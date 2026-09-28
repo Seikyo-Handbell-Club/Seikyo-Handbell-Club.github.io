@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>管理者設定｜清教学園ハンドベル部</title>
 
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
 <style>
 *{
   box-sizing:border-box;
@@ -27,10 +29,6 @@ h1{
   margin:0;
   text-align:center;
   font-size:21px;
-}
-
-h2{
-  margin-top:0;
 }
 
 main{
@@ -70,7 +68,7 @@ textarea{
 }
 
 textarea{
-  min-height:150px;
+  min-height:130px;
   resize:vertical;
 }
 
@@ -91,6 +89,13 @@ button{
 
 .secondary{
   background:#eef3fb;
+}
+
+.cancel{
+  background:#f1f3f5;
+  color:#4b5560;
+  width:100%;
+  margin-top:8px;
 }
 
 .danger{
@@ -135,79 +140,65 @@ button{
   color:#6f7882;
 }
 
-.member-row{
+/* 部員一覧 */
+.member-head{
   display:flex;
   align-items:center;
   gap:8px;
+  flex-wrap:wrap;
 }
 
-.member-name{
-  font-weight:700;
-  flex:1;
+.member-head strong{
+  font-size:16px;
 }
 
-.member-buttons{
+.member-actions{
   display:flex;
-  gap:4px;
+  gap:5px;
+  margin-left:auto;
 }
 
-.member-buttons button{
-  padding:5px 8px;
+.member-actions button{
+  padding:5px 9px;
   font-size:12px;
-  font-weight:500;
-  background:#f3f5f8;
-  color:#68717c;
 }
 
-.member-buttons .danger{
-  background:#fff5f5;
-  color:#a66;
-  border:1px solid #f0d0d0;
+/* 変更中のフォーム */
+.editing{
+  border:2px solid #1f6feb;
 }
 
-.grade-title{
-  font-size:18px;
-  font-weight:800;
-  margin-top:22px;
-  margin-bottom:8px;
-}
-
-.class-title{
-  font-size:14px;
-  font-weight:700;
-  color:#68717c;
-  margin-top:12px;
-  margin-bottom:5px;
-}
-
+/* OCR */
 .preview{
-  width:100%;
-  max-height:400px;
-  object-fit:contain;
+  max-width:100%;
+  max-height:240px;
   border-radius:10px;
-  border:1px solid #ddd;
   margin-top:10px;
 }
 
-.detected{
-  border:1px solid #e3e7ed;
-  border-radius:12px;
-  padding:12px;
-  margin-top:10px;
-}
-
-.detected-row{
+.ocr-candidate{
   display:grid;
   grid-template-columns:1fr 1fr 1fr auto;
-  gap:8px;
+  gap:7px;
   align-items:center;
-  margin-bottom:8px;
+  margin:8px 0;
+}
+
+.ocr-candidate input{
+  padding:8px;
+  font-size:14px;
 }
 
 @media(max-width:600px){
-  .detected-row{
+
+  .ocr-candidate{
     grid-template-columns:1fr 1fr;
   }
+
+  .ocr-candidate button{
+    grid-column:span 2;
+  }
+
 }
 </style>
 </head>
@@ -215,167 +206,288 @@ button{
 <body>
 
 <header>
-  <h1>清教学園ハンドベル部 管理者設定</h1>
+<h1>清教学園ハンドベル部 管理者設定</h1>
 </header>
 
 <main>
 
+<!-- ========================= -->
 <!-- ログイン -->
+<!-- ========================= -->
+
 <section id="login" class="card">
-  <h2>管理者ログイン</h2>
 
-  <label>パスワード</label>
-  <input id="password" type="password">
+<h2>管理者ログイン</h2>
 
-  <button class="primary" onclick="adminLogin()">ログイン</button>
+<p class="small">
+管理者として登録されたアカウントでログインしてください。
+</p>
 
-  <div id="loginMsg"></div>
+<label>パスワード</label>
+
+<input
+  id="password"
+  type="password"
+  autocomplete="current-password"
+>
+
+<button
+  class="primary"
+  onclick="adminLogin()"
+>
+ログイン
+</button>
+
+<div id="loginMsg"></div>
+
 </section>
 
 
+<!-- ========================= -->
+<!-- 管理画面 -->
+<!-- ========================= -->
+
 <section id="app" class="hidden">
 
-<!-- ログアウト -->
-<div class="card">
-  <button class="secondary" onclick="logout()">ログアウト</button>
-</div>
-
-
-<!-- 部員登録 -->
 <div class="card">
 
-  <h2>部員登録</h2>
-
-  <label>学校ID</label>
-  <input id="mid" placeholder="学校ID">
-
-  <label>名前</label>
-  <input id="mname" placeholder="名前">
-
-  <label>学年</label>
-  <select id="mgrade">
-    <option value="">学年を選択</option>
-    <option value="中学1年">中学1年</option>
-    <option value="中学2年">中学2年</option>
-    <option value="中学3年">中学3年</option>
-    <option value="高校1年">高校1年</option>
-    <option value="高校2年">高校2年</option>
-  </select>
-
-  <label>クラス</label>
-  <select id="mclass">
-    <option value="">クラスを選択</option>
-    <option value="A">A組</option>
-    <option value="B">B組</option>
-    <option value="C">C組</option>
-    <option value="D">D組</option>
-    <option value="E">E組</option>
-    <option value="F">F組</option>
-    <option value="G">G組</option>
-    <option value="H">H組</option>
-    <option value="I">I組</option>
-    <option value="J">J組</option>
-    <option value="K">K組</option>
-  </select>
-
-  <button class="primary" onclick="addMember()">登録する</button>
-
-  <div id="memberMsg"></div>
+<button
+  class="secondary"
+  onclick="logout()"
+>
+ログアウト
+</button>
 
 </div>
 
 
+<!-- ========================= -->
+<!-- 部員登録・変更 -->
+<!-- ========================= -->
+
+<div
+  id="memberFormCard"
+  class="card"
+>
+
+<h2 id="memberFormTitle">
+部員登録
+</h2>
+
+
+<label>学校ID</label>
+
+<input
+  id="mid"
+  autocomplete="off"
+>
+
+
+<label>名前</label>
+
+<input
+  id="mname"
+>
+
+
+<label>学年</label>
+
+<select id="mgrade">
+
+<option value="中学1年">
+中学1年
+</option>
+
+<option value="中学2年">
+中学2年
+</option>
+
+<option value="中学3年">
+中学3年
+</option>
+
+<option value="高校1年">
+高校1年
+</option>
+
+<option value="高校2年">
+高校2年
+</option>
+
+</select>
+
+
+<label>クラス</label>
+
+<select id="mclass">
+
+<option value="A">A組</option>
+<option value="B">B組</option>
+<option value="C">C組</option>
+<option value="D">D組</option>
+<option value="E">E組</option>
+<option value="F">F組</option>
+<option value="G">G組</option>
+<option value="H">H組</option>
+<option value="I">I組</option>
+<option value="J">J組</option>
+<option value="K">K組</option>
+
+</select>
+
+
+<button
+  id="memberSubmit"
+  class="primary"
+  onclick="addMember()"
+>
+登録する
+</button>
+
+
+<button
+  id="memberCancel"
+  class="cancel hidden"
+  onclick="cancelMemberEdit()"
+>
+変更をやめる
+</button>
+
+
+<div id="memberMsg"></div>
+
+</div>
+
+
+<!-- ========================= -->
 <!-- 部員一覧 -->
+<!-- ========================= -->
+
 <div class="card">
 
-  <h2>部員一覧</h2>
+<h2>部員一覧</h2>
 
-  <div id="members"></div>
+<div id="members"></div>
 
 </div>
 
 
+<!-- ========================= -->
 <!-- 予定表 -->
+<!-- ========================= -->
+
 <div class="card">
 
-  <h2>清教学園ハンドベル部予定表</h2>
-
-  <p class="small">
-    学校の予定表の画像を読み込んで登録できます。
-    読み取り後に内容を確認・修正してから登録してください。
-  </p>
-
-  <label>予定表の画像</label>
-
-  <input
-    id="scheduleImage"
-    type="file"
-    accept="image/*"
-  >
-
-  <img
-    id="schedulePreview"
-    class="preview hidden"
-    alt="予定表プレビュー"
-  >
-
-  <button
-    class="secondary"
-    style="margin-top:10px;width:100%;"
-    onclick="readScheduleImage()"
-  >
-    画像を読み取る
-  </button>
-
-  <div id="ocrMsg"></div>
-
-  <label>読み取った文字</label>
-
-  <textarea
-    id="ocrText"
-    placeholder="画像を読み取ると、ここに文字が表示されます。"
-  ></textarea>
-
-  <button
-    class="secondary"
-    style="margin-top:10px;width:100%;"
-    onclick="buildDetectedSchedules()"
-  >
-    日付を読み取る
-  </button>
-
-  <div id="detectedSchedules"></div>
-
-  <button
-    id="registerDetectedButton"
-    class="primary hidden"
-    onclick="registerDetectedSchedules()"
-  >
-    読み取った予定を登録
-  </button>
+<h2>
+清教学園ハンドベル部予定表
+</h2>
 
 
-  <hr style="margin:25px 0;border:0;border-top:1px solid #e5e8ed;">
+<label>
+予定表の画像
+</label>
+
+<input
+  id="scheduleImage"
+  type="file"
+  accept="image/*"
+  onchange="previewScheduleImage(event)"
+>
 
 
-  <h3>手動で登録</h3>
+<img
+  id="schedulePreview"
+  class="preview hidden"
+>
 
-  <label>日付</label>
-  <input id="sdate" type="date">
 
-  <label>時間</label>
-  <input id="stime" placeholder="例：17:00〜19:00">
+<button
+  class="secondary"
+  style="margin-top:10px;width:100%"
+  onclick="runOCR()"
+>
+画像から予定を読み取る
+</button>
 
-  <label>場所</label>
-  <input id="splace" placeholder="例：音楽室">
 
-  <button class="primary" onclick="saveSchedule()">
-    予定を保存
-  </button>
+<div id="ocrMsg"></div>
 
-  <div id="scheduleMsg"></div>
 
-  <div id="schedules"></div>
+<label>
+読み取った文字
+</label>
+
+<textarea
+  id="ocrText"
+  placeholder="OCR結果がここに表示されます。必要なら修正できます。"
+></textarea>
+
+
+<h3>
+予定候補
+</h3>
+
+<div id="ocrCandidates">
+
+<p class="small">
+画像を読み取ると候補が表示されます。
+</p>
+
+</div>
+
+
+<button
+  class="primary"
+  onclick="registerOCRCandidates()"
+>
+選択した予定を登録
+</button>
+
+
+<hr
+  style="border:0;border-top:1px solid #e5e8ed;margin:20px 0"
+>
+
+
+<h3>
+手動で予定を登録
+</h3>
+
+
+<label>日付</label>
+
+<input
+  id="sdate"
+  type="date"
+>
+
+
+<label>時間</label>
+
+<input
+  id="stime"
+  placeholder="例：17:00〜19:00"
+>
+
+
+<label>場所</label>
+
+<input
+  id="splace"
+>
+
+
+<button
+  class="primary"
+  onclick="saveSchedule()"
+>
+予定を保存
+</button>
+
+
+<div id="scheduleMsg"></div>
+
+<div id="schedules"></div>
 
 </div>
 
@@ -384,22 +496,24 @@ button{
 </main>
 
 
-<!-- OCR -->
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-
-
 <script type="module">
 
 import {
   initializeApp
-} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+}
+from
+"https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+
 
 import {
   getAuth,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut
-} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+}
+from
+"https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+
 
 import {
   getDatabase,
@@ -408,7 +522,17 @@ import {
   set,
   update,
   remove
-} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+}
+from
+"https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+
+
+/* =========================
+   管理者アカウント
+========================= */
+
+const ADMIN_EMAIL =
+"kazuma.cosmos@gmail.com";
 
 
 /* =========================
@@ -416,52 +540,93 @@ import {
 ========================= */
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAK9yRsSLSfYpLSyluzwRyI22Zp32KeMSA",
-  authDomain: "seikyo-handbell-club.firebaseapp.com",
-  databaseURL: "https://seikyo-handbell-club-default-rtdb.firebaseio.com",
-  projectId: "seikyo-handbell-club",
-  storageBucket: "seikyo-handbell-club.firebasestorage.app",
-  messagingSenderId: "55435007971",
-  appId: "1:55435007971:web:25f5c3b9dcd4324bc3f2d6"
+
+  apiKey:
+  "AIzaSyAK9yRsSLSfYpLSyluzwRyI22Zp32KeMSA",
+
+  authDomain:
+  "seikyo-handbell-club.firebaseapp.com",
+
+  databaseURL:
+  "https://seikyo-handbell-club-default-rtdb.firebaseio.com",
+
+  projectId:
+  "seikyo-handbell-club",
+
+  storageBucket:
+  "seikyo-handbell-club.firebasestorage.app",
+
+  messagingSenderId:
+  "55435007971",
+
+  appId:
+  "1:55435007971:web:25f5c3b9dcd4324bc3f2d6"
+
 };
 
 
-const app = initializeApp(firebaseConfig);
+const app =
+initializeApp(firebaseConfig);
 
-const auth = getAuth(app);
 
-const db = getDatabase(app);
+const auth =
+getAuth(app);
 
-const ADMIN_EMAIL = "kazuma.cosmos@gmail.com";
 
-const $ = id => document.getElementById(id);
+const db =
+getDatabase(app);
 
-const esc = s =>
-  String(s ?? "").replace(
-    /[&<>"']/g,
-    c => ({
-      "&":"&amp;",
-      "<":"&lt;",
-      ">":"&gt;",
-      '"':"&quot;",
-      "'":"&#39;"
-    }[c])
-  );
+
+const $ =
+id => document.getElementById(id);
+
+
+const esc =
+s =>
+String(s ?? "")
+.replace(
+  /[&<>"']/g,
+  c =>
+  ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  }[c])
+);
+
+
+/* =========================
+   状態
+========================= */
+
+let editingMemberId = null;
+
+let ocrCandidates = [];
 
 
 /* =========================
    メッセージ
 ========================= */
 
-function message(id,text,error=false){
+function msg(
+  id,
+  text,
+  error=false
+){
 
-  const el = $(id);
+  const el =
+  $(id);
 
-  el.className = text
-    ? (error ? "msg error" : "msg")
-    : "";
+  el.className =
+  text
+  ? (error ? "msg error" : "msg")
+  : "";
 
-  el.textContent = text;
+  el.textContent =
+  text;
+
 }
 
 
@@ -471,13 +636,23 @@ function message(id,text,error=false){
 
 async function isAdmin(){
 
-  if(!auth.currentUser) return false;
+  if(!auth.currentUser)
+    return false;
 
-  const s = await get(
-    ref(db,"admins/"+auth.currentUser.uid)
+  const s =
+  await get(
+    ref(
+      db,
+      "admins/" +
+      auth.currentUser.uid
+    )
   );
 
-  return s.exists() && s.val() === true;
+  return (
+    s.exists() &&
+    s.val() === true
+  );
+
 }
 
 
@@ -485,27 +660,42 @@ async function isAdmin(){
    ログイン状態
 ========================= */
 
-onAuthStateChanged(auth,async user=>{
+onAuthStateChanged(
+  auth,
+  async user => {
 
-  if(user && await isAdmin()){
+    if(
+      user &&
+      await isAdmin()
+    ){
 
-    $("login").classList.add("hidden");
+      $("login")
+      .classList
+      .add("hidden");
 
-    $("app").classList.remove("hidden");
+      $("app")
+      .classList
+      .remove("hidden");
 
-    loadMembers();
+      loadMembers();
 
-    loadSchedules();
+      loadSchedules();
 
-  }else{
+    }
+    else{
 
-    $("login").classList.remove("hidden");
+      $("login")
+      .classList
+      .remove("hidden");
 
-    $("app").classList.add("hidden");
+      $("app")
+      .classList
+      .add("hidden");
+
+    }
 
   }
-
-});
+);
 
 
 /* =========================
@@ -522,23 +712,37 @@ async function adminLogin(){
       $("password").value
     );
 
-    if(!(await isAdmin())){
+
+    if(
+      !(await isAdmin())
+    ){
 
       await signOut(auth);
 
-      message(
+      msg(
         "loginMsg",
         "このアカウントは管理者として登録されていません。",
         true
       );
 
     }
+    else{
 
-  }catch(e){
+      $("password").value="";
 
-    message(
+      msg(
+        "loginMsg",
+        ""
+      );
+
+    }
+
+  }
+  catch(e){
+
+    msg(
       "loginMsg",
-      "ログインできませんでした。",
+      "ログインできませんでした。パスワードを確認してください。",
       true
     );
 
@@ -546,10 +750,6 @@ async function adminLogin(){
 
 }
 
-
-/* =========================
-   ログアウト
-========================= */
 
 function logout(){
 
@@ -564,20 +764,33 @@ function logout(){
 
 async function addMember(){
 
-  if(!(await isAdmin())) return;
-
-  const id = $("mid").value.trim();
-
-  const name = $("mname").value.trim();
-
-  const grade = $("mgrade").value;
-
-  const cl = $("mclass").value;
+  if(
+    !(await isAdmin())
+  )
+    return;
 
 
-  if(!id || !name || !grade || !cl){
+  const id =
+  $("mid").value.trim();
 
-    message(
+  const name =
+  $("mname").value.trim();
+
+  const grade =
+  $("mgrade").value;
+
+  const cl =
+  $("mclass").value;
+
+
+  if(
+    !id ||
+    !name ||
+    !grade ||
+    !cl
+  ){
+
+    msg(
       "memberMsg",
       "すべて入力してください。",
       true
@@ -588,14 +801,19 @@ async function addMember(){
   }
 
 
-  const existing = await get(
-    ref(db,"memberRegistrations/"+id)
+  const existing =
+  await get(
+    ref(
+      db,
+      "memberRegistrations/" +
+      id
+    )
   );
 
 
   if(existing.exists()){
 
-    message(
+    msg(
       "memberMsg",
       "その学校IDはすでに登録されています。",
       true
@@ -607,35 +825,43 @@ async function addMember(){
 
 
   await set(
-    ref(db,"memberRegistrations/"+id),
+    ref(
+      db,
+      "memberRegistrations/" +
+      id
+    ),
     {
+
       schoolId:id,
+
       name:name,
+
       grade:grade,
+
       className:cl,
+
       createdAt:Date.now()
+
     }
   );
 
 
   await set(
-    ref(db,"memberIds/"+id),
+    ref(
+      db,
+      "memberIds/" +
+      id
+    ),
     {
       accountCreated:false
     }
   );
 
 
-  $("mid").value = "";
-
-  $("mname").value = "";
-
-  $("mgrade").value = "";
-
-  $("mclass").value = "";
+  clearMemberForm();
 
 
-  message(
+  msg(
     "memberMsg",
     "登録しました。"
   );
@@ -647,142 +873,118 @@ async function addMember(){
 
 
 /* =========================
+   登録フォームを空に戻す
+========================= */
+
+function clearMemberForm(){
+
+  $("mid").value="";
+
+  $("mname").value="";
+
+  $("mgrade").value="中学1年";
+
+  $("mclass").value="A";
+
+}
+
+
+/* =========================
    部員一覧
 ========================= */
 
 async function loadMembers(){
 
-  const s = await get(
-    ref(db,"memberRegistrations")
+  const s =
+  await get(
+    ref(
+      db,
+      "memberRegistrations"
+    )
   );
 
-  const v = s.exists() ? s.val() : {};
 
-  let a = Object.entries(v);
+  const v =
+  s.exists()
+  ? s.val()
+  : {};
 
 
   const gradeOrder = {
+
     "中学1年":1,
+
     "中学2年":2,
+
     "中学3年":3,
+
     "高校1年":4,
+
     "高校2年":5
+
   };
 
 
-  const classOrder = {
-    A:1,
-    B:2,
-    C:3,
-    D:4,
-    E:5,
-    F:6,
-    G:7,
-    H:8,
-    I:9,
-    J:10,
-    K:11
-  };
+  const classOrder =
+  c =>
+  String(c || "")
+  .charCodeAt(0);
 
 
-  a.sort((x,y)=>{
+  const a =
+  Object
+  .entries(v)
+  .sort(
+    ([,x],[,y]) => {
 
-    const gx =
-      gradeOrder[x[1].grade] ?? 99;
+      const g =
+      (gradeOrder[x.grade] || 99) -
+      (gradeOrder[y.grade] || 99);
 
-    const gy =
-      gradeOrder[y[1].grade] ?? 99;
-
-
-    if(gx !== gy){
-
-      return gx - gy;
-
-    }
+      if(g)
+        return g;
 
 
-    const cx =
-      classOrder[x[1].className] ?? 99;
+      const c =
+      classOrder(x.className) -
+      classOrder(y.className);
 
-    const cy =
-      classOrder[y[1].className] ?? 99;
-
-
-    if(cx !== cy){
-
-      return cx - cy;
-
-    }
+      if(c)
+        return c;
 
 
-    return String(x[1].name ?? "")
-      .localeCompare(
-        String(y[1].name ?? ""),
+      return String(
+        x.name || ""
+      ).localeCompare(
+        String(y.name || ""),
         "ja"
       );
 
-  });
-
-
-  if(!a.length){
-
-    $("members").innerHTML =
-      "<p class='small'>まだ登録されていません。</p>";
-
-    return;
-
-  }
-
-
-  let html = "";
-
-  let currentGrade = "";
-
-  let currentClass = "";
-
-
-  for(const [id,x] of a){
-
-    if(x.grade !== currentGrade){
-
-      currentGrade = x.grade;
-
-      currentClass = "";
-
-      html += `
-        <div class="grade-title">
-          ${esc(x.grade)}
-        </div>
-      `;
-
     }
+  );
 
 
-    if(x.className !== currentClass){
+  $("members").innerHTML =
 
-      currentClass = x.className;
+  a.length
 
-      html += `
-        <div class="class-title">
-          ${esc(x.className)}組
-        </div>
-      `;
+  ?
 
-    }
+  a.map(
+    ([id,x]) => `
 
-
-    html += `
       <div class="item">
 
-        <div class="member-row">
+        <div class="member-head">
 
-          <div class="member-name">
+          <strong>
             ${esc(x.name)}
-          </div>
+          </strong>
 
-          <div class="member-buttons">
+          <div class="member-actions">
 
             <button
+              class="secondary"
               onclick="editMember('${esc(id)}')"
             >
               変更
@@ -799,104 +1001,373 @@ async function loadMembers(){
 
         </div>
 
+        <div class="small">
+
+          ${esc(id)}
+          　
+          ${esc(x.grade)}
+          　
+          ${esc(x.className)}組
+
+        </div>
+
       </div>
-    `;
 
-  }
+    `
+  ).join("")
 
+  :
 
-  $("members").innerHTML = html;
+  "<p class='small'>まだ登録されていません。</p>";
 
 }
 
 
 /* =========================
-   部員変更
+   ★変更ボタン
 ========================= */
 
 async function editMember(id){
 
-  const s = await get(
-    ref(db,"memberRegistrations/"+id)
+  const s =
+  await get(
+    ref(
+      db,
+      "memberRegistrations/" +
+      id
+    )
   );
 
-  if(!s.exists()) return;
 
-  const x = s.val();
-
-
-  const name = prompt(
-    "名前",
-    x.name
-  );
-
-  if(name === null) return;
+  if(!s.exists())
+    return;
 
 
-  const grades = [
-    "中学1年",
-    "中学2年",
-    "中学3年",
-    "高校1年",
-    "高校2年"
-  ];
+  const x =
+  s.val();
 
 
-  const gradeText =
-    grades.join("\n");
+  /* 編集中のIDを保存 */
+
+  editingMemberId =
+  id;
 
 
-  const grade = prompt(
-    "学年\n\n"+gradeText,
-    x.grade
-  );
+  /* フォームを変更モードへ */
 
-  if(grade === null) return;
-
-
-  const classes = [
-    "A","B","C","D","E","F",
-    "G","H","I","J","K"
-  ];
+  $("memberFormCard")
+  .classList
+  .add("editing");
 
 
-  const cl = prompt(
-    "クラス\n\nA〜K",
-    x.className
-  );
-
-  if(cl === null) return;
+  $("memberFormTitle")
+  .textContent =
+  "部員変更";
 
 
-  if(!grades.includes(grade)){
+  /* 現在の情報を入力 */
 
-    alert("学年は中学1年〜高校2年から選択してください。");
+  $("mid").value =
+  x.schoolId || id;
+
+
+  $("mname").value =
+  x.name || "";
+
+
+  $("mgrade").value =
+  x.grade || "中学1年";
+
+
+  $("mclass").value =
+  x.className || "A";
+
+
+  /* ボタン変更 */
+
+  $("memberSubmit")
+  .textContent =
+  "変更を保存";
+
+
+  $("memberSubmit")
+  .onclick =
+  saveMemberEdit;
+
+
+  /* キャンセル表示 */
+
+  $("memberCancel")
+  .classList
+  .remove("hidden");
+
+
+  /* フォームまでスクロール */
+
+  $("memberFormCard")
+  .scrollIntoView({
+
+    behavior:"smooth",
+
+    block:"start"
+
+  });
+
+}
+
+
+/* =========================
+   ★変更を保存
+========================= */
+
+async function saveMemberEdit(){
+
+  if(
+    !(await isAdmin()) ||
+    !editingMemberId
+  )
+    return;
+
+
+  const oldId =
+  editingMemberId;
+
+
+  const newId =
+  $("mid").value.trim();
+
+
+  const name =
+  $("mname").value.trim();
+
+
+  const grade =
+  $("mgrade").value;
+
+
+  const cl =
+  $("mclass").value;
+
+
+  if(
+    !newId ||
+    !name ||
+    !grade ||
+    !cl
+  ){
+
+    msg(
+      "memberMsg",
+      "すべて入力してください。",
+      true
+    );
 
     return;
 
   }
 
 
-  if(!classes.includes(cl.toUpperCase())){
+  /* IDを変更する場合 */
 
-    alert("クラスはA〜Kで入力してください。");
+  if(newId !== oldId){
 
-    return;
+    const exists =
+    await get(
+      ref(
+        db,
+        "memberRegistrations/" +
+        newId
+      )
+    );
 
-  }
 
+    if(exists.exists()){
 
-  await update(
-    ref(db,"memberRegistrations/"+id),
-    {
-      name:name.trim(),
-      grade:grade,
-      className:cl.toUpperCase()
+      msg(
+        "memberMsg",
+        "変更後の学校IDはすでに登録されています。",
+        true
+      );
+
+      return;
+
     }
+
+  }
+
+
+  const oldSnap =
+  await get(
+    ref(
+      db,
+      "memberRegistrations/" +
+      oldId
+    )
+  );
+
+
+  const oldData =
+  oldSnap.val() || {};
+
+
+  const newData = {
+
+    ...oldData,
+
+    schoolId:newId,
+
+    name:name,
+
+    grade:grade,
+
+    className:cl,
+
+    updatedAt:Date.now()
+
+  };
+
+
+  /* 学校IDまで変更された場合 */
+
+  if(newId !== oldId){
+
+    await set(
+      ref(
+        db,
+        "memberRegistrations/" +
+        newId
+      ),
+      newData
+    );
+
+
+    const memberIdSnap =
+    await get(
+      ref(
+        db,
+        "memberIds/" +
+        oldId
+      )
+    );
+
+
+    if(
+      memberIdSnap.exists()
+    ){
+
+      await set(
+        ref(
+          db,
+          "memberIds/" +
+          newId
+        ),
+        memberIdSnap.val()
+      );
+
+    }
+    else{
+
+      await set(
+        ref(
+          db,
+          "memberIds/" +
+          newId
+        ),
+        {
+          accountCreated:false
+        }
+      );
+
+    }
+
+
+    await remove(
+      ref(
+        db,
+        "memberRegistrations/" +
+        oldId
+      )
+    );
+
+
+    await remove(
+      ref(
+        db,
+        "memberIds/" +
+        oldId
+      )
+    );
+
+  }
+
+  /* IDが同じならそのまま更新 */
+
+  else{
+
+    await update(
+      ref(
+        db,
+        "memberRegistrations/" +
+        oldId
+      ),
+      newData
+    );
+
+  }
+
+
+  /* 登録モードに戻す */
+
+  cancelMemberEdit();
+
+
+  msg(
+    "memberMsg",
+    "変更を保存しました。"
   );
 
 
   loadMembers();
+
+}
+
+
+/* =========================
+   変更をやめる
+========================= */
+
+function cancelMemberEdit(){
+
+  editingMemberId =
+  null;
+
+
+  $("memberFormCard")
+  .classList
+  .remove("editing");
+
+
+  $("memberFormTitle")
+  .textContent =
+  "部員登録";
+
+
+  $("memberSubmit")
+  .textContent =
+  "登録する";
+
+
+  $("memberSubmit")
+  .onclick =
+  addMember;
+
+
+  $("memberCancel")
+  .classList
+  .add("hidden");
+
+
+  clearMemberForm();
 
 }
 
@@ -907,19 +1378,39 @@ async function editMember(id){
 
 async function deleteMember(id){
 
-  if(!confirm(
-    "この部員登録を削除しますか？"
-  )) return;
+  if(
+    !confirm(
+      "この部員登録を削除しますか？"
+    )
+  )
+    return;
 
 
   await remove(
-    ref(db,"memberRegistrations/"+id)
+    ref(
+      db,
+      "memberRegistrations/" +
+      id
+    )
   );
 
 
   await remove(
-    ref(db,"memberIds/"+id)
+    ref(
+      db,
+      "memberIds/" +
+      id
+    )
   );
+
+
+  if(
+    editingMemberId === id
+  ){
+
+    cancelMemberEdit();
+
+  }
 
 
   loadMembers();
@@ -928,53 +1419,50 @@ async function deleteMember(id){
 
 
 /* =========================
-   画像プレビュー
+   予定表画像
 ========================= */
 
-$("scheduleImage").addEventListener(
-  "change",
-  e=>{
+function previewScheduleImage(event){
 
-    const file = e.target.files[0];
-
-    if(!file){
-
-      $("schedulePreview")
-        .classList.add("hidden");
-
-      return;
-
-    }
+  const file =
+  event.target.files?.[0];
 
 
-    const url =
-      URL.createObjectURL(file);
+  if(!file)
+    return;
 
 
-    $("schedulePreview").src = url;
+  const url =
+  URL.createObjectURL(file);
 
-    $("schedulePreview")
-      .classList.remove("hidden");
 
-  }
-);
+  $("schedulePreview").src =
+  url;
+
+
+  $("schedulePreview")
+  .classList
+  .remove("hidden");
+
+}
 
 
 /* =========================
    OCR
 ========================= */
 
-async function readScheduleImage(){
+async function runOCR(){
 
   const file =
-    $("scheduleImage").files[0];
+  $("scheduleImage")
+  .files?.[0];
 
 
   if(!file){
 
-    message(
+    msg(
       "ocrMsg",
-      "予定表の画像を選択してください。",
+      "先に予定表の画像を選択してください。",
       true
     );
 
@@ -983,7 +1471,7 @@ async function readScheduleImage(){
   }
 
 
-  message(
+  msg(
     "ocrMsg",
     "画像を読み取っています。少し待ってください。"
   );
@@ -992,52 +1480,59 @@ async function readScheduleImage(){
   try{
 
     const result =
-      await Tesseract.recognize(
-        file,
-        "jpn+eng",
-        {
-          logger:m=>{
+    await Tesseract.recognize(
+      file,
+      "jpn+eng",
+      {
 
-            if(
-              m.status === "recognizing text" &&
-              typeof m.progress === "number"
-            ){
+        logger:m=>{
 
-              const percent =
-                Math.round(m.progress*100);
+          if(
+            m.status ===
+            "recognizing text"
+          ){
 
-              message(
-                "ocrMsg",
-                "画像を読み取っています… "+
-                percent+"%"
-              );
-
-            }
+            msg(
+              "ocrMsg",
+              "画像を読み取っています… " +
+              Math.round(
+                (m.progress || 0) * 100
+              ) +
+              "%"
+            );
 
           }
+
         }
-      );
 
-
-    $("ocrText").value =
-      result.data.text || "";
-
-
-    message(
-      "ocrMsg",
-      "読み取りが完了しました。"
+      }
     );
 
 
-    buildDetectedSchedules();
+    $("ocrText").value =
+    result.data.text || "";
 
-  }catch(e){
 
-    console.error(e);
+    ocrCandidates =
+    parseScheduleCandidates(
+      result.data.text || ""
+    );
 
-    message(
+
+    renderOCRCandidates();
+
+
+    msg(
       "ocrMsg",
-      "画像を読み取れませんでした。",
+      "読み取り完了。候補を確認してください。"
+    );
+
+  }
+  catch(e){
+
+    msg(
+      "ocrMsg",
+      "画像を読み取れませんでした。別の画像でもう一度試してください。",
       true
     );
 
@@ -1047,158 +1542,150 @@ async function readScheduleImage(){
 
 
 /* =========================
-   OCR文字から予定候補作成
+   OCRの日付解析
 ========================= */
 
-function buildDetectedSchedules(){
-
-  const text =
-    $("ocrText").value.trim();
-
-
-  if(!text){
-
-    message(
-      "ocrMsg",
-      "読み取った文字がありません。",
-      true
-    );
-
-    return;
-
-  }
-
+function parseScheduleCandidates(text){
 
   const lines =
-    text
-      .split(/\r?\n/)
-      .map(x=>x.trim())
-      .filter(Boolean);
+  text
+  .split(/\r?\n/)
+  .map(x=>x.trim())
+  .filter(Boolean);
 
 
-  const results = [];
+  const found=[];
 
 
-  for(let i=0;i<lines.length;i++){
-
-    const line = lines[i];
-
-
-    /*
-      例
-      9月10日
-      9/10
-      9月10日（水）
-    */
-
-    let match =
-      line.match(
-        /(\d{1,2})\s*月\s*(\d{1,2})\s*日/
-      );
+  const dateRe =
+  /(20\d{2})[\/\-年](\d{1,2})[\/\-月](\d{1,2})日?|(\d{1,2})[\/\-月](\d{1,2})日?/;
 
 
-    if(!match){
+  for(
+    const line of lines
+  ){
 
-      match =
-        line.match(
-          /(\d{1,2})\s*[\/／]\s*(\d{1,2})/
-        );
-
-    }
+    const m =
+    line.match(dateRe);
 
 
-    if(!match) continue;
-
-
-    const month =
-      Number(match[1]);
-
-    const day =
-      Number(match[2]);
-
-
-    if(
-      month < 1 ||
-      month > 12 ||
-      day < 1 ||
-      day > 31
-    ) continue;
+    if(!m)
+      continue;
 
 
     let year =
-      new Date().getFullYear();
+    m[1];
+
+    let month =
+    m[2];
+
+    let day =
+    m[3];
 
 
-    const timeMatch =
-      line.match(
-        /(\d{1,2}:\d{2})\s*[〜~\-－]\s*(\d{1,2}:\d{2})/
-      );
+    if(!year){
+
+      month =
+      m[4];
+
+      day =
+      m[5];
+
+      year =
+      new Date()
+      .getFullYear();
+
+    }
 
 
-    let time = "";
+    const mm =
+    String(
+      Number(month)
+    ).padStart(2,"0");
 
 
-    if(timeMatch){
+    const dd =
+    String(
+      Number(day)
+    ).padStart(2,"0");
+
+
+    let time="";
+
+
+    const tm =
+    line.match(
+      /(\d{1,2}:\d{2}\s*[〜~\-－]\s*\d{1,2}:\d{2})/
+    );
+
+
+    if(tm){
 
       time =
-        timeMatch[1]+"〜"+timeMatch[2];
+      tm[1]
+      .replace(/\s/g,"");
 
     }
 
 
-    let place = "";
+    const place =
+    line
+    .replace(dateRe,"")
+    .replace(
+      /(\d{1,2}:\d{2}\s*[〜~\-－]\s*\d{1,2}:\d{2})/,
+      ""
+    )
+    .trim();
 
 
-    const nextLine =
-      lines[i+1] || "";
+    found.push({
+
+      selected:true,
+
+      date:
+      `${year}-${mm}-${dd}`,
+
+      time,
+
+      place
+
+    });
+
+  }
+
+
+  const unique=[];
+
+  const seen =
+  new Set();
+
+
+  for(
+    const x of found
+  ){
+
+    const key =
+    x.date +
+    "|" +
+    x.time +
+    "|" +
+    x.place;
 
 
     if(
-      nextLine &&
-      !nextLine.match(
-        /(\d{1,2})\s*月\s*(\d{1,2})\s*日/
-      ) &&
-      !nextLine.match(
-        /(\d{1,2})\s*[\/／]\s*(\d{1,2})/
-      )
+      !seen.has(key)
     ){
 
-      if(
-        /音楽室|講堂|教室|ホール|体育館|部室/
-          .test(nextLine)
-      ){
+      seen.add(key);
 
-        place = nextLine;
-
-      }
-
-    }
-
-
-    const date =
-      year+
-      "-" +
-      String(month).padStart(2,"0")+
-      "-" +
-      String(day).padStart(2,"0");
-
-
-    if(
-      !results.some(x=>x.date===date)
-    ){
-
-      results.push({
-        date,
-        time,
-        place
-      });
+      unique.push(x);
 
     }
 
   }
 
 
-  renderDetectedSchedules(results);
+  return unique;
 
 }
 
@@ -1207,93 +1694,68 @@ function buildDetectedSchedules(){
    OCR候補表示
 ========================= */
 
-let detectedSchedules = [];
+function renderOCRCandidates(){
+
+  const el =
+  $("ocrCandidates");
 
 
-function renderDetectedSchedules(results){
+  if(
+    !ocrCandidates.length
+  ){
 
-  detectedSchedules = results;
-
-
-  if(!results.length){
-
-    $("detectedSchedules").innerHTML = `
-      <div class="msg">
-        日付を自動で見つけられませんでした。
-        「読み取った文字」を確認して、必要なら手動登録してください。
-      </div>
-    `;
-
-    $("registerDetectedButton")
-      .classList.add("hidden");
+    el.innerHTML =
+    "<p class='small'>日付を自動認識できませんでした。手動登録を使ってください。</p>";
 
     return;
 
   }
 
 
-  let html = `
-    <div class="detected">
+  el.innerHTML =
+  ocrCandidates
+  .map(
+    (x,i)=>`
 
-      <strong>
-        読み取った予定
-      </strong>
+      <div class="ocr-candidate">
 
-      <p class="small">
-        内容を確認・修正してから登録してください。
-      </p>
-  `;
-
-
-  results.forEach((x,i)=>{
-
-    html += `
-      <div class="detected-row">
+        <input
+          type="checkbox"
+          ${x.selected ? "checked" : ""}
+          onchange="ocrCandidates[${i}].selected=this.checked"
+        >
 
         <input
           type="date"
-          id="detectedDate${i}"
-          value="${x.date}"
+          value="${esc(x.date)}"
+          onchange="ocrCandidates[${i}].date=this.value"
         >
 
         <input
-          type="text"
-          id="detectedTime${i}"
           placeholder="時間"
           value="${esc(x.time)}"
-        >
-
-        <input
-          type="text"
-          id="detectedPlace${i}"
-          placeholder="場所"
-          value="${esc(x.place)}"
+          onchange="ocrCandidates[${i}].time=this.value"
         >
 
         <button
           class="danger"
-          onclick="removeDetected(${i})"
+          onclick="removeOCRCandidate(${i})"
         >
           削除
         </button>
 
+        <input
+          placeholder="場所"
+          value="${esc(x.place)}"
+          onchange="ocrCandidates[${i}].place=this.value"
+          style="grid-column:span 3"
+        >
+
       </div>
-    `;
 
-  });
-
-
-  html += `
-    </div>
-  `;
-
-
-  $("detectedSchedules").innerHTML =
-    html;
-
-
-  $("registerDetectedButton")
-    .classList.remove("hidden");
+    `
+  )
+  .join("");
 
 }
 
@@ -1302,93 +1764,84 @@ function renderDetectedSchedules(results){
    OCR候補削除
 ========================= */
 
-function removeDetected(index){
+function removeOCRCandidate(i){
 
-  detectedSchedules.splice(index,1);
-
-  renderDetectedSchedules(
-    detectedSchedules
+  ocrCandidates.splice(
+    i,
+    1
   );
+
+  renderOCRCandidates();
 
 }
 
 
 /* =========================
-   OCR候補をFirebase登録
+   OCR予定登録
 ========================= */
 
-async function registerDetectedSchedules(){
+async function registerOCRCandidates(){
 
-  if(!(await isAdmin())) return;
-
-
-  const rows = [];
-
-
-  for(
-    let i=0;
-    i<detectedSchedules.length;
-    i++
-  ){
-
-    const date =
-      $("detectedDate"+i)?.value;
-
-    const time =
-      $("detectedTime"+i)?.value.trim() || "";
-
-    const place =
-      $("detectedPlace"+i)?.value.trim() || "";
+  if(
+    !(await isAdmin())
+  )
+    return;
 
 
-    if(!date) continue;
+  const selected =
+  ocrCandidates.filter(
+    x =>
+    x.selected &&
+    x.date
+  );
 
 
-    rows.push({
-      date,
-      time,
-      place
-    });
+  if(!selected.length){
 
-  }
-
-
-  if(!rows.length){
-
-    alert("登録できる予定がありません。");
+    msg(
+      "ocrMsg",
+      "登録する予定を選択してください。",
+      true
+    );
 
     return;
 
   }
 
 
-  for(const x of rows){
+  for(
+    const x of selected
+  ){
 
     await set(
-      ref(db,"schedules/"+x.date),
+      ref(
+        db,
+        "schedules/" +
+        x.date
+      ),
       {
-        time:x.time,
-        place:x.place,
-        updatedAt:Date.now()
+
+        time:
+        x.time || "",
+
+        place:
+        x.place || "",
+
+        updatedAt:
+        Date.now()
+
       }
     );
 
   }
 
 
-  message(
+  msg(
     "ocrMsg",
-    rows.length+"件の予定を登録しました。"
+    selected.length +
+    "件の予定を登録しました。"
   );
 
-
-  $("detectedSchedules").innerHTML = "";
-
-  $("registerDetectedButton")
-    .classList.add("hidden");
-
-
-  detectedSchedules = [];
 
   loadSchedules();
 
@@ -1401,22 +1854,27 @@ async function registerDetectedSchedules(){
 
 async function saveSchedule(){
 
-  if(!(await isAdmin())) return;
+  if(
+    !(await isAdmin())
+  )
+    return;
 
 
   const d =
-    $("sdate").value;
+  $("sdate").value;
+
 
   const t =
-    $("stime").value.trim();
+  $("stime").value.trim();
+
 
   const p =
-    $("splace").value.trim();
+  $("splace").value.trim();
 
 
   if(!d){
 
-    message(
+    msg(
       "scheduleMsg",
       "日付を入力してください。",
       true
@@ -1428,16 +1886,25 @@ async function saveSchedule(){
 
 
   await set(
-    ref(db,"schedules/"+d),
+    ref(
+      db,
+      "schedules/" +
+      d
+    ),
     {
+
       time:t,
+
       place:p,
-      updatedAt:Date.now()
+
+      updatedAt:
+      Date.now()
+
     }
   );
 
 
-  message(
+  msg(
     "scheduleMsg",
     "保存しました。"
   );
@@ -1455,28 +1922,34 @@ async function saveSchedule(){
 async function loadSchedules(){
 
   const s =
-    await get(ref(db,"schedules"));
+  await get(
+    ref(
+      db,
+      "schedules"
+    )
+  );
+
 
   const v =
-    s.exists() ? s.val() : {};
+  s.exists()
+  ? s.val()
+  : {};
 
 
   const a =
-    Object.entries(v).sort();
-
-
-  if(!a.length){
-
-    $("schedules").innerHTML =
-      "<p class='small'>予定はありません。</p>";
-
-    return;
-
-  }
+  Object
+  .entries(v)
+  .sort();
 
 
   $("schedules").innerHTML =
-    a.map(([d,x])=>`
+
+  a.length
+
+  ?
+
+  a.map(
+    ([d,x]) => `
 
       <div class="item">
 
@@ -1511,7 +1984,12 @@ async function loadSchedules(){
 
       </div>
 
-    `).join("");
+    `
+  ).join("")
+
+  :
+
+  "<p class='small'>予定はありません。</p>";
 
 }
 
@@ -1523,24 +2001,40 @@ async function loadSchedules(){
 async function editSchedule(d){
 
   const s =
-    await get(
-      ref(db,"schedules/"+d)
-    );
+  await get(
+    ref(
+      db,
+      "schedules/" +
+      d
+    )
+  );
 
 
-  if(!s.exists()) return;
+  if(!s.exists())
+    return;
 
 
-  const x = s.val();
+  const x =
+  s.val();
 
 
-  $("sdate").value = d;
+  $("sdate").value =
+  d;
+
 
   $("stime").value =
-    x.time || "";
+  x.time || "";
+
 
   $("splace").value =
-    x.place || "";
+  x.place || "";
+
+
+  $("sdate")
+  .scrollIntoView({
+    behavior:"smooth",
+    block:"center"
+  });
 
 }
 
@@ -1551,60 +2045,85 @@ async function editSchedule(d){
 
 async function deleteSchedule(d){
 
-  if(!confirm(
-    d+"の予定を削除しますか？"
-  )) return;
+  if(
+    confirm(
+      d +
+      "の予定を削除しますか？"
+    )
+  ){
 
+    await remove(
+      ref(
+        db,
+        "schedules/" +
+        d
+      )
+    );
 
-  await remove(
-    ref(db,"schedules/"+d)
-  );
+    loadSchedules();
 
-
-  loadSchedules();
+  }
 
 }
 
 
 /* =========================
-   HTMLから呼び出せるようにする
+   HTMLから呼び出すため公開
 ========================= */
 
 window.adminLogin =
-  adminLogin;
+adminLogin;
 
 window.logout =
-  logout;
+logout;
 
 window.addMember =
-  addMember;
+addMember;
 
 window.editMember =
-  editMember;
+editMember;
+
+window.saveMemberEdit =
+saveMemberEdit;
+
+window.cancelMemberEdit =
+cancelMemberEdit;
 
 window.deleteMember =
-  deleteMember;
+deleteMember;
 
-window.readScheduleImage =
-  readScheduleImage;
+window.previewScheduleImage =
+previewScheduleImage;
 
-window.buildDetectedSchedules =
-  buildDetectedSchedules;
+window.runOCR =
+runOCR;
 
-window.removeDetected =
-  removeDetected;
+window.removeOCRCandidate =
+removeOCRCandidate;
 
-window.registerDetectedSchedules =
-  registerDetectedSchedules;
+window.registerOCRCandidates =
+registerOCRCandidates;
 
 window.saveSchedule =
-  saveSchedule;
+saveSchedule;
 
 window.editSchedule =
-  editSchedule;
+editSchedule;
 
 window.deleteSchedule =
-  deleteSchedule;
+deleteSchedule;
+
+
+/*
+ * OCR候補をHTML側から操作するため
+ */
+Object.defineProperty(
+  window,
+  "ocrCandidates",
+  {
+    get:()=>ocrCandidates
+  }
+);
 
 </script>
 
