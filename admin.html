@@ -1,25 +1,912 @@
 <!DOCTYPE html>
-<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>管理者設定｜清教学園ハンドベル部</title>
-<style>*{box-sizing:border-box}body{margin:0;background:#f5f7fb;color:#20242a;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif}header{background:#fff;padding:20px;border-bottom:1px solid #e5e8ed}h1{margin:0;text-align:center;font-size:21px}main{max-width:800px;margin:auto;padding:18px}.card{background:#fff;border-radius:18px;padding:16px;margin-bottom:16px;box-shadow:0 2px 12px #0000000b}.hidden{display:none!important}label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}input,select{width:100%;padding:11px;border:1px solid #d9dee7;border-radius:10px;font-size:16px}button{border:0;border-radius:10px;padding:11px 14px;font-weight:700;cursor:pointer}.primary{background:#1f6feb;color:#fff;width:100%;margin-top:14px}.secondary{background:#eef3fb}.danger{background:#fff0f0;color:#b22;border:1px solid #efbbbb}.msg{padding:12px;border-radius:10px;background:#fff8df;color:#69520a;margin-top:10px;font-size:14px}.error{background:#fff0f0;color:#9b1c1c}.item{border:1px solid #e3e7ed;border-radius:12px;padding:12px;margin:10px 0}.row{display:flex;gap:8px;margin-top:10px}.row button{flex:1}.small{font-size:12px;color:#6f7882}</style></head>
-<body><header><h1>清教学園ハンドベル部 管理者設定</h1></header><main>
-<section id="login" class="card"><h2>管理者ログイン</h2><label>メールアドレス</label><input id="email" type="email"><label>パスワード</label><input id="password" type="password"><button class="primary" onclick="adminLogin()">ログイン</button><div id="loginMsg"></div><p class="small">管理者アカウントはFirebase Authenticationで作成し、Realtime Databaseの admins/{UID} に true を登録してください。</p></section>
-<section id="app" class="hidden"><div class="card"><button class="secondary" onclick="logout()">ログアウト</button></div>
-<div class="card"><h2>部員登録</h2><label>学校ID</label><input id="mid"><label>名前</label><input id="mname"><label>学年</label><select id="mgrade"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select><label>クラス</label><input id="mclass"><button class="primary" onclick="addMember()">登録する</button><div id="memberMsg"></div></div>
-<div class="card"><h2>部員一覧</h2><div id="members"></div></div>
-<div class="card"><h2>清教学園ハンドベル部予定表</h2><label>日付</label><input id="sdate" type="date"><label>時間</label><input id="stime" placeholder="例：17:00〜19:00"><label>場所</label><input id="splace"><button class="primary" onclick="saveSchedule()">予定を保存</button><div id="scheduleMsg"></div><div id="schedules"></div></div></section></main>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>管理者設定｜清教学園ハンドベル部</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:#f5f7fb;
+  color:#20242a;
+  font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif
+}
+
+header{
+  background:#fff;
+  padding:20px;
+  border-bottom:1px solid #e5e8ed
+}
+
+h1{
+  margin:0;
+  text-align:center;
+  font-size:21px
+}
+
+main{
+  max-width:800px;
+  margin:auto;
+  padding:18px
+}
+
+.card{
+  background:#fff;
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:16px;
+  box-shadow:0 2px 12px #0000000b
+}
+
+.hidden{
+  display:none!important
+}
+
+label{
+  display:block;
+  font-weight:700;
+  font-size:14px;
+  margin:12px 0 5px
+}
+
+input,select{
+  width:100%;
+  padding:11px;
+  border:1px solid #d9dee7;
+  border-radius:10px;
+  font-size:16px
+}
+
+button{
+  border:0;
+  border-radius:10px;
+  padding:11px 14px;
+  font-weight:700;
+  cursor:pointer
+}
+
+.primary{
+  background:#1f6feb;
+  color:#fff;
+  width:100%;
+  margin-top:14px
+}
+
+.secondary{
+  background:#eef3fb
+}
+
+.danger{
+  background:#fff0f0;
+  color:#b22;
+  border:1px solid #efbbbb
+}
+
+.msg{
+  padding:12px;
+  border-radius:10px;
+  background:#fff8df;
+  color:#69520a;
+  margin-top:10px;
+  font-size:14px
+}
+
+.error{
+  background:#fff0f0;
+  color:#9b1c1c
+}
+
+.item{
+  border:1px solid #e3e7ed;
+  border-radius:12px;
+  padding:12px;
+  margin:10px 0
+}
+
+.row{
+  display:flex;
+  gap:8px;
+  margin-top:10px
+}
+
+.row button{
+  flex:1
+}
+
+.small{
+  font-size:12px;
+  color:#6f7882
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>清教学園ハンドベル部 管理者設定</h1>
+</header>
+
+<main>
+
+<!-- ログイン画面 -->
+<section id="login" class="card">
+
+<h2>管理者ログイン</h2>
+
+<label>パスワード</label>
+<input
+  id="password"
+  type="password"
+  autocomplete="current-password"
+>
+
+<button class="primary" onclick="adminLogin()">
+ログイン
+</button>
+
+<div id="loginMsg"></div>
+
+</section>
+
+
+<!-- 管理画面 -->
+<section id="app" class="hidden">
+
+<div class="card">
+<button class="secondary" onclick="logout()">
+ログアウト
+</button>
+</div>
+
+
+<!-- 部員登録 -->
+<div class="card">
+
+<h2>部員登録</h2>
+
+<label>学校ID</label>
+<input id="mid">
+
+<label>名前</label>
+<input id="mname">
+
+<label>学年</label>
+
+<select id="mgrade">
+<option>1</option>
+<option>2</option>
+<option>3</option>
+<option>4</option>
+<option>5</option>
+<option>6</option>
+</select>
+
+<label>クラス</label>
+<input id="mclass">
+
+<button class="primary" onclick="addMember()">
+登録する
+</button>
+
+<div id="memberMsg"></div>
+
+</div>
+
+
+<!-- 部員一覧 -->
+<div class="card">
+
+<h2>部員一覧</h2>
+
+<div id="members"></div>
+
+</div>
+
+
+<!-- 予定表 -->
+<div class="card">
+
+<h2>清教学園ハンドベル部予定表</h2>
+
+<label>日付</label>
+<input id="sdate" type="date">
+
+<label>時間</label>
+<input id="stime" placeholder="例：17:00〜19:00">
+
+<label>場所</label>
+<input id="splace">
+
+<button class="primary" onclick="saveSchedule()">
+予定を保存
+</button>
+
+<div id="scheduleMsg"></div>
+
+<div id="schedules"></div>
+
+</div>
+
+</section>
+
+</main>
+
+
 <script type="module">
-import{initializeApp}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";import{getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";import{getDatabase,ref,get,set,update,remove}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
-const firebaseConfig={apiKey:"AIzaSyAK9yRrSSLsfYpLSyuzwRyI2ZZp32KeMSA",authDomain:"seikyo-handbell-club.firebaseapp.com",databaseURL:"https://seikyo-handbell-club-default-rtdb.firebaseio.com",projectId:"seikyo-handbell-club",storageBucket:"seikyo-handbell-club.firebasestorage.app",messagingSenderId:"55435007971",appId:"1:55435007971:web:25f5c3b9dcd4324bc3f2d6"};
-const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getDatabase(app),$=id=>document.getElementById(id),esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-async function admin(){if(!auth.currentUser)return false;let s=await get(ref(db,"admins/"+auth.currentUser.uid));return s.exists()&&s.val()===true}function m(id,t,e=false){$(id).className=t?(e?"msg error":"msg"):"";$(id).textContent=t}
-onAuthStateChanged(auth,async u=>{if(u&&await admin()){$("login").classList.add("hidden");$("app").classList.remove("hidden");loadMembers();loadSchedules()}else{$("login").classList.remove("hidden");$("app").classList.add("hidden")}});
-async function adminLogin(){try{await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);if(!(await admin())){await signOut(auth);m("loginMsg","このアカウントは管理者として登録されていません。",true)}}catch(e){m("loginMsg","ログインできませんでした。",true)}}function logout(){signOut(auth)}
-async function addMember(){if(!(await admin()))return;let id=$("mid").value.trim(),name=$("mname").value.trim(),grade=$("mgrade").value,cl=$("mclass").value.trim();if(!id||!name||!cl)return m("memberMsg","すべて入力してください。",true);if((await get(ref(db,"memberRegistrations/"+id))).exists())return m("memberMsg","そのIDはすでに登録されています。",true);await set(ref(db,"memberRegistrations/"+id),{schoolId:id,name,grade,className:cl,createdAt:Date.now()});await set(ref(db,"memberIds/"+id),{accountCreated:false});$("mid").value=$("mname").value=$("mclass").value="";m("memberMsg","登録しました。");loadMembers()}
-async function loadMembers(){let s=await get(ref(db,"memberRegistrations")),v=s.exists()?s.val():{};let a=Object.entries(v);$("members").innerHTML=a.length?a.map(([id,x])=>`<div class="item"><strong>${esc(id)}　${esc(x.name)}</strong><div>${esc(x.grade)}年${esc(x.className)}組</div><div class="row"><button onclick="editMember('${id}')">変更</button><button class="danger" onclick="deleteMember('${id}')">削除</button></div></div>`).join(""):"<p class='small'>まだ登録されていません。</p>"}
-async function editMember(id){let s=await get(ref(db,"memberRegistrations/"+id));if(!s.exists())return;let x=s.val(),name=prompt("名前",x.name),grade=prompt("学年",x.grade),cl=prompt("クラス",x.className);if(name===null||grade===null||cl===null)return;await update(ref(db,"memberRegistrations/"+id),{name,grade,className:cl});loadMembers()}
-async function deleteMember(id){if(!confirm("この部員登録を削除しますか？"))return;await remove(ref(db,"memberRegistrations/"+id));await remove(ref(db,"memberIds/"+id));loadMembers()}
-async function saveSchedule(){if(!(await admin()))return;let d=$("sdate").value,t=$("stime").value.trim(),p=$("splace").value.trim();if(!d)return m("scheduleMsg","日付を入力してください。",true);await set(ref(db,"schedules/"+d),{time:t,place:p,updatedAt:Date.now()});m("scheduleMsg","保存しました。");loadSchedules()}
-async function loadSchedules(){let s=await get(ref(db,"schedules")),v=s.exists()?s.val():{};let a=Object.entries(v).sort();$("schedules").innerHTML=a.length?a.map(([d,x])=>`<div class="item"><strong>${esc(d)}</strong><br>${esc(x.time||"")}<br>${esc(x.place||"")}<div class="row"><button onclick="editSchedule('${d}')">変更</button><button class="danger" onclick="deleteSchedule('${d}')">削除</button></div></div>`).join(""):"<p class='small'>予定はありません。</p>"}
-async function editSchedule(d){let s=await get(ref(db,"schedules/"+d)),x=s.val();$("sdate").value=d;$("stime").value=x.time||"";$("splace").value=x.place||""}async function deleteSchedule(d){if(confirm(d+"の予定を削除しますか？")){await remove(ref(db,"schedules/"+d));loadSchedules()}}
-window.adminLogin=adminLogin;window.logout=logout;window.addMember=addMember;window.editMember=editMember;window.deleteMember=deleteMember;window.saveSchedule=saveSchedule;window.editSchedule=editSchedule;window.deleteSchedule=deleteSchedule;
-</script></body></html>
+
+import {
+  initializeApp
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+
+import {
+  getDatabase,
+  ref,
+  get,
+  set,
+  update,
+  remove
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+
+
+/* Firebase設定 */
+
+const firebaseConfig = {
+
+  apiKey:"AIzaSyAK9yRrSSLsfYpLSyuzwRyI2ZZp32KeMSA",
+
+  authDomain:"seikyo-handbell-club.firebaseapp.com",
+
+  databaseURL:"https://seikyo-handbell-club-default-rtdb.firebaseio.com",
+
+  projectId:"seikyo-handbell-club",
+
+  storageBucket:"seikyo-handbell-club.firebasestorage.app",
+
+  messagingSenderId:"55435007971",
+
+  appId:"1:55435007971:web:25f5c3b9dcd4324bc3f2d6"
+
+};
+
+
+/* ★ここだけ変更する */
+
+const ADMIN_EMAIL = "ここに管理者アカウントのメールアドレス";
+
+
+/* Firebase開始 */
+
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+
+const db = getDatabase(app);
+
+
+const $ = id => document.getElementById(id);
+
+
+const esc = s =>
+  String(s ?? "").replace(
+    /[&<>"']/g,
+    c => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#39;"
+    }[c])
+  );
+
+
+/* メッセージ */
+
+function message(id,text,error=false){
+
+  $(id).className =
+    text
+      ? (error ? "msg error" : "msg")
+      : "";
+
+  $(id).textContent = text;
+}
+
+
+/* 管理者確認 */
+
+async function isAdmin(){
+
+  if(!auth.currentUser){
+    return false;
+  }
+
+  const snapshot =
+    await get(
+      ref(
+        db,
+        "admins/" + auth.currentUser.uid
+      )
+    );
+
+  return (
+    snapshot.exists() &&
+    snapshot.val() === true
+  );
+
+}
+
+
+/* ログイン状態 */
+
+onAuthStateChanged(
+  auth,
+  async user => {
+
+    if(user && await isAdmin()){
+
+      $("login").classList.add("hidden");
+
+      $("app").classList.remove("hidden");
+
+      loadMembers();
+
+      loadSchedules();
+
+    }else{
+
+      $("login").classList.remove("hidden");
+
+      $("app").classList.add("hidden");
+
+    }
+
+  }
+);
+
+
+/* 管理者ログイン */
+
+async function adminLogin(){
+
+  const password =
+    $("password").value;
+
+  if(!password){
+
+    message(
+      "loginMsg",
+      "パスワードを入力してください。",
+      true
+    );
+
+    return;
+  }
+
+
+  try{
+
+    await signInWithEmailAndPassword(
+      auth,
+      ADMIN_EMAIL,
+      password
+    );
+
+
+    if(!(await isAdmin())){
+
+      await signOut(auth);
+
+      message(
+        "loginMsg",
+        "このアカウントは管理者として登録されていません。",
+        true
+      );
+
+      return;
+    }
+
+
+    $("password").value = "";
+
+  }catch(error){
+
+    console.error(error);
+
+    message(
+      "loginMsg",
+      "パスワードが違います。",
+      true
+    );
+
+  }
+
+}
+
+
+/* ログアウト */
+
+function logout(){
+
+  signOut(auth);
+
+}
+
+
+/* =========================
+   部員登録
+========================= */
+
+async function addMember(){
+
+  if(!(await isAdmin())){
+    return;
+  }
+
+
+  const id =
+    $("mid").value.trim();
+
+  const name =
+    $("mname").value.trim();
+
+  const grade =
+    $("mgrade").value;
+
+  const className =
+    $("mclass").value.trim();
+
+
+  if(!id || !name || !className){
+
+    message(
+      "memberMsg",
+      "すべて入力してください。",
+      true
+    );
+
+    return;
+  }
+
+
+  const existing =
+    await get(
+      ref(
+        db,
+        "memberRegistrations/" + id
+      )
+    );
+
+
+  if(existing.exists()){
+
+    message(
+      "memberMsg",
+      "そのIDはすでに登録されています。",
+      true
+    );
+
+    return;
+  }
+
+
+  await set(
+    ref(
+      db,
+      "memberRegistrations/" + id
+    ),
+    {
+      schoolId:id,
+      name:name,
+      grade:grade,
+      className:className,
+      createdAt:Date.now()
+    }
+  );
+
+
+  await set(
+    ref(
+      db,
+      "memberIds/" + id
+    ),
+    {
+      accountCreated:false
+    }
+  );
+
+
+  $("mid").value="";
+  $("mname").value="";
+  $("mclass").value="";
+
+
+  message(
+    "memberMsg",
+    "登録しました。"
+  );
+
+
+  loadMembers();
+
+}
+
+
+/* 部員一覧 */
+
+async function loadMembers(){
+
+  const snapshot =
+    await get(
+      ref(db,"memberRegistrations")
+    );
+
+
+  const data =
+    snapshot.exists()
+      ? snapshot.val()
+      : {};
+
+
+  const list =
+    Object.entries(data);
+
+
+  $("members").innerHTML =
+    list.length
+
+      ? list.map(
+          ([id,x]) => `
+
+<div class="item">
+
+<strong>
+${esc(id)}　${esc(x.name)}
+</strong>
+
+<div>
+${esc(x.grade)}年${esc(x.className)}組
+</div>
+
+<div class="row">
+
+<button
+onclick="editMember('${id}')">
+変更
+</button>
+
+<button
+class="danger"
+onclick="deleteMember('${id}')">
+削除
+</button>
+
+</div>
+
+</div>
+
+`
+        ).join("")
+
+      : "<p class='small'>まだ登録されていません。</p>";
+
+}
+
+
+/* 部員変更 */
+
+async function editMember(id){
+
+  const snapshot =
+    await get(
+      ref(
+        db,
+        "memberRegistrations/" + id
+      )
+    );
+
+
+  if(!snapshot.exists()){
+    return;
+  }
+
+
+  const x =
+    snapshot.val();
+
+
+  const name =
+    prompt(
+      "名前",
+      x.name
+    );
+
+
+  const grade =
+    prompt(
+      "学年",
+      x.grade
+    );
+
+
+  const className =
+    prompt(
+      "クラス",
+      x.className
+    );
+
+
+  if(
+    name === null ||
+    grade === null ||
+    className === null
+  ){
+    return;
+  }
+
+
+  await update(
+    ref(
+      db,
+      "memberRegistrations/" + id
+    ),
+    {
+      name:name,
+      grade:grade,
+      className:className
+    }
+  );
+
+
+  loadMembers();
+
+}
+
+
+/* 部員削除 */
+
+async function deleteMember(id){
+
+  if(
+    !confirm(
+      "この部員登録を削除しますか？"
+    )
+  ){
+    return;
+  }
+
+
+  await remove(
+    ref(
+      db,
+      "memberRegistrations/" + id
+    )
+  );
+
+
+  await remove(
+    ref(
+      db,
+      "memberIds/" + id
+    )
+  );
+
+
+  loadMembers();
+
+}
+
+
+/* =========================
+   予定表
+========================= */
+
+async function saveSchedule(){
+
+  if(!(await isAdmin())){
+    return;
+  }
+
+
+  const date =
+    $("sdate").value;
+
+  const time =
+    $("stime").value.trim();
+
+  const place =
+    $("splace").value.trim();
+
+
+  if(!date){
+
+    message(
+      "scheduleMsg",
+      "日付を入力してください。",
+      true
+    );
+
+    return;
+  }
+
+
+  await set(
+    ref(
+      db,
+      "schedules/" + date
+    ),
+    {
+      time:time,
+      place:place,
+      updatedAt:Date.now()
+    }
+  );
+
+
+  message(
+    "scheduleMsg",
+    "保存しました。"
+  );
+
+
+  loadSchedules();
+
+}
+
+
+/* 予定一覧 */
+
+async function loadSchedules(){
+
+  const snapshot =
+    await get(
+      ref(db,"schedules")
+    );
+
+
+  const data =
+    snapshot.exists()
+      ? snapshot.val()
+      : {};
+
+
+  const list =
+    Object.entries(data).sort();
+
+
+  $("schedules").innerHTML =
+    list.length
+
+      ? list.map(
+          ([date,x]) => `
+
+<div class="item">
+
+<strong>
+${esc(date)}
+</strong>
+
+<br>
+
+${esc(x.time || "")}
+
+<br>
+
+${esc(x.place || "")}
+
+<div class="row">
+
+<button
+onclick="editSchedule('${date}')">
+変更
+</button>
+
+<button
+class="danger"
+onclick="deleteSchedule('${date}')">
+削除
+</button>
+
+</div>
+
+</div>
+
+`
+        ).join("")
+
+      : "<p class='small'>予定はありません。</p>";
+
+}
+
+
+/* 予定変更 */
+
+async function editSchedule(date){
+
+  const snapshot =
+    await get(
+      ref(
+        db,
+        "schedules/" + date
+      )
+    );
+
+
+  if(!snapshot.exists()){
+    return;
+  }
+
+
+  const x =
+    snapshot.val();
+
+
+  $("sdate").value =
+    date;
+
+  $("stime").value =
+    x.time || "";
+
+  $("splace").value =
+    x.place || "";
+
+}
+
+
+/* 予定削除 */
+
+async function deleteSchedule(date){
+
+  if(
+    !confirm(
+      date + "の予定を削除しますか？"
+    )
+  ){
+    return;
+  }
+
+
+  await remove(
+    ref(
+      db,
+      "schedules/" + date
+    )
+  );
+
+
+  loadSchedules();
+
+}
+
+
+/* HTMLから呼び出せるようにする */
+
+window.adminLogin = adminLogin;
+
+window.logout = logout;
+
+window.addMember = addMember;
+
+window.editMember = editMember;
+
+window.deleteMember = deleteMember;
+
+window.saveSchedule = saveSchedule;
+
+window.editSchedule = editSchedule;
+
+window.deleteSchedule = deleteSchedule;
+
+</script>
+
+</body>
+</html>
