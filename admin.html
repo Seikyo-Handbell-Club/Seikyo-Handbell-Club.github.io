@@ -6,7 +6,9 @@
 <title>管理者設定｜清教学園ハンドベル部</title>
 
 <style>
-*{box-sizing:border-box}
+*{
+  box-sizing:border-box;
+}
 
 body{
   margin:0;
@@ -133,12 +135,13 @@ button{
 
 <main>
 
-<!-- ログイン -->
+<!-- 管理者ログイン -->
 <section id="login" class="card">
 
 <h2>管理者ログイン</h2>
 
 <label>パスワード</label>
+
 <input
   id="password"
   type="password"
@@ -163,9 +166,11 @@ button{
 <section id="app" class="hidden">
 
 <div class="card">
+
 <button class="secondary" onclick="logout()">
 ログアウト
 </button>
+
 </div>
 
 
@@ -181,6 +186,7 @@ button{
 <input id="mname" placeholder="名前">
 
 <label>学年</label>
+
 <select id="mgrade">
 <option value="1">1</option>
 <option value="2">2</option>
@@ -276,7 +282,7 @@ const ADMIN_EMAIL = "kazuma.cosmos@gmail.com";
 // ========================================
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAK9yRrSSLsfYpLSyuzwRyI2ZZp32KeMSA",
+  apiKey: "AIzaSyAK9yRsSLSfYpLSyluzwRyI22Zp32KeMSA",
   authDomain: "seikyo-handbell-club.firebaseapp.com",
   databaseURL: "https://seikyo-handbell-club-default-rtdb.firebaseio.com",
   projectId: "seikyo-handbell-club",
@@ -285,6 +291,10 @@ const firebaseConfig = {
   appId: "1:55435007971:web:25f5c3b9dcd4324bc3f2d6"
 };
 
+
+// ========================================
+// Firebase初期化
+// ========================================
 
 const app = initializeApp(firebaseConfig);
 
@@ -353,7 +363,7 @@ async function isAdmin(){
 
 
 // ========================================
-// ログイン状態
+// ログイン状態確認
 // ========================================
 
 onAuthStateChanged(auth, async user => {
@@ -400,7 +410,10 @@ onAuthStateChanged(auth, async user => {
 
   }catch(error){
 
-    console.error(error);
+    console.error(
+      "管理者確認エラー:",
+      error
+    );
 
     $("login").classList.remove("hidden");
 
@@ -408,9 +421,15 @@ onAuthStateChanged(auth, async user => {
 
     showMessage(
       "loginMsg",
+
       "管理者確認でエラーが発生しました。\n\n" +
-      "code: " + (error?.code || "(なし)") + "\n" +
-      "message: " + (error?.message || "(なし)"),
+
+      "code: " +
+      (error?.code || "(なし)") +
+
+      "\nmessage: " +
+      (error?.message || "(なし)"),
+
       true
     );
 
@@ -425,7 +444,9 @@ onAuthStateChanged(auth, async user => {
 
 async function adminLogin(){
 
-  const password = $("password").value;
+  const password =
+    $("password").value;
+
 
   if(!password){
 
@@ -447,12 +468,11 @@ async function adminLogin(){
     );
 
 
-    const credential =
-      await signInWithEmailAndPassword(
-        auth,
-        ADMIN_EMAIL,
-        password
-      );
+    await signInWithEmailAndPassword(
+      auth,
+      ADMIN_EMAIL,
+      password
+    );
 
 
     const admin =
@@ -501,9 +521,14 @@ async function adminLogin(){
     let errorString = "";
 
     try{
+
       errorString = String(error);
+
     }catch(_){
-      errorString = "(取得できませんでした)";
+
+      errorString =
+        "(取得できませんでした)";
+
     }
 
 
@@ -583,7 +608,10 @@ async function addMember(){
 
     const existing =
       await get(
-        ref(db,"memberRegistrations/" + id)
+        ref(
+          db,
+          "memberRegistrations/" + id
+        )
       );
 
 
@@ -600,7 +628,10 @@ async function addMember(){
 
 
     await set(
-      ref(db,"memberRegistrations/" + id),
+      ref(
+        db,
+        "memberRegistrations/" + id
+      ),
       {
         schoolId:id,
         name:name,
@@ -612,7 +643,10 @@ async function addMember(){
 
 
     await set(
-      ref(db,"memberIds/" + id),
+      ref(
+        db,
+        "memberIds/" + id
+      ),
       {
         accountCreated:false
       }
@@ -641,9 +675,15 @@ async function addMember(){
 
     showMessage(
       "memberMsg",
+
       "登録に失敗しました。\n\n" +
-      "code: " + (error?.code || "(なし)") +
-      "\nmessage: " + (error?.message || "(なし)"),
+
+      "code: " +
+      (error?.code || "(なし)") +
+
+      "\nmessage: " +
+      (error?.message || "(なし)"),
+
       true
     );
 
@@ -729,7 +769,10 @@ async function editMember(id){
 
   const snapshot =
     await get(
-      ref(db,"memberRegistrations/" + id)
+      ref(
+        db,
+        "memberRegistrations/" + id
+      )
     );
 
 
@@ -779,7 +822,10 @@ async function editMember(id){
 
 
   await update(
-    ref(db,"memberRegistrations/" + id),
+    ref(
+      db,
+      "memberRegistrations/" + id
+    ),
     {
       name:name.trim(),
       grade:grade.trim(),
@@ -809,12 +855,18 @@ async function deleteMember(id){
 
 
   await remove(
-    ref(db,"memberRegistrations/" + id)
+    ref(
+      db,
+      "memberRegistrations/" + id
+    )
   );
 
 
   await remove(
-    ref(db,"memberIds/" + id)
+    ref(
+      db,
+      "memberIds/" + id
+    )
   );
 
 
@@ -859,7 +911,10 @@ async function saveSchedule(){
   try{
 
     await set(
-      ref(db,"schedules/" + date),
+      ref(
+        db,
+        "schedules/" + date
+      ),
       {
         time:time,
         place:place,
@@ -883,9 +938,15 @@ async function saveSchedule(){
 
     showMessage(
       "scheduleMsg",
+
       "保存に失敗しました。\n\n" +
-      "code: " + (error?.code || "(なし)") +
-      "\nmessage: " + (error?.message || "(なし)"),
+
+      "code: " +
+      (error?.code || "(なし)") +
+
+      "\nmessage: " +
+      (error?.message || "(なし)"),
+
       true
     );
 
@@ -974,7 +1035,10 @@ async function editSchedule(date){
 
   const snapshot =
     await get(
-      ref(db,"schedules/" + date)
+      ref(
+        db,
+        "schedules/" + date
+      )
     );
 
 
@@ -1015,7 +1079,10 @@ async function deleteSchedule(date){
 
 
   await remove(
-    ref(db,"schedules/" + date)
+    ref(
+      db,
+      "schedules/" + date
+    )
   );
 
 
