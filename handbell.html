@@ -1,206 +1,46 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>部活おやすみ連絡</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>部活おやすみ連絡｜清教学園ハンドベル部</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif;background:#f5f7fb;color:#20242a}
-header{background:#fff;padding:22px 18px 14px;position:sticky;top:0;z-index:10;border-bottom:1px solid #e7eaf0}
-h1{font-size:22px;margin:0 0 16px;text-align:center}
-.actions{display:flex;gap:10px}
-button{border:0;border-radius:12px;padding:13px 10px;font-size:15px;font-weight:700;cursor:pointer}
-.actions button{flex:1;background:#1f6feb;color:#fff}
-.actions button:last-child{background:#fff;color:#1f6feb;border:1px solid #1f6feb}
-main{max-width:720px;margin:auto;padding:18px}
-.calendar-card,.panel{background:#fff;border-radius:18px;padding:16px;box-shadow:0 2px 12px #0000000b}
-.monthbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.monthbar button{background:#eef3fb;padding:8px 12px}
-.month-title{font-size:18px;font-weight:800}
-.week,.days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
-.week div{text-align:center;font-size:12px;color:#7b8490;padding:5px 0}
-.day{min-height:72px;background:#f8f9fb;border-radius:10px;padding:6px;text-align:left}
-.day.empty{background:transparent}
-.day:not(.empty){cursor:pointer}
-.day.off{opacity:.45}
-.daynum{font-weight:700;font-size:14px}
-.count{display:inline-block;margin-top:8px;background:#e8f0ff;color:#1f6feb;border-radius:999px;padding:3px 7px;font-size:12px;font-weight:700}
-.dot{display:block;margin-top:7px;font-size:11px;color:#64707d}
-.panel{margin-top:16px}
-.hidden{display:none}
-.back{background:#eef3fb;color:#333;margin-bottom:12px}
-label{display:block;font-weight:700;font-size:14px;margin:14px 0 6px}
-input,select,textarea{width:100%;padding:12px;border:1px solid #d9dee7;border-radius:10px;font-size:16px;background:#fff}
-textarea{min-height:80px;resize:vertical}
-.primary{width:100%;margin-top:18px;background:#1f6feb;color:#fff}
-.danger{background:#fff0f0;color:#d33;border:1px solid #f0b8b8}
-.item{border:1px solid #e3e7ed;border-radius:12px;padding:12px;margin:10px 0}
-.item strong{display:block;margin-bottom:4px}
-.meta{font-size:13px;color:#66717e}
-.row{display:flex;gap:8px;margin-top:10px}
-.row button{flex:1}
-.badge{display:inline-block;border-radius:999px;padding:4px 8px;background:#eef3fb;font-size:12px;font-weight:700}
-.notice{padding:12px;border-radius:10px;background:#fff8df;color:#69520a;font-size:14px}
-.schedule{background:#f5f8ff;border-radius:12px;padding:12px;margin-bottom:12px}
-.small{font-size:12px;color:#77818e}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif;background:#f5f7fb;color:#20242a}header{background:#fff;padding:20px 18px 14px;position:sticky;top:0;z-index:10;border-bottom:1px solid #e7eaf0}h1{font-size:22px;margin:0 0 5px;text-align:center}.club{text-align:center;color:#66717e;font-size:13px;margin-bottom:15px}.actions{display:flex;gap:10px}button{border:0;border-radius:12px;padding:12px 10px;font-size:15px;font-weight:700;cursor:pointer}.actions button{flex:1;background:#1f6feb;color:#fff}.actions button:last-child{background:#fff;color:#1f6feb;border:1px solid #1f6feb}main{max-width:720px;margin:auto;padding:18px}.card,.panel{background:#fff;border-radius:18px;padding:16px;margin-bottom:16px;box-shadow:0 2px 12px #0000000b}.hidden{display:none!important}label{display:block;font-weight:700;font-size:14px;margin:14px 0 6px}input,select,textarea{width:100%;padding:12px;border:1px solid #d9dee7;border-radius:10px;font-size:16px;background:#fff}textarea{min-height:85px}.primary{width:100%;margin-top:16px;background:#1f6feb;color:#fff}.secondary{background:#eef3fb;color:#333}.danger{background:#fff0f0;color:#d33;border:1px solid #f0b8b8}.msg{padding:12px;border-radius:10px;background:#fff8df;color:#69520a;font-size:14px;margin-top:12px}.error{background:#fff0f0;color:#9b1c1c}.userbar{background:#f5f8ff;border-radius:12px;padding:12px;margin-bottom:14px}.week,.days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.week div{text-align:center;font-size:12px;color:#7b8490;padding:5px 0}.day{min-height:72px;background:#f8f9fb;border-radius:10px;padding:6px;cursor:pointer}.day.empty{background:transparent;cursor:default}.day.off{opacity:.45}.daynum{font-weight:700;font-size:14px}.count{display:inline-block;margin-top:8px;background:#e8f0ff;color:#1f6feb;border-radius:999px;padding:3px 7px;font-size:12px;font-weight:700}.dot{display:block;margin-top:7px;font-size:11px;color:#64707d}.monthbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}.monthbar button{background:#eef3fb;padding:8px 12px}.month-title{font-size:18px;font-weight:800}.item{border:1px solid #e3e7ed;border-radius:12px;padding:12px;margin:10px 0}.meta{font-size:13px;color:#66717e;margin-top:4px}.badge{display:inline-block;border-radius:999px;padding:4px 8px;background:#eef3fb;font-size:12px;font-weight:700}.row{display:flex;gap:8px;margin-top:10px}.row button{flex:1}.small{font-size:12px;color:#77818e}.linkbtn{background:none;color:#1f6feb;padding:4px 0}
 </style>
 </head>
 <body>
-<header>
-  <h1>部活おやすみ連絡</h1>
-  <div class="actions">
-    <button onclick="showForm()">欠席連絡</button>
-    <button onclick="showEdit()">連絡を修正</button>
-  </div>
-</header>
-
+<header><h1>部活おやすみ連絡</h1><div class="club">清教学園ハンドベル部</div>
+<div id="loggedOut" class="actions"><button onclick="showLogin()">ログイン</button><button onclick="showSetup()">初回パスワード設定</button></div>
+<div id="loggedIn" class="hidden"><div id="userbar" class="userbar"></div><div class="actions"><button onclick="showForm()">欠席連絡</button><button onclick="showEdit()">連絡を修正</button></div><button class="linkbtn" onclick="logout()">ログアウト</button></div></header>
 <main>
-  <section id="calendarView">
-    <div class="calendar-card">
-      <div class="monthbar">
-        <button onclick="changeMonth(-1)">‹</button>
-        <div class="month-title" id="monthTitle"></div>
-        <button onclick="changeMonth(1)">›</button>
-      </div>
-      <div class="week">
-        <div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div>土</div><div>日</div>
-      </div>
-      <div class="days" id="days"></div>
-    </div>
-  </section>
-
-  <section id="detailView" class="panel hidden">
-    <button class="back" onclick="backHome()">← カレンダーに戻る</button>
-    <div id="detail"></div>
-  </section>
-
-  <section id="formView" class="panel hidden">
-    <button class="back" onclick="backHome()">← 戻る</button>
-    <h2 id="formTitle">欠席連絡</h2>
-    <label>名前</label>
-    <input id="name" placeholder="例：山田太郎">
-    <label>連絡の種類</label>
-    <select id="type" onchange="updateTimeFields()">
-      <option value="欠席">欠席</option>
-      <option value="遅刻">遅刻</option>
-      <option value="早退">早退</option>
-      <option value="途中抜け">途中抜け</option>
-    </select>
-    <label>日付</label>
-    <input id="date" type="date" onchange="checkDate()">
-    <div id="timeFields"></div>
-    <label>理由（任意）</label>
-    <textarea id="reason" placeholder="必要なら入力"></textarea>
-    <div id="formNotice"></div>
-    <button class="primary" onclick="saveNotice()">登録する</button>
-  </section>
-
-  <section id="editView" class="panel hidden">
-    <button class="back" onclick="backHome()">← 戻る</button>
-    <h2>連絡を修正</h2>
-    <label>名前を入力</label>
-    <input id="editName" placeholder="登録した名前">
-    <button class="primary" onclick="loadMyNotices()">自分の連絡を表示</button>
-    <div id="myNotices"></div>
-  </section>
+<section id="calendarView"><div class="card"><div class="monthbar"><button onclick="changeMonth(-1)">‹</button><div class="month-title" id="monthTitle"></div><button onclick="changeMonth(1)">›</button></div><div class="week"><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div>土</div><div>日</div></div><div class="days" id="days"></div></div></section>
+<section id="detailView" class="panel hidden"><button class="secondary" onclick="backHome()">← カレンダーに戻る</button><div id="detail"></div></section>
+<section id="loginView" class="panel hidden"><button class="secondary" onclick="backHome()">← 戻る</button><h2>ログイン</h2><label>学校ID</label><input id="loginId" autocomplete="username"><label>パスワード</label><input id="loginPassword" type="password" autocomplete="current-password"><button class="primary" onclick="login()">ログイン</button><div id="loginMsg"></div></section>
+<section id="setupView" class="panel hidden"><button class="secondary" onclick="backHome()">← 戻る</button><h2>初回パスワード設定</h2><p class="small">管理者に登録された学校IDを入力して、自分でパスワードを設定します。</p><label>学校ID</label><input id="setupId"><label>新しいパスワード（6文字以上）</label><input id="setupPassword" type="password"><label>確認</label><input id="setupPassword2" type="password"><button class="primary" onclick="setupPassword()">設定する</button><div id="setupMsg"></div></section>
+<section id="formView" class="panel hidden"><button class="secondary" onclick="backHome()">← 戻る</button><h2 id="formTitle">欠席連絡</h2><div id="profileBox" class="userbar"></div><label>連絡の種類</label><select id="type" onchange="updateTimeFields()"><option>欠席</option><option>遅刻</option><option>早退</option><option>途中抜け</option></select><label>日付</label><input id="date" type="date" onchange="checkDate()"><div id="timeFields"></div><label>理由（必須）</label><textarea id="reason"></textarea><div id="formNotice"></div><button class="primary" onclick="saveNotice()">登録する</button></section>
+<section id="editView" class="panel hidden"><button class="secondary" onclick="backHome()">← 戻る</button><h2>連絡を修正</h2><div id="myNotices"></div></section>
 </main>
-
-<script>
-const KEY="club_absence_notices_v1";
-const SCHEDULE_KEY="club_schedule_v1";
-let current=new Date();
-let editingId=null;
-
-function notices(){return JSON.parse(localStorage.getItem(KEY)||"[]")}
-function schedules(){return JSON.parse(localStorage.getItem(SCHEDULE_KEY)||"{}")}
-function saveNotices(v){localStorage.setItem(KEY,JSON.stringify(v))}
-function pad(n){return String(n).padStart(2,"0")}
-function ymd(y,m,d){return `${y}-${pad(m+1)}-${pad(d)}`}
-function jpDate(s){const [y,m,d]=s.split("-");return `${y}年${+m}月${+d}日`}
-function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-
-function render(){
-  const y=current.getFullYear(), m=current.getMonth();
-  document.getElementById("monthTitle").textContent=`${y}年${m+1}月`;
-  const first=(new Date(y,m,1).getDay()+6)%7;
-  const last=new Date(y,m+1,0).getDate();
-  const ns=notices();
-  let h="";
-  for(let i=0;i<first;i++)h+='<div class="day empty"></div>';
-  for(let d=1;d<=last;d++){
-    const date=ymd(y,m,d), has=!!schedules()[date], list=ns.filter(n=>n.date===date);
-    h+=`<div class="day ${has?'':'off'}" onclick="openDay('${date}')">
-      <div class="daynum">${d}</div>
-      ${list.length?`<span class="count">${list.length}件</span>`:""}
-      <span class="dot">${has?(schedules()[date].time||"部活あり"):"部活なし"}</span>
-    </div>`;
-  }
-  document.getElementById("days").innerHTML=h;
-}
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import{getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import{getDatabase,ref,get,set,update,remove,push}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+const firebaseConfig={apiKey:"AIzaSyAK9yRrSSLsfYpLSyuzwRyI2ZZp32KeMSA",authDomain:"seikyo-handbell-club.firebaseapp.com",databaseURL:"https://seikyo-handbell-club-default-rtdb.firebaseio.com",projectId:"seikyo-handbell-club",storageBucket:"seikyo-handbell-club.firebasestorage.app",messagingSenderId:"55435007971",appId:"1:55435007971:web:25f5c3b9dcd4324bc3f2d6"};
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getDatabase(app);const $=id=>document.getElementById(id);let profile=null,currentUser=null,editingId=null,current=new Date();const DOMAIN="@seikyo-handbell-club.local";
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));const pad=n=>String(n).padStart(2,"0");const ymd=(y,m,d)=>`${y}-${pad(m+1)}-${pad(d)}`;const jp=s=>{let[a,b,c]=s.split("-");return`${a}年${+b}月${+c}日`};const email=id=>String(id).trim()+DOMAIN;
+function hide(){["calendarView","detailView","loginView","setupView","formView","editView"].forEach(x=>$(x).classList.add("hidden"))}function backHome(){hide();$("calendarView").classList.remove("hidden");render()}function showLogin(){hide();$("loginView").classList.remove("hidden")}function showSetup(){hide();$("setupView").classList.remove("hidden")}
+async function loadProfile(){if(!currentUser)return;const s=await get(ref(db,"members/"+currentUser.uid));profile=s.exists()?s.val():null;if(profile){$("userbar").innerHTML=`<strong>${esc(profile.name)}</strong>${esc(profile.grade)}年${esc(profile.className)}組　ID：${esc(profile.schoolId)}`;$("profileBox").textContent=`${profile.name}（${profile.grade}年${profile.className}組）`}}
+onAuthStateChanged(auth,async u=>{currentUser=u;if(u){await loadProfile();$("loggedOut").classList.add("hidden");$("loggedIn").classList.remove("hidden");render()}else{$("loggedOut").classList.remove("hidden");$("loggedIn").classList.add("hidden");profile=null}});
+async function login(){let id=$("loginId").value.trim(),pw=$("loginPassword").value;if(!id||!pw)return $("loginMsg").innerHTML='<div class="msg error">IDとパスワードを入力してください。</div>';try{await signInWithEmailAndPassword(auth,email(id),pw);backHome()}catch(e){$("loginMsg").innerHTML='<div class="msg error">IDまたはパスワードが正しくありません。</div>'}}
+async function setupPassword(){let id=$("setupId").value.trim(),p=$("setupPassword").value,p2=$("setupPassword2").value;if(!id||p.length<6||p!==p2)return $("setupMsg").innerHTML='<div class="msg error">入力内容を確認してください。</div>';try{let exists=await get(ref(db,"memberIds/"+id));if(!exists.exists())throw Error("not-registered");let reg=await get(ref(db,"memberRegistrations/"+id));if(!reg.exists())throw Error("no-data");let data=reg.val();let cred=await createUserWithEmailAndPassword(auth,email(id),p);await set(ref(db,"members/"+cred.user.uid),{schoolId:id,name:data.name,grade:data.grade,className:data.className});await update(ref(db,"memberIds/"+id),{accountCreated:true,uid:cred.user.uid});backHome()}catch(e){console.error(e);$("setupMsg").innerHTML='<div class="msg error">そのIDが登録されていないか、すでに初回設定済みです。</div>'}}
+function logout(){signOut(auth)}
+async function render(){let y=current.getFullYear(),m=current.getMonth();$("monthTitle").textContent=`${y}年${m+1}月`;let ss=await get(ref(db,"schedules")),ns=await get(ref(db,"notices")),sch=ss.exists()?ss.val():{},all=ns.exists()?ns.val():{},first=(new Date(y,m,1).getDay()+6)%7,last=new Date(y,m+1,0).getDate(),h="";for(let i=0;i<first;i++)h+='<div class="day empty"></div>';for(let d=1;d<=last;d++){let date=ymd(y,m,d),has=!!sch[date],count=Object.values(all).filter(n=>n.date===date).length;h+=`<div class="day ${has?"":"off"}" onclick="openDay('${date}')"><div class="daynum">${d}</div>${count?`<span class="count">${count}件</span>`:""}<span class="dot">${has?esc(sch[date].time||"部活あり"):"部活なし"}</span></div>`}$("days").innerHTML=h}
 function changeMonth(n){current=new Date(current.getFullYear(),current.getMonth()+n,1);render()}
-function hideAll(){["calendarView","detailView","formView","editView"].forEach(id=>document.getElementById(id).classList.add("hidden"))}
-function backHome(){hideAll();document.getElementById("calendarView").classList.remove("hidden");render()}
-function openDay(date){
-  hideAll();document.getElementById("detailView").classList.remove("hidden");
-  const sch=schedules()[date], list=notices().filter(n=>n.date===date);
-  let h=`<h2>${jpDate(date)}</h2>`;
-  if(!sch){h+='<div class="notice">この日は部活動がありません。</div>';document.getElementById("detail").innerHTML=h;return}
-  h+=`<div class="schedule"><strong>部活動あり</strong><br>${esc(sch.time||"時間未登録")}<br>${esc(sch.place||"場所未登録")}</div>`;
-  h+=`<h3>連絡 ${list.length}件</h3>`;
-  h+=list.length?list.map(n=>`<div class="item"><strong>${esc(n.name)} <span class="badge">${esc(n.type)}</span></strong>${n.time?`<div class="meta">${esc(n.time)}</div>`:""}${n.reason?`<div class="meta">理由：${esc(n.reason)}</div>`:""}</div>`).join(""):'<p class="small">現在、連絡はありません。</p>';
-  document.getElementById("detail").innerHTML=h;
-}
-function showForm(id=null){
-  editingId=id;hideAll();document.getElementById("formView").classList.remove("hidden");
-  document.getElementById("formTitle").textContent=id?"連絡を修正":"欠席連絡";
-  const n=id?notices().find(x=>x.id===id):null;
-  document.getElementById("name").value=n?.name||"";
-  document.getElementById("type").value=n?.type||"欠席";
-  document.getElementById("date").value=n?.date||"";
-  document.getElementById("reason").value=n?.reason||"";
-  updateTimeFields(n?.time||"");checkDate();
-}
-function updateTimeFields(value=""){
-  const t=document.getElementById("type").value;
-  let label="",ph="";
-  if(t==="遅刻"){label="到着予定時刻";ph="例：17:30"}
-  if(t==="早退"){label="帰る予定時刻";ph="例：17:30"}
-  if(t==="途中抜け"){label="抜ける時間〜戻る時間";ph="例：18:00〜19:00"}
-  document.getElementById("timeFields").innerHTML=label?`<label>${label}</label><input id="time" placeholder="${ph}" value="${esc(value)}">`:"";
-}
-function checkDate(){
-  const d=document.getElementById("date").value, box=document.getElementById("formNotice");
-  if(!d){box.innerHTML="";return}
-  box.innerHTML=schedules()[d]?`<div class="notice">部活：${esc(schedules()[d].time||"時間未登録")} / ${esc(schedules()[d].place||"場所未登録")}</div>`:'<div class="notice">この日は部活動がないため、連絡できません。</div>';
-}
-function saveNotice(){
-  const name=document.getElementById("name").value.trim(), type=document.getElementById("type").value;
-  const date=document.getElementById("date").value, reason=document.getElementById("reason").value.trim();
-  if(!name||!date)return alert("名前と日付を入力してください。");
-  if(!schedules()[date])return alert("その日は部活動がありません。");
-  const time=document.getElementById("time")?.value.trim()||"";
-  const ns=notices();
-  if(editingId){
-    const i=ns.findIndex(n=>n.id===editingId); if(i>=0)ns[i]={...ns[i],name,type,date,time,reason};
-  }else ns.push({id:crypto.randomUUID(),name,type,date,time,reason,createdAt:new Date().toISOString()});
-  saveNotices(ns);alert("登録しました。");backHome();
-}
-function showEdit(){hideAll();document.getElementById("editView").classList.remove("hidden");document.getElementById("myNotices").innerHTML=""}
-function loadMyNotices(){
-  const name=document.getElementById("editName").value.trim();
-  if(!name)return;
-  const list=notices().filter(n=>n.name===name);
-  document.getElementById("myNotices").innerHTML=list.length?list.map(n=>`<div class="item"><strong>${jpDate(n.date)}　${esc(n.type)}</strong>${n.time?`<div class="meta">${esc(n.time)}</div>`:""}${n.reason?`<div class="meta">理由：${esc(n.reason)}</div>`:""}<div class="row"><button onclick="showForm('${n.id}')">修正</button><button class="danger" onclick="removeNotice('${n.id}')">削除</button></div></div>`).join(""):'<p class="small">登録された連絡がありません。</p>';
-}
-function removeNotice(id){if(confirm("この連絡を削除しますか？")){saveNotices(notices().filter(n=>n.id!==id));loadMyNotices();render()}}
-/* サンプル予定：画像の予定表を読み取って全件確定する前の仮データ */
-if(!Object.keys(schedules()).length){
-  const demo={};
-  ["2026-10-01","2026-10-02","2026-10-03","2026-10-05","2026-10-06","2026-10-07","2026-10-08"].forEach(d=>demo[d]={time:"予定表を確認中",place:"未設定"});
-  localStorage.setItem(SCHEDULE_KEY,JSON.stringify(demo));
-}
-render();
-</script>
-</body>
-</html>
+async function openDay(date){hide();$("detailView").classList.remove("hidden");let ss=await get(ref(db,"schedules/"+date)),ns=await get(ref(db,"notices")),sch=ss.exists()?ss.val():null,all=ns.exists()?ns.val():{},list=Object.values(all).filter(n=>n.date===date);let h=`<h2>${jp(date)}</h2>`;if(!sch){$("detail").innerHTML=h+'<div class="msg error">この日は部活動がありません。</div>';return}h+=`<div class="userbar"><strong>部活動あり</strong>${esc(sch.time||"")}<br>${esc(sch.place||"")}</div><h3>連絡 ${list.length}件</h3>`;h+=list.length?list.map(n=>`<div class="item"><strong>${esc(n.name)} <span class="badge">${esc(n.type)}</span></strong>${n.time?`<div class="meta">${esc(n.time)}</div>`:""}<div class="meta">理由：${esc(n.reason)}</div></div>`).join(""):"<p class='small'>現在、連絡はありません。</p>";$("detail").innerHTML=h}
+function showForm(id=null){if(!currentUser||!profile)return showLogin();editingId=id;hide();$("formView").classList.remove("hidden");$("formTitle").textContent=id?"連絡を修正":"欠席連絡";$("type").value="欠席";$("date").value="";$("reason").value="";updateTimeFields()}
+function updateTimeFields(v=""){let t=$("type").value,l="",p="";if(t==="遅刻"){l="到着予定時刻";p="例：17:30"}if(t==="早退"){l="帰る予定時刻";p="例：17:30"}if(t==="途中抜け"){l="抜ける時間〜戻る時間";p="例：18:00〜19:00"}$("timeFields").innerHTML=l?`<label>${l}</label><input id="time" value="${esc(v)}" placeholder="${p}">`:""}
+async function checkDate(){let d=$("date").value;if(!d)return $("formNotice").innerHTML="";let s=await get(ref(db,"schedules/"+d));$("formNotice").innerHTML=s.exists()?`<div class="msg">部活：${esc(s.val().time||"")} / ${esc(s.val().place||"")}</div>`:'<div class="msg error">この日は部活動がないため、連絡できません。</div>'}
+async function saveNotice(){let d=$("date").value,r=$("reason").value.trim(),t=$("type").value,time=$("time")?.value.trim()||"";if(!d||!r)return alert("日付と理由は必須です。");if(!(await get(ref(db,"schedules/"+d))).exists())return alert("その日は部活動がありません。");if(editingId)await update(ref(db,"notices/"+editingId),{type:t,date:d,time,reason:r,updatedAt:Date.now()});else await set(push(ref(db,"notices")),{uid:currentUser.uid,schoolId:profile.schoolId,name:profile.name,type:t,date:d,time,reason:r,createdAt:Date.now(),updatedAt:Date.now()});alert("登録しました。");backHome()}
+async function showEdit(){if(!currentUser)return showLogin();hide();$("editView").classList.remove("hidden");let s=await get(ref(db,"notices")),all=s.exists()?s.val():{},list=Object.entries(all).filter(([id,n])=>n.uid===currentUser.uid);$("myNotices").innerHTML=list.length?list.map(([id,n])=>`<div class="item"><strong>${jp(n.date)}　${esc(n.type)}</strong>${n.time?`<div class="meta">${esc(n.time)}</div>`:""}<div class="meta">理由：${esc(n.reason)}</div><div class="row"><button onclick="editNotice('${id}')">修正</button><button class="danger" onclick="deleteNotice('${id}')">削除</button></div></div>`).join(""):"<p class='small'>登録された連絡がありません。</p>"}
+async function editNotice(id){let s=await get(ref(db,"notices/"+id));if(!s.exists()||s.val().uid!==currentUser.uid)return;let n=s.val();editingId=id;hide();$("formView").classList.remove("hidden");$("formTitle").textContent="連絡を修正";$("type").value=n.type;$("date").value=n.date;$("reason").value=n.reason;updateTimeFields(n.time||"");checkDate()}
+async function deleteNotice(id){if(confirm("この連絡を削除しますか？")){let s=await get(ref(db,"notices/"+id));if(s.exists()&&s.val().uid===currentUser.uid)await remove(ref(db,"notices/"+id));showEdit()}}
+window.showLogin=showLogin;window.showSetup=showSetup;window.login=login;window.setupPassword=setupPassword;window.logout=logout;window.changeMonth=changeMonth;window.openDay=openDay;window.showForm=showForm;window.showEdit=showEdit;window.updateTimeFields=updateTimeFields;window.checkDate=checkDate;window.saveNotice=saveNotice;window.editNotice=editNotice;window.deleteNotice=deleteNotice;window.backHome=backHome;render();
+</script></body></html>
