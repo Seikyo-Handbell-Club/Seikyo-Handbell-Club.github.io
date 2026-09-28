@@ -12,25 +12,25 @@ body{
   margin:0;
   background:#f5f7fb;
   color:#20242a;
-  font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif
+  font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif;
 }
 
 header{
   background:#fff;
   padding:20px;
-  border-bottom:1px solid #e5e8ed
+  border-bottom:1px solid #e5e8ed;
 }
 
 h1{
   margin:0;
   text-align:center;
-  font-size:21px
+  font-size:21px;
 }
 
 main{
   max-width:800px;
   margin:auto;
-  padding:18px
+  padding:18px;
 }
 
 .card{
@@ -38,26 +38,27 @@ main{
   border-radius:18px;
   padding:16px;
   margin-bottom:16px;
-  box-shadow:0 2px 12px #0000000b
+  box-shadow:0 2px 12px #0000000b;
 }
 
 .hidden{
-  display:none!important
+  display:none!important;
 }
 
 label{
   display:block;
   font-weight:700;
   font-size:14px;
-  margin:12px 0 5px
+  margin:12px 0 5px;
 }
 
-input,select{
+input,
+select{
   width:100%;
   padding:11px;
   border:1px solid #d9dee7;
   border-radius:10px;
-  font-size:16px
+  font-size:16px;
 }
 
 button{
@@ -65,24 +66,24 @@ button{
   border-radius:10px;
   padding:11px 14px;
   font-weight:700;
-  cursor:pointer
+  cursor:pointer;
 }
 
 .primary{
   background:#1f6feb;
   color:#fff;
   width:100%;
-  margin-top:14px
+  margin-top:14px;
 }
 
 .secondary{
-  background:#eef3fb
+  background:#eef3fb;
 }
 
 .danger{
   background:#fff0f0;
   color:#b22;
-  border:1px solid #efbbbb
+  border:1px solid #efbbbb;
 }
 
 .msg{
@@ -91,34 +92,35 @@ button{
   background:#fff8df;
   color:#69520a;
   margin-top:10px;
-  font-size:14px
+  font-size:14px;
+  white-space:pre-wrap;
 }
 
 .error{
   background:#fff0f0;
-  color:#9b1c1c
+  color:#9b1c1c;
 }
 
 .item{
   border:1px solid #e3e7ed;
   border-radius:12px;
   padding:12px;
-  margin:10px 0
+  margin:10px 0;
 }
 
 .row{
   display:flex;
   gap:8px;
-  margin-top:10px
+  margin-top:10px;
 }
 
 .row button{
-  flex:1
+  flex:1;
 }
 
 .small{
   font-size:12px;
-  color:#6f7882
+  color:#6f7882;
 }
 </style>
 </head>
@@ -131,7 +133,7 @@ button{
 
 <main>
 
-<!-- ログイン画面 -->
+<!-- ログイン -->
 <section id="login" class="card">
 
 <h2>管理者ログイン</h2>
@@ -141,6 +143,7 @@ button{
   id="password"
   type="password"
   autocomplete="current-password"
+  placeholder="管理者パスワード"
 >
 
 <button class="primary" onclick="adminLogin()">
@@ -148,6 +151,10 @@ button{
 </button>
 
 <div id="loginMsg"></div>
+
+<p class="small">
+管理者アカウントでログインします。
+</p>
 
 </section>
 
@@ -168,24 +175,23 @@ button{
 <h2>部員登録</h2>
 
 <label>学校ID</label>
-<input id="mid">
+<input id="mid" placeholder="学校ID">
 
 <label>名前</label>
-<input id="mname">
+<input id="mname" placeholder="名前">
 
 <label>学年</label>
-
 <select id="mgrade">
-<option>1</option>
-<option>2</option>
-<option>3</option>
-<option>4</option>
-<option>5</option>
-<option>6</option>
+<option value="1">1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5</option>
+<option value="6">6</option>
 </select>
 
 <label>クラス</label>
-<input id="mclass">
+<input id="mclass" placeholder="例：1">
 
 <button class="primary" onclick="addMember()">
 登録する
@@ -218,7 +224,7 @@ button{
 <input id="stime" placeholder="例：17:00〜19:00">
 
 <label>場所</label>
-<input id="splace">
+<input id="splace" placeholder="例：音楽室">
 
 <button class="primary" onclick="saveSchedule()">
 予定を保存
@@ -258,33 +264,27 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
 
 
-/* Firebase設定 */
-
-const firebaseConfig = {
-
-  apiKey:"AIzaSyAK9yRrSSLsfYpLSyuzwRyI2ZZp32KeMSA",
-
-  authDomain:"seikyo-handbell-club.firebaseapp.com",
-
-  databaseURL:"https://seikyo-handbell-club-default-rtdb.firebaseio.com",
-
-  projectId:"seikyo-handbell-club",
-
-  storageBucket:"seikyo-handbell-club.firebasestorage.app",
-
-  messagingSenderId:"55435007971",
-
-  appId:"1:55435007971:web:25f5c3b9dcd4324bc3f2d6"
-
-};
-
-
-/* ★ここだけ変更する */
+// ========================================
+// 管理者メールアドレス
+// ========================================
 
 const ADMIN_EMAIL = "kazuma.cosmos@gmail.com";
 
 
-/* Firebase開始 */
+// ========================================
+// Firebase設定
+// ========================================
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAK9yRrSSLsfYpLSyuzwRyI2ZZp32KeMSA",
+  authDomain: "seikyo-handbell-club.firebaseapp.com",
+  databaseURL: "https://seikyo-handbell-club-default-rtdb.firebaseio.com",
+  projectId: "seikyo-handbell-club",
+  storageBucket: "seikyo-handbell-club.firebasestorage.app",
+  messagingSenderId: "55435007971",
+  appId: "1:55435007971:web:25f5c3b9dcd4324bc3f2d6"
+};
+
 
 const app = initializeApp(firebaseConfig);
 
@@ -292,12 +292,16 @@ const auth = getAuth(app);
 
 const db = getDatabase(app);
 
-
 const $ = id => document.getElementById(id);
 
 
-const esc = s =>
-  String(s ?? "").replace(
+// ========================================
+// HTMLエスケープ
+// ========================================
+
+function esc(value){
+
+  return String(value ?? "").replace(
     /[&<>"']/g,
     c => ({
       "&":"&amp;",
@@ -308,21 +312,29 @@ const esc = s =>
     }[c])
   );
 
-
-/* メッセージ */
-
-function message(id,text,error=false){
-
-  $(id).className =
-    text
-      ? (error ? "msg error" : "msg")
-      : "";
-
-  $(id).textContent = text;
 }
 
 
-/* 管理者確認 */
+// ========================================
+// メッセージ表示
+// ========================================
+
+function showMessage(id,text,error=false){
+
+  const el = $(id);
+
+  el.className = text
+    ? (error ? "msg error" : "msg")
+    : "";
+
+  el.textContent = text;
+
+}
+
+
+// ========================================
+// 管理者確認
+// ========================================
 
 async function isAdmin(){
 
@@ -330,37 +342,53 @@ async function isAdmin(){
     return false;
   }
 
-  const snapshot =
-    await get(
-      ref(
-        db,
-        "admins/" + auth.currentUser.uid
-      )
-    );
-
-  return (
-    snapshot.exists() &&
-    snapshot.val() === true
+  const snapshot = await get(
+    ref(db,"admins/" + auth.currentUser.uid)
   );
+
+  return snapshot.exists() &&
+         snapshot.val() === true;
 
 }
 
 
-/* ログイン状態 */
+// ========================================
+// ログイン状態
+// ========================================
 
-onAuthStateChanged(
-  auth,
-  async user => {
+onAuthStateChanged(auth, async user => {
 
-    if(user && await isAdmin()){
+  try{
 
-      $("login").classList.add("hidden");
+    if(user){
 
-      $("app").classList.remove("hidden");
+      const admin = await isAdmin();
 
-      loadMembers();
+      if(admin){
 
-      loadSchedules();
+        $("login").classList.add("hidden");
+
+        $("app").classList.remove("hidden");
+
+        await loadMembers();
+
+        await loadSchedules();
+
+      }else{
+
+        await signOut(auth);
+
+        $("login").classList.remove("hidden");
+
+        $("app").classList.add("hidden");
+
+        showMessage(
+          "loginMsg",
+          "このアカウントは管理者として登録されていません。",
+          true
+        );
+
+      }
 
     }else{
 
@@ -370,20 +398,38 @@ onAuthStateChanged(
 
     }
 
+  }catch(error){
+
+    console.error(error);
+
+    $("login").classList.remove("hidden");
+
+    $("app").classList.add("hidden");
+
+    showMessage(
+      "loginMsg",
+      "管理者確認でエラーが発生しました。\n\n" +
+      "code: " + (error?.code || "(なし)") + "\n" +
+      "message: " + (error?.message || "(なし)"),
+      true
+    );
+
   }
-);
+
+});
 
 
-/* 管理者ログイン */
+// ========================================
+// 管理者ログイン
+// ========================================
 
 async function adminLogin(){
 
-  const password =
-    $("password").value;
+  const password = $("password").value;
 
   if(!password){
 
-    message(
+    showMessage(
       "loginMsg",
       "パスワードを入力してください。",
       true
@@ -395,18 +441,29 @@ async function adminLogin(){
 
   try{
 
-    await signInWithEmailAndPassword(
-      auth,
-      ADMIN_EMAIL,
-      password
+    showMessage(
+      "loginMsg",
+      "ログインしています..."
     );
 
 
-    if(!(await isAdmin())){
+    const credential =
+      await signInWithEmailAndPassword(
+        auth,
+        ADMIN_EMAIL,
+        password
+      );
+
+
+    const admin =
+      await isAdmin();
+
+
+    if(!admin){
 
       await signOut(auth);
 
-      message(
+      showMessage(
         "loginMsg",
         "このアカウントは管理者として登録されていません。",
         true
@@ -418,13 +475,55 @@ async function adminLogin(){
 
     $("password").value = "";
 
+    showMessage(
+      "loginMsg",
+      ""
+    );
+
+
   }catch(error){
 
-    console.error(error);
+    console.error(
+      "管理者ログインエラー:",
+      error
+    );
 
-    message(
+
+    const errorCode =
+      String(error?.code || "");
+
+    const errorName =
+      String(error?.name || "");
+
+    const errorMessage =
+      String(error?.message || "");
+
+    let errorString = "";
+
+    try{
+      errorString = String(error);
+    }catch(_){
+      errorString = "(取得できませんでした)";
+    }
+
+
+    showMessage(
       "loginMsg",
-      "パスワードが違います。",
+
+      "ログインできませんでした。\n\n" +
+
+      "code: " +
+      (errorCode || "(なし)") +
+
+      "\nname: " +
+      (errorName || "(なし)") +
+
+      "\nmessage: " +
+      (errorMessage || "(なし)") +
+
+      "\nString(error): " +
+      (errorString || "(なし)"),
+
       true
     );
 
@@ -433,7 +532,9 @@ async function adminLogin(){
 }
 
 
-/* ログアウト */
+// ========================================
+// ログアウト
+// ========================================
 
 function logout(){
 
@@ -442,9 +543,9 @@ function logout(){
 }
 
 
-/* =========================
-   部員登録
-========================= */
+// ========================================
+// 部員登録
+// ========================================
 
 async function addMember(){
 
@@ -468,7 +569,7 @@ async function addMember(){
 
   if(!id || !name || !className){
 
-    message(
+    showMessage(
       "memberMsg",
       "すべて入力してください。",
       true
@@ -478,70 +579,82 @@ async function addMember(){
   }
 
 
-  const existing =
-    await get(
-      ref(
-        db,
-        "memberRegistrations/" + id
-      )
+  try{
+
+    const existing =
+      await get(
+        ref(db,"memberRegistrations/" + id)
+      );
+
+
+    if(existing.exists()){
+
+      showMessage(
+        "memberMsg",
+        "そのIDはすでに登録されています。",
+        true
+      );
+
+      return;
+    }
+
+
+    await set(
+      ref(db,"memberRegistrations/" + id),
+      {
+        schoolId:id,
+        name:name,
+        grade:grade,
+        className:className,
+        createdAt:Date.now()
+      }
     );
 
 
-  if(existing.exists()){
+    await set(
+      ref(db,"memberIds/" + id),
+      {
+        accountCreated:false
+      }
+    );
 
-    message(
+
+    $("mid").value = "";
+
+    $("mname").value = "";
+
+    $("mclass").value = "";
+
+
+    showMessage(
       "memberMsg",
-      "そのIDはすでに登録されています。",
+      "登録しました。"
+    );
+
+
+    await loadMembers();
+
+
+  }catch(error){
+
+    console.error(error);
+
+    showMessage(
+      "memberMsg",
+      "登録に失敗しました。\n\n" +
+      "code: " + (error?.code || "(なし)") +
+      "\nmessage: " + (error?.message || "(なし)"),
       true
     );
 
-    return;
   }
-
-
-  await set(
-    ref(
-      db,
-      "memberRegistrations/" + id
-    ),
-    {
-      schoolId:id,
-      name:name,
-      grade:grade,
-      className:className,
-      createdAt:Date.now()
-    }
-  );
-
-
-  await set(
-    ref(
-      db,
-      "memberIds/" + id
-    ),
-    {
-      accountCreated:false
-    }
-  );
-
-
-  $("mid").value="";
-  $("mname").value="";
-  $("mclass").value="";
-
-
-  message(
-    "memberMsg",
-    "登録しました。"
-  );
-
-
-  loadMembers();
 
 }
 
 
-/* 部員一覧 */
+// ========================================
+// 部員一覧
+// ========================================
 
 async function loadMembers(){
 
@@ -557,61 +670,66 @@ async function loadMembers(){
       : {};
 
 
-  const list =
+  const entries =
     Object.entries(data);
 
 
+  if(!entries.length){
+
+    $("members").innerHTML =
+      "<p class='small'>まだ登録されていません。</p>";
+
+    return;
+  }
+
+
   $("members").innerHTML =
-    list.length
+    entries.map(([id,x]) => `
 
-      ? list.map(
-          ([id,x]) => `
+      <div class="item">
 
-<div class="item">
+        <strong>
+          ${esc(id)}　${esc(x.name)}
+        </strong>
 
-<strong>
-${esc(id)}　${esc(x.name)}
-</strong>
+        <div>
+          ${esc(x.grade)}年
+          ${esc(x.className)}組
+        </div>
 
-<div>
-${esc(x.grade)}年${esc(x.className)}組
-</div>
+        <div class="row">
 
-<div class="row">
+          <button
+            onclick="editMember('${esc(id)}')"
+          >
+            変更
+          </button>
 
-<button
-onclick="editMember('${id}')">
-変更
-</button>
+          <button
+            class="danger"
+            onclick="deleteMember('${esc(id)}')"
+          >
+            削除
+          </button>
 
-<button
-class="danger"
-onclick="deleteMember('${id}')">
-削除
-</button>
+        </div>
 
-</div>
+      </div>
 
-</div>
-
-`
-        ).join("")
-
-      : "<p class='small'>まだ登録されていません。</p>";
+    `).join("");
 
 }
 
 
-/* 部員変更 */
+// ========================================
+// 部員変更
+// ========================================
 
 async function editMember(id){
 
   const snapshot =
     await get(
-      ref(
-        db,
-        "memberRegistrations/" + id
-      )
+      ref(db,"memberRegistrations/" + id)
     );
 
 
@@ -620,59 +738,64 @@ async function editMember(id){
   }
 
 
-  const x =
+  const data =
     snapshot.val();
 
 
   const name =
     prompt(
       "名前",
-      x.name
+      data.name || ""
     );
+
+
+  if(name === null){
+    return;
+  }
 
 
   const grade =
     prompt(
       "学年",
-      x.grade
+      data.grade || ""
     );
+
+
+  if(grade === null){
+    return;
+  }
 
 
   const className =
     prompt(
       "クラス",
-      x.className
+      data.className || ""
     );
 
 
-  if(
-    name === null ||
-    grade === null ||
-    className === null
-  ){
+  if(className === null){
     return;
   }
 
 
   await update(
-    ref(
-      db,
-      "memberRegistrations/" + id
-    ),
+    ref(db,"memberRegistrations/" + id),
     {
-      name:name,
-      grade:grade,
-      className:className
+      name:name.trim(),
+      grade:grade.trim(),
+      className:className.trim()
     }
   );
 
 
-  loadMembers();
+  await loadMembers();
 
 }
 
 
-/* 部員削除 */
+// ========================================
+// 部員削除
+// ========================================
 
 async function deleteMember(id){
 
@@ -686,29 +809,23 @@ async function deleteMember(id){
 
 
   await remove(
-    ref(
-      db,
-      "memberRegistrations/" + id
-    )
+    ref(db,"memberRegistrations/" + id)
   );
 
 
   await remove(
-    ref(
-      db,
-      "memberIds/" + id
-    )
+    ref(db,"memberIds/" + id)
   );
 
 
-  loadMembers();
+  await loadMembers();
 
 }
 
 
-/* =========================
-   予定表
-========================= */
+// ========================================
+// 予定保存
+// ========================================
 
 async function saveSchedule(){
 
@@ -729,7 +846,7 @@ async function saveSchedule(){
 
   if(!date){
 
-    message(
+    showMessage(
       "scheduleMsg",
       "日付を入力してください。",
       true
@@ -739,31 +856,47 @@ async function saveSchedule(){
   }
 
 
-  await set(
-    ref(
-      db,
-      "schedules/" + date
-    ),
-    {
-      time:time,
-      place:place,
-      updatedAt:Date.now()
-    }
-  );
+  try{
+
+    await set(
+      ref(db,"schedules/" + date),
+      {
+        time:time,
+        place:place,
+        updatedAt:Date.now()
+      }
+    );
 
 
-  message(
-    "scheduleMsg",
-    "保存しました。"
-  );
+    showMessage(
+      "scheduleMsg",
+      "保存しました。"
+    );
 
 
-  loadSchedules();
+    await loadSchedules();
+
+
+  }catch(error){
+
+    console.error(error);
+
+    showMessage(
+      "scheduleMsg",
+      "保存に失敗しました。\n\n" +
+      "code: " + (error?.code || "(なし)") +
+      "\nmessage: " + (error?.message || "(なし)"),
+      true
+    );
+
+  }
 
 }
 
 
-/* 予定一覧 */
+// ========================================
+// 予定一覧
+// ========================================
 
 async function loadSchedules(){
 
@@ -779,65 +912,69 @@ async function loadSchedules(){
       : {};
 
 
-  const list =
+  const entries =
     Object.entries(data).sort();
 
 
+  if(!entries.length){
+
+    $("schedules").innerHTML =
+      "<p class='small'>予定はありません。</p>";
+
+    return;
+  }
+
+
   $("schedules").innerHTML =
-    list.length
+    entries.map(([date,x]) => `
 
-      ? list.map(
-          ([date,x]) => `
+      <div class="item">
 
-<div class="item">
+        <strong>
+          ${esc(date)}
+        </strong>
 
-<strong>
-${esc(date)}
-</strong>
+        <br>
 
-<br>
+        ${esc(x.time || "")}
 
-${esc(x.time || "")}
+        <br>
 
-<br>
+        ${esc(x.place || "")}
 
-${esc(x.place || "")}
+        <div class="row">
 
-<div class="row">
+          <button
+            onclick="editSchedule('${esc(date)}')"
+          >
+            変更
+          </button>
 
-<button
-onclick="editSchedule('${date}')">
-変更
-</button>
+          <button
+            class="danger"
+            onclick="deleteSchedule('${esc(date)}')"
+          >
+            削除
+          </button>
 
-<button
-class="danger"
-onclick="deleteSchedule('${date}')">
-削除
-</button>
+        </div>
 
-</div>
+      </div>
 
-</div>
-
-`
-        ).join("")
-
-      : "<p class='small'>予定はありません。</p>";
+    `).join("");
 
 }
 
 
-/* 予定変更 */
+// ========================================
+// 予定変更
+// ========================================
 
 async function editSchedule(date){
 
   const snapshot =
     await get(
-      ref(
-        db,
-        "schedules/" + date
-      )
+      ref(db,"schedules/" + date)
     );
 
 
@@ -846,7 +983,7 @@ async function editSchedule(date){
   }
 
 
-  const x =
+  const data =
     snapshot.val();
 
 
@@ -854,15 +991,17 @@ async function editSchedule(date){
     date;
 
   $("stime").value =
-    x.time || "";
+    data.time || "";
 
   $("splace").value =
-    x.place || "";
+    data.place || "";
 
 }
 
 
-/* 予定削除 */
+// ========================================
+// 予定削除
+// ========================================
 
 async function deleteSchedule(date){
 
@@ -876,35 +1015,42 @@ async function deleteSchedule(date){
 
 
   await remove(
-    ref(
-      db,
-      "schedules/" + date
-    )
+    ref(db,"schedules/" + date)
   );
 
 
-  loadSchedules();
+  await loadSchedules();
 
 }
 
 
-/* HTMLから呼び出せるようにする */
+// ========================================
+// HTMLから呼び出せるようにする
+// ========================================
 
-window.adminLogin = adminLogin;
+window.adminLogin =
+  adminLogin;
 
-window.logout = logout;
+window.logout =
+  logout;
 
-window.addMember = addMember;
+window.addMember =
+  addMember;
 
-window.editMember = editMember;
+window.editMember =
+  editMember;
 
-window.deleteMember = deleteMember;
+window.deleteMember =
+  deleteMember;
 
-window.saveSchedule = saveSchedule;
+window.saveSchedule =
+  saveSchedule;
 
-window.editSchedule = editSchedule;
+window.editSchedule =
+  editSchedule;
 
-window.deleteSchedule = deleteSchedule;
+window.deleteSchedule =
+  deleteSchedule;
 
 </script>
 
