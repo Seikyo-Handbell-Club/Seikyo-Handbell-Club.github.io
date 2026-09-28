@@ -140,9 +140,7 @@ button{
   color:#6f7882;
 }
 
-/* =========================
-   部員一覧
-========================= */
+/* 部員一覧 */
 
 .member-head{
   display:flex;
@@ -166,85 +164,72 @@ button{
   font-size:12px;
 }
 
-/* =========================
-   変更中のフォーム
-========================= */
+/* 変更中 */
 
 .editing{
   border:2px solid #1f6feb;
 }
 
-/* =========================
-   OCR
-========================= */
+/* OCR */
 
 .preview{
   max-width:100%;
-  max-height:240px;
+  max-height:300px;
   border-radius:10px;
   margin-top:10px;
 }
 
 .ocr-candidate{
+  border:1px solid #dfe4eb;
+  border-radius:12px;
+  padding:10px;
+  margin:10px 0;
+  background:#fafbfc;
+}
+
+.ocr-candidate-top{
   display:grid;
-  grid-template-columns:
-    auto
-    1fr
-    1fr
-    1fr;
-  gap:7px;
+  grid-template-columns:30px 1fr;
+  gap:8px;
   align-items:center;
-  margin:8px 0;
 }
 
 .ocr-candidate input{
   padding:8px;
   font-size:14px;
+  margin-bottom:7px;
 }
 
-.ocr-candidate .ocr-raw{
-  grid-column:span 2;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
+.ocr-candidate input[type="checkbox"]{
+  width:20px;
+  height:20px;
+  margin:0;
 }
 
-.ocr-day{
-  font-weight:700;
-  font-size:14px;
-  white-space:nowrap;
+.ocr-label{
+  font-size:12px;
+  color:#6f7882;
+  margin-bottom:3px;
 }
 
-.ocr-note{
-  grid-column:span 3;
+.ocr-field{
+  margin-top:7px;
+}
+
+.ocr-delete{
+  margin-top:5px;
+  width:100%;
 }
 
 @media(max-width:600px){
 
-  .ocr-candidate{
-    grid-template-columns:
-      auto
-      1fr
-      1fr;
-  }
-
-  .ocr-candidate button{
-    grid-column:span 2;
-  }
-
-  .ocr-note{
-    grid-column:span 2;
-  }
-
-  .ocr-candidate .ocr-raw{
-    grid-column:span 2;
+  main{
+    padding:12px;
   }
 
 }
-
 </style>
 </head>
-
 
 <body>
 
@@ -252,25 +237,19 @@ button{
 <h1>清教学園ハンドベル部 管理者設定</h1>
 </header>
 
-
 <main>
-
 
 <!-- =========================
      ログイン
 ========================= -->
 
-<section
-  id="login"
-  class="card"
->
+<section id="login" class="card">
 
 <h2>管理者ログイン</h2>
 
 <p class="small">
 管理者として登録されたアカウントでログインしてください。
 </p>
-
 
 <label>パスワード</label>
 
@@ -280,7 +259,6 @@ button{
   autocomplete="current-password"
 >
 
-
 <button
   class="primary"
   onclick="adminLogin()"
@@ -288,22 +266,16 @@ button{
 ログイン
 </button>
 
-
 <div id="loginMsg"></div>
 
 </section>
-
 
 
 <!-- =========================
      管理画面
 ========================= -->
 
-<section
-  id="app"
-  class="hidden"
->
-
+<section id="app" class="hidden">
 
 <div class="card">
 
@@ -315,7 +287,6 @@ button{
 </button>
 
 </div>
-
 
 
 <!-- =========================
@@ -331,7 +302,6 @@ button{
 部員登録
 </h2>
 
-
 <label>学校ID</label>
 
 <input
@@ -339,40 +309,23 @@ button{
   autocomplete="off"
 >
 
-
 <label>名前</label>
 
 <input
   id="mname"
 >
 
-
 <label>学年</label>
 
 <select id="mgrade">
 
-<option value="中学1年">
-中学1年
-</option>
-
-<option value="中学2年">
-中学2年
-</option>
-
-<option value="中学3年">
-中学3年
-</option>
-
-<option value="高校1年">
-高校1年
-</option>
-
-<option value="高校2年">
-高校2年
-</option>
+<option value="中学1年">中学1年</option>
+<option value="中学2年">中学2年</option>
+<option value="中学3年">中学3年</option>
+<option value="高校1年">高校1年</option>
+<option value="高校2年">高校2年</option>
 
 </select>
-
 
 <label>クラス</label>
 
@@ -392,7 +345,6 @@ button{
 
 </select>
 
-
 <button
   id="memberSubmit"
   class="primary"
@@ -400,7 +352,6 @@ button{
 >
 登録する
 </button>
-
 
 <button
   id="memberCancel"
@@ -410,11 +361,9 @@ button{
 変更をやめる
 </button>
 
-
 <div id="memberMsg"></div>
 
 </div>
-
 
 
 <!-- =========================
@@ -430,7 +379,6 @@ button{
 </div>
 
 
-
 <!-- =========================
      予定表
 ========================= -->
@@ -441,11 +389,9 @@ button{
 清教学園ハンドベル部予定表
 </h2>
 
-
 <label>
 予定表の画像
 </label>
-
 
 <input
   id="scheduleImage"
@@ -454,12 +400,10 @@ button{
   onchange="previewScheduleImage(event)"
 >
 
-
 <img
   id="schedulePreview"
   class="preview hidden"
 >
-
 
 <button
   class="secondary"
@@ -469,32 +413,22 @@ button{
 画像から予定を読み取る
 </button>
 
-
 <div id="ocrMsg"></div>
-
 
 
 <label>
 読み取った文字
 </label>
 
-
 <textarea
   id="ocrText"
-  placeholder="OCR結果がここに表示されます。必要なら修正できます。"
+  placeholder="OCR結果がここに表示されます。"
 ></textarea>
-
 
 
 <h3>
 予定候補
 </h3>
-
-
-<p class="small">
-チェックが入っている予定が登録対象です。OCRが間違っていても、登録前に修正できます。
-</p>
-
 
 <div id="ocrCandidates">
 
@@ -513,15 +447,9 @@ button{
 </button>
 
 
-
 <hr
-  style="
-    border:0;
-    border-top:1px solid #e5e8ed;
-    margin:20px 0
-  "
+  style="border:0;border-top:1px solid #e5e8ed;margin:20px 0"
 >
-
 
 
 <!-- =========================
@@ -532,38 +460,26 @@ button{
 手動で予定を登録
 </h3>
 
-
-<label>
-日付
-</label>
-
+<label>日付</label>
 
 <input
   id="sdate"
   type="date"
 >
 
-
-<label>
-時間
-</label>
-
+<label>時間</label>
 
 <input
   id="stime"
-  placeholder="例：17:00〜19:00"
+  placeholder="例：15:45〜18:00"
 >
 
-
-<label>
-場所
-</label>
-
+<label>場所</label>
 
 <input
   id="splace"
+  placeholder="例：音楽練習室"
 >
-
 
 <button
   class="primary"
@@ -572,27 +488,22 @@ button{
 予定を保存
 </button>
 
-
 <div id="scheduleMsg"></div>
-
 
 <div id="schedules"></div>
 
 </div>
-
 
 </section>
 
 </main>
 
 
-
 <script type="module">
 
-
-/* =====================================================
+/* =========================================================
    Firebase
-===================================================== */
+========================================================= */
 
 import {
   initializeApp
@@ -623,19 +534,17 @@ from
 "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
 
 
-
-/* =====================================================
-   管理者アカウント
-===================================================== */
+/* =========================================================
+   管理者
+========================================================= */
 
 const ADMIN_EMAIL =
 "kazuma.cosmos@gmail.com";
 
 
-
-/* =====================================================
+/* =========================================================
    Firebase設定
-===================================================== */
+========================================================= */
 
 const firebaseConfig = {
 
@@ -664,23 +573,18 @@ const firebaseConfig = {
 
 
 const app =
-initializeApp(
-  firebaseConfig
-);
-
+initializeApp(firebaseConfig);
 
 const auth =
 getAuth(app);
-
 
 const db =
 getDatabase(app);
 
 
-
-/* =====================================================
+/* =========================================================
    共通
-===================================================== */
+========================================================= */
 
 const $ =
 id =>
@@ -703,23 +607,20 @@ String(s ?? "")
 );
 
 
-
-/* =====================================================
+/* =========================================================
    状態
-===================================================== */
+========================================================= */
 
 let editingMemberId =
 null;
-
 
 let ocrCandidates =
 [];
 
 
-
-/* =====================================================
+/* =========================================================
    メッセージ
-===================================================== */
+========================================================= */
 
 function msg(
   id,
@@ -730,16 +631,10 @@ function msg(
   const el =
   $(id);
 
-
   el.className =
   text
-  ? (
-      error
-      ? "msg error"
-      : "msg"
-    )
+  ? (error ? "msg error" : "msg")
   : "";
-
 
   el.textContent =
   text;
@@ -747,18 +642,14 @@ function msg(
 }
 
 
-
-/* =====================================================
+/* =========================================================
    管理者確認
-===================================================== */
+========================================================= */
 
 async function isAdmin(){
 
-  if(
-    !auth.currentUser
-  )
+  if(!auth.currentUser)
     return false;
-
 
   const s =
   await get(
@@ -769,7 +660,6 @@ async function isAdmin(){
     )
   );
 
-
   return (
     s.exists() &&
     s.val() === true
@@ -778,10 +668,9 @@ async function isAdmin(){
 }
 
 
-
-/* =====================================================
+/* =========================================================
    ログイン状態
-===================================================== */
+========================================================= */
 
 onAuthStateChanged(
   auth,
@@ -796,11 +685,9 @@ onAuthStateChanged(
       .classList
       .add("hidden");
 
-
       $("app")
       .classList
       .remove("hidden");
-
 
       loadMembers();
 
@@ -813,7 +700,6 @@ onAuthStateChanged(
       .classList
       .remove("hidden");
 
-
       $("app")
       .classList
       .add("hidden");
@@ -824,10 +710,9 @@ onAuthStateChanged(
 );
 
 
-
-/* =====================================================
+/* =========================================================
    ログイン
-===================================================== */
+========================================================= */
 
 async function adminLogin(){
 
@@ -846,7 +731,6 @@ async function adminLogin(){
 
       await signOut(auth);
 
-
       msg(
         "loginMsg",
         "このアカウントは管理者として登録されていません。",
@@ -856,9 +740,7 @@ async function adminLogin(){
     }
     else{
 
-      $("password").value =
-      "";
-
+      $("password").value="";
 
       msg(
         "loginMsg",
@@ -869,9 +751,6 @@ async function adminLogin(){
 
   }
   catch(e){
-
-    console.error(e);
-
 
     msg(
       "loginMsg",
@@ -884,7 +763,6 @@ async function adminLogin(){
 }
 
 
-
 function logout(){
 
   signOut(auth);
@@ -892,10 +770,9 @@ function logout(){
 }
 
 
-
-/* =====================================================
+/* =========================================================
    部員登録
-===================================================== */
+========================================================= */
 
 async function addMember(){
 
@@ -908,14 +785,11 @@ async function addMember(){
   const id =
   $("mid").value.trim();
 
-
   const name =
   $("mname").value.trim();
 
-
   const grade =
   $("mgrade").value;
-
 
   const cl =
   $("mclass").value;
@@ -949,9 +823,7 @@ async function addMember(){
   );
 
 
-  if(
-    existing.exists()
-  ){
+  if(existing.exists()){
 
     msg(
       "memberMsg",
@@ -980,8 +852,7 @@ async function addMember(){
 
       className:cl,
 
-      createdAt:
-      Date.now()
+      createdAt:Date.now()
 
     }
   );
@@ -1013,35 +884,26 @@ async function addMember(){
 }
 
 
-
-/* =====================================================
-   登録フォームを空に戻す
-===================================================== */
+/* =========================================================
+   部員フォーム初期化
+========================================================= */
 
 function clearMemberForm(){
 
-  $("mid").value =
-  "";
+  $("mid").value="";
 
+  $("mname").value="";
 
-  $("mname").value =
-  "";
+  $("mgrade").value="中学1年";
 
-
-  $("mgrade").value =
-  "中学1年";
-
-
-  $("mclass").value =
-  "A";
+  $("mclass").value="A";
 
 }
 
 
-
-/* =====================================================
+/* =========================================================
    部員一覧
-===================================================== */
+========================================================= */
 
 async function loadMembers(){
 
@@ -1063,13 +925,9 @@ async function loadMembers(){
   const gradeOrder = {
 
     "中学1年":1,
-
     "中学2年":2,
-
     "中学3年":3,
-
     "高校1年":4,
-
     "高校2年":5
 
   };
@@ -1088,24 +946,16 @@ async function loadMembers(){
     ([,x],[,y]) => {
 
       const g =
-      (
-        gradeOrder[x.grade] || 99
-      )
-      -
-      (
-        gradeOrder[y.grade] || 99
-      );
-
+      (gradeOrder[x.grade] || 99) -
+      (gradeOrder[y.grade] || 99);
 
       if(g)
         return g;
 
 
       const c =
-      classOrder(x.className)
-      -
+      classOrder(x.className) -
       classOrder(y.className);
-
 
       if(c)
         return c;
@@ -1139,7 +989,6 @@ async function loadMembers(){
             ${esc(x.name)}
           </strong>
 
-
           <div class="member-actions">
 
             <button
@@ -1148,7 +997,6 @@ async function loadMembers(){
             >
               変更
             </button>
-
 
             <button
               class="danger"
@@ -1161,13 +1009,12 @@ async function loadMembers(){
 
         </div>
 
-
         <div class="small">
 
           ${esc(id)}
-          　
+         　
           ${esc(x.grade)}
-          　
+         　
           ${esc(x.className)}組
 
         </div>
@@ -1184,10 +1031,9 @@ async function loadMembers(){
 }
 
 
-
-/* =====================================================
+/* =========================================================
    部員変更
-===================================================== */
+========================================================= */
 
 async function editMember(id){
 
@@ -1201,9 +1047,7 @@ async function editMember(id){
   );
 
 
-  if(
-    !s.exists()
-  )
+  if(!s.exists())
     return;
 
 
@@ -1258,20 +1102,16 @@ async function editMember(id){
 
   $("memberFormCard")
   .scrollIntoView({
-
     behavior:"smooth",
-
     block:"start"
-
   });
 
 }
 
 
-
-/* =====================================================
-   部員変更を保存
-===================================================== */
+/* =========================================================
+   部員変更保存
+========================================================= */
 
 async function saveMemberEdit(){
 
@@ -1285,18 +1125,14 @@ async function saveMemberEdit(){
   const oldId =
   editingMemberId;
 
-
   const newId =
   $("mid").value.trim();
-
 
   const name =
   $("mname").value.trim();
 
-
   const grade =
   $("mgrade").value;
-
 
   const cl =
   $("mclass").value;
@@ -1320,9 +1156,7 @@ async function saveMemberEdit(){
   }
 
 
-  if(
-    newId !== oldId
-  ){
+  if(newId !== oldId){
 
     const exists =
     await get(
@@ -1334,9 +1168,7 @@ async function saveMemberEdit(){
     );
 
 
-    if(
-      exists.exists()
-    ){
+    if(exists.exists()){
 
       msg(
         "memberMsg",
@@ -1369,27 +1201,20 @@ async function saveMemberEdit(){
 
     ...oldData,
 
-    schoolId:
-    newId,
+    schoolId:newId,
 
-    name:
-    name,
+    name:name,
 
-    grade:
-    grade,
+    grade:grade,
 
-    className:
-    cl,
+    className:cl,
 
-    updatedAt:
-    Date.now()
+    updatedAt:Date.now()
 
   };
 
 
-  if(
-    newId !== oldId
-  ){
+  if(newId !== oldId){
 
     await set(
       ref(
@@ -1459,6 +1284,7 @@ async function saveMemberEdit(){
     );
 
   }
+
   else{
 
     await update(
@@ -1487,10 +1313,9 @@ async function saveMemberEdit(){
 }
 
 
-
-/* =====================================================
-   変更をやめる
-===================================================== */
+/* =========================================================
+   部員変更キャンセル
+========================================================= */
 
 function cancelMemberEdit(){
 
@@ -1528,10 +1353,9 @@ function cancelMemberEdit(){
 }
 
 
-
-/* =====================================================
+/* =========================================================
    部員削除
-===================================================== */
+========================================================= */
 
 async function deleteMember(id){
 
@@ -1575,10 +1399,9 @@ async function deleteMember(id){
 }
 
 
-
-/* =====================================================
-   予定表画像プレビュー
-===================================================== */
+/* =========================================================
+   画像プレビュー
+========================================================= */
 
 function previewScheduleImage(event){
 
@@ -1605,10 +1428,176 @@ function previewScheduleImage(event){
 }
 
 
+/* =========================================================
+   OCR用画像加工
+========================================================= */
 
-/* =====================================================
+function prepareOCRImage(file){
+
+  return new Promise(
+    (resolve,reject)=>{
+
+      const img =
+      new Image();
+
+      const url =
+      URL.createObjectURL(file);
+
+
+      img.onload = () => {
+
+        /*
+         * 元画像を2倍程度に拡大。
+         * 表の文字をTesseractが読みやすくする。
+         */
+
+        const scale =
+        Math.max(
+          2,
+          Math.min(
+            3,
+            2200 / img.width
+          )
+        );
+
+
+        const canvas =
+        document.createElement("canvas");
+
+
+        canvas.width =
+        Math.round(
+          img.width * scale
+        );
+
+
+        canvas.height =
+        Math.round(
+          img.height * scale
+        );
+
+
+        const ctx =
+        canvas.getContext("2d");
+
+
+        ctx.drawImage(
+          img,
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        );
+
+
+        /*
+         * グレースケール＋コントラスト調整
+         */
+
+        const imageData =
+        ctx.getImageData(
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        );
+
+
+        const data =
+        imageData.data;
+
+
+        for(
+          let i=0;
+          i<data.length;
+          i+=4
+        ){
+
+          const r =
+          data[i];
+
+          const g =
+          data[i+1];
+
+          const b =
+          data[i+2];
+
+
+          const gray =
+          0.299*r +
+          0.587*g +
+          0.114*b;
+
+
+          /*
+           * 少しだけコントラストを強くする
+           */
+
+          const contrast =
+          Math.max(
+            0,
+            Math.min(
+              255,
+              (gray - 128) * 1.35 + 128
+            )
+          );
+
+
+          data[i] =
+          contrast;
+
+          data[i+1] =
+          contrast;
+
+          data[i+2] =
+          contrast;
+
+        }
+
+
+        ctx.putImageData(
+          imageData,
+          0,
+          0
+        );
+
+
+        canvas.toBlob(
+          blob => {
+
+            URL.revokeObjectURL(url);
+
+            if(blob)
+              resolve(blob);
+            else
+              reject(
+                new Error(
+                  "画像変換失敗"
+                )
+              );
+
+          },
+          "image/png"
+        );
+
+      };
+
+
+      img.onerror =
+      reject;
+
+      img.src =
+      url;
+
+    }
+  );
+
+}
+
+
+/* =========================================================
    OCR
-===================================================== */
+========================================================= */
 
 async function runOCR(){
 
@@ -1632,15 +1621,34 @@ async function runOCR(){
 
   msg(
     "ocrMsg",
-    "予定表を読み取っています。少し待ってください。"
+    "画像を準備しています…"
   );
 
 
   try{
 
+    /*
+     * OCR用に画像を拡大・加工
+     */
+
+    const processed =
+    await prepareOCRImage(file);
+
+
+    msg(
+      "ocrMsg",
+      "予定表を読み取っています。少し待ってください。"
+    );
+
+
+    /*
+     * TSV情報を取得するため、
+     * word単位のOCR結果を使う。
+     */
+
     const result =
     await Tesseract.recognize(
-      file,
+      processed,
       "jpn+eng",
       {
 
@@ -1653,7 +1661,7 @@ async function runOCR(){
 
             msg(
               "ocrMsg",
-              "予定表を読み取っています… " +
+              "画像を読み取っています… " +
               Math.round(
                 (m.progress || 0) * 100
               ) +
@@ -1662,30 +1670,46 @@ async function runOCR(){
 
           }
 
-        },
-
-        /*
-         * 表の文字をバラバラに認識しやすくする
-         */
-        tessedit_pageseg_mode:11
+        }
 
       }
     );
 
 
-    const rawText =
+    const text =
     result.data.text || "";
 
 
     $("ocrText").value =
-    rawText;
+    text;
 
+
+    /*
+     * 今回の表形式に合わせて
+     * OCR結果の座標から予定を作る。
+     */
 
     ocrCandidates =
-    parseScheduleTable(
-      result.data,
-      rawText
+    parseScheduleFromOCR(
+      result
     );
+
+
+    /*
+     * 座標方式で取れなかった場合、
+     * 通常のテキスト方式も試す。
+     */
+
+    if(
+      !ocrCandidates.length
+    ){
+
+      ocrCandidates =
+      parseScheduleCandidatesFromText(
+        text
+      );
+
+    }
 
 
     renderOCRCandidates();
@@ -1697,7 +1721,7 @@ async function runOCR(){
 
       msg(
         "ocrMsg",
-        "読み取り完了。予定候補を確認してください。"
+        "読み取り完了。時間・場所も候補に入れました。内容を確認してください。"
       );
 
     }
@@ -1705,7 +1729,7 @@ async function runOCR(){
 
       msg(
         "ocrMsg",
-        "日付を読み取れませんでした。画像を確認してください。",
+        "日付を読み取れませんでした。画像を確認するか、手動登録を使ってください。",
         true
       );
 
@@ -1715,7 +1739,6 @@ async function runOCR(){
   catch(e){
 
     console.error(e);
-
 
     msg(
       "ocrMsg",
@@ -1728,610 +1751,83 @@ async function runOCR(){
 }
 
 
+/* =========================================================
+   日付を抽出
+========================================================= */
 
-/* =====================================================
-   表形式予定表の解析
-===================================================== */
-
-function parseScheduleTable(
-  data,
+function extractDateFromText(
   text
 ){
 
-  /*
-   * 予定表の月を検出
-   */
+  if(!text)
+    return null;
 
-  const month =
-  detectScheduleMonth(
-    text
-  );
+
+  let m;
 
 
   /*
-   * 年を検出
+   * 2026/9/1
+   * 2026-9-1
+   * 2026年9月1日
    */
 
-  const year =
-  detectScheduleYear(
-    text
-  );
-
-
-  /*
-   * Tesseractの行情報
-   */
-
-  let lines =
-  Array.isArray(
-    data?.lines
-  )
-  ? data.lines
-  : [];
-
-
-  /*
-   * 行情報が取れない場合
-   */
-
-  if(
-    !lines.length
-  ){
-
-    lines =
-    text
-    .split(/\r?\n/)
-    .map(
-      (text,i)=>({
-
-        text,
-
-        bbox:{
-          x0:0,
-          y0:i*30,
-          x1:1000,
-          y1:i*30+20
-        }
-
-      })
-    );
-
-  }
-
-
-  /*
-   * OCR文字を整理
-   */
-
-  lines =
-  lines
-  .filter(
-    x =>
-    String(
-      x.text || ""
-    ).trim()
-  )
-  .map(
-    x => ({
-
-      text:
-      normalizeOCRText(
-        x.text
-      ),
-
-      y:
-      (
-        Number(
-          x.bbox?.y0 || 0
-        )
-        +
-        Number(
-          x.bbox?.y1 || 0
-        )
-      ) / 2
-
-    })
-  )
-  .sort(
-    (a,b)=>
-    a.y-b.y
-  );
-
-
-  /*
-   * 日付の行を探す
-   */
-
-  const dateRows=[];
-
-
-  for(
-    const line of lines
-  ){
-
-    const m =
-    findScheduleDate(
-      line.text,
-      month
-    );
-
-
-    if(!m)
-      continue;
-
-
-    const exists =
-    dateRows.find(
-      x =>
-      x.day === m.day
-    );
-
-
-    if(!exists){
-
-      dateRows.push({
-
-        day:
-        m.day,
-
-        y:
-        line.y,
-
-        text:
-        line.text
-
-      });
-
-    }
-
-  }
-
-
-  /*
-   * 日付を見つけられなかった場合は
-   * 従来方式へ
-   */
-
-  if(
-    !dateRows.length
-  ){
-
-    return parseScheduleCandidates(
-      text
-    );
-
-  }
-
-
-  /*
-   * 日付順
-   */
-
-  dateRows.sort(
-    (a,b)=>
-    a.day-b.day
-  );
-
-
-  const result=[];
-
-
-  /*
-   * 日付ごとに処理
-   */
-
-  for(
-    let i=0;
-    i<dateRows.length;
-    i++
-  ){
-
-    const row =
-    dateRows[i];
-
-
-    const next =
-    dateRows[i+1];
-
-
-    const top =
-    row.y - 35;
-
-
-    const bottom =
-    next
-    ? next.y - 15
-    : row.y + 100;
-
-
-    const rowLines =
-    lines.filter(
-      x =>
-      x.y >= top &&
-      x.y < bottom
-    );
-
-
-    const rowText =
-    rowLines
-    .map(
-      x =>
-      x.text
-    )
-    .join(" ")
-    .replace(
-      /\s+/g,
-      " "
-    )
-    .trim();
-
-
-    const time =
-    extractScheduleTime(
-      rowText
-    );
-
-
-    const place =
-    extractSchedulePlace(
-      rowText
-    );
-
-
-    const note =
-    extractScheduleNote(
-      rowText
-    );
-
-
-    /*
-     * 時間がある、
-     * またはイベント系の文字がある場合は
-     * 初期状態でチェック。
-     */
-
-    const active =
-    !!(
-      time ||
-      /リハーサル|文化祭|練習|本番|演奏|準備|コンサート|発表/
-      .test(rowText)
-    );
-
-
-    result.push({
-
-      selected:
-      active,
-
-      date:
-      `${year}-${String(month).padStart(2,"0")}-${String(row.day).padStart(2,"0")}`,
-
-      time:
-      time,
-
-      place:
-      place,
-
-      note:
-      note,
-
-      raw:
-      rowText
-
-    });
-
-  }
-
-
-  /*
-   * OCRが読み取れなかった日も
-   * 1〜月末まで全部表示する
-   */
-
-  const maxDay =
-  getDaysInMonth(
-    year,
-    month
-  );
-
-
-  const byDay =
-  new Map(
-    result.map(
-      x => [
-        Number(
-          x.date.slice(8,10)
-        ),
-        x
-      ]
-    )
-  );
-
-
-  const complete=[];
-
-
-  for(
-    let day=1;
-    day<=maxDay;
-    day++
-  ){
-
-    if(
-      byDay.has(day)
-    ){
-
-      complete.push(
-        byDay.get(day)
-      );
-
-    }
-    else{
-
-      complete.push({
-
-        selected:false,
-
-        date:
-        `${year}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`,
-
-        time:"",
-
-        place:"",
-
-        note:"",
-
-        raw:""
-
-      });
-
-    }
-
-  }
-
-
-  return complete;
-
-}
-
-
-
-/* =====================================================
-   OCR文字の正規化
-===================================================== */
-
-function normalizeOCRText(text){
-
-  return String(
-    text || ""
-  )
-
-  .replace(
-    /　/g,
-    " "
-  )
-
-  .replace(
-    /[|｜]/g,
-    " "
-  )
-
-  .replace(
-    /[：﹕]/g,
-    ":"
-  )
-
-  .replace(
-    /[～〜~]/g,
-    "〜"
-  )
-
-  .replace(
-    /[－—–]/g,
-    "-"
-  )
-
-  .replace(
-    /\s+/g,
-    " "
-  )
-
-  .trim();
-
-}
-
-
-
-/* =====================================================
-   月を検出
-===================================================== */
-
-function detectScheduleMonth(text){
-
-  const t =
-  normalizeOCRText(
-    text
-  );
-
-
-  const m =
-  t.match(
-    /(\d{1,2})\s*月/
+  m =
+  text.match(
+    /(20\d{2})\s*[\/\-年]\s*(\d{1,2})\s*[\/\-月]\s*(\d{1,2})日?/
   );
 
 
   if(m){
 
-    const n =
-    Number(
-      m[1]
-    );
-
-
-    if(
-      n>=1 &&
-      n<=12
-    )
-      return n;
+    return {
+      year:Number(m[1]),
+      month:Number(m[2]),
+      day:Number(m[3])
+    };
 
   }
-
-
-  /*
-   * 今回のように
-   * タイトルの「9月」が
-   * OCRされた場合
-   */
-
-  const m2 =
-  t.match(
-    /([1-9]|1[0-2])/
-  );
-
-
-  if(m2){
-
-    const n =
-    Number(
-      m2[1]
-    );
-
-
-    if(
-      n>=1 &&
-      n<=12
-    )
-      return n;
-
-  }
-
-
-  return (
-    new Date()
-    .getMonth()
-    +
-    1
-  );
-
-}
-
-
-
-/* =====================================================
-   年を検出
-===================================================== */
-
-function detectScheduleYear(text){
-
-  const m =
-  String(
-    text || ""
-  )
-  .match(
-    /20\d{2}/
-  );
-
-
-  if(m)
-    return Number(
-      m[0]
-    );
-
-
-  return new Date()
-  .getFullYear();
-
-}
-
-
-
-/* =====================================================
-   日付検出
-===================================================== */
-
-function findScheduleDate(
-  text,
-  month
-){
-
-  let t =
-  normalizeOCRText(
-    text
-  );
 
 
   /*
    * 9月1日
    */
 
-  let m =
-  t.match(
-    /(?:\d{1,2})\s*月\s*(\d{1,2})\s*[日昌]?/
+  m =
+  text.match(
+    /(\d{1,2})\s*月\s*(\d{1,2})\s*日/
   );
 
 
   if(m){
 
-    const day =
-    Number(
-      m[1]
-    );
-
-
-    if(
-      day>=1 &&
-      day<=31
-    ){
-
-      return {
-
-        month:
-        month,
-
-        day:
-        day
-
-      };
-
-    }
+    return {
+      year:new Date().getFullYear(),
+      month:Number(m[1]),
+      day:Number(m[2])
+    };
 
   }
 
 
   /*
-   * 9月1
+   * OCRで「9月1日」が崩れた場合
+   * 9月1 なども許容
    */
 
   m =
-  t.match(
-    /(?:\d{1,2})\s*月\s*(\d{1,2})/
+  text.match(
+    /(\d{1,2})\s*月\s*(\d{1,2})/
   );
 
 
   if(m){
 
-    const day =
-    Number(
-      m[1]
-    );
-
-
-    if(
-      day>=1 &&
-      day<=31
-    ){
-
-      return {
-
-        month:
-        month,
-
-        day:
-        day
-
-      };
-
-    }
+    return {
+      year:new Date().getFullYear(),
+      month:Number(m[1]),
+      day:Number(m[2])
+    };
 
   }
 
@@ -2341,367 +1837,609 @@ function findScheduleDate(
 }
 
 
+/* =========================================================
+   時間を抽出
+========================================================= */
 
-/* =====================================================
-   時間抽出
-===================================================== */
+function extractTime(
+  text
+){
 
-function extractScheduleTime(text){
-
-  const t =
-  normalizeOCRText(
-    text
-  );
+  if(!text)
+    return "";
 
 
   /*
    * 15:45〜18:00
+   * 15:45~18:00
+   * 15:45-18:00
    */
 
-  let m =
-  t.match(
-    /(\d{1,2})\s*:\s*(\d{2})\s*[〜\-]\s*(\d{1,2})\s*:\s*(\d{2})/
+  const m =
+  text.match(
+    /(\d{1,2})\s*[:：]\s*(\d{2})\s*[〜~～\-－ー]\s*(\d{1,2})\s*[:：]\s*(\d{2})/
   );
 
 
   if(m){
 
     return (
-
-      `${m[1].padStart(2,"0")}:${m[2]}` +
-
-      `〜` +
-
-      `${m[3].padStart(2,"0")}:${m[4]}`
-
+      String(
+        Number(m[1])
+      ).padStart(2,"0") +
+      ":" +
+      m[2] +
+      "〜" +
+      String(
+        Number(m[3])
+      ).padStart(2,"0") +
+      ":" +
+      m[4]
     );
 
   }
 
 
   /*
-   * 1545〜1800
+   * 15:45 18:00 のように
+   * 区切りが消えた場合
    */
 
-  m =
-  t.match(
-    /(\d{3,4})\s*[〜\-]\s*(\d{3,4})/
+  const m2 =
+  text.match(
+    /(\d{1,2})\s*[:：]\s*(\d{2}).{0,10}?(\d{1,2})\s*[:：]\s*(\d{2})/
   );
 
 
-  if(m){
+  if(m2){
 
-    const a =
-    normalizeTimeNumber(
-      m[1]
+    return (
+      String(
+        Number(m2[1])
+      ).padStart(2,"0") +
+      ":" +
+      m2[2] +
+      "〜" +
+      String(
+        Number(m2[3])
+      ).padStart(2,"0") +
+      ":" +
+      m2[4]
+    );
+
+  }
+
+
+  return "";
+
+}
+
+
+/* =========================================================
+   場所を抽出
+========================================================= */
+
+function extractPlace(
+  text
+){
+
+  if(!text)
+    return "";
+
+
+  let s =
+  text;
+
+
+  /*
+   * 日付を削除
+   */
+
+  s =
+  s.replace(
+    /(20\d{2})\s*[\/\-年]\s*\d{1,2}\s*[\/\-月]\s*\d{1,2}日?/g,
+    ""
+  );
+
+
+  s =
+  s.replace(
+    /\d{1,2}\s*月\s*\d{1,2}\s*日?/g,
+    ""
+  );
+
+
+  /*
+   * 曜日を削除
+   */
+
+  s =
+  s.replace(
+    /[月火水木金土日](?:曜日)?/g,
+    ""
+  );
+
+
+  /*
+   * 時間を削除
+   */
+
+  s =
+  s.replace(
+    /\d{1,2}\s*[:：]\s*\d{2}\s*[〜~～\-－ー]\s*\d{1,2}\s*[:：]\s*\d{2}/g,
+    ""
+  );
+
+
+  s =
+  s.replace(
+    /\d{1,2}\s*[:：]\s*\d{2}/g,
+    ""
+  );
+
+
+  /*
+   * 表の区切りっぽい文字を削除
+   */
+
+  s =
+  s.replace(
+    /[|｜│┃]/g,
+    " "
+  );
+
+
+  s =
+  s.replace(
+    /\s+/g,
+    " "
+  )
+  .trim();
+
+
+  /*
+   * 明らかに不要な文字
+   */
+
+  if(
+    !s ||
+    /^[\d\s]+$/.test(s)
+  )
+    return "";
+
+
+  return s;
+
+}
+
+
+/* =========================================================
+   OCRの座標から予定を作る
+========================================================= */
+
+function parseScheduleFromOCR(
+  result
+){
+
+  const words =
+  result?.data?.words || [];
+
+
+  if(!words.length)
+    return [];
+
+
+  /*
+   * 文字のまとまりを横方向の行にする。
+   */
+
+  const usable =
+  words
+  .filter(
+    w =>
+    w.text &&
+    w.text.trim() &&
+    w.confidence > 20
+  )
+  .map(
+    w => {
+
+      const b =
+      w.bbox || {};
+
+
+      const left =
+      Number(b.x0 || 0);
+
+      const right =
+      Number(b.x1 || 0);
+
+      const top =
+      Number(b.y0 || 0);
+
+      const bottom =
+      Number(b.y1 || 0);
+
+
+      return {
+
+        text:
+        w.text.trim(),
+
+        left,
+        right,
+        top,
+        bottom,
+
+        centerX:
+        (left + right) / 2,
+
+        centerY:
+        (top + bottom) / 2
+
+      };
+
+    }
+  );
+
+
+  if(!usable.length)
+    return [];
+
+
+  /*
+   * y座標で行を作る。
+   *
+   * 今回の予定表は横長の表なので、
+   * 同じ高さにある文字を同じ行として扱う。
+   */
+
+  usable.sort(
+    (a,b) =>
+    a.centerY -
+    b.centerY
+  );
+
+
+  const rows=[];
+
+
+  for(
+    const word of usable
+  ){
+
+    let row =
+    rows.find(
+      r =>
+      Math.abs(
+        r.centerY -
+        word.centerY
+      ) < 18
     );
 
 
-    const b =
-    normalizeTimeNumber(
-      m[2]
+    if(!row){
+
+      row = {
+
+        centerY:
+        word.centerY,
+
+        words:[]
+
+      };
+
+
+      rows.push(row);
+
+    }
+
+
+    row.words.push(word);
+
+
+    /*
+     * 行の中心を更新
+     */
+
+    row.centerY =
+    row.words.reduce(
+      (sum,w) =>
+      sum+w.centerY,
+      0
+    ) /
+    row.words.length;
+
+  }
+
+
+  const candidates=[];
+
+
+  for(
+    const row of rows
+  ){
+
+    const sorted =
+    row.words.sort(
+      (a,b) =>
+      a.left -
+      b.left
     );
 
 
-    if(
-      a &&
-      b
-    ){
+    const rowText =
+    sorted
+    .map(
+      w=>w.text
+    )
+    .join(" ");
 
-      return (
-        `${a}〜${b}`
+
+    const date =
+    extractDateFromText(
+      rowText
+    );
+
+
+    /*
+     * 日付がない行は無視
+     */
+
+    if(!date)
+      continue;
+
+
+    /*
+     * 行の中から時間を探す
+     */
+
+    let time =
+    extractTime(
+      rowText
+    );
+
+
+    /*
+     * 時間が取れない場合、
+     * 各単語を連結して再チェック。
+     */
+
+    if(!time){
+
+      const compact =
+      sorted
+      .map(
+        w=>w.text
+      )
+      .join("");
+
+
+      time =
+      extractTime(
+        compact
       );
 
     }
 
-  }
+
+    /*
+     * 場所
+     *
+     * 今回の表では
+     * 「音楽練習室」が時間の右側にあるため、
+     * 時間より右にある文字を優先する。
+     */
+
+    let place = "";
 
 
-  return "";
+    if(time){
 
-}
-
-
-
-/* =====================================================
-   時刻補正
-===================================================== */
-
-function normalizeTimeNumber(
-  value
-){
-
-  const s =
-  String(
-    value
-  );
+      const timeIndex =
+      findTimeWordIndex(
+        sorted
+      );
 
 
-  if(
-    s.length === 3
-  ){
+      if(
+        timeIndex >= 0
+      ){
 
-    return (
-      "0" +
-      s[0] +
-      ":" +
-      s.slice(1)
-    );
-
-  }
+        const rightWords =
+        sorted
+        .slice(
+          timeIndex + 1
+        );
 
 
-  if(
-    s.length === 4
-  ){
+        place =
+        rightWords
+        .map(
+          w=>w.text
+        )
+        .join(" ")
+        .trim();
 
-    return (
-      s.slice(0,2) +
-      ":" +
-      s.slice(2)
-    );
-
-  }
-
-
-  return "";
-
-}
-
-
-
-/* =====================================================
-   場所抽出
-===================================================== */
-
-function extractSchedulePlace(
-  text
-){
-
-  const t =
-  normalizeOCRText(
-    text
-  );
-
-
-  const places = [
-
-    "音楽練習室",
-
-    "音楽室",
-
-    "講堂",
-
-    "体育館",
-
-    "礼拝堂",
-
-    "教室"
-
-  ];
-
-
-  for(
-    const place of places
-  ){
-
-    if(
-      t.includes(place)
-    ){
-
-      return place;
+      }
 
     }
 
+
+    /*
+     * 右側方式で取れなかった場合、
+     * 行全体から場所を抽出。
+     */
+
+    if(!place){
+
+      place =
+      extractPlace(
+        rowText
+      );
+
+    }
+
+
+    /*
+     * 「音楽練習室」など、
+     * よく出る場所を補正
+     */
+
+    place =
+    normalizePlace(
+      place
+    );
+
+
+    candidates.push({
+
+      selected:true,
+
+      date:
+      formatDate(
+        date.year,
+        date.month,
+        date.day
+      ),
+
+      time:
+      time,
+
+      place:
+      place
+
+    });
+
   }
 
 
-  return "";
+  /*
+   * 重複削除
+   */
+
+  return uniqueCandidates(
+    candidates
+  );
 
 }
 
 
+/* =========================================================
+   時間が入っている単語の位置を探す
+========================================================= */
 
-/* =====================================================
-   備考・内容抽出
-===================================================== */
-
-function extractScheduleNote(
-  text
+function findTimeWordIndex(
+  words
 ){
 
-  const t =
-  normalizeOCRText(
-    text
-  );
-
-
-  const notes=[];
-
-
-  /*
-   * 文化祭
-   */
-
-  const festival =
-  t.match(
-    /文化祭[①②③④⑤1-5]?/
-  );
-
-
-  if(festival){
-
-    notes.push(
-      festival[0]
-    );
-
-  }
-
-
-  /*
-   * リハーサル
-   */
-
-  if(
-    /リハーサル/
-    .test(t)
+  for(
+    let i=0;
+    i<words.length;
+    i++
   ){
 
-    const m =
-    t.match(
-      /リハーサル\s*[？?]?/
-    );
-
-
-    notes.push(
-      m
-      ? m[0]
-      : "リハーサル"
-    );
-
-  }
-
-
-  /*
-   * 文化祭準備
-   */
-
-  if(
-    /文化祭準備/
-    .test(t)
-  ){
-
-    notes.push(
-      "文化祭準備"
-    );
-
-  }
-
-
-  /*
-   * 不在
-   */
-
-  const absence =
-  t.match(
-    /不在\s*[:：]?\s*[^ ]+/
-  );
-
-
-  if(absence){
-
-    notes.push(
-      absence[0]
-    );
-
-  }
-
-
-  /*
-   * 敬老の日
-   */
-
-  if(
-    /敬老の日/
-    .test(t)
-  ){
-
-    notes.push(
-      "敬老の日"
-    );
-
-  }
-
-
-  /*
-   * 国民の休日
-   */
-
-  if(
-    /国民の休日/
-    .test(t)
-  ){
-
-    notes.push(
-      "国民の休日"
-    );
-
-  }
-
-
-  /*
-   * 秋分の日
-   */
-
-  if(
-    /秋分の日/
-    .test(t)
-  ){
-
-    notes.push(
-      "秋分の日"
-    );
-
-  }
-
-
-  return [
-    ...new Set(
-      notes
+    if(
+      extractTime(
+        words[i].text
+      )
     )
-  ].join(
-    " / "
-  );
+      return i;
+
+
+    /*
+     * 15:45 と 18:00 が別単語になった場合
+     */
+
+    const combined =
+    words
+    .slice(
+      i,
+      i+4
+    )
+    .map(
+      w=>w.text
+    )
+    .join("");
+
+
+    if(
+      extractTime(
+        combined
+      )
+    )
+      return i;
+
+  }
+
+
+  return -1;
 
 }
 
 
+/* =========================================================
+   場所の補正
+========================================================= */
 
-/* =====================================================
-   月の日数
-===================================================== */
-
-function getDaysInMonth(
-  year,
-  month
+function normalizePlace(
+  place
 ){
 
-  return new Date(
-    year,
-    month,
-    0
-  ).getDate();
+  if(!place)
+    return "";
+
+
+  let s =
+  place
+  .replace(
+    /\s+/g,
+    ""
+  );
+
+
+  /*
+   * OCRの誤認識をある程度吸収
+   */
+
+  if(
+    /音楽.*習室/.test(s) ||
+    /音楽練習室/.test(s)
+  ){
+
+    return "音楽練習室";
+
+  }
+
+
+  if(
+    /練習室/.test(s)
+  ){
+
+    return "音楽練習室";
+
+  }
+
+
+  if(
+    /文化祭/.test(s)
+  ){
+
+    return "文化祭";
+
+  }
+
+
+  return place.trim();
 
 }
 
 
+/* =========================================================
+   通常テキストからの予備解析
+========================================================= */
 
-/* =====================================================
-   従来型OCR
-   （予備）
-===================================================== */
-
-function parseScheduleCandidates(
+function parseScheduleCandidatesFromText(
   text
 ){
 
@@ -2709,8 +2447,7 @@ function parseScheduleCandidates(
   text
   .split(/\r?\n/)
   .map(
-    x =>
-    x.trim()
+    x=>x.trim()
   )
   .filter(Boolean);
 
@@ -2718,135 +2455,186 @@ function parseScheduleCandidates(
   const found=[];
 
 
-  const dateRe =
-  /(\d{1,2})\s*月\s*(\d{1,2})\s*[日昌]?/;
-
-
   for(
-    const line of lines
+    let i=0;
+    i<lines.length;
+    i++
   ){
 
-    const m =
-    line.match(
-      dateRe
+    const line =
+    lines[i];
+
+
+    const date =
+    extractDateFromText(
+      line
     );
 
 
-    if(!m)
+    if(!date)
       continue;
 
 
-    const month =
-    Number(
-      m[1]
-    );
+    /*
+     * 同じ行
+     */
+
+    let combined =
+    line;
 
 
-    const day =
-    Number(
-      m[2]
-    );
+    /*
+     * 次の2行も調べる。
+     * 表のOCRでは、日付・時間・場所が
+     * 別行として出ることがあるため。
+     */
 
+    for(
+      let j=1;
+      j<=2;
+      j++
+    ){
 
-    if(
-      month<1 ||
-      month>12 ||
-      day<1 ||
-      day>31
-    )
-      continue;
+      if(
+        lines[i+j]
+      ){
+
+        combined +=
+        " " +
+        lines[i+j];
+
+      }
+
+    }
 
 
     const time =
-    extractScheduleTime(
-      line
+    extractTime(
+      combined
     );
 
 
-    const place =
-    extractSchedulePlace(
-      line
+    let place =
+    extractPlace(
+      combined
     );
 
 
-    const note =
-    extractScheduleNote(
-      line
+    place =
+    normalizePlace(
+      place
     );
 
 
     found.push({
 
-      selected:
-      !!(
-        time ||
-        note
-      ),
+      selected:true,
 
       date:
-      `${new Date().getFullYear()}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`,
+      formatDate(
+        date.year,
+        date.month,
+        date.day
+      ),
 
       time:
-
       time,
 
       place:
-
-      place,
-
-      note:
-
-      note,
-
-      raw:
-
-      line
+      place
 
     });
 
   }
 
 
-  const unique=[];
+  return uniqueCandidates(
+    found
+  );
 
+}
+
+
+/* =========================================================
+   日付フォーマット
+========================================================= */
+
+function formatDate(
+  year,
+  month,
+  day
+){
+
+  return (
+    String(year) +
+    "-" +
+    String(month).padStart(2,"0") +
+    "-" +
+    String(day).padStart(2,"0")
+  );
+
+}
+
+
+/* =========================================================
+   重複削除
+========================================================= */
+
+function uniqueCandidates(
+  list
+){
+
+  const result=[];
 
   const seen =
   new Set();
 
 
   for(
-    const x of found
+    const x of list
   ){
 
+    const key =
+    x.date +
+    "|" +
+    x.time +
+    "|" +
+    x.place;
+
+
     if(
-      seen.has(
-        x.date
-      )
+      seen.has(key)
     )
       continue;
 
 
-    seen.add(
-      x.date
-    );
+    seen.add(key);
 
-
-    unique.push(
-      x
-    );
+    result.push(x);
 
   }
 
 
-  return unique;
+  /*
+   * 日付順にする
+   */
+
+  result.sort(
+    (a,b) =>
+    a.date.localeCompare(
+      b.date
+    )
+  );
+
+
+  return result;
 
 }
 
 
-
-/* =====================================================
+/* =========================================================
    OCR候補表示
-===================================================== */
+========================================================= */
 
 function renderOCRCandidates(){
 
@@ -2867,114 +2655,78 @@ function renderOCRCandidates(){
 
 
   el.innerHTML =
-
   ocrCandidates
   .map(
     (x,i)=>`
 
-      <div
-        class="ocr-candidate"
-        style="
-          border:1px solid #e3e7ed;
-          border-radius:12px;
-          padding:10px;
-          margin-bottom:8px;
-        "
-      >
+      <div class="ocr-candidate">
 
-
-        <div
-          class="ocr-day"
-        >
+        <div class="ocr-candidate-top">
 
           <input
             type="checkbox"
             ${x.selected ? "checked" : ""}
-            onchange="
-              updateOCRCandidate(
-                ${i},
-                'selected',
-                this.checked
-              )
-            "
+            onchange="updateOCRCandidate(${i},'selected',this.checked)"
           >
 
-          ${esc(x.date)}
+          <strong>
+            ${esc(x.date)}
+          </strong>
 
         </div>
 
 
-        <input
-          type="date"
-          value="${esc(x.date)}"
-          onchange="
-            updateOCRCandidate(
-              ${i},
-              'date',
-              this.value
-            )
-          "
-        >
+        <div class="ocr-field">
+
+          <div class="ocr-label">
+            日付
+          </div>
+
+          <input
+            type="date"
+            value="${esc(x.date)}"
+            onchange="updateOCRCandidate(${i},'date',this.value)"
+          >
+
+        </div>
 
 
-        <input
-          placeholder="時間"
-          value="${esc(x.time)}"
-          onchange="
-            updateOCRCandidate(
-              ${i},
-              'time',
-              this.value
-            )
-          "
-        >
+        <div class="ocr-field">
+
+          <div class="ocr-label">
+            部活の時間
+          </div>
+
+          <input
+            placeholder="例：15:45〜18:00"
+            value="${esc(x.time)}"
+            onchange="updateOCRCandidate(${i},'time',this.value)"
+          >
+
+        </div>
+
+
+        <div class="ocr-field">
+
+          <div class="ocr-label">
+            場所
+          </div>
+
+          <input
+            placeholder="例：音楽練習室"
+            value="${esc(x.place)}"
+            onchange="updateOCRCandidate(${i},'place',this.value)"
+          >
+
+        </div>
 
 
         <button
-          class="danger"
-          onclick="
-            removeOCRCandidate(${i})
-          "
+          class="danger ocr-delete"
+          onclick="removeOCRCandidate(${i})"
         >
-          削除
+          この予定を削除
         </button>
-
-
-        <input
-          placeholder="場所"
-          value="${esc(x.place)}"
-          onchange="
-            updateOCRCandidate(
-              ${i},
-              'place',
-              this.value
-            )
-          "
-        >
-
-
-        <input
-          class="ocr-note"
-          placeholder="内容・備考"
-          value="${esc(x.note || "")}"
-          onchange="
-            updateOCRCandidate(
-              ${i},
-              'note',
-              this.value
-            )
-          "
-        >
-
-
-        <span
-          class="small ocr-raw"
-        >
-          OCR：
-          ${esc(x.raw || "文字なし")}
-
-        </span>
-
 
       </div>
 
@@ -2985,14 +2737,13 @@ function renderOCRCandidates(){
 }
 
 
-
-/* =====================================================
-   OCR候補更新
-===================================================== */
+/* =========================================================
+   OCR候補変更
+========================================================= */
 
 function updateOCRCandidate(
   index,
-  key,
+  field,
   value
 ){
 
@@ -3002,20 +2753,17 @@ function updateOCRCandidate(
     return;
 
 
-  ocrCandidates[index][key] =
+  ocrCandidates[index][field] =
   value;
 
 }
 
 
-
-/* =====================================================
+/* =========================================================
    OCR候補削除
-===================================================== */
+========================================================= */
 
-function removeOCRCandidate(
-  i
-){
+function removeOCRCandidate(i){
 
   ocrCandidates.splice(
     i,
@@ -3028,10 +2776,9 @@ function removeOCRCandidate(
 }
 
 
-
-/* =====================================================
+/* =========================================================
    OCR予定登録
-===================================================== */
+========================================================= */
 
 async function registerOCRCandidates(){
 
@@ -3049,27 +2796,13 @@ async function registerOCRCandidates(){
   );
 
 
-  if(
-    !selected.length
-  ){
+  if(!selected.length){
 
     msg(
       "ocrMsg",
       "登録する予定を選択してください。",
       true
     );
-
-    return;
-
-  }
-
-
-  if(
-    !confirm(
-      selected.length +
-      "件の予定を登録しますか？"
-    )
-  ){
 
     return;
 
@@ -3094,9 +2827,6 @@ async function registerOCRCandidates(){
         place:
         x.place || "",
 
-        note:
-        x.note || "",
-
         updatedAt:
         Date.now()
 
@@ -3118,10 +2848,9 @@ async function registerOCRCandidates(){
 }
 
 
-
-/* =====================================================
+/* =========================================================
    手動予定登録
-===================================================== */
+========================================================= */
 
 async function saveSchedule(){
 
@@ -3134,10 +2863,8 @@ async function saveSchedule(){
   const d =
   $("sdate").value;
 
-
   const t =
   $("stime").value.trim();
-
 
   const p =
   $("splace").value.trim();
@@ -3164,11 +2891,9 @@ async function saveSchedule(){
     ),
     {
 
-      time:
-      t,
+      time:t,
 
-      place:
-      p,
+      place:p,
 
       updatedAt:
       Date.now()
@@ -3188,10 +2913,9 @@ async function saveSchedule(){
 }
 
 
-
-/* =====================================================
+/* =========================================================
    予定一覧
-===================================================== */
+========================================================= */
 
 async function loadSchedules(){
 
@@ -3231,48 +2955,25 @@ async function loadSchedules(){
           ${esc(d)}
         </strong>
 
+        <br>
+
+        ${esc(x.time || "")}
 
         <br>
 
-
-        ${esc(
-          x.time || ""
-        )}
-
-
-        <br>
-
-
-        ${esc(
-          x.place || ""
-        )}
-
-
-        ${
-          x.note
-          ?
-          `<br>${esc(x.note)}`
-          :
-          ""
-        }
-
+        ${esc(x.place || "")}
 
         <div class="row">
 
           <button
-            onclick="
-              editSchedule('${esc(d)}')
-            "
+            onclick="editSchedule('${esc(d)}')"
           >
             変更
           </button>
 
-
           <button
             class="danger"
-            onclick="
-              deleteSchedule('${esc(d)}')
-            "
+            onclick="deleteSchedule('${esc(d)}')"
           >
             削除
           </button>
@@ -3291,14 +2992,11 @@ async function loadSchedules(){
 }
 
 
-
-/* =====================================================
+/* =========================================================
    予定変更
-===================================================== */
+========================================================= */
 
-async function editSchedule(
-  d
-){
+async function editSchedule(d){
 
   const s =
   await get(
@@ -3310,9 +3008,7 @@ async function editSchedule(
   );
 
 
-  if(
-    !s.exists()
-  )
+  if(!s.exists())
     return;
 
 
@@ -3334,26 +3030,18 @@ async function editSchedule(
 
   $("sdate")
   .scrollIntoView({
-
-    behavior:
-    "smooth",
-
-    block:
-    "center"
-
+    behavior:"smooth",
+    block:"center"
   });
 
 }
 
 
-
-/* =====================================================
+/* =========================================================
    予定削除
-===================================================== */
+========================================================= */
 
-async function deleteSchedule(
-  d
-){
+async function deleteSchedule(d){
 
   if(
     confirm(
@@ -3378,66 +3066,51 @@ async function deleteSchedule(
 }
 
 
-
-/* =====================================================
+/* =========================================================
    HTMLから呼び出せるようにする
-===================================================== */
+========================================================= */
 
 window.adminLogin =
 adminLogin;
 
-
 window.logout =
 logout;
-
 
 window.addMember =
 addMember;
 
-
 window.editMember =
 editMember;
-
 
 window.saveMemberEdit =
 saveMemberEdit;
 
-
 window.cancelMemberEdit =
 cancelMemberEdit;
-
 
 window.deleteMember =
 deleteMember;
 
-
 window.previewScheduleImage =
 previewScheduleImage;
-
 
 window.runOCR =
 runOCR;
 
+window.updateOCRCandidate =
+updateOCRCandidate;
 
 window.removeOCRCandidate =
 removeOCRCandidate;
 
-
-window.updateOCRCandidate =
-updateOCRCandidate;
-
-
 window.registerOCRCandidates =
 registerOCRCandidates;
-
 
 window.saveSchedule =
 saveSchedule;
 
-
 window.editSchedule =
 editSchedule;
-
 
 window.deleteSchedule =
 deleteSchedule;
