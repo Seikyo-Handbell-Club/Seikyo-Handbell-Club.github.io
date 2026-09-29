@@ -615,6 +615,20 @@ const db =
 const $ =
   id => document.getElementById(id);
 
+
+/* =========================================
+   状態管理
+========================================= */
+
+let authReady = false;
+let loginInProgress = false;
+let loadingApp = false;
+
+
+/* =========================================
+   共通
+========================================= */
+
 function esc(value){
 
   return String(value ?? "")
@@ -654,9 +668,17 @@ function message(
 
 }
 
+
+/* =========================================
+   管理者確認
+========================================= */
+
 async function isAdmin(){
 
-  if(!auth.currentUser){
+  const user =
+    auth.currentUser;
+
+  if(!user){
     return false;
   }
 
@@ -665,7 +687,7 @@ async function isAdmin(){
       ref(
         db,
         "admins/" +
-        auth.currentUser.uid
+        user.uid
       )
     );
 
@@ -676,9 +698,170 @@ async function isAdmin(){
 
 }
 
+
+/* =========================================
+   管理画面表示
+========================================= */
+
+async function showAdminApp(){
+
+  if(loadingApp){
+    return;
+  }
+
+  const user =
+    auth.currentUser;
+
+  if(!user){
+    return;
+  }
+
+  loadingApp = true;
+
+  try{
+
+    const admin =
+      await isAdmin();
+
+    if(!admin){
+
+      $("login")
+        .classList
+        .remove("hidden");
+
+      $("app")
+        .classList
+        .add("hidden");
+
+      return;
+
+    }
+
+    $("login")
+      .classList
+      .add("hidden");
+
+    $("app")
+      .classList
+      .remove("hidden");
+
+    $("password").value = "";
+
+    message(
+      "loginMsg",
+      ""
+    );
+
+    /*
+     * 部員一覧
+     */
+    try{
+
+      await loadMembers();
+
+    }catch(error){
+
+      console.error(
+        "部員一覧読み込みエラー:",
+        error
+      );
+
+      $("members").innerHTML =
+        `
+        <div class="msg error">
+          部員一覧の読み込みに失敗しました。
+
+          エラーコード:
+          ${esc(error.code || "不明")}
+
+          詳細:
+          ${esc(error.message || "不明")}
+        </div>
+        `;
+
+    }
+
+    /*
+     * 予定一覧
+     */
+    try{
+
+      await loadSchedules();
+
+    }catch(error){
+
+      console.error(
+        "予定一覧読み込みエラー:",
+        error
+      );
+
+      $("schedules").innerHTML =
+        `
+        <div class="msg error">
+          予定一覧の読み込みに失敗しました。
+
+          エラーコード:
+          ${esc(error.code || "不明")}
+
+          詳細:
+          ${esc(error.message || "不明")}
+        </div>
+        `;
+
+    }
+
+  }catch(error){
+
+    console.error(
+      "管理者確認エラー:",
+      error
+    );
+
+    $("login")
+      .classList
+      .remove("hidden");
+
+    $("app")
+      .classList
+      .add("hidden");
+
+    message(
+      "loginMsg",
+      "管理者権限の確認に失敗しました。\n\n" +
+      "エラーコード: " +
+      (error.code || "不明") +
+      "\n" +
+      "詳細: " +
+      (error.message || "不明"),
+      "error"
+    );
+
+  }finally{
+
+    loadingApp = false;
+
+  }
+
+}
+
+
+/* =========================================
+   Firebase認証状態
+========================================= */
+
 onAuthStateChanged(
   auth,
   async user => {
+
+    authReady = true;
+
+    /*
+     * 手動ログイン処理中なら、
+     * adminLogin側の処理と二重実行しない。
+     */
+    if(loginInProgress){
+      return;
+    }
 
     if(!user){
 
@@ -694,71 +877,25 @@ onAuthStateChanged(
 
     }
 
-    try{
-
-      const admin =
-        await isAdmin();
-
-      if(!admin){
-
-        $("login")
-          .classList
-          .remove("hidden");
-
-        $("app")
-          .classList
-          .add("hidden");
-
-        return;
-
-      }
-
-      $("login")
-        .classList
-        .add("hidden");
-
-      $("app")
-        .classList
-        .remove("hidden");
-
-      $("password").value = "";
-
-      await loadMembers();
-
-      await loadSchedules();
-
-    }catch(error){
-
-      console.error(
-        "認証状態確認エラー:",
-        error
-      );
-
-      $("login")
-        .classList
-        .remove("hidden");
-
-      $("app")
-        .classList
-        .add("hidden");
-
-      message(
-        "loginMsg",
-        "管理者権限の確認に失敗しました。\n\n" +
-        "エラーコード: " +
-        (error.code || "不明") +
-        "\n" +
-        "詳細: " +
-        (error.message || "不明"),
-        "error"
-      );
-
-    }
+    /*
+     * 既にログイン状態が残っている場合のみ
+     * 自動的に管理者確認を行う。
+     */
+    await showAdminApp();
 
   }
 );
 
+
+/* =========================================
+   管理者ログイン
+========================================= */
+
 async function adminLogin(){
+
+  if(loginInProgress){
+    return;
+  }
 
   const password =
     $("password").value;
@@ -783,6 +920,8 @@ async function adminLogin(){
   const button =
     $("loginButton");
 
+  loginInProgress = true;
+
   button.disabled = true;
 
   button.textContent =
@@ -790,6 +929,9 @@ async function adminLogin(){
 
   try{
 
+    /*
+     * Authentication
+     */
     const credential =
       await signInWithEmailAndPassword(
         auth,
@@ -798,48 +940,22 @@ async function adminLogin(){
       );
 
     console.log(
-      "Authentication成功",
-      credential.user.uid,
-      credential.user.email
+      "Authentication成功:",
+      credential.user.uid
     );
 
-    let adminSnapshot;
-
-    try{
-
-      adminSnapshot =
-        await get(
-          ref(
-            db,
-            "admins/" +
-            credential.user.uid
-          )
-        );
-
-    }catch(error){
-
-      console.error(
-        "admins読み込みエラー:",
-        error
+    /*
+     * ここではonAuthStateChangedに
+     * 任せず、この処理だけで管理者確認する。
+     */
+    const adminSnapshot =
+      await get(
+        ref(
+          db,
+          "admins/" +
+          credential.user.uid
+        )
       );
-
-      await signOut(auth);
-
-      message(
-        "loginMsg",
-        "パスワードは正しい可能性がありますが、\n" +
-        "管理者権限の確認に失敗しました。\n\n" +
-        "エラーコード: " +
-        (error.code || "不明") +
-        "\n" +
-        "詳細: " +
-        (error.message || "不明"),
-        "error"
-      );
-
-      return;
-
-    }
 
     if(
       !adminSnapshot.exists() ||
@@ -853,13 +969,7 @@ async function adminLogin(){
         "ログインは成功しましたが、\n" +
         "このアカウントは管理者として登録されていません。\n\n" +
         "UID:\n" +
-        credential.user.uid +
-        "\n\n" +
-        "Firebase Realtime Database の\n" +
-        "admins/" +
-        credential.user.uid +
-        "\n" +
-        "を確認してください。",
+        credential.user.uid,
         "error"
       );
 
@@ -867,6 +977,9 @@ async function adminLogin(){
 
     }
 
+    /*
+     * 管理画面表示
+     */
     $("login")
       .classList
       .add("hidden");
@@ -883,9 +996,60 @@ async function adminLogin(){
       "success"
     );
 
-    await loadMembers();
+    /*
+     * ここで直接読み込む。
+     */
+    try{
 
-    await loadSchedules();
+      await loadMembers();
+
+    }catch(error){
+
+      console.error(
+        "部員一覧読み込みエラー:",
+        error
+      );
+
+      $("members").innerHTML =
+        `
+        <div class="msg error">
+          部員一覧の読み込みに失敗しました。
+
+          エラーコード:
+          ${esc(error.code || "不明")}
+
+          詳細:
+          ${esc(error.message || "不明")}
+        </div>
+        `;
+
+    }
+
+    try{
+
+      await loadSchedules();
+
+    }catch(error){
+
+      console.error(
+        "予定一覧読み込みエラー:",
+        error
+      );
+
+      $("schedules").innerHTML =
+        `
+        <div class="msg error">
+          予定一覧の読み込みに失敗しました。
+
+          エラーコード:
+          ${esc(error.code || "不明")}
+
+          詳細:
+          ${esc(error.message || "不明")}
+        </div>
+        `;
+
+    }
 
   }catch(error){
 
@@ -914,6 +1078,8 @@ async function adminLogin(){
 
   }finally{
 
+    loginInProgress = false;
+
     button.disabled = false;
 
     button.textContent =
@@ -923,11 +1089,29 @@ async function adminLogin(){
 
 }
 
+
+/* =========================================
+   ログアウト
+========================================= */
+
 async function logout(){
 
   try{
 
     await signOut(auth);
+
+    $("login")
+      .classList
+      .remove("hidden");
+
+    $("app")
+      .classList
+      .add("hidden");
+
+    message(
+      "loginMsg",
+      ""
+    );
 
   }catch(error){
 
@@ -936,9 +1120,25 @@ async function logout(){
       error
     );
 
+    message(
+      "loginMsg",
+      "ログアウトに失敗しました。\n\n" +
+      "エラーコード: " +
+      (error.code || "不明") +
+      "\n" +
+      "詳細: " +
+      (error.message || "不明"),
+      "error"
+    );
+
   }
 
 }
+
+
+/* =========================================
+   部員登録
+========================================= */
 
 async function addMember(){
 
@@ -981,67 +1181,94 @@ async function addMember(){
 
   }
 
-  const existing =
-    await get(
+  try{
+
+    const existing =
+      await get(
+        ref(
+          db,
+          "memberRegistrations/" +
+          id
+        )
+      );
+
+    if(existing.exists()){
+
+      message(
+        "memberMsg",
+        "その学校IDはすでに登録されています。",
+        "error"
+      );
+
+      return;
+
+    }
+
+    await set(
       ref(
         db,
         "memberRegistrations/" +
         id
-      )
+      ),
+      {
+        schoolId:id,
+        name:name,
+        grade:grade,
+        className:className,
+        createdAt:Date.now()
+      }
     );
 
-  if(existing.exists()){
+    await set(
+      ref(
+        db,
+        "memberIds/" +
+        id
+      ),
+      {
+        accountCreated:false
+      }
+    );
+
+    $("mid").value = "";
+    $("mname").value = "";
+    $("mgrade").value = "";
+    $("mclass").value = "";
 
     message(
       "memberMsg",
-      "その学校IDはすでに登録されています。",
+      "登録しました。",
+      "success"
+    );
+
+    await loadMembers();
+
+  }catch(error){
+
+    console.error(
+      "部員登録エラー:",
+      error
+    );
+
+    message(
+      "memberMsg",
+      "部員登録に失敗しました。\n\n" +
+      "エラーコード: " +
+      (error.code || "不明") +
+      "\n" +
+      "詳細: " +
+      (error.message || "不明"),
       "error"
     );
 
-    return;
-
   }
 
-  await set(
-    ref(
-      db,
-      "memberRegistrations/" +
-      id
-    ),
-    {
-      schoolId:id,
-      name:name,
-      grade:grade,
-      className:className,
-      createdAt:Date.now()
-    }
-  );
-
-  await set(
-    ref(
-      db,
-      "memberIds/" +
-      id
-    ),
-    {
-      accountCreated:false
-    }
-  );
-
-  $("mid").value = "";
-  $("mname").value = "";
-  $("mgrade").value = "";
-  $("mclass").value = "";
-
-  message(
-    "memberMsg",
-    "登録しました。",
-    "success"
-  );
-
-  await loadMembers();
-
 }
+
+
+/* =========================================
+   部員一覧
+========================================= */
 
 const gradeOrder = {
 
@@ -1070,6 +1297,9 @@ const classOrder = {
 };
 
 async function loadMembers(){
+
+  $("members").innerHTML =
+    "<p class='small'>部員一覧を読み込んでいます...</p>";
 
   const snapshot =
     await get(
@@ -1187,110 +1417,142 @@ async function loadMembers(){
 
 }
 
+
+/* =========================================
+   部員変更
+========================================= */
+
 async function editMember(id){
 
   if(!(await isAdmin())){
     return;
   }
 
-  const snapshot =
-    await get(
+  try{
+
+    const snapshot =
+      await get(
+        ref(
+          db,
+          "memberRegistrations/" +
+          id
+        )
+      );
+
+    if(!snapshot.exists()){
+      return;
+    }
+
+    const data =
+      snapshot.val();
+
+    const name =
+      prompt(
+        "名前",
+        data.name || ""
+      );
+
+    if(name === null){
+      return;
+    }
+
+    const grade =
+      prompt(
+        "学年\n\n中学1年\n中学2年\n中学3年\n高校1年\n高校2年",
+        data.grade || ""
+      );
+
+    if(grade === null){
+      return;
+    }
+
+    const className =
+      prompt(
+        "クラス（A〜K）",
+        data.className || ""
+      );
+
+    if(className === null){
+      return;
+    }
+
+    const normalizedClass =
+      className
+        .replace("組","")
+        .trim()
+        .toUpperCase();
+
+    if(
+      !Object.prototype.hasOwnProperty.call(
+        gradeOrder,
+        grade
+      )
+    ){
+
+      alert(
+        "学年は「中学1年」〜「高校2年」で入力してください。"
+      );
+
+      return;
+
+    }
+
+    if(
+      !Object.prototype.hasOwnProperty.call(
+        classOrder,
+        normalizedClass
+      )
+    ){
+
+      alert(
+        "クラスはA〜Kで入力してください。"
+      );
+
+      return;
+
+    }
+
+    await update(
       ref(
         db,
         "memberRegistrations/" +
         id
-      )
+      ),
+      {
+        name:name.trim(),
+        grade:grade,
+        className:normalizedClass
+      }
     );
 
-  if(!snapshot.exists()){
-    return;
-  }
+    await loadMembers();
 
-  const data =
-    snapshot.val();
+  }catch(error){
 
-  const name =
-    prompt(
-      "名前",
-      data.name || ""
+    console.error(
+      "部員変更エラー:",
+      error
     );
 
-  if(name === null){
-    return;
-  }
-
-  const grade =
-    prompt(
-      "学年\n\n中学1年\n中学2年\n中学3年\n高校1年\n高校2年",
-      data.grade || ""
+    message(
+      "memberMsg",
+      "部員情報の変更に失敗しました。\n\n" +
+      "エラーコード: " +
+      (error.code || "不明") +
+      "\n" +
+      "詳細: " +
+      (error.message || "不明"),
+      "error"
     );
 
-  if(grade === null){
-    return;
   }
-
-  const className =
-    prompt(
-      "クラス（A〜K）",
-      data.className || ""
-    );
-
-  if(className === null){
-    return;
-  }
-
-  const normalizedClass =
-    className
-      .replace("組","")
-      .trim()
-      .toUpperCase();
-
-  if(
-    !Object.prototype.hasOwnProperty.call(
-      gradeOrder,
-      grade
-    )
-  ){
-
-    alert(
-      "学年は「中学1年」〜「高校2年」で入力してください。"
-    );
-
-    return;
-
-  }
-
-  if(
-    !Object.prototype.hasOwnProperty.call(
-      classOrder,
-      normalizedClass
-    )
-  ){
-
-    alert(
-      "クラスはA〜Kで入力してください。"
-    );
-
-    return;
-
-  }
-
-  await update(
-    ref(
-      db,
-      "memberRegistrations/" +
-      id
-    ),
-    {
-      name:name.trim(),
-      grade:grade,
-      className:normalizedClass
-    }
-  );
-
-  await loadMembers();
 
 }
+
+
+/* =========================================
+   部員削除
+========================================= */
 
 async function deleteMember(id){
 
@@ -1307,25 +1569,52 @@ async function deleteMember(id){
     return;
   }
 
-  await remove(
-    ref(
-      db,
-      "memberRegistrations/" +
-      id
-    )
-  );
+  try{
 
-  await remove(
-    ref(
-      db,
-      "memberIds/" +
-      id
-    )
-  );
+    await remove(
+      ref(
+        db,
+        "memberRegistrations/" +
+        id
+      )
+    );
 
-  await loadMembers();
+    await remove(
+      ref(
+        db,
+        "memberIds/" +
+        id
+      )
+    );
+
+    await loadMembers();
+
+  }catch(error){
+
+    console.error(
+      "部員削除エラー:",
+      error
+    );
+
+    message(
+      "memberMsg",
+      "部員の削除に失敗しました。\n\n" +
+      "エラーコード: " +
+      (error.code || "不明") +
+      "\n" +
+      "詳細: " +
+      (error.message || "不明"),
+      "error"
+    );
+
+  }
 
 }
+
+
+/* =========================================
+   PDF.js
+========================================= */
 
 let pdfjsLib = null;
 
@@ -1349,6 +1638,11 @@ async function getPdfJs(){
   return pdfjsLib;
 
 }
+
+
+/* =========================================
+   PDF解析
+========================================= */
 
 async function extractPdfLines(file){
 
@@ -1510,6 +1804,11 @@ async function extractPdfLines(file){
 
 }
 
+
+/* =========================================
+   PDF予定解析
+========================================= */
+
 function parseScheduleLines(lines){
 
   let month = null;
@@ -1575,9 +1874,7 @@ function parseScheduleLines(lines){
     if(
       raw.includes("練習曲")
     ){
-
       continue;
-
     }
 
     let dateMatch =
@@ -1731,9 +2028,7 @@ function makeCandidate(
   if(
     text.includes("練習曲")
   ){
-
     return null;
-
   }
 
   const yyyy =
@@ -1777,9 +2072,7 @@ function makeCandidate(
     );
 
   if(!time){
-
     return null;
-
   }
 
   let place = "";
@@ -1841,6 +2134,11 @@ function makeCandidate(
   };
 
 }
+
+
+/* =========================================
+   PDF読み込み
+========================================= */
 
 async function readSchedulePDF(){
 
@@ -1937,7 +2235,10 @@ async function readSchedulePDF(){
     message(
       "pdfStatus",
       "PDFの読み込みに失敗しました。\n\n" +
-      "エラー：" +
+      "エラーコード: " +
+      (error.code || "不明") +
+      "\n" +
+      "詳細: " +
       (error.message || "不明"),
       "error"
     );
@@ -1952,6 +2253,11 @@ async function readSchedulePDF(){
   }
 
 }
+
+
+/* =========================================
+   PDF候補
+========================================= */
 
 let pdfCandidatesData = [];
 
@@ -2057,6 +2363,11 @@ function renderCandidates(
       .join("");
 
 }
+
+
+/* =========================================
+   PDF候補登録
+========================================= */
 
 async function registerCandidates(){
 
@@ -2201,6 +2512,11 @@ async function registerCandidates(){
 
 }
 
+
+/* =========================================
+   手動予定登録
+========================================= */
+
 async function saveSchedule(){
 
   if(!(await isAdmin())){
@@ -2290,7 +2606,15 @@ async function saveSchedule(){
 
 }
 
+
+/* =========================================
+   予定一覧
+========================================= */
+
 async function loadSchedules(){
+
+  $("schedules").innerHTML =
+    "<p class='small'>予定一覧を読み込んでいます...</p>";
 
   const snapshot =
     await get(
@@ -2377,48 +2701,80 @@ async function loadSchedules(){
 
 }
 
+
+/* =========================================
+   予定変更
+========================================= */
+
 async function editSchedule(date){
 
   if(!(await isAdmin())){
     return;
   }
 
-  const snapshot =
-    await get(
-      ref(
-        db,
-        "schedules/" +
-        date
-      )
+  try{
+
+    const snapshot =
+      await get(
+        ref(
+          db,
+          "schedules/" +
+          date
+        )
+      );
+
+    if(!snapshot.exists()){
+      return;
+    }
+
+    const data =
+      snapshot.val();
+
+    $("sdate").value =
+      date;
+
+    $("stime").value =
+      data.time || "";
+
+    $("splace").value =
+      data.place || "";
+
+    $("snote").value =
+      data.note || "";
+
+    window.scrollTo({
+
+      top:0,
+      behavior:"smooth"
+
+    });
+
+  }catch(error){
+
+    console.error(
+      "予定変更読み込みエラー:",
+      error
     );
 
-  if(!snapshot.exists()){
-    return;
+    message(
+      "scheduleMsg",
+      "予定の読み込みに失敗しました。\n\n" +
+      "エラーコード: " +
+      (error.code || "不明") +
+      "\n" +
+      "詳細: " +
+      (error.message || "不明"),
+      "error"
+    );
+
   }
 
-  const data =
-    snapshot.val();
-
-  $("sdate").value =
-    date;
-
-  $("stime").value =
-    data.time || "";
-
-  $("splace").value =
-    data.place || "";
-
-  $("snote").value =
-    data.note || "";
-
-  window.scrollTo({
-
-    top:0,
-    behavior:"smooth"
-
-  });
-
 }
+
+
+/* =========================================
+   予定削除
+========================================= */
 
 async function deleteSchedule(date){
 
@@ -2469,6 +2825,11 @@ async function deleteSchedule(date){
 
 }
 
+
+/* =========================================
+   グローバル公開
+========================================= */
+
 window.adminLogin =
   adminLogin;
 
@@ -2498,6 +2859,11 @@ window.readSchedulePDF =
 
 window.registerCandidates =
   registerCandidates;
+
+
+/* =========================================
+   イベント
+========================================= */
 
 $("loginButton")
   .addEventListener(
