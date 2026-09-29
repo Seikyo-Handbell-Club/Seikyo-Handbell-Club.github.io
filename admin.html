@@ -578,7 +578,7 @@ import {
 const firebaseConfig = {
 
   apiKey:
-    "AIzaSyAK9yRsSLSfYpLSyluzwRyI22Zp32KeMSA",
+    "AIzaSyAK9yRrSSLsfYpLSyuzwRyI2ZZp32KeMSA",
 
   authDomain:
     "seikyo-handbell-club.firebaseapp.com",
@@ -1713,12 +1713,6 @@ function parseScheduleLines(lines){
 
 }
 
-
-/* =========================================
-   PDF予定判定
-   時間がある場合だけ予定として扱う
-========================================= */
-
 function containsScheduleInformation(text){
 
   return /\d{1,2}:\d{2}/.test(text);
@@ -1781,12 +1775,6 @@ function makeCandidate(
       /\s+/g,
       ""
     );
-
-  /* =========================================
-     時間がないものはすべて自動登録しない
-     「不在」「試験休み」「文化祭」なども
-     PDFからは自動登録しない
-  ========================================= */
 
   if(!time){
 
