@@ -160,7 +160,8 @@ textarea{
 }
 
 textarea{
-  min-height:85px
+  min-height:85px;
+  resize:vertical
 }
 
 .primary{
@@ -202,6 +203,10 @@ textarea{
   margin-bottom:14px
 }
 
+/* =========================
+   カレンダー共通
+========================= */
+
 .week,
 .days{
   display:grid;
@@ -222,12 +227,19 @@ textarea{
   border-radius:10px;
   padding:6px;
   cursor:pointer;
-  overflow:hidden
+  overflow:hidden;
+  border:2px solid transparent;
+  transition:.15s
+}
+
+.day:hover{
+  border-color:#dbe5f7
 }
 
 .day.empty{
   background:transparent;
-  cursor:default
+  cursor:default;
+  border-color:transparent
 }
 
 .day.off{
@@ -235,7 +247,17 @@ textarea{
 }
 
 .day.club-day{
-  background:#fff0f0
+  background:#fff0f0;
+  opacity:1
+}
+
+.day.selected-day{
+  border-color:#1f6feb;
+  background:#eaf2ff
+}
+
+.day.club-day.selected-day{
+  background:#eaf2ff
 }
 
 .daynum{
@@ -281,6 +303,39 @@ textarea{
   font-weight:800
 }
 
+/* =========================
+   フォーム内カレンダー
+========================= */
+
+.form-calendar{
+  margin-top:8px;
+  padding:12px;
+  background:#f8f9fb;
+  border-radius:14px
+}
+
+.form-calendar .day{
+  min-height:60px;
+  padding:5px
+}
+
+.form-calendar .daynum{
+  font-size:13px
+}
+
+.form-calendar .dot{
+  font-size:10px
+}
+
+.selected-date-box{
+  margin-top:10px;
+  padding:11px 12px;
+  background:#eef3fb;
+  border-radius:10px;
+  font-weight:700;
+  font-size:14px
+}
+
 .item{
   border:1px solid #e3e7ed;
   border-radius:12px;
@@ -322,6 +377,12 @@ textarea{
   margin-bottom:10px
 }
 
+.reason-note{
+  font-size:12px;
+  color:#77818e;
+  margin-top:6px
+}
+
 @media(max-width:480px){
 
   header{
@@ -354,6 +415,27 @@ textarea{
   .header-spacer{
     width:38px
   }
+
+  .form-calendar{
+    padding:8px
+  }
+
+  .form-calendar .days{
+    gap:3px
+  }
+
+  .form-calendar .day{
+    min-height:55px;
+    padding:4px
+  }
+
+  .form-calendar .daynum{
+    font-size:12px
+  }
+
+  .form-calendar .dot{
+    font-size:9px
+  }
 }
 </style>
 </head>
@@ -364,8 +446,11 @@ textarea{
 
   <div class="header-top">
 
-    <!-- ログイン後：左上 -->
-    <div id="loggedInLeft" class="header-side hidden">
+    <!-- ログイン後：左側 -->
+    <div
+      id="loggedInLeft"
+      class="header-side hidden"
+    >
 
       <div class="profile-mini">
 
@@ -373,7 +458,9 @@ textarea{
           class="icon-button"
           onclick="showMyPage()"
           aria-label="マイページ"
-        >👤</button>
+        >
+          👤
+        </button>
 
         <div
           id="profileMiniText"
@@ -395,7 +482,9 @@ textarea{
     <h1
       class="header-title"
       onclick="backHome()"
-    >部活動欠席連絡</h1>
+    >
+      部活動欠席連絡
+    </h1>
 
 
     <!-- ログアウト時 -->
@@ -403,7 +492,11 @@ textarea{
       id="loggedOutRight"
       class="header-side right"
     >
-      <button onclick="showLogin()">ログイン</button>
+
+      <button onclick="showLogin()">
+        ログイン
+      </button>
+
     </div>
 
 
@@ -446,7 +539,7 @@ textarea{
 <main>
 
 <!-- =========================
-     カレンダー
+     ホーム・カレンダー
 ========================= -->
 
 <section id="calendarView">
@@ -531,7 +624,10 @@ textarea{
     ← 戻る
   </button>
 
-  <h2>ログイン</h2>
+  <h2>
+    ログイン
+  </h2>
+
 
   <label>
     学校ID
@@ -560,6 +656,7 @@ textarea{
   >
     ログイン
   </button>
+
 
   <div id="loginMsg"></div>
 
@@ -591,7 +688,11 @@ textarea{
     ← ログインに戻る
   </button>
 
-  <h2>初回パスワード設定</h2>
+
+  <h2>
+    初回パスワード設定
+  </h2>
+
 
   <p class="small">
     管理者に登録された学校IDを入力して、自分でパスワードを設定します。
@@ -602,7 +703,9 @@ textarea{
     学校ID
   </label>
 
-  <input id="setupId">
+  <input
+    id="setupId"
+  >
 
 
   <label>
@@ -632,6 +735,7 @@ textarea{
     設定する
   </button>
 
+
   <div id="setupMsg"></div>
 
 </section>
@@ -653,7 +757,11 @@ textarea{
     ← ホームに戻る
   </button>
 
-  <h2>マイページ</h2>
+
+  <h2>
+    マイページ
+  </h2>
+
 
   <p class="small">
     学年・クラス・名前・パスワードを変更できます。
@@ -768,41 +876,155 @@ textarea{
   ></div>
 
 
+  <!-- =========================
+       欠席理由
+  ========================= -->
+
   <label>
-    連絡の種類
+    欠席理由（必須）
   </label>
 
+
   <select
-    id="type"
-    onchange="updateTimeFields()"
+    id="reasonType"
+    onchange="toggleOtherReason()"
   >
 
-    <option>欠席</option>
-    <option>遅刻</option>
-    <option>早退</option>
-    <option>途中抜け</option>
+    <option value="">
+      理由を選択してください
+    </option>
+
+    <option value="体調不良・けが">
+      体調不良・けが
+    </option>
+
+    <option value="通院">
+      通院
+    </option>
+
+    <option value="家庭の用事・旅行">
+      家庭の用事・旅行
+    </option>
+
+    <option value="他の部活動">
+      他の部活動
+    </option>
+
+    <option value="塾・習い事">
+      塾・習い事
+    </option>
+
+    <option value="冠婚葬祭">
+      冠婚葬祭
+    </option>
+
+    <option value="追試・補講・課題">
+      追試・補講・課題
+    </option>
+
+    <option value="セミナー">
+      セミナー
+    </option>
+
+    <option value="委員会・コアなどの仕事">
+      委員会・コアなどの仕事
+    </option>
+
+    <option value="2者懇談・3者懇談">
+      2者懇談・3者懇談
+    </option>
+
+    <option value="英検など">
+      英検など
+    </option>
+
+    <option value="その他">
+      その他
+    </option>
 
   </select>
 
 
+  <!-- その他 -->
+  <div
+    id="otherReasonBox"
+    class="hidden"
+  >
+
+    <label>
+      その他の理由（必須）
+    </label>
+
+    <textarea
+      id="otherReason"
+      placeholder="理由を入力してください"
+    ></textarea>
+
+  </div>
+
+
+  <!-- =========================
+       日付カレンダー
+  ========================= -->
+
   <label>
-    日付
+    日付（必須）
   </label>
 
-  <select
-    id="date"
-    onchange="checkDate()"
-  ></select>
+
+  <div class="form-calendar">
+
+    <div class="monthbar">
+
+      <button
+        type="button"
+        onclick="changeFormMonth(-1)"
+      >
+        ‹
+      </button>
+
+      <div
+        class="month-title"
+        id="formMonthTitle"
+      ></div>
+
+      <button
+        type="button"
+        onclick="changeFormMonth(1)"
+      >
+        ›
+      </button>
+
+    </div>
 
 
-  <div id="timeFields"></div>
+    <div class="week">
+
+      <div>月</div>
+      <div>火</div>
+      <div>水</div>
+      <div>木</div>
+      <div>金</div>
+      <div>土</div>
+      <div>日</div>
+
+    </div>
 
 
-  <label>
-    理由（必須）
-  </label>
+    <div
+      class="days"
+      id="formDays"
+    ></div>
 
-  <textarea id="reason"></textarea>
+
+    <div
+      id="selectedDateBox"
+      class="selected-date-box"
+    >
+      日付を選択してください
+    </div>
+
+  </div>
 
 
   <div id="formNotice"></div>
@@ -819,7 +1041,7 @@ textarea{
 
 
 <!-- =========================
-     連絡を修正
+     連絡を修正一覧
 ========================= -->
 
 <section
@@ -885,10 +1107,10 @@ from
    Firebase設定
 ========================= */
 
-const firebaseConfig={
+const firebaseConfig = {
 
   apiKey:
-    "AIzaSyAK9yRsSLSfYpLSyluzwRyI22Zp32KeMSA",
+    "AIzaSyAK9ySLSfYpLSyluzwRyI22Zp32KeMSA",
 
   authDomain:
     "seikyo-handbell-club.firebaseapp.com",
@@ -924,16 +1146,40 @@ const db =
 
 
 const $ =
-  id => document.getElementById(id);
+  id =>
+    document.getElementById(id);
 
 
-let profile = null;
+let profile =
+  null;
 
-let currentUser = null;
 
-let editingId = null;
+let currentUser =
+  null;
 
-let current = new Date();
+
+let editingId =
+  null;
+
+
+/* =========================
+   ホーム用カレンダー
+========================= */
+
+let current =
+  new Date();
+
+
+/* =========================
+   フォーム用カレンダー
+========================= */
+
+let formCurrent =
+  new Date();
+
+
+let selectedDate =
+  "";
 
 
 const DOMAIN =
@@ -962,7 +1208,8 @@ const esc =
 
 const pad =
   n =>
-    String(n).padStart(2,"0");
+    String(n)
+      .padStart(2,"0");
 
 
 const ymd =
@@ -973,8 +1220,13 @@ const ymd =
 const jp =
   s => {
 
-    let [a,b,c] =
+    let [
+      a,
+      b,
+      c
+    ] =
       s.split("-");
+
 
     return `${a}年${+b}月${+c}日`;
 
@@ -983,11 +1235,12 @@ const jp =
 
 const email =
   id =>
-    String(id).trim()+DOMAIN;
+    String(id).trim() +
+    DOMAIN;
 
 
 /* =========================
-   画面切り替え
+   画面を隠す
 ========================= */
 
 function hide(){
@@ -1003,7 +1256,9 @@ function hide(){
   ]
   .forEach(
     x =>
-      $(x).classList.add("hidden")
+      $(x)
+        .classList
+        .add("hidden")
   );
 
 }
@@ -1015,13 +1270,17 @@ function hide(){
 
 function backHome(){
 
-  editingId = null;
+  editingId =
+    null;
+
 
   hide();
+
 
   $("calendarView")
     .classList
     .remove("hidden");
+
 
   render();
 
@@ -1029,12 +1288,13 @@ function backHome(){
 
 
 /* =========================
-   ログイン画面
+   ログイン
 ========================= */
 
 function showLogin(){
 
   hide();
+
 
   $("loginView")
     .classList
@@ -1050,6 +1310,7 @@ function showLogin(){
 function showSetup(){
 
   hide();
+
 
   $("setupView")
     .classList
@@ -1072,7 +1333,8 @@ async function loadProfile(){
     await get(
       ref(
         db,
-        "members/"+currentUser.uid
+        "members/" +
+        currentUser.uid
       )
     );
 
@@ -1090,7 +1352,8 @@ async function loadProfile(){
 
 
     $("profileMiniText")
-      .innerHTML = text;
+      .innerHTML =
+        text;
 
 
     $("profileBox")
@@ -1110,7 +1373,8 @@ onAuthStateChanged(
   auth,
   async u => {
 
-    currentUser = u;
+    currentUser =
+      u;
 
 
     if(u){
@@ -1162,7 +1426,8 @@ onAuthStateChanged(
         .add("hidden");
 
 
-      profile = null;
+      profile =
+        null;
 
     }
 
@@ -1189,8 +1454,10 @@ async function login(){
 
   if(!id || !pw){
 
-    $("loginMsg").innerHTML =
-      '<div class="msg error">IDとパスワードを入力してください。</div>';
+    $("loginMsg")
+      .innerHTML =
+        '<div class="msg error">IDとパスワードを入力してください。</div>';
+
 
     return;
 
@@ -1212,8 +1479,10 @@ async function login(){
 
     console.error(e);
 
-    $("loginMsg").innerHTML =
-      '<div class="msg error">IDまたはパスワードが正しくありません。</div>';
+
+    $("loginMsg")
+      .innerHTML =
+        '<div class="msg error">IDまたはパスワードが正しくありません。</div>';
 
   }
 
@@ -1248,8 +1517,10 @@ async function setupPassword(){
     p !== p2
   ){
 
-    $("setupMsg").innerHTML =
-      '<div class="msg error">入力内容を確認してください。</div>';
+    $("setupMsg")
+      .innerHTML =
+        '<div class="msg error">入力内容を確認してください。</div>';
+
 
     return;
 
@@ -1262,26 +1533,32 @@ async function setupPassword(){
       await get(
         ref(
           db,
-          "memberIds/"+id
+          "memberIds/" +
+          id
         )
       );
 
 
     if(!exists.exists())
-      throw Error("not-registered");
+      throw Error(
+        "not-registered"
+      );
 
 
     let reg =
       await get(
         ref(
           db,
-          "memberRegistrations/"+id
+          "memberRegistrations/" +
+          id
         )
       );
 
 
     if(!reg.exists())
-      throw Error("no-data");
+      throw Error(
+        "no-data"
+      );
 
 
     let data =
@@ -1299,7 +1576,8 @@ async function setupPassword(){
     await set(
       ref(
         db,
-        "members/"+cred.user.uid
+        "members/" +
+        cred.user.uid
       ),
       {
         schoolId:id,
@@ -1313,7 +1591,8 @@ async function setupPassword(){
     await update(
       ref(
         db,
-        "memberIds/"+id
+        "memberIds/" +
+        id
       ),
       {
         accountCreated:true,
@@ -1329,8 +1608,10 @@ async function setupPassword(){
 
     console.error(e);
 
-    $("setupMsg").innerHTML =
-      '<div class="msg error">そのIDが登録されていないか、すでに初回設定済みです。</div>';
+
+    $("setupMsg")
+      .innerHTML =
+        '<div class="msg error">そのIDが登録されていないか、すでに初回設定済みです。</div>';
 
   }
 
@@ -1356,9 +1637,9 @@ function logout(){
 }
 
 
-/* =========================
-   カレンダー
-========================= */
+/* =========================================================
+   ホームのカレンダー
+========================================================= */
 
 async function render(){
 
@@ -1377,13 +1658,19 @@ async function render(){
 
   let ss =
     await get(
-      ref(db,"schedules")
+      ref(
+        db,
+        "schedules"
+      )
     );
 
 
   let ns =
     await get(
-      ref(db,"notices")
+      ref(
+        db,
+        "notices"
+      )
     );
 
 
@@ -1405,7 +1692,8 @@ async function render(){
         y,
         m,
         1
-      ).getDay()+6
+      ).getDay() +
+      6
     ) % 7;
 
 
@@ -1417,7 +1705,8 @@ async function render(){
     ).getDate();
 
 
-  let h = "";
+  let h =
+    "";
 
 
   for(
@@ -1439,7 +1728,11 @@ async function render(){
   ){
 
     let date =
-      ymd(y,m,d);
+      ymd(
+        y,
+        m,
+        d
+      );
 
 
     let has =
@@ -1469,18 +1762,24 @@ async function render(){
 
         ${
           count
-            ? `<span class="count">${count}件</span>`
-            : ""
+            ?
+            `<span class="count">
+              ${count}件
+            </span>`
+            :
+            ""
         }
 
         <span class="dot">
           ${
             has
-              ? esc(
-                  sch[date].time ||
-                  "部活あり"
-                )
-              : "部活なし"
+              ?
+              esc(
+                sch[date].time ||
+                "部活あり"
+              )
+              :
+              "部活なし"
           }
         </span>
 
@@ -1492,13 +1791,14 @@ async function render(){
 
 
   $("days")
-    .innerHTML = h;
+    .innerHTML =
+      h;
 
 }
 
 
 /* =========================
-   月変更
+   ホームの月変更
 ========================= */
 
 function changeMonth(n){
@@ -1516,13 +1816,14 @@ function changeMonth(n){
 }
 
 
-/* =========================
+/* =========================================================
    日付詳細
-========================= */
+========================================================= */
 
 async function openDay(date){
 
   hide();
+
 
   $("detailView")
     .classList
@@ -1533,14 +1834,18 @@ async function openDay(date){
     await get(
       ref(
         db,
-        "schedules/"+date
+        "schedules/" +
+        date
       )
     );
 
 
   let ns =
     await get(
-      ref(db,"notices")
+      ref(
+        db,
+        "notices"
+      )
     );
 
 
@@ -1576,6 +1881,7 @@ async function openDay(date){
         h +
         '<div class="msg error">この日は部活動がありません。</div>';
 
+
     return;
 
   }
@@ -1589,11 +1895,15 @@ async function openDay(date){
         部活動あり
       </strong>
 
-      ${esc(sch.time || "")}
+      ${esc(
+        sch.time || ""
+      )}
 
       <br>
 
-      ${esc(sch.place || "")}
+      ${esc(
+        sch.place || ""
+      )}
 
     </div>
 
@@ -1605,6 +1915,7 @@ async function openDay(date){
 
 
   h +=
+
     list.length
 
       ?
@@ -1617,27 +1928,14 @@ async function openDay(date){
             <div class="item">
 
               <strong>
+
                 ${esc(n.name)}
 
                 <span class="badge">
-                  ${esc(n.type)}
+                  ${esc(n.reason)}
                 </span>
 
               </strong>
-
-              ${
-                n.time
-                  ?
-                  `<div class="meta">
-                    ${esc(n.time)}
-                  </div>`
-                  :
-                  ""
-              }
-
-              <div class="meta">
-                理由：${esc(n.reason)}
-              </div>
 
             </div>
 
@@ -1647,83 +1945,23 @@ async function openDay(date){
 
       :
 
-      "<p class='small'>現在、連絡はありません。</p>";
+      `
+      <p class="small">
+        現在、連絡はありません。
+      </p>
+      `;
 
 
   $("detail")
-    .innerHTML = h;
+    .innerHTML =
+      h;
 
 }
 
 
-/* =========================
-   日付プルダウン
-========================= */
-
-function populateDateOptions(
-  selected=""
-){
-
-  const select =
-    $("date");
-
-
-  select.innerHTML =
-    '<option value="">日付を選択してください</option>';
-
-
-  const y =
-    current.getFullYear();
-
-
-  const m =
-    current.getMonth();
-
-
-  const days =
-    new Date(
-      y,
-      m+1,
-      0
-    ).getDate();
-
-
-  for(
-    let d=1;
-    d<=days;
-    d++
-  ){
-
-    const v =
-      ymd(y,m,d);
-
-
-    const o =
-      document.createElement(
-        "option"
-      );
-
-
-    o.value = v;
-
-    o.textContent =
-      jp(v);
-
-
-    if(v === selected)
-      o.selected = true;
-
-
-    select.appendChild(o);
-
-  }
-
-}
-
-
-/* =========================
+/* =========================================================
    欠席連絡フォーム
-========================= */
+========================================================= */
 
 function showForm(id=null){
 
@@ -1739,7 +1977,8 @@ function showForm(id=null){
   }
 
 
-  editingId = id;
+  editingId =
+    id;
 
 
   hide();
@@ -1753,40 +1992,61 @@ function showForm(id=null){
   $("formTitle")
     .textContent =
       id
-        ? "連絡を修正"
-        : "欠席連絡";
-
-
-  $("type").value =
-    "欠席";
-
-
-  $("reason").value =
-    "";
-
-
-  $("formNotice")
-    .innerHTML = "";
-
-
-  populateDateOptions(
-    ""
-  );
-
-
-  updateTimeFields();
+        ?
+        "連絡を修正"
+        :
+        "欠席連絡";
 
 
   $("profileBox")
     .textContent =
       `${profile.name}（高校${profile.grade}${profile.className}組）`;
 
+
+  $("reasonType")
+    .value =
+      "";
+
+
+  $("otherReason")
+    .value =
+      "";
+
+
+  $("otherReasonBox")
+    .classList
+    .add("hidden");
+
+
+  $("formNotice")
+    .innerHTML =
+      "";
+
+
+  /*
+    新規登録なら
+    現在のフォームカレンダー月をそのまま使用。
+  */
+
+  if(!id){
+
+    selectedDate =
+      "";
+
+    formCurrent =
+      new Date();
+
+  }
+
+
+  renderFormCalendar();
+
 }
 
 
-/* =========================
+/* =========================================================
    フォームから戻る
-========================= */
+========================================================= */
 
 function backFromForm(){
 
@@ -1803,96 +2063,294 @@ function backFromForm(){
 }
 
 
-/* =========================
-   時間入力欄
-========================= */
+/* =========================================================
+   その他理由欄
+========================================================= */
 
-function updateTimeFields(
-  v=""
-){
+function toggleOtherReason(){
 
-  let t =
-    $("type").value;
-
-
-  let l = "";
-
-  let p = "";
+  const type =
+    $("reasonType")
+      .value;
 
 
-  if(t === "遅刻"){
-
-    l =
-      "到着予定時刻";
-
-    p =
-      "例：17:30";
-
-  }
+  const box =
+    $("otherReasonBox");
 
 
-  if(t === "早退"){
+  if(
+    type === "その他"
+  ){
 
-    l =
-      "帰る予定時刻";
+    box
+      .classList
+      .remove("hidden");
 
-    p =
-      "例：17:30";
+  }else{
 
-  }
-
-
-  if(t === "途中抜け"){
-
-    l =
-      "抜ける時間〜戻る時間";
-
-    p =
-      "例：18:00〜19:00";
-
-  }
+    box
+      .classList
+      .add("hidden");
 
 
-  $("timeFields")
-    .innerHTML =
-
-      l
-
-        ?
-
-        `
-        <label>
-          ${l}
-        </label>
-
-        <input
-          id="time"
-          value="${esc(v)}"
-          placeholder="${p}"
-        >
-        `
-
-        :
-
+    $("otherReason")
+      .value =
         "";
+
+  }
 
 }
 
 
-/* =========================
-   日付確認
-========================= */
+/* =========================================================
+   フォーム用カレンダー表示
+========================================================= */
+
+async function renderFormCalendar(){
+
+  let y =
+    formCurrent.getFullYear();
+
+
+  let m =
+    formCurrent.getMonth();
+
+
+  $("formMonthTitle")
+    .textContent =
+      `${y}年${m+1}月`;
+
+
+  let ss =
+    await get(
+      ref(
+        db,
+        "schedules"
+      )
+    );
+
+
+  let ns =
+    await get(
+      ref(
+        db,
+        "notices"
+      )
+    );
+
+
+  let sch =
+    ss.exists()
+      ? ss.val()
+      : {};
+
+
+  let all =
+    ns.exists()
+      ? ns.val()
+      : {};
+
+
+  let first =
+    (
+      new Date(
+        y,
+        m,
+        1
+      ).getDay() +
+      6
+    ) % 7;
+
+
+  let last =
+    new Date(
+      y,
+      m+1,
+      0
+    ).getDate();
+
+
+  let h =
+    "";
+
+
+  for(
+    let i=0;
+    i<first;
+    i++
+  ){
+
+    h +=
+      '<div class="day empty"></div>';
+
+  }
+
+
+  for(
+    let d=1;
+    d<=last;
+    d++
+  ){
+
+    let date =
+      ymd(
+        y,
+        m,
+        d
+      );
+
+
+    let hasClub =
+      !!sch[date];
+
+
+    let count =
+      Object
+        .values(all)
+        .filter(
+          n =>
+            n.date === date &&
+            n.uid === currentUser?.uid
+        )
+        .length;
+
+
+    let selected =
+      date === selectedDate;
+
+
+    h += `
+
+      <div
+        class="day
+          ${hasClub ? "club-day" : "off"}
+          ${selected ? "selected-day" : ""}
+        "
+        onclick="selectFormDate('${date}')"
+      >
+
+        <div class="daynum">
+          ${d}
+        </div>
+
+        ${
+          count
+            ?
+            `<span class="count">
+              登録済
+            </span>`
+            :
+            ""
+        }
+
+        <span class="dot">
+          ${
+            hasClub
+              ?
+              esc(
+                sch[date].time ||
+                "部活あり"
+              )
+              :
+              "部活なし"
+          }
+        </span>
+
+      </div>
+
+    `;
+
+  }
+
+
+  $("formDays")
+    .innerHTML =
+      h;
+
+
+  updateSelectedDateBox();
+
+}
+
+
+/* =========================================================
+   フォームカレンダーの月変更
+========================================================= */
+
+function changeFormMonth(n){
+
+  formCurrent =
+    new Date(
+      formCurrent.getFullYear(),
+      formCurrent.getMonth()+n,
+      1
+    );
+
+
+  renderFormCalendar();
+
+}
+
+
+/* =========================================================
+   フォームで日付選択
+========================================================= */
+
+async function selectFormDate(date){
+
+  selectedDate =
+    date;
+
+
+  renderFormCalendar();
+
+
+  checkDate();
+
+}
+
+
+/* =========================================================
+   選択した日付表示
+========================================================= */
+
+function updateSelectedDateBox(){
+
+  if(!selectedDate){
+
+    $("selectedDateBox")
+      .textContent =
+        "日付を選択してください";
+
+
+    return;
+
+  }
+
+
+  $("selectedDateBox")
+    .textContent =
+      `選択中：${jp(selectedDate)}`;
+
+}
+
+
+/* =========================================================
+   選択日の部活確認
+========================================================= */
 
 async function checkDate(){
 
   let d =
-    $("date").value;
+    selectedDate;
 
 
   if(!d){
 
     $("formNotice")
-      .innerHTML = "";
+      .innerHTML =
+        "";
+
 
     return;
 
@@ -1903,43 +2361,58 @@ async function checkDate(){
     await get(
       ref(
         db,
-        "schedules/"+d
+        "schedules/" +
+        d
       )
     );
 
 
-  $("formNotice")
-    .innerHTML =
+  if(s.exists()){
 
-      s.exists()
-
-        ?
-
+    $("formNotice")
+      .innerHTML =
         `
+
         <div class="msg">
 
           部活：
-          ${esc(s.val().time || "")}
+          ${esc(
+            s.val().time || ""
+          )}
+
           /
-          ${esc(s.val().place || "")}
+
+          ${esc(
+            s.val().place || ""
+          )}
 
         </div>
-        `
 
-        :
-
-        `
-        <div class="msg error">
-          この日は部活動がないため、連絡できません。
-        </div>
         `;
+
+  }else{
+
+    $("formNotice")
+      .innerHTML =
+        `
+
+        <div class="msg error">
+
+          この日は部活動がないため、
+          連絡できません。
+
+        </div>
+
+        `;
+
+  }
 
 }
 
 
-/* =========================
+/* =========================================================
    同日重複チェック
-========================= */
+========================================================= */
 
 async function hasNoticeOnDate(
   date
@@ -1947,7 +2420,10 @@ async function hasNoticeOnDate(
 
   const s =
     await get(
-      ref(db,"notices")
+      ref(
+        db,
+        "notices"
+      )
     );
 
 
@@ -1956,46 +2432,62 @@ async function hasNoticeOnDate(
 
 
   return Object
-    .entries(s.val())
+    .entries(
+      s.val()
+    )
     .some(
       ([id,n]) =>
-        n.uid === currentUser.uid &&
-        n.date === date &&
-        id !== editingId
+        n.uid ===
+          currentUser.uid &&
+
+        n.date ===
+          date &&
+
+        id !==
+          editingId
     );
 
 }
 
 
-/* =========================
+/* =========================================================
    欠席連絡登録・修正
-========================= */
+========================================================= */
 
 async function saveNotice(){
 
   let d =
-    $("date").value;
+    selectedDate;
 
 
-  let r =
-    $("reason")
+  let reasonType =
+    $("reasonType")
+      .value;
+
+
+  let otherReason =
+    $("otherReason")
       .value
       .trim();
 
 
-  let t =
-    $("type").value;
+  let r =
+    reasonType === "その他"
+      ?
+      otherReason
+      :
+      reasonType;
 
 
-  let time =
-    $("time")?.value.trim() || "";
-
-
-  if(!d || !r){
+  if(
+    !d ||
+    !reasonType
+  ){
 
     alert(
-      "日付と理由は必須です。"
+      "日付と欠席理由は必須です。"
     );
+
 
     return;
 
@@ -2003,30 +2495,54 @@ async function saveNotice(){
 
 
   if(
-    !(await get(
+    reasonType === "その他" &&
+    !otherReason
+  ){
+
+    alert(
+      "その他の理由を入力してください。"
+    );
+
+
+    return;
+
+  }
+
+
+  let schedule =
+    await get(
       ref(
         db,
-        "schedules/"+d
+        "schedules/" +
+        d
       )
-    )).exists()
+    );
+
+
+  if(
+    !schedule.exists()
   ){
 
     alert(
       "その日は部活動がありません。"
     );
 
+
     return;
 
   }
 
 
   if(
-    await hasNoticeOnDate(d)
+    await hasNoticeOnDate(
+      d
+    )
   ){
 
     alert(
       "この日はすでに連絡を登録しています。\n同じ日に2件は登録できません。"
     );
+
 
     return;
 
@@ -2046,14 +2562,20 @@ async function saveNotice(){
     await update(
       ref(
         db,
-        "notices/"+editingId
+        "notices/" +
+        editingId
       ),
       {
-        type:t,
-        date:d,
-        time,
-        reason:r,
-        updatedAt:Date.now()
+
+        reason:
+          r,
+
+        date:
+          d,
+
+        updatedAt:
+          Date.now()
+
       }
     );
 
@@ -2063,10 +2585,10 @@ async function saveNotice(){
     );
 
 
-    editingId = null;
+    editingId =
+      null;
 
 
-    /* 修正後は一覧へ */
     showEdit();
 
 
@@ -2081,7 +2603,10 @@ async function saveNotice(){
 
   await set(
     push(
-      ref(db,"notices")
+      ref(
+        db,
+        "notices"
+      )
     ),
     {
 
@@ -2094,13 +2619,11 @@ async function saveNotice(){
       name:
         profile.name,
 
-      type:t,
+      reason:
+        r,
 
-      date:d,
-
-      time,
-
-      reason:r,
+      date:
+        d,
 
       createdAt:
         Date.now(),
@@ -2118,35 +2641,47 @@ async function saveNotice(){
 
 
   /*
-    ホームには戻らず、
-    そのまま次の連絡を入力できるようにする
+    ホームには戻らない。
+    次の連絡をそのまま入力できるようにする。
   */
 
-  $("type").value =
-    "欠席";
+
+  $("reasonType")
+    .value =
+      "";
 
 
-  $("reason").value =
-    "";
+  $("otherReason")
+    .value =
+      "";
+
+
+  $("otherReasonBox")
+    .classList
+    .add("hidden");
 
 
   $("formNotice")
-    .innerHTML = "";
+    .innerHTML =
+      "";
 
 
-  populateDateOptions(
-    ""
-  );
+  selectedDate =
+    "";
 
 
-  updateTimeFields();
+  formCurrent =
+    new Date();
+
+
+  renderFormCalendar();
 
 }
 
 
-/* =========================
+/* =========================================================
    連絡を修正一覧
-========================= */
+========================================================= */
 
 async function showEdit(){
 
@@ -2169,14 +2704,19 @@ async function showEdit(){
 
   let s =
     await get(
-      ref(db,"notices")
+      ref(
+        db,
+        "notices"
+      )
     );
 
 
   let all =
     s.exists()
-      ? s.val()
-      : {};
+      ?
+      s.val()
+      :
+      {};
 
 
   let list =
@@ -2184,8 +2724,22 @@ async function showEdit(){
       .entries(all)
       .filter(
         ([id,n]) =>
-          n.uid === currentUser.uid
+          n.uid ===
+          currentUser.uid
       );
+
+
+  /*
+    日付が新しいものから表示
+  */
+
+  list.sort(
+    (a,b) =>
+      String(b[1].date)
+        .localeCompare(
+          String(a[1].date)
+        )
+  );
 
 
   $("myNotices")
@@ -2204,26 +2758,16 @@ async function showEdit(){
 
                 <strong>
                   ${jp(n.date)}
-                  　
-                  ${esc(n.type)}
                 </strong>
 
-                ${
-                  n.time
-                    ?
-
-                    `<div class="meta">
-                      ${esc(n.time)}
-                    </div>`
-
-                    :
-
-                    ""
-                }
 
                 <div class="meta">
-                  理由：${esc(n.reason)}
+
+                  理由：
+                  ${esc(n.reason)}
+
                 </div>
+
 
                 <div class="row">
 
@@ -2232,6 +2776,7 @@ async function showEdit(){
                   >
                     修正
                   </button>
+
 
                   <button
                     class="danger"
@@ -2259,9 +2804,9 @@ async function showEdit(){
 }
 
 
-/* =========================
+/* =========================================================
    修正画面
-========================= */
+========================================================= */
 
 async function editNotice(id){
 
@@ -2269,14 +2814,16 @@ async function editNotice(id){
     await get(
       ref(
         db,
-        "notices/"+id
+        "notices/" +
+        id
       )
     );
 
 
   if(
     !s.exists() ||
-    s.val().uid !== currentUser.uid
+    s.val().uid !==
+      currentUser.uid
   )
     return;
 
@@ -2285,7 +2832,8 @@ async function editNotice(id){
     s.val();
 
 
-  editingId = id;
+  editingId =
+    id;
 
 
   hide();
@@ -2301,22 +2849,104 @@ async function editNotice(id){
       "連絡を修正";
 
 
-  $("type").value =
-    n.type;
+  $("profileBox")
+    .textContent =
+      `${profile.name}（高校${profile.grade}${profile.className}組）`;
 
 
-  $("reason").value =
-    n.reason;
+  /*
+    理由を設定
+  */
+
+  const reasonOptions = [
+
+    "体調不良・けが",
+    "通院",
+    "家庭の用事・旅行",
+    "他の部活動",
+    "塾・習い事",
+    "冠婚葬祭",
+    "追試・補講・課題",
+    "セミナー",
+    "委員会・コアなどの仕事",
+    "2者懇談・3者懇談",
+    "英検など"
+
+  ];
 
 
-  populateDateOptions(
-    n.date
-  );
+  if(
+    reasonOptions.includes(
+      n.reason
+    )
+  ){
+
+    $("reasonType")
+      .value =
+        n.reason;
 
 
-  updateTimeFields(
-    n.time || ""
-  );
+    $("otherReason")
+      .value =
+        "";
+
+
+  }else{
+
+    $("reasonType")
+      .value =
+        "その他";
+
+
+    $("otherReason")
+      .value =
+        n.reason || "";
+
+  }
+
+
+  toggleOtherReason();
+
+
+  /*
+    登録済みの日付の月を開く
+  */
+
+  if(n.date){
+
+    let [
+      y,
+      m
+    ] =
+      n.date
+        .split("-")
+        .map(Number);
+
+
+    formCurrent =
+      new Date(
+        y,
+        m-1,
+        1
+      );
+
+
+    selectedDate =
+      n.date;
+
+  }else{
+
+    formCurrent =
+      new Date();
+
+
+    selectedDate =
+      "";
+
+  }
+
+
+  renderFormCalendar();
 
 
   checkDate();
@@ -2324,9 +2954,9 @@ async function editNotice(id){
 }
 
 
-/* =========================
+/* =========================================================
    削除
-========================= */
+========================================================= */
 
 async function deleteNotice(id){
 
@@ -2342,20 +2972,23 @@ async function deleteNotice(id){
     await get(
       ref(
         db,
-        "notices/"+id
+        "notices/" +
+        id
       )
     );
 
 
   if(
     s.exists() &&
-    s.val().uid === currentUser.uid
+    s.val().uid ===
+      currentUser.uid
   ){
 
     await remove(
       ref(
         db,
-        "notices/"+id
+        "notices/" +
+        id
       )
     );
 
@@ -2367,9 +3000,9 @@ async function deleteNotice(id){
 }
 
 
-/* =========================
+/* =========================================================
    マイページ
-========================= */
+========================================================= */
 
 async function showMyPage(){
 
@@ -2395,16 +3028,19 @@ async function showMyPage(){
 
   $("myGrade").value =
     String(
-      profile.grade ?? "1"
+      profile.grade ??
+      "1"
     );
 
 
   $("myClass").value =
-    profile.className ?? "";
+    profile.className ??
+    "";
 
 
   $("myName").value =
-    profile.name ?? "";
+    profile.name ??
+    "";
 
 
   $("myPassword").value =
@@ -2416,14 +3052,15 @@ async function showMyPage(){
 
 
   $("myPageMsg")
-    .innerHTML = "";
+    .innerHTML =
+      "";
 
 }
 
 
-/* =========================
+/* =========================================================
    プロフィール保存
-========================= */
+========================================================= */
 
 async function saveProfile(){
 
@@ -2435,7 +3072,8 @@ async function saveProfile(){
 
 
   const grade =
-    $("myGrade").value;
+    $("myGrade")
+      .value;
 
 
   const className =
@@ -2460,6 +3098,7 @@ async function saveProfile(){
       .innerHTML =
         '<div class="msg error">学年・クラス・名前を入力してください。</div>';
 
+
     return;
 
   }
@@ -2470,21 +3109,27 @@ async function saveProfile(){
     await update(
       ref(
         db,
-        "members/"+currentUser.uid
+        "members/" +
+        currentUser.uid
       ),
       {
+
         grade,
         className,
         name
+
       }
     );
 
 
     profile = {
+
       ...profile,
+
       grade,
       className,
       name
+
     };
 
 
@@ -2510,9 +3155,9 @@ async function saveProfile(){
 }
 
 
-/* =========================
+/* =========================================================
    パスワード変更
-========================= */
+========================================================= */
 
 async function changePassword(){
 
@@ -2534,6 +3179,7 @@ async function changePassword(){
     $("myPageMsg")
       .innerHTML =
         '<div class="msg error">パスワードは6文字以上で、確認と一致させてください。</div>';
+
 
     return;
 
@@ -2575,9 +3221,9 @@ async function changePassword(){
 }
 
 
-/* =========================
-   windowへ登録
-========================= */
+/* =========================================================
+   HTMLから呼び出す関数をwindowへ登録
+========================================================= */
 
 window.showLogin =
   showLogin;
@@ -2619,8 +3265,16 @@ window.showEdit =
   showEdit;
 
 
-window.updateTimeFields =
-  updateTimeFields;
+window.toggleOtherReason =
+  toggleOtherReason;
+
+
+window.changeFormMonth =
+  changeFormMonth;
+
+
+window.selectFormDate =
+  selectFormDate;
 
 
 window.checkDate =
@@ -2655,9 +3309,9 @@ window.backHome =
   backHome;
 
 
-/* =========================
+/* =========================================================
    初期表示
-========================= */
+========================================================= */
 
 render();
 
