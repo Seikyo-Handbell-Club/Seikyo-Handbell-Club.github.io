@@ -19,59 +19,96 @@ body{
 
 header{
   background:#fff;
-  padding:16px 18px 12px;
+  padding:14px 18px 12px;
   position:sticky;
   top:0;
   z-index:10;
   border-bottom:1px solid #e7eaf0
 }
 
+/* =========================
+   ヘッダー
+   タイトル
+   ↓
+   部活名
+   ↓
+   マイページ
+   ↓
+   操作ボタン
+========================= */
+
 .header-top{
   display:flex;
-  align-items:center;
-  justify-content:space-between;
-  min-height:42px
+  flex-direction:column;
+  align-items:stretch;
+  justify-content:flex-start;
+  width:100%;
+  min-height:0;
+  gap:0
+}
+
+.header-brand{
+  width:100%;
+  text-align:center;
+  cursor:pointer
 }
 
 .header-title{
   margin:0;
+  width:100%;
   font-size:22px;
   font-weight:800;
+  line-height:1.3;
   text-align:center;
-  flex:1;
-  cursor:pointer
+  cursor:pointer;
+  overflow-wrap:anywhere
 }
 
 .club{
+  width:100%;
   text-align:center;
   color:#66717e;
   font-size:13px;
-  margin:2px 0 10px
+  line-height:1.4;
+  margin:2px 0 11px
+}
+
+.header-user-row{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  min-width:0;
+  margin-bottom:8px
+}
+
+.header-action-row{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  min-width:0
 }
 
 .header-side{
   display:flex;
   align-items:center;
   gap:7px;
-  min-width:42px
-}
-
-.header-side.right{
-  justify-content:flex-end
-}
-
-.header-spacer{
-  width:42px
+  min-width:0
 }
 
 .profile-mini{
   display:flex;
   align-items:center;
+  justify-content:center;
   gap:7px;
-  min-width:0
+  min-width:0;
+  max-width:100%
 }
 
 .profile-mini-text{
+  min-width:0;
+  max-width:calc(100vw - 90px);
   font-size:13px;
   font-weight:700;
   white-space:nowrap;
@@ -83,6 +120,7 @@ header{
   width:40px;
   height:40px;
   padding:0;
+  flex:none;
   border-radius:50%;
   background:#eef3fb;
   color:#333;
@@ -95,20 +133,36 @@ header{
 .header-actions{
   display:flex;
   align-items:center;
-  justify-content:flex-end;
-  gap:6px
+  justify-content:center;
+  gap:6px;
+  width:100%;
+  max-width:520px;
+  flex-wrap:wrap
 }
 
 .header-actions button{
   padding:7px 9px;
   font-size:12px;
-  border-radius:9px
+  border-radius:9px;
+  white-space:nowrap;
+  flex:0 1 auto
 }
 
 .header-actions .logout{
   background:#fff;
   color:#555;
   border:1px solid #d9dee7
+}
+
+.header-login{
+  width:100%;
+  display:flex;
+  justify-content:center
+}
+
+.header-login button{
+  width:100%;
+  max-width:180px
 }
 
 button{
@@ -121,6 +175,7 @@ button{
 }
 
 main{
+  width:100%;
   max-width:720px;
   margin:auto;
   padding:18px
@@ -276,6 +331,11 @@ textarea{
   font-weight:700
 }
 
+/*
+  ホームカレンダーでは時間を表示しない。
+  詳細画面では時間を表示する。
+*/
+
 .dot{
   display:block;
   margin-top:7px;
@@ -384,7 +444,7 @@ textarea{
 }
 
 /* =========================
-   スマホ縦向き
+   スマホ
 ========================= */
 
 @media(max-width:480px){
@@ -393,111 +453,60 @@ textarea{
     padding:12px 10px 10px
   }
 
-  /*
-    スマホ縦向きでは
-    ①タイトル
-    ②マイページ＋名前
-    ③操作ボタン
-    の3段構成
-  */
-
-  .header-top{
-    flex-direction:column;
-    justify-content:flex-start;
-    align-items:stretch;
-    gap:8px;
-    min-height:0
-  }
-
-  /* ①タイトル */
-
   .header-title{
-    order:1;
-    width:100%;
-    flex:none;
-    font-size:22px;
-    line-height:1.3;
-    white-space:nowrap;
-    text-align:center;
-    margin:0
+    font-size:21px;
+    line-height:1.3
   }
 
-  /* ②マイページ＋名前 */
+  .club{
+    font-size:12px;
+    margin:2px 0 10px
+  }
 
-  #loggedInLeft{
-    order:2;
-    width:100%;
-    min-width:0;
-    justify-content:center
+  .header-user-row{
+    margin-bottom:8px
   }
 
   .profile-mini{
-    justify-content:center;
     width:100%;
-    min-width:0
+    max-width:100%
   }
 
   .profile-mini-text{
     font-size:13px;
-    max-width:calc(100vw - 70px);
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis
+    max-width:calc(100vw - 70px)
   }
 
   .icon-button{
     width:38px;
     height:38px;
-    flex:none
-  }
-
-  /* ③操作ボタン */
-
-  #loggedInRight{
-    order:3;
-    width:100%;
-    min-width:0;
-    justify-content:center
+    font-size:21px
   }
 
   .header-actions{
     width:100%;
-    gap:5px;
-    justify-content:center
+    gap:5px
   }
 
   .header-actions button{
-    flex:1;
+    flex:1 1 auto;
     min-width:0;
     padding:8px 5px;
-    font-size:12px;
-    white-space:nowrap
+    font-size:12px
   }
 
-  /* ログアウト状態 */
-
-  #loggedOutLeft{
-    display:none
-  }
-
-  #loggedOutRight{
-    order:3;
-    width:100%;
-    justify-content:center
-  }
-
-  #loggedOutRight button{
-    width:100%;
+  .header-login button{
     max-width:180px
   }
 
-  .header-spacer{
-    width:38px
+  main{
+    padding:12px
   }
 
-  .club{
-    font-size:13px;
-    margin:6px 0 8px
+  .card,
+  .panel{
+    padding:13px;
+    border-radius:15px
   }
 
   .form-calendar{
@@ -522,6 +531,46 @@ textarea{
   }
 
 }
+
+
+/* =========================
+   かなり狭いスマホ
+========================= */
+
+@media(max-width:350px){
+
+  .header-title{
+    font-size:19px
+  }
+
+  .club{
+    font-size:11px
+  }
+
+  .header-actions{
+    gap:4px
+  }
+
+  .header-actions button{
+    font-size:11px;
+    padding:8px 3px
+  }
+
+  .day{
+    min-height:65px;
+    padding:5px
+  }
+
+  .daynum{
+    font-size:13px
+  }
+
+  .count{
+    font-size:10px;
+    padding:3px 5px
+  }
+
+}
 </style>
 </head>
 
@@ -531,9 +580,29 @@ textarea{
 
   <div class="header-top">
 
+    <!-- タイトル＋部活名を1セットとして最上部に配置 -->
+
+    <div
+      class="header-brand"
+      onclick="backHome()"
+    >
+
+      <h1 class="header-title">
+        部活動欠席連絡
+      </h1>
+
+      <div class="club">
+        清教学園ハンドベル部
+      </div>
+
+    </div>
+
+
+    <!-- ログイン中：マイページ＋名前 -->
+
     <div
       id="loggedInLeft"
-      class="header-side hidden"
+      class="header-user-row hidden"
     >
 
       <div class="profile-mini">
@@ -555,32 +624,20 @@ textarea{
 
     </div>
 
+
+    <!-- ログアウト中はここを空けておく -->
+
     <div
       id="loggedOutLeft"
-      class="header-spacer"
+      class="header-user-row hidden"
     ></div>
 
-    <h1
-      class="header-title"
-      onclick="backHome()"
-    >
-      部活動欠席連絡
-    </h1>
 
-    <div
-      id="loggedOutRight"
-      class="header-side right"
-    >
-
-      <button onclick="showLogin()">
-        ログイン
-      </button>
-
-    </div>
+    <!-- ログイン中：操作ボタン -->
 
     <div
       id="loggedInRight"
-      class="header-side right hidden"
+      class="header-action-row hidden"
     >
 
       <div class="header-actions">
@@ -604,10 +661,24 @@ textarea{
 
     </div>
 
-  </div>
 
-  <div class="club">
-    清教学園ハンドベル部
+    <!-- ログアウト中：ログイン -->
+
+    <div
+      id="loggedOutRight"
+      class="header-action-row"
+    >
+
+      <div class="header-login">
+
+        <button onclick="showLogin()">
+          ログイン
+        </button>
+
+      </div>
+
+    </div>
+
   </div>
 
 </header>
@@ -1424,7 +1495,7 @@ onAuthStateChanged(
 
       $("loggedOutLeft")
         .classList
-        .remove("hidden");
+        .add("hidden");
 
 
       $("loggedOutRight")
@@ -1789,6 +1860,11 @@ async function render(){
         .length;
 
 
+    /*
+      ホームのカレンダーには
+      時間を表示しない。
+    */
+
     h += `
 
       <div
@@ -1809,19 +1885,6 @@ async function render(){
             :
             ""
         }
-
-        <span class="dot">
-          ${
-            has
-              ?
-              esc(
-                sch[date].time ||
-                "部活あり"
-              )
-              :
-              "部活なし"
-          }
-        </span>
 
       </div>
 
@@ -1923,6 +1986,11 @@ async function openDay(date){
   }
 
 
+  /*
+    日付をクリックした詳細画面では
+    部活時間を表示する。
+  */
+
   h += `
 
     <div class="userbar">
@@ -1931,14 +1999,18 @@ async function openDay(date){
         部活動あり
       </strong>
 
+      <br>
+
+      時間：
       ${esc(
-        sch.time || ""
+        sch.time || "時間未設定"
       )}
 
       <br>
 
+      場所：
       ${esc(
-        sch.place || ""
+        sch.place || "場所未設定"
       )}
 
     </div>
