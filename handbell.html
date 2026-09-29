@@ -1348,7 +1348,7 @@ async function loadProfile(){
   if(profile){
 
     const text =
-      `高校${esc(profile.grade)}${esc(profile.className)}組　${esc(profile.name)}`;
+      `高校${esc(profile.grade)}年${esc(profile.className)}組　${esc(profile.name)}`;
 
 
     $("profileMiniText")
@@ -1358,7 +1358,7 @@ async function loadProfile(){
 
     $("profileBox")
       .textContent =
-        `${profile.name}（高校${profile.grade}${profile.className}組）`;
+        `${profile.name}（高校${profile.grade}年${profile.className}組）`;
 
   }
 
@@ -2000,7 +2000,7 @@ function showForm(id=null){
 
   $("profileBox")
     .textContent =
-      `${profile.name}（高校${profile.grade}${profile.className}組）`;
+      `${profile.name}（高校${profile.grade}年${profile.className}組）`;
 
 
   $("reasonType")
@@ -2851,7 +2851,7 @@ async function editNotice(id){
 
   $("profileBox")
     .textContent =
-      `${profile.name}（高校${profile.grade}${profile.className}組）`;
+      `${profile.name}（高校${profile.grade}年${profile.className}組）`;
 
 
   /*
