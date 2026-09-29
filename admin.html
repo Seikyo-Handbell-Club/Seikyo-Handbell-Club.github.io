@@ -5,12 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>管理者設定｜清教学園ハンドベル部</title>
 
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-
 <style>
-*{
-  box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
 body{
   margin:0;
@@ -64,11 +60,10 @@ textarea{
   border:1px solid #d9dee7;
   border-radius:10px;
   font-size:16px;
-  background:#fff;
 }
 
 textarea{
-  min-height:130px;
+  min-height:90px;
   resize:vertical;
 }
 
@@ -89,13 +84,6 @@ button{
 
 .secondary{
   background:#eef3fb;
-}
-
-.cancel{
-  background:#f1f3f5;
-  color:#4b5560;
-  width:100%;
-  margin-top:8px;
 }
 
 .danger{
@@ -140,91 +128,68 @@ button{
   color:#6f7882;
 }
 
-/* 部員一覧 */
-
 .member-head{
   display:flex;
   align-items:center;
+  justify-content:space-between;
   gap:8px;
-  flex-wrap:wrap;
 }
 
-.member-head strong{
-  font-size:16px;
+.member-name{
+  font-weight:700;
 }
 
 .member-actions{
   display:flex;
   gap:5px;
-  margin-left:auto;
 }
 
 .member-actions button{
-  padding:5px 9px;
+  padding:5px 8px;
   font-size:12px;
 }
 
-/* 変更中 */
-
-.editing{
-  border:2px solid #1f6feb;
+.pdf-box{
+  border:1px dashed #b9c3d0;
+  border-radius:12px;
+  padding:14px;
+  background:#fafbfd;
 }
 
-/* OCR */
-
-.preview{
-  max-width:100%;
-  max-height:300px;
-  border-radius:10px;
-  margin-top:10px;
-}
-
-.ocr-candidate{
+.candidate{
   border:1px solid #dfe4eb;
   border-radius:12px;
-  padding:10px;
-  margin:10px 0;
-  background:#fafbfc;
+  padding:12px;
+  margin:9px 0;
+  background:#fff;
 }
 
-.ocr-candidate-top{
+.candidate label{
+  margin:0;
+  font-weight:400;
+}
+
+.candidate-grid{
   display:grid;
-  grid-template-columns:30px 1fr;
+  grid-template-columns:1fr 1fr;
   gap:8px;
-  align-items:center;
 }
 
-.ocr-candidate input{
-  padding:8px;
-  font-size:14px;
+.candidate-grid div{
+  font-size:13px;
+}
+
+.badge{
+  display:inline-block;
+  padding:3px 7px;
+  border-radius:999px;
+  background:#eef3fb;
+  font-size:12px;
   margin-bottom:7px;
 }
 
-.ocr-candidate input[type="checkbox"]{
-  width:20px;
-  height:20px;
-  margin:0;
-}
-
-.ocr-label{
-  font-size:12px;
-  color:#6f7882;
-  margin-bottom:3px;
-}
-
-.ocr-field{
-  margin-top:7px;
-}
-
-.ocr-delete{
-  margin-top:5px;
-  width:100%;
-}
-
-@media(max-width:600px){
-  main{
-    padding:12px;
-  }
+.notice{
+  white-space:pre-wrap;
 }
 </style>
 </head>
@@ -232,221 +197,210 @@ button{
 <body>
 
 <header>
-<h1>清教学園ハンドベル部 管理者設定</h1>
+  <h1>清教学園ハンドベル部 管理者設定</h1>
 </header>
 
 <main>
 
+<!-- ログイン -->
 <section id="login" class="card">
 
-<h2>管理者ログイン</h2>
+  <h2>管理者ログイン</h2>
 
-<p class="small">
-管理者として登録されたアカウントでログインしてください。
-</p>
+  <p class="small">
+    管理者用パスワードを入力してください。
+  </p>
 
-<label>パスワード</label>
+  <label>パスワード</label>
+  <input
+    id="password"
+    type="password"
+    autocomplete="current-password"
+  >
 
-<input
-  id="password"
-  type="password"
-  autocomplete="current-password"
->
+  <button class="primary" onclick="adminLogin()">
+    ログイン
+  </button>
 
-<button
-  class="primary"
-  onclick="adminLogin()"
->
-ログイン
-</button>
-
-<div id="loginMsg"></div>
+  <div id="loginMsg"></div>
 
 </section>
 
 
+<!-- 管理画面 -->
 <section id="app" class="hidden">
 
-<div class="card">
-
-<button
-  class="secondary"
-  onclick="logout()"
->
-ログアウト
-</button>
-
-</div>
+  <!-- ログアウト -->
+  <div class="card">
+    <button class="secondary" onclick="logout()">
+      ログアウト
+    </button>
+  </div>
 
 
-<!-- 部員登録 -->
+  <!-- 部員登録 -->
+  <div class="card">
 
-<div id="memberFormCard" class="card">
+    <h2>部員登録</h2>
 
-<h2 id="memberFormTitle">
-部員登録
-</h2>
+    <label>学校ID</label>
+    <input id="mid">
 
-<label>学校ID</label>
+    <label>名前</label>
+    <input id="mname">
 
-<input
-  id="mid"
-  autocomplete="off"
->
+    <label>学年</label>
 
-<label>名前</label>
+    <select id="mgrade">
+      <option value="中学1年">中学1年</option>
+      <option value="中学2年">中学2年</option>
+      <option value="中学3年">中学3年</option>
+      <option value="高校1年">高校1年</option>
+      <option value="高校2年">高校2年</option>
+    </select>
 
-<input id="mname">
+    <label>クラス</label>
 
-<label>学年</label>
+    <select id="mclass">
+      <option value="A">A組</option>
+      <option value="B">B組</option>
+      <option value="C">C組</option>
+      <option value="D">D組</option>
+      <option value="E">E組</option>
+      <option value="F">F組</option>
+      <option value="G">G組</option>
+      <option value="H">H組</option>
+      <option value="I">I組</option>
+      <option value="J">J組</option>
+      <option value="K">K組</option>
+    </select>
 
-<select id="mgrade">
-<option value="中学1年">中学1年</option>
-<option value="中学2年">中学2年</option>
-<option value="中学3年">中学3年</option>
-<option value="高校1年">高校1年</option>
-<option value="高校2年">高校2年</option>
-</select>
+    <button class="primary" onclick="addMember()">
+      登録する
+    </button>
 
-<label>クラス</label>
+    <div id="memberMsg"></div>
 
-<select id="mclass">
-<option value="A">A組</option>
-<option value="B">B組</option>
-<option value="C">C組</option>
-<option value="D">D組</option>
-<option value="E">E組</option>
-<option value="F">F組</option>
-<option value="G">G組</option>
-<option value="H">H組</option>
-<option value="I">I組</option>
-<option value="J">J組</option>
-<option value="K">K組</option>
-</select>
-
-<button
-  id="memberSubmit"
-  class="primary"
-  onclick="addMember()"
->
-登録する
-</button>
-
-<button
-  id="memberCancel"
-  class="cancel hidden"
-  onclick="cancelMemberEdit()"
->
-変更をやめる
-</button>
-
-<div id="memberMsg"></div>
-
-</div>
+  </div>
 
 
-<!-- 部員一覧 -->
+  <!-- 部員一覧 -->
+  <div class="card">
 
-<div class="card">
+    <h2>部員一覧</h2>
 
-<h2>部員一覧</h2>
+    <div id="members"></div>
 
-<div id="members"></div>
-
-</div>
+  </div>
 
 
-<!-- 予定表 -->
+  <!-- 予定表 -->
+  <div class="card">
 
-<div class="card">
+    <h2>清教学園ハンドベル部予定表</h2>
 
-<h2>清教学園ハンドベル部予定表</h2>
 
-<label>予定表の画像</label>
+    <!-- PDF読み込み -->
+    <div class="pdf-box">
 
-<input
-  id="scheduleImage"
-  type="file"
-  accept="image/*"
-  onchange="previewScheduleImage(event)"
->
+      <strong>PDFから予定を読み取る</strong>
 
-<img
-  id="schedulePreview"
-  class="preview hidden"
->
+      <p class="small">
+        予定表PDFの文字データを直接読み取ります。<br>
+        OCRは使用しません。<br>
+        「練習曲の目安」列は完全に無視します。
+      </p>
 
-<button
-  class="secondary"
-  style="margin-top:10px;width:100%"
-  onclick="runOCR()"
->
-画像から予定を読み取る
-</button>
+      <input
+        id="schedulePdf"
+        type="file"
+        accept="application/pdf,.pdf"
+      >
 
-<div id="ocrMsg"></div>
+      <button
+        class="secondary"
+        style="margin-top:10px;width:100%"
+        onclick="readSchedulePDF()"
+      >
+        PDFから予定を読み取る
+      </button>
 
-<label>読み取った文字</label>
+      <div id="pdfMsg"></div>
 
-<textarea
-  id="ocrText"
-  placeholder="OCR結果がここに表示されます。"
-></textarea>
+    </div>
 
-<h3>予定候補</h3>
 
-<div id="ocrCandidates">
-<p class="small">
-画像を読み取ると候補が表示されます。
-</p>
-</div>
+    <!-- PDF候補 -->
+    <div id="pdfCandidatesBox" class="hidden">
 
-<button
-  class="primary"
-  onclick="registerOCRCandidates()"
->
-選択した予定を登録
-</button>
+      <h3>読み取った予定候補</h3>
 
-<hr
-  style="border:0;border-top:1px solid #e5e8ed;margin:20px 0"
->
+      <p class="small">
+        登録したい予定にチェックを入れてください。<br>
+        間違っている部分はここで修正できます。
+      </p>
 
-<h3>手動で予定を登録</h3>
+      <div id="pdfCandidates"></div>
 
-<label>日付</label>
+      <button
+        class="primary"
+        onclick="registerPDFCandidates()"
+      >
+        選択した予定を登録
+      </button>
 
-<input
-  id="sdate"
-  type="date"
->
+    </div>
 
-<label>時間</label>
 
-<input
-  id="stime"
-  placeholder="例：15:45〜18:00"
->
+    <hr
+      style="
+        border:0;
+        border-top:1px solid #e5e8ed;
+        margin:20px 0;
+      "
+    >
 
-<label>場所</label>
 
-<input
-  id="splace"
-  placeholder="例：音楽練習室"
->
+    <!-- 手動登録 -->
+    <h3>手動で予定を登録</h3>
 
-<button
-  class="primary"
-  onclick="saveSchedule()"
->
-予定を保存
-</button>
+    <label>日付</label>
+    <input id="sdate" type="date">
 
-<div id="scheduleMsg"></div>
+    <label>時間</label>
+    <input
+      id="stime"
+      placeholder="例：15:45〜18:00"
+    >
 
-<div id="schedules"></div>
+    <label>場所</label>
+    <input
+      id="splace"
+      placeholder="例：音楽練習室"
+    >
 
-</div>
+    <label>その他・備考</label>
+    <textarea
+      id="snote"
+      placeholder="例：不在：中3"
+    ></textarea>
+
+    <button
+      class="primary"
+      onclick="saveSchedule()"
+    >
+      予定を保存
+    </button>
+
+    <div id="scheduleMsg"></div>
+
+
+    <!-- 登録済み予定 -->
+    <h3>登録済み予定</h3>
+
+    <div id="schedules"></div>
+
+  </div>
 
 </section>
 
@@ -455,24 +409,20 @@ button{
 
 <script type="module">
 
-/* =========================================================
+/* =====================================================
    Firebase
-========================================================= */
+===================================================== */
 
 import {
   initializeApp
-}
-from
-"https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 
 import {
   getAuth,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut
-}
-from
-"https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
 import {
   getDatabase,
@@ -481,128 +431,124 @@ import {
   set,
   update,
   remove
-}
-from
-"https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
-
-
-const ADMIN_EMAIL =
-"kazuma.cosmos@gmail.com";
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
 
 
 const firebaseConfig = {
 
   apiKey:
-  "AIzaSyAK9yRsSLSfYpLSyluzwRyI22Zp32KeMSA",
+    "AIzaSyAK9yRrSSLsfYpLSyuzwRyI2ZZp32KeMSA",
 
   authDomain:
-  "seikyo-handbell-club.firebaseapp.com",
+    "seikyo-handbell-club.firebaseapp.com",
 
   databaseURL:
-  "https://seikyo-handbell-club-default-rtdb.firebaseio.com",
+    "https://seikyo-handbell-club-default-rtdb.firebaseio.com",
 
   projectId:
-  "seikyo-handbell-club",
+    "seikyo-handbell-club",
 
   storageBucket:
-  "seikyo-handbell-club.firebasestorage.app",
+    "seikyo-handbell-club.firebasestorage.app",
 
   messagingSenderId:
-  "55435007971",
+    "55435007971",
 
   appId:
-  "1:55435007971:web:25f5c3b9dcd4324bc3f2d6"
+    "1:55435007971:web:25f5c3b9dcd4324bc3f2d6"
 
 };
 
 
-const app =
-initializeApp(firebaseConfig);
+const ADMIN_EMAIL = "kazuma.cosmos@gmail.com";
 
-const auth =
-getAuth(app);
+const app = initializeApp(firebaseConfig);
 
-const db =
-getDatabase(app);
+const auth = getAuth(app);
 
+const db = getDatabase(app);
 
-const $ =
-id =>
-document.getElementById(id);
+const $ = id => document.getElementById(id);
+
+let pdfCandidates = [];
 
 
-const esc =
-s =>
-String(s ?? "")
-.replace(
-  /[&<>"']/g,
-  c =>
-  ({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    '"':"&quot;",
-    "'":"&#39;"
-  }[c])
-);
+/* =====================================================
+   共通
+===================================================== */
+
+const esc = s =>
+  String(s ?? "").replace(
+    /[&<>"']/g,
+    c => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#39;"
+    }[c])
+  );
 
 
-let editingMemberId =
-null;
+const gradeOrder = {
+  "中学1年":1,
+  "中学2年":2,
+  "中学3年":3,
+  "高校1年":4,
+  "高校2年":5
+};
 
-let ocrCandidates =
-[];
+
+const classOrder = {
+  A:1,
+  B:2,
+  C:3,
+  D:4,
+  E:5,
+  F:6,
+  G:7,
+  H:8,
+  I:9,
+  J:10,
+  K:11
+};
 
 
-function msg(
-  id,
-  text,
-  error=false
-){
+function msg(id,text,error=false){
 
-  const el =
-  $(id);
+  const el = $(id);
 
   el.className =
-  text
-  ? (error ? "msg error" : "msg")
-  : "";
+    text
+      ? (error ? "msg error" : "msg")
+      : "";
 
-  el.textContent =
-  text;
-
+  el.textContent = text;
 }
 
 
-/* =========================================================
-   管理者確認
-========================================================= */
-
 async function isAdmin(){
 
-  if(!auth.currentUser)
-    return false;
+  if(!auth.currentUser) return false;
 
   const s =
-  await get(
-    ref(
-      db,
-      "admins/" +
-      auth.currentUser.uid
-    )
-  );
+    await get(
+      ref(
+        db,
+        "admins/" + auth.currentUser.uid
+      )
+    );
 
   return (
     s.exists() &&
     s.val() === true
   );
-
 }
 
 
-/* =========================================================
-   ログイン状態
-========================================================= */
+/* =====================================================
+   ログイン
+===================================================== */
 
 onAuthStateChanged(
   auth,
@@ -614,36 +560,31 @@ onAuthStateChanged(
     ){
 
       $("login")
-      .classList
-      .add("hidden");
+        .classList
+        .add("hidden");
 
       $("app")
-      .classList
-      .remove("hidden");
+        .classList
+        .remove("hidden");
 
       loadMembers();
       loadSchedules();
 
-    }
-    else{
+    }else{
 
       $("login")
-      .classList
-      .remove("hidden");
+        .classList
+        .remove("hidden");
 
       $("app")
-      .classList
-      .add("hidden");
+        .classList
+        .add("hidden");
 
     }
 
   }
 );
 
-
-/* =========================================================
-   ログイン
-========================================================= */
 
 async function adminLogin(){
 
@@ -667,10 +608,9 @@ async function adminLogin(){
         true
       );
 
-    }
-    else{
+    }else{
 
-      $("password").value="";
+      $("password").value = "";
 
       msg(
         "loginMsg",
@@ -679,8 +619,9 @@ async function adminLogin(){
 
     }
 
-  }
-  catch(e){
+  }catch(e){
+
+    console.error(e);
 
     msg(
       "loginMsg",
@@ -694,32 +635,39 @@ async function adminLogin(){
 
 
 function logout(){
+
   signOut(auth);
+
 }
 
 
-/* =========================================================
-   部員登録
-========================================================= */
+/* =====================================================
+   部員
+===================================================== */
 
 async function addMember(){
 
-  if(!(await isAdmin()))
-    return;
+  if(!(await isAdmin())) return;
 
   const id =
-  $("mid").value.trim();
+    $("mid").value.trim();
 
   const name =
-  $("mname").value.trim();
+    $("mname").value.trim();
 
   const grade =
-  $("mgrade").value;
+    $("mgrade").value;
 
   const cl =
-  $("mclass").value;
+    $("mclass").value;
 
-  if(!id || !name || !grade || !cl){
+
+  if(
+    !id ||
+    !name ||
+    !grade ||
+    !cl
+  ){
 
     msg(
       "memberMsg",
@@ -730,15 +678,17 @@ async function addMember(){
     return;
   }
 
-  const existing =
-  await get(
-    ref(
-      db,
-      "memberRegistrations/" + id
-    )
-  );
 
-  if(existing.exists()){
+  if(
+    (
+      await get(
+        ref(
+          db,
+          "memberRegistrations/" + id
+        )
+      )
+    ).exists()
+  ){
 
     msg(
       "memberMsg",
@@ -749,6 +699,7 @@ async function addMember(){
     return;
   }
 
+
   await set(
     ref(
       db,
@@ -756,12 +707,13 @@ async function addMember(){
     ),
     {
       schoolId:id,
-      name:name,
-      grade:grade,
+      name,
+      grade,
       className:cl,
       createdAt:Date.now()
     }
   );
+
 
   await set(
     ref(
@@ -773,7 +725,9 @@ async function addMember(){
     }
   );
 
-  clearMemberForm();
+
+  $("mid").value = "";
+  $("mname").value = "";
 
   msg(
     "memberMsg",
@@ -781,397 +735,191 @@ async function addMember(){
   );
 
   loadMembers();
-}
-
-
-function clearMemberForm(){
-
-  $("mid").value="";
-  $("mname").value="";
-  $("mgrade").value="中学1年";
-  $("mclass").value="A";
 
 }
 
-
-/* =========================================================
-   部員一覧
-========================================================= */
 
 async function loadMembers(){
 
   const s =
-  await get(
-    ref(
-      db,
-      "memberRegistrations"
-    )
-  );
+    await get(
+      ref(
+        db,
+        "memberRegistrations"
+      )
+    );
 
   const v =
-  s.exists()
-  ? s.val()
-  : {};
+    s.exists()
+      ? s.val()
+      : {};
 
-  const gradeOrder = {
-
-    "中学1年":1,
-    "中学2年":2,
-    "中学3年":3,
-    "高校1年":4,
-    "高校2年":5
-
-  };
-
-  const classOrder =
-  c =>
-  String(c || "")
-  .charCodeAt(0);
 
   const a =
-  Object
-  .entries(v)
-  .sort(
-    ([,x],[,y]) => {
+    Object
+      .entries(v)
+      .sort(
+        ([,x],[,y]) => {
 
-      const g =
-      (gradeOrder[x.grade] || 99) -
-      (gradeOrder[y.grade] || 99);
+          const g =
+            (gradeOrder[x.grade] || 99) -
+            (gradeOrder[y.grade] || 99);
 
-      if(g)
-        return g;
+          if(g) return g;
 
-      const c =
-      classOrder(x.className) -
-      classOrder(y.className);
 
-      if(c)
-        return c;
+          const c =
+            (classOrder[x.className] || 99) -
+            (classOrder[y.className] || 99);
 
-      return String(
-        x.name || ""
-      ).localeCompare(
-        String(y.name || ""),
-        "ja"
+          if(c) return c;
+
+
+          return String(
+            x.name || ""
+          ).localeCompare(
+            String(y.name || ""),
+            "ja"
+          );
+
+        }
       );
 
-    }
-  );
 
   $("members").innerHTML =
+    a.length
 
-  a.length
+      ? a.map(
+          ([id,x]) => `
 
-  ?
+            <div class="item">
 
-  a.map(
-    ([id,x]) => `
+              <div class="member-head">
 
-      <div class="item">
+                <div>
 
-        <div class="member-head">
+                  <span class="member-name">
+                    ${esc(x.name)}
+                  </span>
 
-          <strong>
-            ${esc(x.name)}
-          </strong>
+                  <span class="small">
+                    ${esc(id)}
+                  </span>
 
-          <div class="member-actions">
+                </div>
 
-            <button
-              class="secondary"
-              onclick="editMember('${esc(id)}')"
-            >
-              変更
-            </button>
 
-            <button
-              class="danger"
-              onclick="deleteMember('${esc(id)}')"
-            >
-              削除
-            </button>
+                <div class="member-actions">
 
-          </div>
+                  <button
+                    onclick="editMember('${esc(id)}')"
+                  >
+                    変更
+                  </button>
 
-        </div>
+                  <button
+                    class="danger"
+                    onclick="deleteMember('${esc(id)}')"
+                  >
+                    削除
+                  </button>
 
-        <div class="small">
+                </div>
 
-          ${esc(id)}
-         　
-          ${esc(x.grade)}
-         　
-          ${esc(x.className)}組
+              </div>
 
-        </div>
 
-      </div>
+              <div class="small">
+                ${esc(x.grade)}
+               　
+                ${esc(x.className)}組
+              </div>
 
-    `
-  ).join("")
+            </div>
 
-  :
+          `
+        ).join("")
 
-  "<p class='small'>まだ登録されていません。</p>";
+      : "<p class='small'>まだ登録されていません。</p>";
 
 }
 
-
-/* =========================================================
-   部員変更
-========================================================= */
 
 async function editMember(id){
 
   const s =
-  await get(
+    await get(
+      ref(
+        db,
+        "memberRegistrations/" + id
+      )
+    );
+
+  if(!s.exists()) return;
+
+  const x = s.val();
+
+
+  const name =
+    prompt(
+      "名前",
+      x.name || ""
+    );
+
+  if(name === null) return;
+
+
+  const grade =
+    prompt(
+      "学年（中学1年〜高校2年）",
+      x.grade || ""
+    );
+
+  if(grade === null) return;
+
+
+  const cl =
+    prompt(
+      "クラス（A〜K）",
+      x.className || ""
+    );
+
+  if(cl === null) return;
+
+
+  if(
+    ![
+      "中学1年",
+      "中学2年",
+      "中学3年",
+      "高校1年",
+      "高校2年"
+    ].includes(grade) ||
+    !/^[A-K]$/.test(cl)
+  ){
+
+    alert(
+      "学年またはクラスの入力が正しくありません。"
+    );
+
+    return;
+  }
+
+
+  await update(
     ref(
       db,
       "memberRegistrations/" + id
-    )
+    ),
+    {
+      name:name.trim(),
+      grade,
+      className:cl
+    }
   );
 
-  if(!s.exists())
-    return;
-
-  const x =
-  s.val();
-
-  editingMemberId =
-  id;
-
-  $("memberFormCard")
-  .classList
-  .add("editing");
-
-  $("memberFormTitle")
-  .textContent =
-  "部員変更";
-
-  $("mid").value =
-  x.schoolId || id;
-
-  $("mname").value =
-  x.name || "";
-
-  $("mgrade").value =
-  x.grade || "中学1年";
-
-  $("mclass").value =
-  x.className || "A";
-
-  $("memberSubmit")
-  .textContent =
-  "変更を保存";
-
-  $("memberSubmit")
-  .onclick =
-  saveMemberEdit;
-
-  $("memberCancel")
-  .classList
-  .remove("hidden");
-
-  $("memberFormCard")
-  .scrollIntoView({
-    behavior:"smooth",
-    block:"start"
-  });
-
-}
-
-
-/* =========================================================
-   部員変更保存
-========================================================= */
-
-async function saveMemberEdit(){
-
-  if(
-    !(await isAdmin()) ||
-    !editingMemberId
-  )
-    return;
-
-  const oldId =
-  editingMemberId;
-
-  const newId =
-  $("mid").value.trim();
-
-  const name =
-  $("mname").value.trim();
-
-  const grade =
-  $("mgrade").value;
-
-  const cl =
-  $("mclass").value;
-
-  if(!newId || !name || !grade || !cl){
-
-    msg(
-      "memberMsg",
-      "すべて入力してください。",
-      true
-    );
-
-    return;
-  }
-
-  if(newId !== oldId){
-
-    const exists =
-    await get(
-      ref(
-        db,
-        "memberRegistrations/" + newId
-      )
-    );
-
-    if(exists.exists()){
-
-      msg(
-        "memberMsg",
-        "変更後の学校IDはすでに登録されています。",
-        true
-      );
-
-      return;
-    }
-  }
-
-  const oldSnap =
-  await get(
-    ref(
-      db,
-      "memberRegistrations/" + oldId
-    )
-  );
-
-  const oldData =
-  oldSnap.val() || {};
-
-  const newData = {
-
-    ...oldData,
-
-    schoolId:newId,
-    name:name,
-    grade:grade,
-    className:cl,
-    updatedAt:Date.now()
-
-  };
-
-  if(newId !== oldId){
-
-    await set(
-      ref(
-        db,
-        "memberRegistrations/" + newId
-      ),
-      newData
-    );
-
-    const memberIdSnap =
-    await get(
-      ref(
-        db,
-        "memberIds/" + oldId
-      )
-    );
-
-    if(memberIdSnap.exists()){
-
-      await set(
-        ref(
-          db,
-          "memberIds/" + newId
-        ),
-        memberIdSnap.val()
-      );
-
-    }
-    else{
-
-      await set(
-        ref(
-          db,
-          "memberIds/" + newId
-        ),
-        {
-          accountCreated:false
-        }
-      );
-
-    }
-
-    await remove(
-      ref(
-        db,
-        "memberRegistrations/" + oldId
-      )
-    );
-
-    await remove(
-      ref(
-        db,
-        "memberIds/" + oldId
-      )
-    );
-
-  }
-  else{
-
-    await update(
-      ref(
-        db,
-        "memberRegistrations/" + oldId
-      ),
-      newData
-    );
-
-  }
-
-  cancelMemberEdit();
-
-  msg(
-    "memberMsg",
-    "変更を保存しました。"
-  );
 
   loadMembers();
-
-}
-
-
-function cancelMemberEdit(){
-
-  editingMemberId =
-  null;
-
-  $("memberFormCard")
-  .classList
-  .remove("editing");
-
-  $("memberFormTitle")
-  .textContent =
-  "部員登録";
-
-  $("memberSubmit")
-  .textContent =
-  "登録する";
-
-  $("memberSubmit")
-  .onclick =
-  addMember;
-
-  $("memberCancel")
-  .classList
-  .add("hidden");
-
-  clearMemberForm();
 
 }
 
@@ -1182,8 +930,8 @@ async function deleteMember(id){
     !confirm(
       "この部員登録を削除しますか？"
     )
-  )
-    return;
+  ) return;
+
 
   await remove(
     ref(
@@ -1192,6 +940,7 @@ async function deleteMember(id){
     )
   );
 
+
   await remove(
     ref(
       db,
@@ -1199,1329 +948,33 @@ async function deleteMember(id){
     )
   );
 
-  if(editingMemberId === id)
-    cancelMemberEdit();
 
   loadMembers();
 
 }
 
 
-/* =========================================================
-   画像プレビュー
-========================================================= */
-
-function previewScheduleImage(event){
-
-  const file =
-  event.target.files?.[0];
-
-  if(!file)
-    return;
-
-  const url =
-  URL.createObjectURL(file);
-
-  $("schedulePreview").src =
-  url;
-
-  $("schedulePreview")
-  .classList
-  .remove("hidden");
-
-}
-
-
-/* =========================================================
-   OCR用画像加工
-========================================================= */
-
-function prepareOCRImage(file){
-
-  return new Promise(
-    (resolve,reject)=>{
-
-      const img =
-      new Image();
-
-      const url =
-      URL.createObjectURL(file);
-
-      img.onload = () => {
-
-        const scale =
-        Math.max(
-          2,
-          Math.min(
-            3,
-            2400 / img.width
-          )
-        );
-
-        const canvas =
-        document.createElement("canvas");
-
-        canvas.width =
-        Math.round(
-          img.width * scale
-        );
-
-        canvas.height =
-        Math.round(
-          img.height * scale
-        );
-
-        const ctx =
-        canvas.getContext("2d");
-
-        ctx.drawImage(
-          img,
-          0,
-          0,
-          canvas.width,
-          canvas.height
-        );
-
-        const imageData =
-        ctx.getImageData(
-          0,
-          0,
-          canvas.width,
-          canvas.height
-        );
-
-        const data =
-        imageData.data;
-
-        for(
-          let i=0;
-          i<data.length;
-          i+=4
-        ){
-
-          const r=data[i];
-          const g=data[i+1];
-          const b=data[i+2];
-
-          const gray =
-          0.299*r +
-          0.587*g +
-          0.114*b;
-
-          const contrast =
-          Math.max(
-            0,
-            Math.min(
-              255,
-              (gray - 128) * 1.35 + 128
-            )
-          );
-
-          data[i]=contrast;
-          data[i+1]=contrast;
-          data[i+2]=contrast;
-
-        }
-
-        ctx.putImageData(
-          imageData,
-          0,
-          0
-        );
-
-        canvas.toBlob(
-          blob => {
-
-            URL.revokeObjectURL(url);
-
-            if(blob)
-              resolve(blob);
-            else
-              reject(
-                new Error("画像変換失敗")
-              );
-
-          },
-          "image/png"
-        );
-
-      };
-
-      img.onerror =
-      reject;
-
-      img.src =
-      url;
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   OCR
-========================================================= */
-
-async function runOCR(){
-
-  const file =
-  $("scheduleImage")
-  .files?.[0];
-
-  if(!file){
-
-    msg(
-      "ocrMsg",
-      "先に予定表の画像を選択してください。",
-      true
-    );
-
-    return;
-  }
-
-  msg(
-    "ocrMsg",
-    "画像を準備しています…"
-  );
-
-  try{
-
-    const processed =
-    await prepareOCRImage(file);
-
-    msg(
-      "ocrMsg",
-      "予定表を読み取っています。少し待ってください。"
-    );
-
-    const result =
-    await Tesseract.recognize(
-      processed,
-      "jpn+eng",
-      {
-        logger:m=>{
-
-          if(
-            m.status === "recognizing text"
-          ){
-
-            msg(
-              "ocrMsg",
-              "画像を読み取っています… " +
-              Math.round(
-                (m.progress || 0) * 100
-              ) +
-              "%"
-            );
-
-          }
-
-        }
-      }
-    );
-
-    const text =
-    result.data.text || "";
-
-    $("ocrText").value =
-    text;
-
-    /*
-     * 表形式専用の解析
-     */
-    ocrCandidates =
-    parseScheduleTable(
-      result
-    );
-
-    /*
-     * それでも取れない場合だけ
-     * 通常のテキスト解析
-     */
-    if(
-      !ocrCandidates.length
-    ){
-
-      ocrCandidates =
-      parseScheduleCandidatesFromText(
-        text
-      );
-
-    }
-
-    renderOCRCandidates();
-
-    if(
-      ocrCandidates.length
-    ){
-
-      msg(
-        "ocrMsg",
-        "読み取り完了。候補を確認してください。"
-      );
-
-    }
-    else{
-
-      msg(
-        "ocrMsg",
-        "予定を自動認識できませんでした。手動登録を使ってください。",
-        true
-      );
-
-    }
-
-  }
-  catch(e){
-
-    console.error(e);
-
-    msg(
-      "ocrMsg",
-      "画像を読み取れませんでした。もう一度試してください。",
-      true
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   日付抽出
-========================================================= */
-
-function extractDateFromText(text){
-
-  if(!text)
-    return null;
-
-  let m;
-
-  m =
-  text.match(
-    /(20\d{2})\s*[\/\-年]\s*(\d{1,2})\s*[\/\-月]\s*(\d{1,2})日?/
-  );
-
-  if(m){
-
-    return {
-      year:Number(m[1]),
-      month:Number(m[2]),
-      day:Number(m[3])
-    };
-
-  }
-
-  m =
-  text.match(
-    /(\d{1,2})\s*月\s*(\d{1,2})\s*日/
-  );
-
-  if(m){
-
-    return {
-      year:new Date().getFullYear(),
-      month:Number(m[1]),
-      day:Number(m[2])
-    };
-
-  }
-
-  m =
-  text.match(
-    /(\d{1,2})\s*月\s*(\d{1,2})/
-  );
-
-  if(m){
-
-    return {
-      year:new Date().getFullYear(),
-      month:Number(m[1]),
-      day:Number(m[2])
-    };
-
-  }
-
-  return null;
-
-}
-
-
-/* =========================================================
-   月を全体から探す
-========================================================= */
-
-function extractMonthFromWholeText(text){
-
-  const m =
-  String(text || "")
-  .match(
-    /(\d{1,2})\s*月/
-  );
-
-  if(m){
-
-    const month =
-    Number(m[1]);
-
-    if(
-      month >= 1 &&
-      month <= 12
-    )
-      return month;
-
-  }
-
-  return new Date().getMonth()+1;
-
-}
-
-
-/* =========================================================
-   時間抽出
-========================================================= */
-
-function extractTime(text){
-
-  if(!text)
-    return "";
-
-  let m;
-
-  m =
-  text.match(
-    /(\d{1,2})\s*[:：]\s*(\d{2})\s*[〜~～\-－ー]\s*(\d{1,2})\s*[:：]\s*(\d{2})/
-  );
-
-  if(m){
-
-    return (
-      String(Number(m[1])).padStart(2,"0") +
-      ":" +
-      m[2] +
-      "〜" +
-      String(Number(m[3])).padStart(2,"0") +
-      ":" +
-      m[4]
-    );
-
-  }
-
-  m =
-  text.match(
-    /(\d{1,2})\s*[:：]\s*(\d{2}).{0,15}?(\d{1,2})\s*[:：]\s*(\d{2})/
-  );
-
-  if(m){
-
-    return (
-      String(Number(m[1])).padStart(2,"0") +
-      ":" +
-      m[2] +
-      "〜" +
-      String(Number(m[3])).padStart(2,"0") +
-      ":" +
-      m[4]
-    );
-
-  }
-
-  return "";
-
-}
-
-
-/* =========================================================
-   場所
-========================================================= */
-
-function normalizePlace(place){
-
-  if(!place)
-    return "";
-
-  const s =
-  place
-  .replace(/\s+/g,"");
-
-  if(
-    /音楽.*練習室/.test(s) ||
-    /音楽練習室/.test(s) ||
-    /練習室/.test(s)
-  ){
-
-    return "音楽練習室";
-
-  }
-
-  if(
-    /文化祭/.test(s)
-  ){
-
-    return "文化祭";
-
-  }
-
-  return place.trim();
-
-}
-
-
-/* =========================================================
-   数字だけから日付の日を取得
-========================================================= */
-
-function extractDayNumber(text){
-
-  if(!text)
-    return null;
-
-  const s =
-  String(text)
-  .replace(
-    /[^\d]/g,
-    " "
-  )
-  .trim();
-
-  if(!s)
-    return null;
-
-  const nums =
-  s
-  .split(/\s+/)
-  .map(Number)
-  .filter(
-    n =>
-    n >= 1 &&
-    n <= 31
-  );
-
-  if(
-    nums.length === 1
-  )
-    return nums[0];
-
-  return null;
-
-}
-
-
-/* =========================================================
-   OCRの単語から表を解析
-========================================================= */
-
-function parseScheduleTable(result){
-
-  const words =
-  result?.data?.words || [];
-
-  if(!words.length)
-    return [];
-
-  const allText =
-  words
-  .map(w => w.text || "")
-  .join(" ");
-
-  const month =
-  extractMonthFromWholeText(
-    allText
-  );
-
-  const usable =
-  words
-  .filter(
-    w =>
-      w.text &&
-      w.text.trim() &&
-      Number(w.confidence ?? 100) > 15
-  )
-  .map(w => {
-
-    const b =
-    w.bbox || {};
-
-    const left =
-    Number(b.x0 || 0);
-
-    const right =
-    Number(b.x1 || 0);
-
-    const top =
-    Number(b.y0 || 0);
-
-    const bottom =
-    Number(b.y1 || 0);
-
-    return {
-
-      text:
-      w.text.trim(),
-
-      left,
-      right,
-      top,
-      bottom,
-
-      centerX:
-      (left + right) / 2,
-
-      centerY:
-      (top + bottom) / 2
-
-    };
-
-  });
-
-  if(!usable.length)
-    return [];
-
-  /*
-   * 文字の高さを基準に行を作る
-   */
-  const heights =
-  usable
-  .map(
-    w =>
-    Math.max(
-      5,
-      w.bottom-w.top
-    )
-  )
-  .sort(
-    (a,b)=>a-b
-  );
-
-  const medianHeight =
-  heights[
-    Math.floor(
-      heights.length/2
-    )
-  ] || 30;
-
-  const rowTolerance =
-  Math.max(
-    12,
-    medianHeight * 0.9
-  );
-
-  usable.sort(
-    (a,b) =>
-    a.centerY-b.centerY
-  );
-
-  const rows=[];
-
-  for(
-    const word of usable
-  ){
-
-    let best=null;
-
-    let bestDiff=Infinity;
-
-    for(
-      const row of rows
-    ){
-
-      const diff =
-      Math.abs(
-        row.centerY-word.centerY
-      );
-
-      if(
-        diff <= rowTolerance &&
-        diff < bestDiff
-      ){
-
-        best=row;
-        bestDiff=diff;
-
-      }
-
-    }
-
-    if(!best){
-
-      best={
-        centerY:word.centerY,
-        words:[]
-      };
-
-      rows.push(best);
-
-    }
-
-    best.words.push(word);
-
-    best.centerY =
-    best.words.reduce(
-      (sum,w)=>
-      sum+w.centerY,
-      0
-    ) /
-    best.words.length;
-
-  }
-
-
-  const candidates=[];
-
-  /*
-   * 表の横幅を推定
-   */
-  const minX =
-  Math.min(
-    ...usable.map(w=>w.left)
-  );
-
-  const maxX =
-  Math.max(
-    ...usable.map(w=>w.right)
-  );
-
-  const width =
-  maxX-minX;
-
-  /*
-   * 左側約25%を日付列として扱う
-   */
-  const dateColumnEnd =
-  minX + width*0.27;
-
-
-  for(
-    const row of rows
-  ){
-
-    const sorted =
-    row.words.sort(
-      (a,b)=>
-      a.left-b.left
-    );
-
-    const rowText =
-    sorted
-    .map(w=>w.text)
-    .join(" ");
-
-
-    /*
-     * 表の見出し行を除外
-     */
-    if(
-      /活動時間|場所|練習曲|その他|備考/.test(
-        rowText
-      )
-    )
-      continue;
-
-
-    /*
-     * まず「9月1日」などが直接読めた場合
-     */
-    let date =
-    extractDateFromText(
-      rowText
-    );
-
-
-    /*
-     * 読めなかった場合、
-     * 左端の日付列から「1」「2」…を探す
-     */
-    if(!date){
-
-      const dateWords =
-      sorted.filter(
-        w =>
-        w.left <= dateColumnEnd
-      );
-
-      for(
-        const w of dateWords
-      ){
-
-        const day =
-        extractDayNumber(
-          w.text
-        );
-
-        if(
-          day !== null
-        ){
-
-          date={
-            year:new Date().getFullYear(),
-            month:month,
-            day:day
-          };
-
-          break;
-
-        }
-
-      }
-
-    }
-
-
-    if(!date)
-      continue;
-
-
-    /*
-     * 日付としてあり得ないものを除外
-     */
-    if(
-      date.month < 1 ||
-      date.month > 12 ||
-      date.day < 1 ||
-      date.day > 31
-    )
-      continue;
-
-
-    /*
-     * 時間を行全体から探す
-     */
-    const time =
-    extractTime(
-      rowText.replace(/\s+/g,"")
-    );
-
-
-    /*
-     * 場所を探す。
-     *
-     * 今回の予定表で特に重要な
-     * 「音楽練習室」を直接探す。
-     */
-    let place="";
-
-
-    if(
-      /音楽.{0,4}練習室/.test(
-        rowText.replace(/\s/g,"")
-      )
-    ){
-
-      place="音楽練習室";
-
-    }
-    else if(
-      /練習室/.test(
-        rowText.replace(/\s/g,"")
-      )
-    ){
-
-      place="音楽練習室";
-
-    }
-    else{
-
-      /*
-       * 時間の右側にある文字を
-       * 場所候補として使う
-       */
-      let timeIndex=-1;
-
-      for(
-        let i=0;
-        i<sorted.length;
-        i++
-      ){
-
-        const combined =
-        sorted
-        .slice(i,i+5)
-        .map(w=>w.text)
-        .join("");
-
-        if(
-          extractTime(combined)
-        ){
-
-          timeIndex=i;
-          break;
-
-        }
-
-      }
-
-      if(
-        timeIndex>=0
-      ){
-
-        const afterTime =
-        sorted
-        .slice(timeIndex+1)
-        .map(w=>w.text)
-        .join(" ");
-
-        place =
-        normalizePlace(
-          afterTime
-        );
-
-      }
-
-    }
-
-
-    /*
-     * 文化祭などの文字は場所ではないので、
-     * 今は場所欄には入れない。
-     */
-    if(
-      /文化祭/.test(place)
-    ){
-
-      place="";
-
-    }
-
-
-    candidates.push({
-
-      selected:true,
-
-      date:
-      formatDate(
-        date.year,
-        date.month,
-        date.day
-      ),
-
-      time:
-      time,
-
-      place:
-      place
-
-    });
-
-  }
-
-
-  return uniqueCandidates(
-    candidates
-  );
-
-}
-
-
-/* =========================================================
-   テキスト解析（予備）
-========================================================= */
-
-function parseScheduleCandidatesFromText(text){
-
-  const lines =
-  text
-  .split(/\r?\n/)
-  .map(
-    x=>x.trim()
-  )
-  .filter(Boolean);
-
-  const found=[];
-
-  const month =
-  extractMonthFromWholeText(
-    text
-  );
-
-  for(
-    let i=0;
-    i<lines.length;
-    i++
-  ){
-
-    const line =
-    lines[i];
-
-    let date =
-    extractDateFromText(
-      line
-    );
-
-    /*
-     * 「1 火」のような表の場合
-     */
-    if(!date){
-
-      const day =
-      extractDayNumber(
-        line
-      );
-
-      if(
-        day !== null
-      ){
-
-        date={
-          year:new Date().getFullYear(),
-          month:month,
-          day:day
-        };
-
-      }
-
-    }
-
-    if(!date)
-      continue;
-
-    let combined =
-    line;
-
-    for(
-      let j=1;
-      j<=3;
-      j++
-    ){
-
-      if(lines[i+j]){
-
-        combined +=
-        " " +
-        lines[i+j];
-
-      }
-
-    }
-
-    const time =
-    extractTime(
-      combined.replace(/\s/g,"")
-    );
-
-    let place="";
-
-    if(
-      /音楽.{0,4}練習室/.test(
-        combined.replace(/\s/g,"")
-      )
-    ){
-
-      place="音楽練習室";
-
-    }
-    else if(
-      /練習室/.test(
-        combined.replace(/\s/g,"")
-      )
-    ){
-
-      place="音楽練習室";
-
-    }
-
-    found.push({
-
-      selected:true,
-
-      date:
-      formatDate(
-        date.year,
-        date.month,
-        date.day
-      ),
-
-      time:
-      time,
-
-      place:
-      place
-
-    });
-
-  }
-
-  return uniqueCandidates(
-    found
-  );
-
-}
-
-
-/* =========================================================
-   日付フォーマット
-========================================================= */
-
-function formatDate(
-  year,
-  month,
-  day
-){
-
-  return (
-    String(year) +
-    "-" +
-    String(month).padStart(2,"0") +
-    "-" +
-    String(day).padStart(2,"0")
-  );
-
-}
-
-
-/* =========================================================
-   重複削除
-========================================================= */
-
-function uniqueCandidates(list){
-
-  const result=[];
-
-  const seen =
-  new Set();
-
-  for(
-    const x of list
-  ){
-
-    const key =
-    x.date +
-    "|" +
-    x.time +
-    "|" +
-    x.place;
-
-    if(
-      seen.has(key)
-    )
-      continue;
-
-    seen.add(key);
-
-    result.push(x);
-
-  }
-
-  result.sort(
-    (a,b)=>
-    a.date.localeCompare(
-      b.date
-    )
-  );
-
-  return result;
-
-}
-
-
-/* =========================================================
-   OCR候補表示
-========================================================= */
-
-function renderOCRCandidates(){
-
-  const el =
-  $("ocrCandidates");
-
-  if(
-    !ocrCandidates.length
-  ){
-
-    el.innerHTML =
-    "<p class='small'>予定を自動認識できませんでした。手動登録を使ってください。</p>";
-
-    return;
-
-  }
-
-  el.innerHTML =
-  ocrCandidates
-  .map(
-    (x,i)=>`
-
-      <div class="ocr-candidate">
-
-        <div class="ocr-candidate-top">
-
-          <input
-            type="checkbox"
-            ${x.selected ? "checked" : ""}
-            onchange="updateOCRCandidate(${i},'selected',this.checked)"
-          >
-
-          <strong>
-            ${esc(x.date)}
-          </strong>
-
-        </div>
-
-        <div class="ocr-field">
-
-          <div class="ocr-label">
-            日付
-          </div>
-
-          <input
-            type="date"
-            value="${esc(x.date)}"
-            onchange="updateOCRCandidate(${i},'date',this.value)"
-          >
-
-        </div>
-
-        <div class="ocr-field">
-
-          <div class="ocr-label">
-            部活の時間
-          </div>
-
-          <input
-            placeholder="例：15:45〜18:00"
-            value="${esc(x.time)}"
-            onchange="updateOCRCandidate(${i},'time',this.value)"
-          >
-
-        </div>
-
-        <div class="ocr-field">
-
-          <div class="ocr-label">
-            場所
-          </div>
-
-          <input
-            placeholder="例：音楽練習室"
-            value="${esc(x.place)}"
-            onchange="updateOCRCandidate(${i},'place',this.value)"
-          >
-
-        </div>
-
-        <button
-          class="danger ocr-delete"
-          onclick="removeOCRCandidate(${i})"
-        >
-          この予定を削除
-        </button>
-
-      </div>
-
-    `
-  )
-  .join("");
-
-}
-
-
-function updateOCRCandidate(
-  index,
-  field,
-  value
-){
-
-  if(!ocrCandidates[index])
-    return;
-
-  ocrCandidates[index][field]=
-  value;
-
-}
-
-
-function removeOCRCandidate(i){
-
-  ocrCandidates.splice(
-    i,
-    1
-  );
-
-  renderOCRCandidates();
-
-}
-
-
-/* =========================================================
-   OCR予定登録
-========================================================= */
-
-async function registerOCRCandidates(){
-
-  if(!(await isAdmin()))
-    return;
-
-  const selected =
-  ocrCandidates.filter(
-    x =>
-      x.selected &&
-      x.date
-  );
-
-  if(!selected.length){
-
-    msg(
-      "ocrMsg",
-      "登録する予定を選択してください。",
-      true
-    );
-
-    return;
-  }
-
-  for(
-    const x of selected
-  ){
-
-    await set(
-      ref(
-        db,
-        "schedules/" +
-        x.date
-      ),
-      {
-
-        time:
-        x.time || "",
-
-        place:
-        x.place || "",
-
-        updatedAt:
-        Date.now()
-
-      }
-    );
-
-  }
-
-  msg(
-    "ocrMsg",
-    selected.length +
-    "件の予定を登録しました。"
-  );
-
-  loadSchedules();
-
-}
-
-
-/* =========================================================
+/* =====================================================
    手動予定登録
-========================================================= */
+===================================================== */
 
 async function saveSchedule(){
 
-  if(!(await isAdmin()))
-    return;
+  if(!(await isAdmin())) return;
+
 
   const d =
-  $("sdate").value;
+    $("sdate").value;
 
   const t =
-  $("stime").value.trim();
+    $("stime").value.trim();
 
   const p =
-  $("splace").value.trim();
+    $("splace").value.trim();
+
+  const n =
+    $("snote").value.trim();
+
 
   if(!d){
 
@@ -2534,22 +987,20 @@ async function saveSchedule(){
     return;
   }
 
+
   await set(
     ref(
       db,
       "schedules/" + d
     ),
     {
-
       time:t,
-
       place:p,
-
-      updatedAt:
-      Date.now()
-
+      note:n,
+      updatedAt:Date.now()
     }
   );
+
 
   msg(
     "scheduleMsg",
@@ -2561,194 +1012,1215 @@ async function saveSchedule(){
 }
 
 
-/* =========================================================
-   予定一覧
-========================================================= */
-
 async function loadSchedules(){
 
   const s =
-  await get(
-    ref(
-      db,
-      "schedules"
-    )
-  );
+    await get(
+      ref(
+        db,
+        "schedules"
+      )
+    );
 
   const v =
-  s.exists()
-  ? s.val()
-  : {};
+    s.exists()
+      ? s.val()
+      : {};
+
 
   const a =
-  Object
-  .entries(v)
-  .sort();
+    Object
+      .entries(v)
+      .sort();
+
 
   $("schedules").innerHTML =
+    a.length
 
-  a.length
+      ? a.map(
+          ([d,x]) => `
 
-  ?
+            <div class="item">
 
-  a.map(
-    ([d,x]) => `
+              <strong>
+                ${esc(d)}
+              </strong>
 
-      <div class="item">
+              ${
+                x.time
+                  ? `<br>${esc(x.time)}`
+                  : ""
+              }
 
-        <strong>
-          ${esc(d)}
-        </strong>
+              ${
+                x.place
+                  ? `<br>${esc(x.place)}`
+                  : ""
+              }
 
-        <br>
+              ${
+                x.note
+                  ? `<br><span class="notice">${esc(x.note)}</span>`
+                  : ""
+              }
 
-        ${esc(x.time || "")}
 
-        <br>
+              <div class="row">
 
-        ${esc(x.place || "")}
+                <button
+                  onclick="editSchedule('${esc(d)}')"
+                >
+                  変更
+                </button>
 
-        <div class="row">
+                <button
+                  class="danger"
+                  onclick="deleteSchedule('${esc(d)}')"
+                >
+                  削除
+                </button>
 
-          <button
-            onclick="editSchedule('${esc(d)}')"
-          >
-            変更
-          </button>
+              </div>
 
-          <button
-            class="danger"
-            onclick="deleteSchedule('${esc(d)}')"
-          >
-            削除
-          </button>
+            </div>
 
-        </div>
+          `
+        ).join("")
 
-      </div>
-
-    `
-  ).join("")
-
-  :
-
-  "<p class='small'>予定はありません。</p>";
+      : "<p class='small'>予定はありません。</p>";
 
 }
 
-
-/* =========================================================
-   予定変更
-========================================================= */
 
 async function editSchedule(d){
 
   const s =
-  await get(
-    ref(
-      db,
-      "schedules/" + d
-    )
-  );
-
-  if(!s.exists())
-    return;
-
-  const x =
-  s.val();
-
-  $("sdate").value=d;
-
-  $("stime").value =
-  x.time || "";
-
-  $("splace").value =
-  x.place || "";
-
-  $("sdate")
-  .scrollIntoView({
-    behavior:"smooth",
-    block:"center"
-  });
-
-}
-
-
-/* =========================================================
-   予定削除
-========================================================= */
-
-async function deleteSchedule(d){
-
-  if(
-    confirm(
-      d +
-      "の予定を削除しますか？"
-    )
-  ){
-
-    await remove(
+    await get(
       ref(
         db,
         "schedules/" + d
       )
     );
 
-    loadSchedules();
+  if(!s.exists()) return;
+
+  const x = s.val();
+
+
+  $("sdate").value =
+    d;
+
+  $("stime").value =
+    x.time || "";
+
+  $("splace").value =
+    x.place || "";
+
+  $("snote").value =
+    x.note || "";
+
+
+  window.scrollTo({
+    top:
+      $("sdate").getBoundingClientRect().top +
+      window.scrollY -
+      20,
+    behavior:"smooth"
+  });
+
+}
+
+
+async function deleteSchedule(d){
+
+  if(
+    !confirm(
+      d + "の予定を削除しますか？"
+    )
+  ) return;
+
+
+  await remove(
+    ref(
+      db,
+      "schedules/" + d
+    )
+  );
+
+
+  loadSchedules();
+
+}
+
+
+/* =====================================================
+   PDF読み込み
+===================================================== */
+
+/*
+  今回のPDFは文字データを持っているので、
+  画像OCRは使用しない。
+
+  PDF.jsでPDF内の文字を直接取得する。
+
+  読み込む列：
+  ・日付
+  ・活動時間
+  ・場所
+  ・その他・備考
+
+  無視する列：
+  ・練習曲の目安
+*/
+
+
+function normalizeText(s){
+
+  return String(s || "")
+    .replace(/\u3000/g," ")
+    .replace(/[：]/g,":")
+    .replace(/[～〜−ー]/g,"~")
+    .replace(/\s+/g," ")
+    .trim();
+
+}
+
+
+function parseTimeFromLine(line){
+
+  const s =
+    normalizeText(line)
+      .replace(/[：]/g,":")
+      .replace(/[～〜−ー]/g,"~")
+      .replace(/\s+/g,"");
+
+
+  let m =
+    s.match(
+      /(\d{1,2}:\d{2})~(\d{1,2}:\d{2})/
+    );
+
+
+  if(!m){
+
+    m =
+      s.match(
+        /(\d{1,2}:\d{2})[-–](\d{1,2}:\d{2})/
+      );
+
+  }
+
+
+  if(!m) return "";
+
+
+  return (
+    m[1] +
+    "〜" +
+    m[2]
+  );
+
+}
+
+
+function cleanOtherText(s){
+
+  let x =
+    normalizeText(s);
+
+
+  x =
+    x.replace(
+      /^(活動時間|場所|練習曲の目安|その他・備考)$/,
+      ""
+    );
+
+
+  x =
+    x.replace(
+      /\d{1,2}:\d{2}\s*[~\-–]\s*\d{1,2}:\d{2}/g,
+      ""
+    );
+
+
+  x =
+    x.replace(
+      /\d{1,2}月\d{1,2}日?/g,
+      ""
+    );
+
+
+  return x.trim();
+
+}
+
+
+function makeDate(
+  year,
+  month,
+  day
+){
+
+  return (
+    year +
+    "-" +
+    String(month).padStart(2,"0") +
+    "-" +
+    String(day).padStart(2,"0")
+  );
+
+}
+
+
+/* =====================================================
+   PDF.js
+===================================================== */
+
+async function getPdfJs(){
+
+  if(window.pdfjsLib){
+
+    return window.pdfjsLib;
+
+  }
+
+
+  const module =
+    await import(
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs"
+    );
+
+
+  module.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
+
+
+  window.pdfjsLib =
+    module;
+
+
+  return module;
+
+}
+
+
+/* =====================================================
+   PDF → 行
+===================================================== */
+
+async function extractPdfLines(file){
+
+  const pdfjs =
+    await getPdfJs();
+
+
+  const buffer =
+    await file.arrayBuffer();
+
+
+  const pdf =
+    await pdfjs.getDocument({
+      data:buffer
+    }).promise;
+
+
+  const allLines = [];
+
+
+  for(
+    let pageNo = 1;
+    pageNo <= pdf.numPages;
+    pageNo++
+  ){
+
+    const page =
+      await pdf.getPage(pageNo);
+
+
+    const content =
+      await page.getTextContent();
+
+
+    const words =
+      content.items
+
+        .filter(
+          x =>
+            String(
+              x.str || ""
+            ).trim()
+        )
+
+        .map(
+          x => ({
+            text:
+              normalizeText(x.str),
+
+            x:
+              Number(
+                x.transform?.[4] || 0
+              ),
+
+            y:
+              Number(
+                x.transform?.[5] || 0
+              )
+          })
+        );
+
+
+    const rows = [];
+
+    const tolerance = 4;
+
+
+    for(const word of words){
+
+      let row =
+        rows.find(
+          r =>
+            Math.abs(
+              r.y - word.y
+            ) <= tolerance
+        );
+
+
+      if(!row){
+
+        row = {
+          y:word.y,
+          items:[]
+        };
+
+        rows.push(row);
+
+      }
+
+
+      row.items.push(word);
+
+    }
+
+
+    rows.sort(
+      (a,b) =>
+        b.y - a.y
+    );
+
+
+    for(const row of rows){
+
+      row.items.sort(
+        (a,b) =>
+          a.x - b.x
+      );
+
+
+      const text =
+        row.items
+          .map(
+            x => x.text
+          )
+          .join(" ");
+
+
+      allLines.push(
+        normalizeText(text)
+      );
+
+    }
+
+  }
+
+
+  return allLines;
+
+}
+
+
+/* =====================================================
+   PDF → 予定
+===================================================== */
+
+function parseScheduleLines(lines){
+
+  const currentYear =
+    new Date().getFullYear();
+
+
+  let month = null;
+
+
+  /*
+    表題から月を探す
+  */
+
+  for(const line of lines){
+
+    const m =
+      line.match(
+        /(\d{1,2})\s*月/
+      );
+
+
+    if(m){
+
+      const n =
+        Number(m[1]);
+
+
+      if(
+        n >= 1 &&
+        n <= 12
+      ){
+
+        month = n;
+
+        break;
+
+      }
+
+    }
+
+  }
+
+
+  if(!month){
+
+    throw new Error(
+      "PDFから月を読み取れませんでした。"
+    );
+
+  }
+
+
+  const results = [];
+
+  let current = null;
+
+
+  for(const raw of lines){
+
+    const line =
+      normalizeText(raw);
+
+
+    if(!line) continue;
+
+
+    /*
+      見出しを無視
+    */
+
+    if(
+      /予定表|活動時間|場所|練習曲の目安|その他・備考/.test(
+        line
+      )
+    ){
+
+      continue;
+
+    }
+
+
+    /*
+      日付
+    */
+
+    const dateMatch =
+      line.match(
+        /(\d{1,2})月\s*(\d{1,2})日?/
+      );
+
+
+    let dateInfo = null;
+
+
+    if(dateMatch){
+
+      const mm =
+        Number(dateMatch[1]);
+
+      const dd =
+        Number(dateMatch[2]);
+
+
+      if(
+        mm === month &&
+        dd >= 1 &&
+        dd <= 31
+      ){
+
+        dateInfo = {
+          month:mm,
+          day:dd
+        };
+
+      }
+
+    }
+
+
+    /*
+      新しい日付
+    */
+
+    if(dateInfo){
+
+      if(current){
+
+        results.push(
+          current
+        );
+
+      }
+
+
+      let rest =
+        line.replace(
+          new RegExp(
+            dateInfo.month +
+            "月\\s*" +
+            dateInfo.day +
+            "日?"
+          ),
+          ""
+        )
+        .trim();
+
+
+      /*
+        曜日を除去
+      */
+
+      rest =
+        rest.replace(
+          /^(月|火|水|木|金|土|日)\s*/,
+          ""
+        )
+        .trim();
+
+
+      current = {
+
+        date:
+          makeDate(
+            currentYear,
+            dateInfo.month,
+            dateInfo.day
+          ),
+
+        time:
+          parseTimeFromLine(
+            rest
+          ),
+
+        place:"",
+
+        note:""
+
+      };
+
+
+      /*
+        時間を除去
+      */
+
+      rest =
+        rest.replace(
+          /\d{1,2}:\d{2}\s*[~\-–]\s*\d{1,2}:\d{2}/,
+          ""
+        )
+        .trim();
+
+
+      /*
+        場所
+      */
+
+      if(
+        rest.includes(
+          "音楽練習室"
+        )
+      ){
+
+        current.place =
+          "音楽練習室";
+
+
+        rest =
+          rest
+            .replace(
+              "音楽練習室",
+              ""
+            )
+            .trim();
+
+      }
+
+
+      /*
+        残りは備考
+      */
+
+      const note =
+        cleanOtherText(
+          rest
+        );
+
+
+      if(note){
+
+        current.note =
+          note;
+
+      }
+
+
+      continue;
+
+    }
+
+
+    /*
+      日付だけが別行になった場合
+    */
+
+    const dayOnly =
+      line.match(
+        /^(\d{1,2})$/
+      );
+
+
+    if(
+      dayOnly &&
+      Number(dayOnly[1]) >= 1 &&
+      Number(dayOnly[1]) <= 31
+    ){
+
+      if(current){
+
+        results.push(
+          current
+        );
+
+      }
+
+
+      current = {
+
+        date:
+          makeDate(
+            currentYear,
+            month,
+            Number(dayOnly[1])
+          ),
+
+        time:"",
+
+        place:"",
+
+        note:""
+
+      };
+
+
+      continue;
+
+    }
+
+
+    /*
+      日付の次の行に
+      時間・場所・備考がある場合
+    */
+
+    if(current){
+
+      const time =
+        parseTimeFromLine(
+          line
+        );
+
+
+      if(time){
+
+        current.time =
+          time;
+
+      }
+
+
+      if(
+        line.includes(
+          "音楽練習室"
+        )
+      ){
+
+        current.place =
+          "音楽練習室";
+
+      }
+
+
+      /*
+        練習曲はここでは
+        一切処理しない
+      */
+
+      let rest =
+        line
+
+          .replace(
+            /\d{1,2}:\d{2}\s*[~\-–]\s*\d{1,2}:\d{2}/,
+            ""
+          )
+
+          .replace(
+            /音楽練習室/g,
+            ""
+          )
+
+          .trim();
+
+
+      /*
+        曜日だけなら無視
+      */
+
+      if(
+        !/^(月|火|水|木|金|土|日)$/.test(
+          rest
+        )
+      ){
+
+        const note =
+          cleanOtherText(
+            rest
+          );
+
+
+        if(note){
+
+          current.note =
+            current.note
+              ? current.note +
+                " " +
+                note
+              : note;
+
+        }
+
+      }
+
+    }
+
+  }
+
+
+  if(current){
+
+    results.push(
+      current
+    );
+
+  }
+
+
+  /*
+    同じ日付をまとめる
+  */
+
+  const map =
+    new Map();
+
+
+  for(const x of results){
+
+    if(!x.date) continue;
+
+
+    if(!map.has(x.date)){
+
+      map.set(
+        x.date,
+        {...x}
+      );
+
+    }else{
+
+      const old =
+        map.get(x.date);
+
+
+      if(x.time){
+
+        old.time =
+          x.time;
+
+      }
+
+
+      if(x.place){
+
+        old.place =
+          x.place;
+
+      }
+
+
+      if(x.note){
+
+        old.note =
+          old.note
+            ? old.note +
+              " " +
+              x.note
+            : x.note;
+
+      }
+
+    }
+
+  }
+
+
+  return [
+    ...map.values()
+  ]
+    .sort(
+      (a,b) =>
+        a.date.localeCompare(
+          b.date
+        )
+    );
+
+}
+
+
+/* =====================================================
+   PDF読み取り
+===================================================== */
+
+async function readSchedulePDF(){
+
+  if(!(await isAdmin())) return;
+
+
+  const file =
+    $("schedulePdf")
+      .files[0];
+
+
+  if(!file){
+
+    msg(
+      "pdfMsg",
+      "PDFファイルを選択してください。",
+      true
+    );
+
+    return;
+
+  }
+
+
+  if(
+    file.type !== "application/pdf" &&
+    !file.name
+      .toLowerCase()
+      .endsWith(".pdf")
+  ){
+
+    msg(
+      "pdfMsg",
+      "PDFファイルを選択してください。",
+      true
+    );
+
+    return;
+
+  }
+
+
+  msg(
+    "pdfMsg",
+    "PDFを読み取っています。少し待ってください。"
+  );
+
+
+  try{
+
+    const lines =
+      await extractPdfLines(
+        file
+      );
+
+
+    console.log(
+      "PDFから取得した文字：",
+      lines
+    );
+
+
+    pdfCandidates =
+      parseScheduleLines(
+        lines
+      );
+
+
+    if(
+      !pdfCandidates.length
+    ){
+
+      throw new Error(
+        "予定候補を見つけられませんでした。"
+      );
+
+    }
+
+
+    renderPDFCandidates();
+
+
+    $("pdfCandidatesBox")
+      .classList
+      .remove("hidden");
+
+
+    msg(
+      "pdfMsg",
+      pdfCandidates.length +
+      "件の予定候補を読み取りました。"
+    );
+
+
+  }catch(e){
+
+    console.error(e);
+
+
+    msg(
+      "pdfMsg",
+      "PDFを読み取れませんでした。PDFの文字データを確認してください。",
+      true
+    );
 
   }
 
 }
 
 
-/* =========================================================
-   HTMLから呼び出せるようにする
-========================================================= */
+/* =====================================================
+   候補表示
+===================================================== */
+
+function renderPDFCandidates(){
+
+  $("pdfCandidates").innerHTML =
+    pdfCandidates
+      .map(
+        (x,i) => `
+
+          <div class="candidate">
+
+            <label>
+
+              <input
+                type="checkbox"
+                id="pdfCheck${i}"
+                checked
+              >
+
+              <span class="badge">
+                ${esc(x.date)}
+              </span>
+
+            </label>
+
+
+            <div class="candidate-grid">
+
+              <div>
+
+                <strong>
+                  日付
+                </strong>
+
+                <input
+                  id="pdfDate${i}"
+                  type="date"
+                  value="${esc(x.date)}"
+                >
+
+              </div>
+
+
+              <div>
+
+                <strong>
+                  時間
+                </strong>
+
+                <input
+                  id="pdfTime${i}"
+                  value="${esc(x.time)}"
+                  placeholder="例：15:45〜18:00"
+                >
+
+              </div>
+
+
+              <div>
+
+                <strong>
+                  場所
+                </strong>
+
+                <input
+                  id="pdfPlace${i}"
+                  value="${esc(x.place)}"
+                >
+
+              </div>
+
+
+              <div>
+
+                <strong>
+                  その他・備考
+                </strong>
+
+                <input
+                  id="pdfNote${i}"
+                  value="${esc(x.note)}"
+                >
+
+              </div>
+
+            </div>
+
+          </div>
+
+        `
+      )
+      .join("");
+
+}
+
+
+/* =====================================================
+   PDF候補をFirebaseへ登録
+===================================================== */
+
+async function registerPDFCandidates(){
+
+  if(!(await isAdmin())) return;
+
+
+  let count = 0;
+
+
+  for(
+    let i = 0;
+    i < pdfCandidates.length;
+    i++
+  ){
+
+    const check =
+      $(`pdfCheck${i}`);
+
+
+    if(
+      !check ||
+      !check.checked
+    ){
+
+      continue;
+
+    }
+
+
+    const d =
+      $(`pdfDate${i}`).value;
+
+    const t =
+      $(`pdfTime${i}`).value.trim();
+
+    const p =
+      $(`pdfPlace${i}`).value.trim();
+
+    const n =
+      $(`pdfNote${i}`).value.trim();
+
+
+    if(!d) continue;
+
+
+    await set(
+      ref(
+        db,
+        "schedules/" + d
+      ),
+      {
+        time:t,
+        place:p,
+        note:n,
+        updatedAt:Date.now()
+      }
+    );
+
+
+    count++;
+
+  }
+
+
+  msg(
+    "pdfMsg",
+    count +
+    "件の予定を登録しました。"
+  );
+
+
+  loadSchedules();
+
+}
+
+
+/* =====================================================
+   HTMLのonclickから呼べるようにする
+===================================================== */
 
 window.adminLogin =
-adminLogin;
+  adminLogin;
 
 window.logout =
-logout;
+  logout;
 
 window.addMember =
-addMember;
+  addMember;
 
 window.editMember =
-editMember;
-
-window.saveMemberEdit =
-saveMemberEdit;
-
-window.cancelMemberEdit =
-cancelMemberEdit;
+  editMember;
 
 window.deleteMember =
-deleteMember;
-
-window.previewScheduleImage =
-previewScheduleImage;
-
-window.runOCR =
-runOCR;
-
-window.updateOCRCandidate =
-updateOCRCandidate;
-
-window.removeOCRCandidate =
-removeOCRCandidate;
-
-window.registerOCRCandidates =
-registerOCRCandidates;
+  deleteMember;
 
 window.saveSchedule =
-saveSchedule;
+  saveSchedule;
 
 window.editSchedule =
-editSchedule;
+  editSchedule;
 
 window.deleteSchedule =
-deleteSchedule;
+  deleteSchedule;
+
+window.readSchedulePDF =
+  readSchedulePDF;
+
+window.registerPDFCandidates =
+  registerPDFCandidates;
 
 </script>
 
