@@ -446,7 +446,6 @@ textarea{
 
   <div class="header-top">
 
-    <!-- ログイン後：左側 -->
     <div
       id="loggedInLeft"
       class="header-side hidden"
@@ -471,14 +470,11 @@ textarea{
 
     </div>
 
-    <!-- ログアウト時の左側スペース -->
     <div
       id="loggedOutLeft"
       class="header-spacer"
     ></div>
 
-
-    <!-- タイトル -->
     <h1
       class="header-title"
       onclick="backHome()"
@@ -486,8 +482,6 @@ textarea{
       部活動欠席連絡
     </h1>
 
-
-    <!-- ログアウト時 -->
     <div
       id="loggedOutRight"
       class="header-side right"
@@ -499,8 +493,6 @@ textarea{
 
     </div>
 
-
-    <!-- ログイン後 -->
     <div
       id="loggedInRight"
       class="header-side right hidden"
@@ -538,10 +530,6 @@ textarea{
 
 <main>
 
-<!-- =========================
-     ホーム・カレンダー
-========================= -->
-
 <section id="calendarView">
 
   <div class="card">
@@ -563,7 +551,6 @@ textarea{
 
     </div>
 
-
     <div class="week">
 
       <div>月</div>
@@ -576,7 +563,6 @@ textarea{
 
     </div>
 
-
     <div
       class="days"
       id="days"
@@ -586,10 +572,6 @@ textarea{
 
 </section>
 
-
-<!-- =========================
-     日付詳細
-========================= -->
 
 <section
   id="detailView"
@@ -608,10 +590,6 @@ textarea{
 </section>
 
 
-<!-- =========================
-     ログイン
-========================= -->
-
 <section
   id="loginView"
   class="panel hidden"
@@ -628,7 +606,6 @@ textarea{
     ログイン
   </h2>
 
-
   <label>
     学校ID
   </label>
@@ -637,7 +614,6 @@ textarea{
     id="loginId"
     autocomplete="username"
   >
-
 
   <label>
     パスワード
@@ -649,7 +625,6 @@ textarea{
     autocomplete="current-password"
   >
 
-
   <button
     class="primary"
     onclick="login()"
@@ -657,9 +632,7 @@ textarea{
     ログイン
   </button>
 
-
   <div id="loginMsg"></div>
-
 
   <button
     class="secondary"
@@ -671,10 +644,6 @@ textarea{
 
 </section>
 
-
-<!-- =========================
-     初回パスワード設定
-========================= -->
 
 <section
   id="setupView"
@@ -688,16 +657,13 @@ textarea{
     ← ログインに戻る
   </button>
 
-
   <h2>
     初回パスワード設定
   </h2>
 
-
   <p class="small">
     管理者に登録された学校IDを入力して、自分でパスワードを設定します。
   </p>
-
 
   <label>
     学校ID
@@ -706,7 +672,6 @@ textarea{
   <input
     id="setupId"
   >
-
 
   <label>
     新しいパスワード（6文字以上）
@@ -717,7 +682,6 @@ textarea{
     type="password"
   >
 
-
   <label>
     確認
   </label>
@@ -727,7 +691,6 @@ textarea{
     type="password"
   >
 
-
   <button
     class="primary"
     onclick="setupPassword()"
@@ -735,15 +698,10 @@ textarea{
     設定する
   </button>
 
-
   <div id="setupMsg"></div>
 
 </section>
 
-
-<!-- =========================
-     マイページ
-========================= -->
 
 <section
   id="myPageView"
@@ -757,16 +715,13 @@ textarea{
     ← ホームに戻る
   </button>
 
-
   <h2>
     マイページ
   </h2>
 
-
   <p class="small">
     学年・クラス・名前・パスワードを変更できます。
   </p>
-
 
   <label>
     学年
@@ -783,7 +738,6 @@ textarea{
 
   </select>
 
-
   <label>
     クラス
   </label>
@@ -791,7 +745,6 @@ textarea{
   <input
     id="myClass"
   >
-
 
   <label>
     名前
@@ -801,7 +754,6 @@ textarea{
     id="myName"
   >
 
-
   <button
     class="primary"
     onclick="saveProfile()"
@@ -809,11 +761,9 @@ textarea{
     プロフィールを保存
   </button>
 
-
   <h3 style="margin-top:24px">
     パスワード変更
   </h3>
-
 
   <label>
     新しいパスワード（6文字以上）
@@ -824,7 +774,6 @@ textarea{
     type="password"
   >
 
-
   <label>
     確認
   </label>
@@ -834,7 +783,6 @@ textarea{
     type="password"
   >
 
-
   <button
     class="primary"
     onclick="changePassword()"
@@ -842,15 +790,10 @@ textarea{
     パスワードを変更
   </button>
 
-
   <div id="myPageMsg"></div>
 
 </section>
 
-
-<!-- =========================
-     欠席連絡・修正フォーム
-========================= -->
 
 <section
   id="formView"
@@ -864,26 +807,18 @@ textarea{
     ← 戻る
   </button>
 
-
   <h2 id="formTitle">
     欠席連絡
   </h2>
-
 
   <div
     id="profileBox"
     class="userbar"
   ></div>
 
-
-  <!-- =========================
-       欠席理由
-  ========================= -->
-
   <label>
     欠席理由（必須）
   </label>
-
 
   <select
     id="reasonType"
@@ -944,8 +879,6 @@ textarea{
 
   </select>
 
-
-  <!-- その他 -->
   <div
     id="otherReasonBox"
     class="hidden"
@@ -962,15 +895,9 @@ textarea{
 
   </div>
 
-
-  <!-- =========================
-       日付カレンダー
-  ========================= -->
-
   <label>
     日付（必須）
   </label>
-
 
   <div class="form-calendar">
 
@@ -997,7 +924,6 @@ textarea{
 
     </div>
 
-
     <div class="week">
 
       <div>月</div>
@@ -1010,12 +936,10 @@ textarea{
 
     </div>
 
-
     <div
       class="days"
       id="formDays"
     ></div>
-
 
     <div
       id="selectedDateBox"
@@ -1026,9 +950,7 @@ textarea{
 
   </div>
 
-
   <div id="formNotice"></div>
-
 
   <button
     class="primary"
@@ -1039,10 +961,6 @@ textarea{
 
 </section>
 
-
-<!-- =========================
-     連絡を修正一覧
-========================= -->
 
 <section
   id="editView"
@@ -1056,11 +974,9 @@ textarea{
     ← ホームに戻る
   </button>
 
-
   <h2>
     連絡を修正
   </h2>
-
 
   <div id="myNotices"></div>
 
@@ -1162,17 +1078,9 @@ let editingId =
   null;
 
 
-/* =========================
-   ホーム用カレンダー
-========================= */
-
 let current =
   new Date();
 
-
-/* =========================
-   フォーム用カレンダー
-========================= */
 
 let formCurrent =
   new Date();
@@ -1185,10 +1093,6 @@ let selectedDate =
 const DOMAIN =
   "@seikyo-handbell-club.local";
 
-
-/* =========================
-   共通関数
-========================= */
 
 const esc =
   s =>
@@ -1239,10 +1143,6 @@ const email =
     DOMAIN;
 
 
-/* =========================
-   画面を隠す
-========================= */
-
 function hide(){
 
   [
@@ -1264,10 +1164,6 @@ function hide(){
 }
 
 
-/* =========================
-   ホーム
-========================= */
-
 function backHome(){
 
   editingId =
@@ -1287,10 +1183,6 @@ function backHome(){
 }
 
 
-/* =========================
-   ログイン
-========================= */
-
 function showLogin(){
 
   hide();
@@ -1303,10 +1195,6 @@ function showLogin(){
 }
 
 
-/* =========================
-   初回設定
-========================= */
-
 function showSetup(){
 
   hide();
@@ -1318,10 +1206,6 @@ function showSetup(){
 
 }
 
-
-/* =========================
-   プロフィール読み込み
-========================= */
 
 async function loadProfile(){
 
@@ -1364,10 +1248,6 @@ async function loadProfile(){
 
 }
 
-
-/* =========================
-   認証状態
-========================= */
 
 onAuthStateChanged(
   auth,
@@ -1437,6 +1317,7 @@ onAuthStateChanged(
 
 /* =========================
    ログイン
+   ※ Firebaseの実際のエラーを表示
 ========================= */
 
 async function login(){
@@ -1466,6 +1347,11 @@ async function login(){
 
   try{
 
+    console.log("Firebaseログイン開始");
+    console.log("学校ID:", id);
+    console.log("ログイン用メール:", email(id));
+
+
     await signInWithEmailAndPassword(
       auth,
       email(id),
@@ -1473,25 +1359,51 @@ async function login(){
     );
 
 
+    console.log("Firebaseログイン成功");
+
+
     backHome();
 
   }catch(e){
 
-    console.error(e);
+    console.error(
+      "Firebaseログインエラー:",
+      e
+    );
+
+
+    console.error(
+      "エラーコード:",
+      e.code
+    );
+
+
+    console.error(
+      "エラーメッセージ:",
+      e.message
+    );
 
 
     $("loginMsg")
       .innerHTML =
-        '<div class="msg error">IDまたはパスワードが正しくありません。</div>';
+        `
+        <div class="msg error">
+
+          ログインできませんでした。<br><br>
+
+          <strong>エラーコード：</strong>
+          ${esc(e.code || "不明")}<br>
+
+          <strong>エラー内容：</strong>
+          ${esc(e.message || "不明")}
+
+        </div>
+        `;
 
   }
 
 }
 
-
-/* =========================
-   初回パスワード設定
-========================= */
 
 async function setupPassword(){
 
@@ -1618,10 +1530,6 @@ async function setupPassword(){
 }
 
 
-/* =========================
-   ログアウト
-========================= */
-
 function logout(){
 
   if(
@@ -1636,10 +1544,6 @@ function logout(){
 
 }
 
-
-/* =========================================================
-   ホームのカレンダー
-========================================================= */
 
 async function render(){
 
@@ -1797,10 +1701,6 @@ async function render(){
 }
 
 
-/* =========================
-   ホームの月変更
-========================= */
-
 function changeMonth(n){
 
   current =
@@ -1815,10 +1715,6 @@ function changeMonth(n){
 
 }
 
-
-/* =========================================================
-   日付詳細
-========================================================= */
 
 async function openDay(date){
 
@@ -1959,10 +1855,6 @@ async function openDay(date){
 }
 
 
-/* =========================================================
-   欠席連絡フォーム
-========================================================= */
-
 function showForm(id=null){
 
   if(
@@ -2023,11 +1915,6 @@ function showForm(id=null){
       "";
 
 
-  /*
-    新規登録なら
-    現在のフォームカレンダー月をそのまま使用。
-  */
-
   if(!id){
 
     selectedDate =
@@ -2044,10 +1931,6 @@ function showForm(id=null){
 }
 
 
-/* =========================================================
-   フォームから戻る
-========================================================= */
-
 function backFromForm(){
 
   if(editingId){
@@ -2062,10 +1945,6 @@ function backFromForm(){
 
 }
 
-
-/* =========================================================
-   その他理由欄
-========================================================= */
 
 function toggleOtherReason(){
 
@@ -2101,10 +1980,6 @@ function toggleOtherReason(){
 
 }
 
-
-/* =========================================================
-   フォーム用カレンダー表示
-========================================================= */
 
 async function renderFormCalendar(){
 
@@ -2273,10 +2148,6 @@ async function renderFormCalendar(){
 }
 
 
-/* =========================================================
-   フォームカレンダーの月変更
-========================================================= */
-
 function changeFormMonth(n){
 
   formCurrent =
@@ -2292,10 +2163,6 @@ function changeFormMonth(n){
 }
 
 
-/* =========================================================
-   フォームで日付選択
-========================================================= */
-
 async function selectFormDate(date){
 
   selectedDate =
@@ -2309,10 +2176,6 @@ async function selectFormDate(date){
 
 }
 
-
-/* =========================================================
-   選択した日付表示
-========================================================= */
 
 function updateSelectedDateBox(){
 
@@ -2334,10 +2197,6 @@ function updateSelectedDateBox(){
 
 }
 
-
-/* =========================================================
-   選択日の部活確認
-========================================================= */
 
 async function checkDate(){
 
@@ -2410,10 +2269,6 @@ async function checkDate(){
 }
 
 
-/* =========================================================
-   同日重複チェック
-========================================================= */
-
 async function hasNoticeOnDate(
   date
 ){
@@ -2449,10 +2304,6 @@ async function hasNoticeOnDate(
 
 }
 
-
-/* =========================================================
-   欠席連絡登録・修正
-========================================================= */
 
 async function saveNotice(){
 
@@ -2553,10 +2404,6 @@ async function saveNotice(){
     !!editingId;
 
 
-  /* =========================
-     修正
-  ========================= */
-
   if(wasEditing){
 
     await update(
@@ -2597,10 +2444,6 @@ async function saveNotice(){
   }
 
 
-  /* =========================
-     新規登録
-  ========================= */
-
   await set(
     push(
       ref(
@@ -2640,12 +2483,6 @@ async function saveNotice(){
   );
 
 
-  /*
-    ホームには戻らない。
-    次の連絡をそのまま入力できるようにする。
-  */
-
-
   $("reasonType")
     .value =
       "";
@@ -2678,10 +2515,6 @@ async function saveNotice(){
 
 }
 
-
-/* =========================================================
-   連絡を修正一覧
-========================================================= */
 
 async function showEdit(){
 
@@ -2729,10 +2562,6 @@ async function showEdit(){
       );
 
 
-  /*
-    日付が新しいものから表示
-  */
-
   list.sort(
     (a,b) =>
       String(b[1].date)
@@ -2760,14 +2589,12 @@ async function showEdit(){
                   ${jp(n.date)}
                 </strong>
 
-
                 <div class="meta">
 
                   理由：
                   ${esc(n.reason)}
 
                 </div>
-
 
                 <div class="row">
 
@@ -2776,7 +2603,6 @@ async function showEdit(){
                   >
                     修正
                   </button>
-
 
                   <button
                     class="danger"
@@ -2803,10 +2629,6 @@ async function showEdit(){
 
 }
 
-
-/* =========================================================
-   修正画面
-========================================================= */
 
 async function editNotice(id){
 
@@ -2854,10 +2676,6 @@ async function editNotice(id){
       `${profile.name}（高校${profile.grade}年${profile.className}組）`;
 
 
-  /*
-    理由を設定
-  */
-
   const reasonOptions = [
 
     "体調不良・けが",
@@ -2890,7 +2708,6 @@ async function editNotice(id){
       .value =
         "";
 
-
   }else{
 
     $("reasonType")
@@ -2907,10 +2724,6 @@ async function editNotice(id){
 
   toggleOtherReason();
 
-
-  /*
-    登録済みの日付の月を開く
-  */
 
   if(n.date){
 
@@ -2954,10 +2767,6 @@ async function editNotice(id){
 }
 
 
-/* =========================================================
-   削除
-========================================================= */
-
 async function deleteNotice(id){
 
   if(
@@ -2999,10 +2808,6 @@ async function deleteNotice(id){
 
 }
 
-
-/* =========================================================
-   マイページ
-========================================================= */
 
 async function showMyPage(){
 
@@ -3057,10 +2862,6 @@ async function showMyPage(){
 
 }
 
-
-/* =========================================================
-   プロフィール保存
-========================================================= */
 
 async function saveProfile(){
 
@@ -3155,10 +2956,6 @@ async function saveProfile(){
 }
 
 
-/* =========================================================
-   パスワード変更
-========================================================= */
-
 async function changePassword(){
 
   const p =
@@ -3220,10 +3017,6 @@ async function changePassword(){
 
 }
 
-
-/* =========================================================
-   HTMLから呼び出す関数をwindowへ登録
-========================================================= */
 
 window.showLogin =
   showLogin;
@@ -3308,10 +3101,6 @@ window.changePassword =
 window.backHome =
   backHome;
 
-
-/* =========================================================
-   初期表示
-========================================================= */
 
 render();
 
