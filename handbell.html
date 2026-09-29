@@ -93,16 +93,29 @@ header{
 }
 
 .profile-mini-text{
+  display:flex;
+  align-items:center;
   min-width:0;
   max-width:calc(100vw - 90px);
   font-size:13px;
   font-weight:700;
   white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
   cursor:pointer;
   padding:8px 5px;
   border-radius:8px
+}
+
+.profile-name{
+  flex:none;
+  min-width:0
+}
+
+.profile-class{
+  flex:1 1 auto;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap
 }
 
 .profile-mini-text:hover{
@@ -321,6 +334,11 @@ textarea{
 
 .day.selected-day{
   border-color:#1f6feb;
+}
+
+.day.today-day{
+  outline:2px solid #20242a;
+  outline-offset:-2px
 }
 
 .daynum{
@@ -586,7 +604,7 @@ textarea{
    横幅が広い画面
 ========================= */
 
-@media(min-width:700px){
+@media(min-width:500px){
 
   header{
     padding:10px 16px
@@ -663,6 +681,14 @@ textarea{
 
   .profile-mini-text{
     max-width:300px
+  }
+
+  .profile-name{
+    flex:none
+  }
+
+  .profile-class{
+    flex:1 1 auto
   }
 
 }
@@ -1155,6 +1181,75 @@ textarea{
 
 
   <label>
+    日付（必須）
+  </label>
+
+  <div class="form-calendar">
+
+    <div class="monthbar">
+
+      <button
+        type="button"
+        onclick="changeFormMonth(-1)"
+      >
+        ‹
+      </button>
+
+      <div class="month-center">
+
+        <div
+          class="month-title"
+          id="formMonthTitle"
+        ></div>
+
+        <button
+          class="today-button"
+          type="button"
+          onclick="goCurrentFormMonth()"
+        >
+          今月に戻る
+        </button>
+
+      </div>
+
+      <button
+        type="button"
+        onclick="changeFormMonth(1)"
+      >
+        ›
+      </button>
+
+    </div>
+
+    <div class="week">
+
+      <div>月</div>
+      <div>火</div>
+      <div>水</div>
+      <div>木</div>
+      <div>金</div>
+      <div>土</div>
+      <div>日</div>
+
+    </div>
+
+    <div
+      class="days"
+      id="formDays"
+    ></div>
+
+    <div
+      id="selectedDateBox"
+      class="selected-date-box"
+    >
+      日付を選択してください
+    </div>
+
+  </div>
+
+
+
+  <label>
     連絡の種類（必須）
   </label>
 
@@ -1162,6 +1257,10 @@ textarea{
     id="noticeType"
     onchange="updateTimeFields()"
   >
+
+    <option value="">
+      理由を選択してください
+    </option>
 
     <option value="欠席">
       欠席
@@ -1180,6 +1279,8 @@ textarea{
     </option>
 
   </select>
+
+
 
 
   <div
@@ -1238,6 +1339,8 @@ textarea{
     </div>
 
   </div>
+
+
 
 
   <label>
@@ -1320,73 +1423,6 @@ textarea{
 
   </div>
 
-
-  <label>
-    日付（必須）
-  </label>
-
-  <div class="form-calendar">
-
-    <div class="monthbar">
-
-      <button
-        type="button"
-        onclick="changeFormMonth(-1)"
-      >
-        ‹
-      </button>
-
-      <div class="month-center">
-
-        <div
-          class="month-title"
-          id="formMonthTitle"
-        ></div>
-
-        <button
-          class="today-button"
-          type="button"
-          onclick="goCurrentFormMonth()"
-        >
-          今月に戻る
-        </button>
-
-      </div>
-
-      <button
-        type="button"
-        onclick="changeFormMonth(1)"
-      >
-        ›
-      </button>
-
-    </div>
-
-    <div class="week">
-
-      <div>月</div>
-      <div>火</div>
-      <div>水</div>
-      <div>木</div>
-      <div>金</div>
-      <div>土</div>
-      <div>日</div>
-
-    </div>
-
-    <div
-      class="days"
-      id="formDays"
-    ></div>
-
-    <div
-      id="selectedDateBox"
-      class="selected-date-box"
-    >
-      日付を選択してください
-    </div>
-
-  </div>
 
   <div id="formNotice"></div>
 
@@ -1612,7 +1648,7 @@ function getProfileDisplay(){
   const className =
     getProfileClass();
 
-  return `${grade}${className}組　${profile?.name ?? ""}`;
+  return `${profile?.name ?? ""}　${grade}${className}組`;
 
 }
 
@@ -1769,6 +1805,66 @@ function getScheduleDayClass(scheduleList){
   }
 
   return "off";
+
+}
+
+
+function getScheduleColors(scheduleList){
+
+  const colors = [];
+
+  scheduleList.forEach(
+    schedule => {
+
+      const type =
+        schedule?.type || "normal";
+
+      let color = "";
+
+      if(type === "normal") color = "#eaf2ff";
+      else if(type === "exam") color = "#eaf8ea";
+      else if(type === "concert") color = "#f3eafa";
+      else if(type === "schoolHoliday") color = "#fff0f0";
+      else if(type === "event") color = "#fff4e5";
+      else color = "#eaf2ff";
+
+      if(!colors.includes(color)) colors.push(color);
+
+    }
+  );
+
+  return colors;
+
+}
+
+
+function getScheduleBackground(scheduleList){
+
+  const colors =
+    getScheduleColors(scheduleList);
+
+  if(!colors.length) return "";
+
+  if(colors.length === 1){
+    return colors[0];
+  }
+
+  if(colors.length === 2){
+    return `linear-gradient(135deg, ${colors[0]} 0%, ${colors[0]} 50%, ${colors[1]} 50%, ${colors[1]} 100%)`;
+  }
+
+  const stops = [];
+  const step = 100 / colors.length;
+
+  colors.forEach(
+    (color,index) => {
+      const start = step * index;
+      const end = step * (index + 1);
+      stops.push(`${color} ${start}%`, `${color} ${end}%`);
+    }
+  );
+
+  return `linear-gradient(to bottom, ${stops.join(", ")})`;
 
 }
 
@@ -2026,8 +2122,8 @@ function updateProfileDisplay(){
 
 
   $("profileMiniText")
-    .textContent =
-      getProfileDisplay();
+    .innerHTML =
+      `<span class="profile-name">${esc(profile?.name ?? "")}</span><span class="profile-class">　${esc(getProfileGrade())}${esc(getProfileClass())}組</span>`;
 
 
   $("profileBox")
@@ -2646,10 +2742,25 @@ async function render(){
       );
 
 
+    const today =
+      ymd(
+        new Date().getFullYear(),
+        new Date().getMonth(),
+        new Date().getDate()
+      ) === date;
+
+
+    const background =
+      getScheduleBackground(
+        scheduleList
+      );
+
+
     h += `
 
       <div
-        class="day ${dayClass}"
+        class="day ${dayClass} ${today ? "today-day" : ""}"
+        ${background ? `style="background:${background}"` : ""}
         onclick="openDay('${date}')"
       >
 
@@ -3186,7 +3297,7 @@ function showForm(id=null){
 
     $("noticeType")
       .value =
-        "欠席";
+        "";
 
 
     $("startTime")
@@ -3266,7 +3377,104 @@ function backFromForm(){
    時間入力表示
 ========================= */
 
-function updateTimeFields(){
+function splitTimeRange(time){
+
+  const value =
+    String(time || "").trim();
+
+  if(!value || value === "終日"){
+    return {start:"", end:""};
+  }
+
+  const match =
+    value.match(/^\s*(\d{1,2}:\d{2})\s*[〜~\-－]\s*(\d{1,2}:\d{2})\s*$/);
+
+  if(match){
+    return {start:match[1], end:match[2]};
+  }
+
+  return {start:"", end:""};
+
+}
+
+
+async function getDefaultClubTimes(){
+
+  if(!selectedDate) return {start:"", end:""};
+
+  try{
+
+    const ss =
+      await get(
+        ref(db,"schedules")
+      );
+
+    const schedules =
+      ss.exists() ? ss.val() : {};
+
+    const scheduleList =
+      getSchedulesForDate(
+        schedules,
+        selectedDate
+      );
+
+    const clubSchedules =
+      scheduleList.filter(
+        s => s && (
+          s.type === "normal" ||
+          s.type === "concert" ||
+          s.type === "event" ||
+          !s.type
+        )
+      );
+
+    for(const schedule of clubSchedules){
+
+      const times =
+        splitTimeRange(schedule.time);
+
+      if(times.start || times.end){
+        return times;
+      }
+
+    }
+
+  }catch(e){
+    console.error("予定時刻の取得エラー:",e);
+  }
+
+  return {start:"", end:""};
+
+}
+
+
+async function setDefaultTimesForNoticeType(){
+
+  const type =
+    $("noticeType").value;
+
+  if(!selectedDate || !type || type === "欠席") return;
+
+  const times =
+    await getDefaultClubTimes();
+
+  if(type === "遅刻" && !$(`startTime`).value){
+    $(`startTime`).value = times.start;
+  }
+
+  if(type === "早退" && !$(`earlyLeaveTime`).value){
+    $(`earlyLeaveTime`).value = times.end;
+  }
+
+  if(type === "途中抜け"){
+    if(!$(`breakOutTime`).value) $(`breakOutTime`).value = times.start;
+    if(!$(`breakReturnTime`).value) $(`breakReturnTime`).value = times.end;
+  }
+
+}
+
+
+async function updateTimeFields(){
 
   const type =
     $("noticeType")
@@ -3340,6 +3548,8 @@ function updateTimeFields(){
       .remove("hidden");
 
   }
+
+  setDefaultTimesForNoticeType();
 
 }
 
@@ -3519,13 +3729,29 @@ async function renderFormCalendar(){
       );
 
 
+    const today =
+      ymd(
+        new Date().getFullYear(),
+        new Date().getMonth(),
+        new Date().getDate()
+      ) === date;
+
+
+    const background =
+      getScheduleBackground(
+        scheduleList
+      );
+
+
     h += `
 
       <div
         class="day
           ${dayClass}
           ${selected ? "selected-day" : ""}
+          ${today ? "today-day" : ""}
         "
+        ${background ? `style="background:${background}"` : ""}
         onclick="selectFormDate('${date}')"
       >
 
@@ -3585,6 +3811,9 @@ async function selectFormDate(date){
 
 
   checkDate();
+
+
+  setDefaultTimesForNoticeType();
 
 
 }
@@ -4182,7 +4411,7 @@ async function saveNotice(){
 
   $("noticeType")
     .value =
-      "欠席";
+      "";
 
 
   $("startTime")
@@ -4880,6 +5109,57 @@ async function changePassword(){
 
 
 /* =========================
+   カレンダー横スワイプ
+========================= */
+
+let calendarTouchStartX = 0;
+let calendarTouchStartY = 0;
+
+function setupCalendarSwipe(){
+
+  const mainCalendar = $("calendarView");
+  const formCalendar = $("formView");
+
+  function bindSwipe(element, next, prev){
+
+    if(!element) return;
+
+    element.addEventListener("touchstart", e => {
+      if(!e.touches.length) return;
+      calendarTouchStartX = e.touches[0].clientX;
+      calendarTouchStartY = e.touches[0].clientY;
+    }, {passive:true});
+
+    element.addEventListener("touchend", e => {
+      if(!e.changedTouches.length) return;
+
+      const dx = e.changedTouches[0].clientX - calendarTouchStartX;
+      const dy = e.changedTouches[0].clientY - calendarTouchStartY;
+
+      if(Math.abs(dx) < 50 || Math.abs(dx) <= Math.abs(dy)) return;
+
+      if(dx < 0) next();
+      else prev();
+    }, {passive:true});
+
+  }
+
+  bindSwipe(
+    mainCalendar,
+    () => changeMonth(1),
+    () => changeMonth(-1)
+  );
+
+  bindSwipe(
+    formCalendar,
+    () => changeFormMonth(1),
+    () => changeFormMonth(-1)
+  );
+
+}
+
+
+/* =========================
    windowへ公開
 ========================= */
 
@@ -4983,6 +5263,7 @@ window.backHome =
    初期表示
 ========================= */
 
+setupCalendarSwipe();
 render();
 
 </script>
