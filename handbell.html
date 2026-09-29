@@ -1576,6 +1576,11 @@ let selectedDate =
   "";
 
 
+let scheduleCache = null;
+let noticeCache = null;
+let dataRefreshPromise = null;
+
+
 const DOMAIN =
   "@seikyo-handbell-club.local";
 
@@ -1917,6 +1922,48 @@ function getScheduleTitle(
 
 
 /* =========================
+   共通データ読み込み
+========================= */
+
+async function refreshCommonData(){
+
+  if(dataRefreshPromise)
+    return dataRefreshPromise;
+
+  dataRefreshPromise =
+    Promise.all([
+      get(ref(db,"schedules")),
+      get(ref(db,"notices"))
+    ])
+    .then(([ss,ns])=>{
+      scheduleCache = ss.exists() ? ss.val() : {};
+      noticeCache = ns.exists() ? ns.val() : {};
+      return {
+        schedules:scheduleCache,
+        notices:noticeCache
+      };
+    })
+    .finally(()=>{
+      dataRefreshPromise = null;
+    });
+
+  return dataRefreshPromise;
+}
+
+async function getCommonData(){
+
+  if(scheduleCache !== null && noticeCache !== null){
+    return {
+      schedules:scheduleCache,
+      notices:noticeCache
+    };
+  }
+
+  return refreshCommonData();
+}
+
+
+/* =========================
    画面切り替え
 ========================= */
 
@@ -1943,25 +1990,25 @@ function hide(){
 
 async function backHome(){
 
-  editingId =
-    null;
-
+  editingId = null;
 
   hide();
 
-  $("detail")
-    .innerHTML = "";
+  $("detail").innerHTML = "";
 
-  $("days")
-    .innerHTML = "";
+  // カレンダー画面を先に表示し、画面遷移を待たせない
+  $("calendarView").classList.remove("hidden");
 
+  // 既に表示済みのカレンダーをそのまま使って即表示し、裏で最新データへ更新
+  render();
 
-  await render();
-
-
-  $("calendarView")
-    .classList
-    .remove("hidden");
+  refreshCommonData()
+    .then(()=>{
+      if(!$("calendarView").classList.contains("hidden")){
+        render();
+      }
+    })
+    .catch(e=>console.error(e));
 
 }
 
@@ -2566,6 +2613,10 @@ function goCurrentMonth(){
 
   render();
 
+  refreshCommonData()
+    .then(()=>render())
+    .catch(e=>console.error(e));
+
 }
 
 
@@ -2607,38 +2658,18 @@ async function render(){
       `${y}年${m+1}月`;
 
 
-  const ss =
-    await get(
-      ref(
-        db,
-        "schedules"
-      )
-    );
-
-
-  const ns =
-    await get(
-      ref(
-        db,
-        "notices"
-      )
-    );
+  const data =
+    await getCommonData();
 
 
   const sch =
-    ss.exists()
-      ?
-      ss.val()
-      :
-      {};
+    data.schedules ||
+    {};
 
 
   const all =
-    ns.exists()
-      ?
-      ns.val()
-      :
-      {};
+    data.notices ||
+    {};
 
 
   const first =
@@ -2785,6 +2816,10 @@ function changeMonth(n){
 
   render();
 
+  refreshCommonData()
+    .then(()=>render())
+    .catch(e=>console.error(e));
+
 }
 
 
@@ -2846,44 +2881,22 @@ async function openDay(date){
 
   hide();
 
-
   $("detailView")
     .classList
     .remove("hidden");
 
-
-  const ss =
-    await get(
-      ref(
-        db,
-        "schedules"
-      )
-    );
-
-
-  const ns =
-    await get(
-      ref(
-        db,
-        "notices"
-      )
-    );
+  const data =
+    await getCommonData();
 
 
   const schedules =
-    ss.exists()
-      ?
-      ss.val()
-      :
-      {};
+    data.schedules ||
+    {};
 
 
   const all =
-    ns.exists()
-      ?
-      ns.val()
-      :
-      {};
+    data.notices ||
+    {};
 
 
   const scheduleList =
@@ -3589,38 +3602,18 @@ async function renderFormCalendar(){
       `${y}年${m+1}月`;
 
 
-  const ss =
-    await get(
-      ref(
-        db,
-        "schedules"
-      )
-    );
-
-
-  const ns =
-    await get(
-      ref(
-        db,
-        "notices"
-      )
-    );
+  const data =
+    await getCommonData();
 
 
   const sch =
-    ss.exists()
-      ?
-      ss.val()
-      :
-      {};
+    data.schedules ||
+    {};
 
 
   const all =
-    ns.exists()
-      ?
-      ns.val()
-      :
-      {};
+    data.notices ||
+    {};
 
 
   const first =
@@ -3843,21 +3836,13 @@ async function checkDate(){
   }
 
 
-  const ss =
-    await get(
-      ref(
-        db,
-        "schedules"
-      )
-    );
+  const data =
+    await getCommonData();
 
 
   const schedules =
-    ss.exists()
-      ?
-      ss.val()
-      :
-      {};
+    data.schedules ||
+    {};
 
 
   const scheduleList =
@@ -4218,21 +4203,13 @@ async function saveNotice(){
   }
 
 
-  const ss =
-    await get(
-      ref(
-        db,
-        "schedules"
-      )
-    );
+  const data =
+    await getCommonData();
 
 
   const schedules =
-    ss.exists()
-      ?
-      ss.val()
-      :
-      {};
+    data.schedules ||
+    {};
 
 
   const scheduleList =
@@ -4466,6 +4443,12 @@ async function showEdit(){
   }
 
 
+  hide();
+
+  $("editView")
+    .classList
+    .remove("hidden");
+
   if(!profile){
 
     const loaded =
@@ -4481,14 +4464,6 @@ async function showEdit(){
     }
 
   }
-
-
-  hide();
-
-
-  $("editView")
-    .classList
-    .remove("hidden");
 
 
   const s =
@@ -4866,6 +4841,12 @@ async function showMyPage(){
   }
 
 
+  hide();
+
+  $("myPageView")
+    .classList
+    .remove("hidden");
+
   if(!profile){
 
     const loaded =
@@ -4881,14 +4862,6 @@ async function showMyPage(){
     }
 
   }
-
-
-  hide();
-
-
-  $("myPageView")
-    .classList
-    .remove("hidden");
 
 
   $("myGrade").value =
@@ -5096,217 +5069,10 @@ async function changePassword(){
 let calendarTouchStartX = 0;
 let calendarTouchStartY = 0;
 
-function setupCalendarSwipe(){
-
-  const mainCalendar = $("calendarView");
-  const formCalendar = $("formView");
-
-  function bindSwipe(element, next, prev){
-
-    if(!element) return;
-
-    let startX = 0;
-    let startY = 0;
-    let dragging = false;
-    let moved = false;
-
-    element.addEventListener("touchstart", e => {
-      if(!e.touches.length) return;
-
-      startX = e.touches[0].clientX;
-      startY = e.touches[0].clientY;
-      dragging = true;
-      moved = false;
-
-      element.style.transition = "none";
-      element.style.transform = "translateX(0)";
-
-    }, {passive:true});
-
-    element.addEventListener("touchmove", e => {
-      if(!dragging || !e.touches.length) return;
-
-      const dx = e.touches[0].clientX - startX;
-      const dy = e.touches[0].clientY - startY;
-
-      if(Math.abs(dx) <= Math.abs(dy) || Math.abs(dx) < 8){
-        return;
-      }
-
-      moved = true;
-
-      const limited = Math.max(-120, Math.min(120, dx));
-      element.style.transform = `translateX(${limited}px)`;
-
-    }, {passive:true});
-
-    element.addEventListener("touchend", async e => {
-      if(!dragging || !e.changedTouches.length){
-        dragging = false;
-        return;
-      }
-
-      const dx = e.changedTouches[0].clientX - startX;
-      const dy = e.changedTouches[0].clientY - startY;
-
-      dragging = false;
-
-      if(!moved || Math.abs(dx) < 50 || Math.abs(dx) <= Math.abs(dy)){
-        element.style.transition = "transform 180ms ease-out";
-        element.style.transform = "translateX(0)";
-        return;
-      }
-
-      const direction = dx < 0 ? -1 : 1;
-      const moveOut = direction < 0 ? -100 : 100;
-
-      element.style.transition = "transform 140ms ease-out";
-      element.style.transform = `translateX(${moveOut}%)`;
-
-      await new Promise(resolve => setTimeout(resolve, 140));
-
-      if(direction < 0) next();
-      else prev();
-
-      element.style.transition = "none";
-      element.style.transform = `translateX(${-moveOut}%)`;
-
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          element.style.transition = "transform 180ms ease-out";
-          element.style.transform = "translateX(0)";
-        });
-      });
-
-    }, {passive:true});
-
-    element.addEventListener("touchcancel", () => {
-      dragging = false;
-      element.style.transition = "transform 180ms ease-out";
-      element.style.transform = "translateX(0)";
-    }, {passive:true});
-
-  }
-
-  bindSwipe(
-    mainCalendar,
-    () => changeMonth(1),
-    () => changeMonth(-1)
-  );
-
-  bindSwipe(
-    formCalendar,
-    () => changeFormMonth(1),
-    () => changeFormMonth(-1)
-  );
-
-}
-
-/* =========================
-   windowへ公開
-========================= */
-
-window.showLogin =
-  showLogin;
-
-
-window.showSetup =
-  showSetup;
-
-
-window.login =
-  login;
-
-
-window.setupPassword =
-  setupPassword;
-
-
-window.logout =
-  logout;
-
-
-window.changeMonth =
-  changeMonth;
-
-
-window.goCurrentMonth =
-  goCurrentMonth;
-
-
-window.openDay =
-  openDay;
-
-
-window.showForm =
-  showForm;
-
-
-window.backFromForm =
-  backFromForm;
-
-
-window.showEdit =
-  showEdit;
-
-
-window.toggleOtherReason =
-  toggleOtherReason;
-
-
-window.updateTimeFields =
-  updateTimeFields;
-
-
-window.goCurrentFormMonth =
-  goCurrentFormMonth;
-
-
-window.changeFormMonth =
-  changeFormMonth;
-
-
-window.selectFormDate =
-  selectFormDate;
-
-
-window.checkDate =
-  checkDate;
-
-
-window.saveNotice =
-  saveNotice;
-
-
-window.editNotice =
-  editNotice;
-
-
-window.deleteNotice =
-  deleteNotice;
-
-
-window.showMyPage =
-  showMyPage;
-
-
-window.saveProfile =
-  saveProfile;
-
-
-window.changePassword =
-  changePassword;
-
-
-window.backHome =
-  backHome;
-
-
 /* =========================
    初期表示
 ========================= */
 
-setupCalendarSwipe();
 render();
 
 </script>
