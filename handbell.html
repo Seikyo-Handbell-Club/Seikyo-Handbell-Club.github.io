@@ -32,36 +32,110 @@ header{
 }
 
 .header-row{
+  position:relative;
+  min-height:46px;
   display:flex;
   align-items:center;
-  gap:14px;
+  justify-content:center;
 }
 
-.title-area{
-  flex-shrink:0;
+/* 個人設定 */
+
+.profile-button{
+  position:absolute;
+  left:0;
+  top:50%;
+  transform:translateY(-50%);
+
+  display:flex;
+  align-items:center;
+  gap:7px;
+
+  background:#f5f7fb;
+  color:#333;
+
+  border:1px solid #e1e5eb;
+  border-radius:10px;
+
+  padding:7px 10px;
+  font-size:13px;
+  font-weight:700;
+
   cursor:pointer;
+  white-space:nowrap;
+}
+
+.profile-icon{
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  background:#e9edf3;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  position:relative;
+  flex-shrink:0;
+}
+
+/* 人型アイコン */
+
+.profile-icon::before{
+  content:"";
+  width:7px;
+  height:7px;
+  background:#687482;
+  border-radius:50%;
+  position:absolute;
+  top:4px;
+}
+
+.profile-icon::after{
+  content:"";
+  width:12px;
+  height:7px;
+  background:#687482;
+  border-radius:8px 8px 5px 5px;
+  position:absolute;
+  bottom:4px;
+}
+
+
+/* タイトル */
+
+.title-area{
+  cursor:pointer;
+  text-align:center;
 }
 
 h1{
   font-size:20px;
   margin:0 0 2px;
-  text-align:left;
+  text-align:center;
   white-space:nowrap;
 }
 
 .club{
-  text-align:left;
+  text-align:center;
   color:#66717e;
   font-size:11px;
   margin:0;
   white-space:nowrap;
 }
 
+
+/* ログイン後ボタン */
+
 .header-actions{
+  position:absolute;
+  right:0;
+  top:50%;
+  transform:translateY(-50%);
+
   display:flex;
   align-items:center;
   gap:7px;
-  margin-left:auto;
 }
 
 .header-actions button{
@@ -82,8 +156,14 @@ h1{
   border:1px solid #1f6feb;
 }
 
+
+/* ログイン前 */
+
 .top-login{
-  margin-left:auto;
+  position:absolute;
+  right:0;
+  top:50%;
+  transform:translateY(-50%);
 }
 
 .top-login button{
@@ -218,6 +298,12 @@ button{
   cursor:pointer;
 }
 
+/* 部活がある日 */
+
+.day.club-day{
+  background:#fff0f0;
+}
+
 .day.empty{
   background:transparent;
   cursor:default;
@@ -336,39 +422,75 @@ button{
 
 
 /* =========================
+   個人設定
+   ========================= */
+
+.setting-section{
+  border-top:1px solid #e7eaf0;
+  margin-top:18px;
+  padding-top:8px;
+}
+
+.setting-note{
+  font-size:12px;
+  color:#77818e;
+  margin-top:6px;
+}
+
+
+/* =========================
    スマホ用
    ========================= */
 
-@media(max-width:600px){
+@media(max-width:700px){
 
   header{
-    padding:12px 12px;
+    padding:10px 8px;
   }
 
   .header-row{
-    gap:8px;
+    min-height:48px;
+  }
+
+  .profile-button{
+    padding:6px 7px;
+    gap:5px;
+    font-size:11px;
+    max-width:105px;
+    overflow:hidden;
+  }
+
+  .profile-button .profile-name{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    max-width:65px;
+  }
+
+  .profile-icon{
+    width:21px;
+    height:21px;
   }
 
   h1{
-    font-size:17px;
+    font-size:16px;
   }
 
   .club{
-    font-size:10px;
+    font-size:9px;
   }
 
   .header-actions{
-    gap:4px;
+    gap:3px;
   }
 
   .header-actions button{
-    padding:7px 8px;
-    font-size:11px;
+    padding:7px 6px;
+    font-size:10px;
   }
 
   .top-login button{
-    padding:7px 12px;
-    font-size:12px;
+    padding:7px 11px;
+    font-size:11px;
   }
 
   .month-title{
@@ -392,10 +514,41 @@ button{
 
   <div class="header-row">
 
-    <!-- タイトルを押すとカレンダーへ戻る -->
-    <div class="title-area" onclick="backHome()">
 
-      <h1>部活動欠席連絡</h1>
+    <!-- =========================
+         ログイン後：個人設定
+         ========================= -->
+
+    <button
+      id="profileButton"
+      class="profile-button hidden"
+      onclick="showProfileSettings()"
+    >
+
+      <span class="profile-icon"></span>
+
+      <span
+        id="headerUserName"
+        class="profile-name"
+      >
+        名前
+      </span>
+
+    </button>
+
+
+    <!-- =========================
+         タイトル
+         ========================= -->
+
+    <div
+      class="title-area"
+      onclick="backHome()"
+    >
+
+      <h1>
+        部活動欠席連絡
+      </h1>
 
       <div class="club">
         清教学園ハンドベル部
@@ -404,8 +557,14 @@ button{
     </div>
 
 
-    <!-- ログイン前 -->
-    <div id="loggedOut" class="top-login">
+    <!-- =========================
+         ログイン前
+         ========================= -->
+
+    <div
+      id="loggedOut"
+      class="top-login"
+    >
 
       <button onclick="showLogin()">
         ログイン
@@ -414,8 +573,14 @@ button{
     </div>
 
 
-    <!-- ログイン後 -->
-    <div id="loggedIn" class="header-actions hidden">
+    <!-- =========================
+         ログイン後
+         ========================= -->
+
+    <div
+      id="loggedIn"
+      class="header-actions hidden"
+    >
 
       <button onclick="showForm()">
         欠席連絡
@@ -468,7 +633,6 @@ button{
         </button>
 
       </div>
-
 
       <button
         class="today-button"
@@ -544,7 +708,6 @@ button{
 
   <h2>ログイン</h2>
 
-
   <label>
     学校ID
   </label>
@@ -553,7 +716,6 @@ button{
     id="loginId"
     autocomplete="username"
   >
-
 
   <label>
     パスワード
@@ -565,7 +727,6 @@ button{
     autocomplete="current-password"
   >
 
-
   <button
     class="primary"
     onclick="login()"
@@ -573,14 +734,12 @@ button{
     ログイン
   </button>
 
-
   <button
     class="linkbtn"
     onclick="showSetup()"
   >
     初回パスワード設定
   </button>
-
 
   <div id="loginMsg"></div>
 
@@ -610,13 +769,11 @@ button{
     管理者に登録された学校IDを入力して、自分でパスワードを設定します。
   </p>
 
-
   <label>
     学校ID
   </label>
 
   <input id="setupId">
-
 
   <label>
     新しいパスワード（6文字以上）
@@ -627,7 +784,6 @@ button{
     type="password"
   >
 
-
   <label>
     確認
   </label>
@@ -637,14 +793,12 @@ button{
     type="password"
   >
 
-
   <button
     class="primary"
     onclick="setupPassword()"
   >
     設定する
   </button>
-
 
   <div id="setupMsg"></div>
 
@@ -662,6 +816,7 @@ button{
 >
 
   <button
+    id="formBackButton"
     class="secondary"
     onclick="backHome()"
   >
@@ -672,12 +827,10 @@ button{
     欠席連絡
   </h2>
 
-
   <div
     id="profileBox"
     class="userbar"
   ></div>
-
 
   <label>
     連絡の種類
@@ -689,15 +842,11 @@ button{
   >
 
     <option>欠席</option>
-
     <option>遅刻</option>
-
     <option>早退</option>
-
     <option>途中抜け</option>
 
   </select>
-
 
   <label>
     日付
@@ -709,9 +858,7 @@ button{
     onchange="checkDate()"
   >
 
-
   <div id="timeFields"></div>
-
 
   <label>
     理由（必須）
@@ -719,9 +866,7 @@ button{
 
   <textarea id="reason"></textarea>
 
-
   <div id="formNotice"></div>
-
 
   <button
     class="primary"
@@ -759,6 +904,158 @@ button{
 </section>
 
 
+
+<!-- =========================
+     個人設定
+     ========================= -->
+
+<section
+  id="profileView"
+  class="panel hidden"
+>
+
+  <button
+    class="secondary"
+    onclick="backHome()"
+  >
+    ← カレンダーに戻る
+  </button>
+
+  <h2>
+    個人設定
+  </h2>
+
+
+  <div class="userbar">
+
+    <strong id="settingsCurrentName">
+      名前
+    </strong>
+
+    <br>
+
+    <span class="small">
+      学校ID：
+      <span id="settingsSchoolId"></span>
+    </span>
+
+  </div>
+
+
+  <div class="setting-section">
+
+    <h3>
+      部員情報
+    </h3>
+
+
+    <label>
+      名前
+    </label>
+
+    <input
+      id="settingsName"
+      type="text"
+    >
+
+
+    <label>
+      学年
+    </label>
+
+    <select id="settingsGrade">
+
+      <option value="中学1年">中学1年</option>
+      <option value="中学2年">中学2年</option>
+      <option value="中学3年">中学3年</option>
+      <option value="高校1年">高校1年</option>
+      <option value="高校2年">高校2年</option>
+
+    </select>
+
+
+    <label>
+      クラス
+    </label>
+
+    <select id="settingsClass">
+
+      <option value="A">A</option>
+      <option value="B">B</option>
+      <option value="C">C</option>
+      <option value="D">D</option>
+      <option value="E">E</option>
+      <option value="F">F</option>
+      <option value="G">G</option>
+      <option value="H">H</option>
+      <option value="I">I</option>
+      <option value="J">J</option>
+      <option value="K">K</option>
+
+    </select>
+
+
+    <p class="setting-note">
+      学校IDは個人設定から変更できません。
+    </p>
+
+
+    <button
+      class="primary"
+      onclick="saveProfileSettings()"
+    >
+      部員情報を保存
+    </button>
+
+    <div id="profileMsg"></div>
+
+  </div>
+
+
+
+  <div class="setting-section">
+
+    <h3>
+      パスワード変更
+    </h3>
+
+
+    <label>
+      新しいパスワード（6文字以上）
+    </label>
+
+    <input
+      id="newPassword"
+      type="password"
+      autocomplete="new-password"
+    >
+
+
+    <label>
+      新しいパスワード（確認）
+    </label>
+
+    <input
+      id="newPassword2"
+      type="password"
+      autocomplete="new-password"
+    >
+
+
+    <button
+      class="primary"
+      onclick="changePassword()"
+    >
+      パスワードを変更
+    </button>
+
+    <div id="passwordMsg"></div>
+
+  </div>
+
+</section>
+
+
 </main>
 
 
@@ -780,6 +1077,7 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  updatePassword,
   signOut
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
@@ -907,7 +1205,8 @@ function hide(){
     "loginView",
     "setupView",
     "formView",
-    "editView"
+    "editView",
+    "profileView"
   ].forEach(
     x =>
     $(x).classList.add("hidden")
@@ -975,6 +1274,18 @@ async function loadProfile(){
 
   if(profile){
 
+    $("headerUserName").textContent =
+      profile.name || "名前";
+
+
+    $("settingsCurrentName").textContent =
+      profile.name || "名前";
+
+
+    $("settingsSchoolId").textContent =
+      profile.schoolId || "";
+
+
     $("userbar").innerHTML =
       `<strong>${esc(profile.name)}</strong>
        ${esc(profile.grade)}${esc(profile.className)}組
@@ -983,6 +1294,18 @@ async function loadProfile(){
 
     $("profileBox").textContent =
       `${profile.name}（${profile.grade}${profile.className}組）`;
+
+
+    $("settingsName").value =
+      profile.name || "";
+
+
+    $("settingsGrade").value =
+      profile.grade || "高校1年";
+
+
+    $("settingsClass").value =
+      profile.className || "A";
 
   }
 
@@ -1002,11 +1325,6 @@ onAuthStateChanged(
 
     if(u){
 
-      /*
-       * Firebaseでログインが確認された時点で
-       * 先にヘッダーをログイン後の状態へ変更
-       */
-
       $("loggedOut")
         .classList.add("hidden");
 
@@ -1015,11 +1333,9 @@ onAuthStateChanged(
         .classList.remove("hidden");
 
 
-      /*
-       * 部員情報の取得
-       * ここでエラーが出ても
-       * ヘッダー表示には影響させない
-       */
+      $("profileButton")
+        .classList.remove("hidden");
+
 
       try{
 
@@ -1045,6 +1361,10 @@ onAuthStateChanged(
 
 
       $("loggedIn")
+        .classList.add("hidden");
+
+
+      $("profileButton")
         .classList.add("hidden");
 
 
@@ -1246,6 +1566,230 @@ function logout(){
 
 
 /* =========================================================
+   個人設定
+   ========================================================= */
+
+function showProfileSettings(){
+
+  if(
+    !currentUser ||
+    !profile
+  ){
+
+    return showLogin();
+
+  }
+
+
+  hide();
+
+
+  $("profileView")
+    .classList.remove("hidden");
+
+
+  $("profileMsg").innerHTML =
+    "";
+
+
+  $("passwordMsg").innerHTML =
+    "";
+
+
+  $("settingsName").value =
+    profile.name || "";
+
+
+  $("settingsGrade").value =
+    profile.grade || "高校1年";
+
+
+  $("settingsClass").value =
+    profile.className || "A";
+
+
+  $("settingsCurrentName").textContent =
+    profile.name || "名前";
+
+
+  $("settingsSchoolId").textContent =
+    profile.schoolId || "";
+
+
+  $("newPassword").value =
+    "";
+
+
+  $("newPassword2").value =
+    "";
+
+}
+
+
+/* =========================================================
+   個人情報変更
+   ========================================================= */
+
+async function saveProfileSettings(){
+
+  if(
+    !currentUser ||
+    !profile
+  ){
+
+    return;
+
+  }
+
+
+  const name =
+    $("settingsName")
+    .value
+    .trim();
+
+
+  const grade =
+    $("settingsGrade")
+    .value;
+
+
+  const className =
+    $("settingsClass")
+    .value;
+
+
+  if(!name){
+
+    $("profileMsg").innerHTML =
+      '<div class="msg error">名前を入力してください。</div>';
+
+    return;
+
+  }
+
+
+  try{
+
+    await update(
+      ref(
+        db,
+        "members/"+currentUser.uid
+      ),
+      {
+        name,
+        grade,
+        className
+      }
+    );
+
+
+    profile = {
+      ...profile,
+      name,
+      grade,
+      className
+    };
+
+
+    await loadProfile();
+
+
+    $("profileMsg").innerHTML =
+      '<div class="msg">部員情報を保存しました。</div>';
+
+
+  }catch(e){
+
+    console.error(e);
+
+
+    $("profileMsg").innerHTML =
+      '<div class="msg error">保存できませんでした。時間をおいてもう一度試してください。</div>';
+
+  }
+
+}
+
+
+/* =========================================================
+   パスワード変更
+   ========================================================= */
+
+async function changePassword(){
+
+  if(!currentUser)
+    return;
+
+
+  const p =
+    $("newPassword")
+    .value;
+
+
+  const p2 =
+    $("newPassword2")
+    .value;
+
+
+  if(
+    p.length < 6 ||
+    p !== p2
+  ){
+
+    $("passwordMsg").innerHTML =
+      '<div class="msg error">6文字以上で、2つのパスワードを同じにしてください。</div>';
+
+    return;
+
+  }
+
+
+  try{
+
+    await updatePassword(
+      currentUser,
+      p
+    );
+
+
+    $("newPassword").value =
+      "";
+
+
+    $("newPassword2").value =
+      "";
+
+
+    $("passwordMsg").innerHTML =
+      '<div class="msg">パスワードを変更しました。</div>';
+
+
+  }catch(e){
+
+    console.error(e);
+
+
+    if(
+      e.code ===
+      "auth/requires-recent-login"
+    ){
+
+      $("passwordMsg").innerHTML =
+        '<div class="msg error">安全のため、いったんログアウトしてもう一度ログインしてから変更してください。</div>';
+
+    }else{
+
+      $("passwordMsg").innerHTML =
+        '<div class="msg error">パスワードを変更できませんでした。</div>';
+
+    }
+
+  }
+
+}
+
+
+/* =========================================================
    カレンダー
    ========================================================= */
 
@@ -1347,7 +1891,7 @@ async function render(){
     h += `
 
       <div
-        class="day ${has ? "" : "off"}"
+        class="day ${has ? "club-day" : "off"}"
         onclick="openDay('${date}')"
       >
 
@@ -1611,6 +2155,14 @@ function showForm(id=null){
     "欠席連絡";
 
 
+  $("formBackButton").onclick =
+    backHome;
+
+
+  $("formBackButton").textContent =
+    "← 戻る";
+
+
   $("type").value =
     "欠席";
 
@@ -1872,11 +2424,6 @@ async function saveNotice(){
   );
 
 
-  /*
-   * 新規登録後はフォームを残す
-   * 続けて別の連絡を登録できるようにする
-   */
-
   editingId = null;
 
   $("date").value =
@@ -2049,6 +2596,19 @@ async function editNotice(id){
     "連絡を修正";
 
 
+  /*
+   * 修正フォームの戻るボタンは
+   * カレンダーではなく連絡一覧へ戻す
+   */
+
+  $("formBackButton").onclick =
+    showEdit;
+
+
+  $("formBackButton").textContent =
+    "← 連絡一覧に戻る";
+
+
   $("type").value =
     n.type;
 
@@ -2150,6 +2710,15 @@ window.showForm =
 
 window.showEdit =
   showEdit;
+
+window.showProfileSettings =
+  showProfileSettings;
+
+window.saveProfileSettings =
+  saveProfileSettings;
+
+window.changePassword =
+  changePassword;
 
 window.updateTimeFields =
   updateTimeFields;
