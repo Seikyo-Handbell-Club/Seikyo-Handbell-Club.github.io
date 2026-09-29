@@ -383,37 +383,121 @@ textarea{
   margin-top:6px
 }
 
+/* =========================
+   スマホ縦向き
+========================= */
+
 @media(max-width:480px){
 
   header{
-    padding-left:10px;
-    padding-right:10px
+    padding:12px 10px 10px
   }
+
+  /*
+    スマホ縦向きでは
+    ①タイトル
+    ②マイページ＋名前
+    ③操作ボタン
+    の3段構成
+  */
+
+  .header-top{
+    flex-direction:column;
+    justify-content:flex-start;
+    align-items:stretch;
+    gap:8px;
+    min-height:0
+  }
+
+  /* ①タイトル */
 
   .header-title{
-    font-size:19px
+    order:1;
+    width:100%;
+    flex:none;
+    font-size:22px;
+    line-height:1.3;
+    white-space:nowrap;
+    text-align:center;
+    margin:0
   }
 
-  .header-actions{
-    gap:4px
+  /* ②マイページ＋名前 */
+
+  #loggedInLeft{
+    order:2;
+    width:100%;
+    min-width:0;
+    justify-content:center
   }
 
-  .header-actions button{
-    padding:6px 7px;
-    font-size:11px
+  .profile-mini{
+    justify-content:center;
+    width:100%;
+    min-width:0
   }
 
   .profile-mini-text{
-    font-size:12px
+    font-size:13px;
+    max-width:calc(100vw - 70px);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis
   }
 
   .icon-button{
     width:38px;
-    height:38px
+    height:38px;
+    flex:none
+  }
+
+  /* ③操作ボタン */
+
+  #loggedInRight{
+    order:3;
+    width:100%;
+    min-width:0;
+    justify-content:center
+  }
+
+  .header-actions{
+    width:100%;
+    gap:5px;
+    justify-content:center
+  }
+
+  .header-actions button{
+    flex:1;
+    min-width:0;
+    padding:8px 5px;
+    font-size:12px;
+    white-space:nowrap
+  }
+
+  /* ログアウト状態 */
+
+  #loggedOutLeft{
+    display:none
+  }
+
+  #loggedOutRight{
+    order:3;
+    width:100%;
+    justify-content:center
+  }
+
+  #loggedOutRight button{
+    width:100%;
+    max-width:180px
   }
 
   .header-spacer{
     width:38px
+  }
+
+  .club{
+    font-size:13px;
+    margin:6px 0 8px
   }
 
   .form-calendar{
@@ -436,6 +520,7 @@ textarea{
   .form-calendar .dot{
     font-size:9px
   }
+
 }
 </style>
 </head>
@@ -1143,6 +1228,57 @@ const email =
     DOMAIN;
 
 
+/* =========================
+   学年・クラス表示を整える
+========================= */
+
+function getProfileGrade(){
+
+  return String(
+    profile?.grade ?? ""
+  )
+  .replace(/^高校/,"")
+  .replace(/年$/,"");
+
+}
+
+
+function getProfileClass(){
+
+  return String(
+    profile?.className ?? ""
+  )
+  .replace(/組$/,"");
+
+}
+
+
+function getProfileDisplay(){
+
+  const grade =
+    getProfileGrade();
+
+  const className =
+    getProfileClass();
+
+  return `高校${grade}年${className}組　${profile?.name ?? ""}`;
+
+}
+
+
+function getProfileBoxDisplay(){
+
+  const grade =
+    getProfileGrade();
+
+  const className =
+    getProfileClass();
+
+  return `${profile?.name ?? ""}（高校${grade}年${className}組）`;
+
+}
+
+
 function hide(){
 
   [
@@ -1232,17 +1368,17 @@ async function loadProfile(){
   if(profile){
 
     const text =
-      `高校${esc(profile.grade)}年${esc(profile.className)}組　${esc(profile.name)}`;
+      getProfileDisplay();
 
 
     $("profileMiniText")
-      .innerHTML =
+      .textContent =
         text;
 
 
     $("profileBox")
       .textContent =
-        `${profile.name}（高校${profile.grade}年${profile.className}組）`;
+        getProfileBoxDisplay();
 
   }
 
@@ -1747,14 +1883,18 @@ async function openDay(date){
 
   let sch =
     ss.exists()
-      ? ss.val()
-      : null;
+      ?
+      ss.val()
+      :
+      null;
 
 
   let all =
     ns.exists()
-      ? ns.val()
-      : {};
+      ?
+      ns.val()
+      :
+      {};
 
 
   let list =
@@ -1892,7 +2032,7 @@ function showForm(id=null){
 
   $("profileBox")
     .textContent =
-      `${profile.name}（高校${profile.grade}年${profile.className}組）`;
+      getProfileBoxDisplay();
 
 
   $("reasonType")
@@ -2016,14 +2156,18 @@ async function renderFormCalendar(){
 
   let sch =
     ss.exists()
-      ? ss.val()
-      : {};
+      ?
+      ss.val()
+      :
+      {};
 
 
   let all =
     ns.exists()
-      ? ns.val()
-      : {};
+      ?
+      ns.val()
+      :
+      {};
 
 
   let first =
@@ -2674,7 +2818,7 @@ async function editNotice(id){
 
   $("profileBox")
     .textContent =
-      `${profile.name}（高校${profile.grade}年${profile.className}組）`;
+      getProfileBoxDisplay();
 
 
   const reasonOptions = [
@@ -2834,14 +2978,13 @@ async function showMyPage(){
 
   $("myGrade").value =
     String(
-      profile.grade ??
+      getProfileGrade() ||
       "1"
     );
 
 
   $("myClass").value =
-    profile.className ??
-    "";
+    getProfileClass();
 
 
   $("myName").value =
