@@ -571,7 +571,7 @@ textarea{
    横幅が広い画面
 ========================= */
 
-@media(min-width:481px){
+@media(min-width:700px){
 
   header{
     padding:10px 16px
@@ -579,23 +579,17 @@ textarea{
 
   .header-top{
     display:grid;
-    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
     grid-template-areas:
-      "brand actions"
-      "user actions";
+      "left brand right";
     align-items:center;
-    column-gap:20px;
-    row-gap:4px
+    column-gap:16px
   }
 
   .header-brand{
     grid-area:brand;
-    display:flex;
-    flex-direction:column;
-    align-items:flex-start;
-    justify-content:center;
     width:auto;
-    text-align:left;
+    text-align:center;
     margin:0
   }
 
@@ -603,7 +597,7 @@ textarea{
     width:auto;
     font-size:20px;
     white-space:nowrap;
-    text-align:left
+    text-align:center
   }
 
   .club{
@@ -611,17 +605,17 @@ textarea{
     margin:2px 0 0;
     font-size:12px;
     white-space:nowrap;
-    text-align:left
+    text-align:center
   }
 
   .header-user-row{
-    grid-area:user;
+    grid-area:left;
     justify-content:flex-start;
     margin:0
   }
 
   .header-action-row{
-    grid-area:actions;
+    grid-area:right;
     justify-content:flex-end;
     align-self:center;
     margin:0
@@ -639,7 +633,7 @@ textarea{
   }
 
   .header-login{
-    grid-area:actions;
+    grid-area:right;
     justify-content:flex-end
   }
 
@@ -4417,6 +4411,11 @@ async function saveProfile(){
     $("myPageMsg")
       .innerHTML =
         '<div class="msg">プロフィールを保存しました。</div>';
+
+
+    alert(
+      "更新しました。"
+    );
 
 
   }catch(e){
