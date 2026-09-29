@@ -1712,6 +1712,12 @@ function parseScheduleLines(lines){
 
 }
 
+
+/* =========================================
+   PDF予定判定
+   「休み」は予定情報として扱わない
+========================================= */
+
 function containsScheduleInformation(text){
 
   return (
@@ -1726,9 +1732,7 @@ function containsScheduleInformation(text){
 
     /リハーサル/.test(text) ||
 
-    /準備/.test(text) ||
-
-    /休み/.test(text)
+    /準備/.test(text)
 
   );
 
@@ -1840,10 +1844,15 @@ function makeCandidate(
       )
       .trim();
 
+  /* =========================================
+     時間・場所・明確な部活関連情報がない
+     学校行事や試験の文章は登録しない
+  ========================================= */
+
   if(
     !time &&
     !place &&
-    !/不在|文化祭|リハーサル|準備|休み/.test(note)
+    !/不在|文化祭|リハーサル|準備/.test(note)
   ){
 
     return null;
