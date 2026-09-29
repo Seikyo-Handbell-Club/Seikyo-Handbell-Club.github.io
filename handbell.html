@@ -2511,63 +2511,6 @@ function goCurrentFormMonth(){
 }
 
 
-function dateInRange(date,startDate,endDate){
-
-  return !!startDate &&
-         !!endDate &&
-         date >= startDate &&
-         date <= endDate;
-
-}
-
-
-function getSchedulesForDate(schedules,date){
-
-  const result = [];
-
-  if(schedules && schedules[date]){
-    result.push(schedules[date]);
-  }
-
-  Object.values(schedules || {}).forEach(s=>{
-
-    if(!s || typeof s !== "object") return;
-
-    if(schedules[date] === s) return;
-
-    if((s.type === "exam" || s.type === "schoolHoliday") &&
-       dateInRange(date,s.startDate,s.endDate)){
-      result.push(s);
-      return;
-    }
-
-    if((s.type === "concert" || s.type === "event") && s.date === date){
-      result.push(s);
-    }
-
-  });
-
-  return result;
-
-}
-
-
-function hasClubSchedule(scheduleList){
-
-  return scheduleList.some(
-    s =>
-      s &&
-      (
-        s.type === "normal" ||
-        s.type === "concert" ||
-        s.type === "event" ||
-        !s.type
-      )
-  );
-
-}
-
-
 /* =========================
    ホームカレンダー
 ========================= */
