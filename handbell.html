@@ -568,10 +568,10 @@ textarea{
 
 
 /* =========================
-   スマホ横向き・タブレット
+   横幅が広い画面
 ========================= */
 
-@media(min-width:481px) and (orientation:landscape){
+@media(min-width:481px){
 
   header{
     padding:10px 16px
@@ -579,35 +579,39 @@ textarea{
 
   .header-top{
     display:grid;
-    grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+    grid-template-columns:minmax(0,1fr) auto;
     grid-template-areas:
-      "brand brand brand"
-      "user actions login";
+      "brand actions"
+      "user actions";
     align-items:center;
-    column-gap:12px
+    column-gap:20px;
+    row-gap:4px
   }
 
   .header-brand{
     grid-area:brand;
     display:flex;
-    align-items:center;
+    flex-direction:column;
+    align-items:flex-start;
     justify-content:center;
-    gap:12px;
-    width:100%;
-    margin-bottom:8px
+    width:auto;
+    text-align:left;
+    margin:0
   }
 
   .header-title{
     width:auto;
     font-size:20px;
-    white-space:nowrap
+    white-space:nowrap;
+    text-align:left
   }
 
   .club{
     width:auto;
-    margin:0;
+    margin:2px 0 0;
     font-size:12px;
-    white-space:nowrap
+    white-space:nowrap;
+    text-align:left
   }
 
   .header-user-row{
@@ -618,7 +622,8 @@ textarea{
 
   .header-action-row{
     grid-area:actions;
-    justify-content:center;
+    justify-content:flex-end;
+    align-self:center;
     margin:0
   }
 
@@ -634,7 +639,7 @@ textarea{
   }
 
   .header-login{
-    grid-area:login;
+    grid-area:actions;
     justify-content:flex-end
   }
 
@@ -2778,10 +2783,6 @@ async function openDay(date){
                 <strong>
 
                   ${esc(n.name)}
-
-                  <span class="badge">
-                    ${esc(n.type || "欠席")}
-                  </span>
 
                 </strong>
 
