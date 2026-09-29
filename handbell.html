@@ -295,23 +295,32 @@ textarea{
 }
 
 .day.club-day{
+  background:#eaf2ff;
+  opacity:1
+}
+
+.day.exam-day{
+  background:#eaf8ea;
+  opacity:1
+}
+
+.day.concert-day{
+  background:#f3eafa;
+  opacity:1
+}
+
+.day.school-holiday-day{
   background:#fff0f0;
   opacity:1
 }
 
-.day.special-day{
-  background:#eef3fb;
+.day.event-day{
+  background:#fff4e5;
   opacity:1
 }
 
 .day.selected-day{
   border-color:#1f6feb;
-  background:#eaf2ff
-}
-
-.day.club-day.selected-day,
-.day.special-day.selected-day{
-  background:#eaf2ff
 }
 
 .daynum{
@@ -1737,6 +1746,33 @@ function hasClubSchedule(
 }
 
 
+function getScheduleDayClass(scheduleList){
+
+  if(scheduleList.some(s => s && (s.type === "normal" || !s.type))){
+    return "club-day";
+  }
+
+  if(scheduleList.some(s => s && s.type === "exam")){
+    return "exam-day";
+  }
+
+  if(scheduleList.some(s => s && s.type === "concert")){
+    return "concert-day";
+  }
+
+  if(scheduleList.some(s => s && s.type === "schoolHoliday")){
+    return "school-holiday-day";
+  }
+
+  if(scheduleList.some(s => s && s.type === "event")){
+    return "event-day";
+  }
+
+  return "off";
+
+}
+
+
 function getScheduleTitle(
   schedule
 ){
@@ -2475,6 +2511,63 @@ function goCurrentFormMonth(){
 }
 
 
+function dateInRange(date,startDate,endDate){
+
+  return !!startDate &&
+         !!endDate &&
+         date >= startDate &&
+         date <= endDate;
+
+}
+
+
+function getSchedulesForDate(schedules,date){
+
+  const result = [];
+
+  if(schedules && schedules[date]){
+    result.push(schedules[date]);
+  }
+
+  Object.values(schedules || {}).forEach(s=>{
+
+    if(!s || typeof s !== "object") return;
+
+    if(schedules[date] === s) return;
+
+    if((s.type === "exam" || s.type === "schoolHoliday") &&
+       dateInRange(date,s.startDate,s.endDate)){
+      result.push(s);
+      return;
+    }
+
+    if((s.type === "concert" || s.type === "event") && s.date === date){
+      result.push(s);
+    }
+
+  });
+
+  return result;
+
+}
+
+
+function hasClubSchedule(scheduleList){
+
+  return scheduleList.some(
+    s =>
+      s &&
+      (
+        s.type === "normal" ||
+        s.type === "concert" ||
+        s.type === "event" ||
+        !s.type
+      )
+  );
+
+}
+
+
 /* =========================
    ホームカレンダー
 ========================= */
@@ -2605,15 +2698,9 @@ async function render(){
 
 
     const dayClass =
-      hasClub
-        ?
-        "club-day"
-        :
-        hasAnySchedule
-          ?
-          "special-day"
-          :
-          "off";
+      getScheduleDayClass(
+        scheduleList
+      );
 
 
     h += `
@@ -3484,15 +3571,9 @@ async function renderFormCalendar(){
 
 
     const dayClass =
-      hasClub
-        ?
-        "club-day"
-        :
-        hasAnySchedule
-          ?
-          "special-day"
-          :
-          "off";
+      getScheduleDayClass(
+        scheduleList
+      );
 
 
     h += `
