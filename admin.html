@@ -294,6 +294,19 @@ button:disabled{
   background:#fff4f4;
 }
 
+/* =========================
+   特殊予定
+========================= */
+
+.special-note{
+  padding:10px 12px;
+  border-radius:10px;
+  background:#f5f7fb;
+  margin-top:10px;
+  font-size:13px;
+  color:#59636e;
+}
+
 @media(max-width:600px){
 
   .candidate-grid{
@@ -466,43 +479,274 @@ button:disabled{
       予定を手動で登録
     </h2>
 
-    <label for="sdate">
-      日付
+    <label for="stype">
+      予定の種類
     </label>
 
-    <input
-      id="sdate"
-      type="date"
+    <select id="stype">
+
+      <option value="normal">
+        通常の部活予定
+      </option>
+
+      <option value="exam">
+        試験期間
+      </option>
+
+      <option value="concert">
+        演奏会
+      </option>
+
+      <option value="club">
+        部活がある日
+      </option>
+
+      <option value="schoolHoliday">
+        学校が休みの日
+      </option>
+
+      <option value="event">
+        その他のイベント
+      </option>
+
+    </select>
+
+
+    <!-- 通常の予定 -->
+
+    <div id="normalScheduleFields">
+
+      <label for="sdate">
+        日付
+      </label>
+
+      <input
+        id="sdate"
+        type="date"
+      >
+
+      <label for="stime">
+        時間
+      </label>
+
+      <input
+        id="stime"
+        type="text"
+        placeholder="例：15:45〜18:00"
+      >
+
+      <label for="splace">
+        場所
+      </label>
+
+      <input
+        id="splace"
+        type="text"
+        placeholder="例：音楽練習室"
+      >
+
+      <label for="snote">
+        その他・備考
+      </label>
+
+      <textarea
+        id="snote"
+        placeholder="必要な場合のみ入力"
+      ></textarea>
+
+    </div>
+
+
+    <!-- 試験期間 -->
+
+    <div
+      id="examScheduleFields"
+      class="hidden"
     >
 
-    <label for="stime">
-      時間
-    </label>
+      <label for="examStartDate">
+        開始日
+      </label>
 
-    <input
-      id="stime"
-      type="text"
-      placeholder="例：15:45〜18:00"
+      <input
+        id="examStartDate"
+        type="date"
+      >
+
+      <label for="examEndDate">
+        終了日
+      </label>
+
+      <input
+        id="examEndDate"
+        type="date"
+      >
+
+    </div>
+
+
+    <!-- 演奏会 -->
+
+    <div
+      id="concertScheduleFields"
+      class="hidden"
     >
 
-    <label for="splace">
-      場所
-    </label>
+      <label for="concertDate">
+        日付
+      </label>
 
-    <input
-      id="splace"
-      type="text"
-      placeholder="例：音楽練習室"
+      <input
+        id="concertDate"
+        type="date"
+      >
+
+      <label for="concertTime">
+        時間
+      </label>
+
+      <input
+        id="concertTime"
+        type="text"
+        placeholder="例：14:00〜16:00"
+      >
+
+      <label for="concertTitle">
+        演奏会名
+      </label>
+
+      <input
+        id="concertTitle"
+        type="text"
+        placeholder="例：定期演奏会"
+      >
+
+      <label for="concertPlace">
+        場所
+      </label>
+
+      <input
+        id="concertPlace"
+        type="text"
+        placeholder="例：講堂"
+      >
+
+      <label for="concertNote">
+        その他・備考
+      </label>
+
+      <textarea
+        id="concertNote"
+        placeholder="必要な場合のみ入力"
+      ></textarea>
+
+    </div>
+
+
+    <!-- 部活がある日 -->
+
+    <div
+      id="clubScheduleFields"
+      class="hidden"
     >
 
-    <label for="snote">
-      その他・備考
-    </label>
+      <label for="clubDate">
+        日付
+      </label>
 
-    <textarea
-      id="snote"
-      placeholder="必要な場合のみ入力"
-    ></textarea>
+      <input
+        id="clubDate"
+        type="date"
+      >
+
+    </div>
+
+
+    <!-- 学校が休みの日 -->
+
+    <div
+      id="schoolHolidayScheduleFields"
+      class="hidden"
+    >
+
+      <label for="schoolHolidayStartDate">
+        開始日
+      </label>
+
+      <input
+        id="schoolHolidayStartDate"
+        type="date"
+      >
+
+      <label for="schoolHolidayEndDate">
+        終了日
+      </label>
+
+      <input
+        id="schoolHolidayEndDate"
+        type="date"
+      >
+
+    </div>
+
+
+    <!-- その他のイベント -->
+
+    <div
+      id="eventScheduleFields"
+      class="hidden"
+    >
+
+      <label for="eventDate">
+        日付
+      </label>
+
+      <input
+        id="eventDate"
+        type="date"
+      >
+
+      <label for="eventTime">
+        時間
+      </label>
+
+      <input
+        id="eventTime"
+        type="text"
+        placeholder="例：10:00〜12:00"
+      >
+
+      <label for="eventTitle">
+        イベント名
+      </label>
+
+      <input
+        id="eventTitle"
+        type="text"
+        placeholder="例：部活動説明会"
+      >
+
+      <label for="eventPlace">
+        場所
+      </label>
+
+      <input
+        id="eventPlace"
+        type="text"
+        placeholder="例：講堂"
+      >
+
+      <label for="eventNote">
+        その他・備考
+      </label>
+
+      <textarea
+        id="eventNote"
+        placeholder="必要な場合のみ入力"
+      ></textarea>
+
+    </div>
+
 
     <button
       id="saveScheduleButton"
@@ -2419,6 +2663,7 @@ async function registerCandidates(){
         ),
         {
 
+          type:"normal",
           time:item.time,
           place:item.place,
           note:item.note,
@@ -2468,6 +2713,60 @@ async function registerCandidates(){
 
 
 /* =========================================
+   手動予定入力欄切り替え
+========================================= */
+
+function updateScheduleFields(){
+
+  const type =
+    $("stype").value;
+
+  $("normalScheduleFields")
+    .classList
+    .toggle(
+      "hidden",
+      type !== "normal"
+    );
+
+  $("examScheduleFields")
+    .classList
+    .toggle(
+      "hidden",
+      type !== "exam"
+    );
+
+  $("concertScheduleFields")
+    .classList
+    .toggle(
+      "hidden",
+      type !== "concert"
+    );
+
+  $("clubScheduleFields")
+    .classList
+    .toggle(
+      "hidden",
+      type !== "club"
+    );
+
+  $("schoolHolidayScheduleFields")
+    .classList
+    .toggle(
+      "hidden",
+      type !== "schoolHoliday"
+    );
+
+  $("eventScheduleFields")
+    .classList
+    .toggle(
+      "hidden",
+      type !== "event"
+    );
+
+}
+
+
+/* =========================================
    手動予定保存
 ========================================= */
 
@@ -2477,84 +2776,594 @@ async function saveSchedule(){
     return;
   }
 
-  const date =
-    $("sdate").value;
+  const type =
+    $("stype").value;
 
-  const time =
-    $("stime")
-      .value
-      .trim();
 
-  const place =
-    $("splace")
-      .value
-      .trim();
+  /* =========================
+     通常の予定
+  ========================== */
 
-  const note =
-    $("snote")
-      .value
-      .trim();
+  if(type === "normal"){
 
-  if(!date){
+    const date =
+      $("sdate").value;
 
-    message(
-      "scheduleMsg",
-      "日付を入力してください。",
-      "error"
-    );
+    const time =
+      $("stime")
+        .value
+        .trim();
+
+    const place =
+      $("splace")
+        .value
+        .trim();
+
+    const note =
+      $("snote")
+        .value
+        .trim();
+
+    if(!date){
+
+      message(
+        "scheduleMsg",
+        "日付を入力してください。",
+        "error"
+      );
+
+      return;
+
+    }
+
+    try{
+
+      await set(
+        ref(
+          db,
+          "schedules/" +
+          date
+        ),
+        {
+
+          type:"normal",
+          time:time,
+          place:place,
+          note:note,
+          updatedAt:Date.now()
+
+        }
+      );
+
+      message(
+        "scheduleMsg",
+        "予定を保存しました。",
+        "success"
+      );
+
+      $("sdate").value = "";
+      $("stime").value = "";
+      $("splace").value = "";
+      $("snote").value = "";
+
+      await loadSchedules();
+
+    }catch(error){
+
+      console.error(
+        "予定保存エラー:",
+        error
+      );
+
+      message(
+        "scheduleMsg",
+        "予定の保存に失敗しました。\n\n" +
+        "エラーコード: " +
+        (error.code || "不明") +
+        "\n" +
+        "詳細: " +
+        (error.message || "不明"),
+        "error"
+      );
+
+    }
 
     return;
 
   }
 
-  try{
 
-    await set(
-      ref(
-        db,
-        "schedules/" +
-        date
-      ),
-      {
+  /* =========================
+     試験期間
+  ========================== */
 
-        time:time,
-        place:place,
-        note:note,
-        updatedAt:Date.now()
+  if(type === "exam"){
 
-      }
-    );
+    const startDate =
+      $("examStartDate").value;
 
-    message(
-      "scheduleMsg",
-      "予定を保存しました。",
-      "success"
-    );
+    const endDate =
+      $("examEndDate").value;
 
-    $("sdate").value = "";
-    $("stime").value = "";
-    $("splace").value = "";
-    $("snote").value = "";
+    if(!startDate || !endDate){
 
-    await loadSchedules();
+      message(
+        "scheduleMsg",
+        "開始日と終了日を入力してください。",
+        "error"
+      );
 
-  }catch(error){
+      return;
 
-    console.error(
-      "予定保存エラー:",
-      error
-    );
+    }
 
-    message(
-      "scheduleMsg",
-      "予定の保存に失敗しました。\n\n" +
-      "エラーコード: " +
-      (error.code || "不明") +
-      "\n" +
-      "詳細: " +
-      (error.message || "不明"),
-      "error"
-    );
+    if(startDate > endDate){
+
+      message(
+        "scheduleMsg",
+        "終了日は開始日以降の日付にしてください。",
+        "error"
+      );
+
+      return;
+
+    }
+
+    try{
+
+      const key =
+        "special_" +
+        Date.now();
+
+      await set(
+        ref(
+          db,
+          "schedules/" +
+          key
+        ),
+        {
+
+          type:"exam",
+          startDate:startDate,
+          endDate:endDate,
+          title:"試験期間",
+          updatedAt:Date.now()
+
+        }
+      );
+
+      message(
+        "scheduleMsg",
+        "試験期間を保存しました。",
+        "success"
+      );
+
+      $("examStartDate").value = "";
+      $("examEndDate").value = "";
+
+      await loadSchedules();
+
+    }catch(error){
+
+      console.error(
+        "試験期間保存エラー:",
+        error
+      );
+
+      message(
+        "scheduleMsg",
+        "試験期間の保存に失敗しました。\n\n" +
+        "エラーコード: " +
+        (error.code || "不明") +
+        "\n" +
+        "詳細: " +
+        (error.message || "不明"),
+        "error"
+      );
+
+    }
+
+    return;
+
+  }
+
+
+  /* =========================
+     演奏会
+  ========================== */
+
+  if(type === "concert"){
+
+    const date =
+      $("concertDate").value;
+
+    const time =
+      $("concertTime")
+        .value
+        .trim();
+
+    const title =
+      $("concertTitle")
+        .value
+        .trim();
+
+    const place =
+      $("concertPlace")
+        .value
+        .trim();
+
+    const note =
+      $("concertNote")
+        .value
+        .trim();
+
+    if(!date){
+
+      message(
+        "scheduleMsg",
+        "日付を入力してください。",
+        "error"
+      );
+
+      return;
+
+    }
+
+    if(!title){
+
+      message(
+        "scheduleMsg",
+        "演奏会名を入力してください。",
+        "error"
+      );
+
+      return;
+
+    }
+
+    try{
+
+      const key =
+        "special_" +
+        Date.now();
+
+      await set(
+        ref(
+          db,
+          "schedules/" +
+          key
+        ),
+        {
+
+          type:"concert",
+          date:date,
+          time:time,
+          title:title,
+          place:place,
+          note:note,
+          updatedAt:Date.now()
+
+        }
+      );
+
+      message(
+        "scheduleMsg",
+        "演奏会を保存しました。",
+        "success"
+      );
+
+      $("concertDate").value = "";
+      $("concertTime").value = "";
+      $("concertTitle").value = "";
+      $("concertPlace").value = "";
+      $("concertNote").value = "";
+
+      await loadSchedules();
+
+    }catch(error){
+
+      console.error(
+        "演奏会保存エラー:",
+        error
+      );
+
+      message(
+        "scheduleMsg",
+        "演奏会の保存に失敗しました。\n\n" +
+        "エラーコード: " +
+        (error.code || "不明") +
+        "\n" +
+        "詳細: " +
+        (error.message || "不明"),
+        "error"
+      );
+
+    }
+
+    return;
+
+  }
+
+
+  /* =========================
+     部活がある日
+  ========================== */
+
+  if(type === "club"){
+
+    const date =
+      $("clubDate").value;
+
+    if(!date){
+
+      message(
+        "scheduleMsg",
+        "日付を入力してください。",
+        "error"
+      );
+
+      return;
+
+    }
+
+    try{
+
+      await set(
+        ref(
+          db,
+          "schedules/" +
+          date
+        ),
+        {
+
+          type:"club",
+          date:date,
+          updatedAt:Date.now()
+
+        }
+      );
+
+      message(
+        "scheduleMsg",
+        "部活がある日として保存しました。",
+        "success"
+      );
+
+      $("clubDate").value = "";
+
+      await loadSchedules();
+
+    }catch(error){
+
+      console.error(
+        "部活予定保存エラー:",
+        error
+      );
+
+      message(
+        "scheduleMsg",
+        "部活予定の保存に失敗しました。\n\n" +
+        "エラーコード: " +
+        (error.code || "不明") +
+        "\n" +
+        "詳細: " +
+        (error.message || "不明"),
+        "error"
+      );
+
+    }
+
+    return;
+
+  }
+
+
+  /* =========================
+     学校が休みの日
+  ========================== */
+
+  if(type === "schoolHoliday"){
+
+    const startDate =
+      $("schoolHolidayStartDate").value;
+
+    const endDate =
+      $("schoolHolidayEndDate").value;
+
+    if(!startDate || !endDate){
+
+      message(
+        "scheduleMsg",
+        "開始日と終了日を入力してください。",
+        "error"
+      );
+
+      return;
+
+    }
+
+    if(startDate > endDate){
+
+      message(
+        "scheduleMsg",
+        "終了日は開始日以降の日付にしてください。",
+        "error"
+      );
+
+      return;
+
+    }
+
+    try{
+
+      const key =
+        "special_" +
+        Date.now();
+
+      await set(
+        ref(
+          db,
+          "schedules/" +
+          key
+        ),
+        {
+
+          type:"schoolHoliday",
+          startDate:startDate,
+          endDate:endDate,
+          title:"学校が休みの日",
+          updatedAt:Date.now()
+
+        }
+      );
+
+      message(
+        "scheduleMsg",
+        "学校が休みの日を保存しました。",
+        "success"
+      );
+
+      $("schoolHolidayStartDate").value = "";
+      $("schoolHolidayEndDate").value = "";
+
+      await loadSchedules();
+
+    }catch(error){
+
+      console.error(
+        "学校休日保存エラー:",
+        error
+      );
+
+      message(
+        "scheduleMsg",
+        "学校が休みの日の保存に失敗しました。\n\n" +
+        "エラーコード: " +
+        (error.code || "不明") +
+        "\n" +
+        "詳細: " +
+        (error.message || "不明"),
+        "error"
+      );
+
+    }
+
+    return;
+
+  }
+
+
+  /* =========================
+     その他のイベント
+  ========================== */
+
+  if(type === "event"){
+
+    const date =
+      $("eventDate").value;
+
+    const time =
+      $("eventTime")
+        .value
+        .trim();
+
+    const title =
+      $("eventTitle")
+        .value
+        .trim();
+
+    const place =
+      $("eventPlace")
+        .value
+        .trim();
+
+    const note =
+      $("eventNote")
+        .value
+        .trim();
+
+    if(!date){
+
+      message(
+        "scheduleMsg",
+        "日付を入力してください。",
+        "error"
+      );
+
+      return;
+
+    }
+
+    if(!title){
+
+      message(
+        "scheduleMsg",
+        "イベント名を入力してください。",
+        "error"
+      );
+
+      return;
+
+    }
+
+    try{
+
+      const key =
+        "special_" +
+        Date.now();
+
+      await set(
+        ref(
+          db,
+          "schedules/" +
+          key
+        ),
+        {
+
+          type:"event",
+          date:date,
+          time:time,
+          title:title,
+          place:place,
+          note:note,
+          updatedAt:Date.now()
+
+        }
+      );
+
+      message(
+        "scheduleMsg",
+        "イベントを保存しました。",
+        "success"
+      );
+
+      $("eventDate").value = "";
+      $("eventTime").value = "";
+      $("eventTitle").value = "";
+      $("eventPlace").value = "";
+      $("eventNote").value = "";
+
+      await loadSchedules();
+
+    }catch(error){
+
+      console.error(
+        "イベント保存エラー:",
+        error
+      );
+
+      message(
+        "scheduleMsg",
+        "イベントの保存に失敗しました。\n\n" +
+        "エラーコード: " +
+        (error.code || "不明") +
+        "\n" +
+        "詳細: " +
+        (error.message || "不明"),
+        "error"
+      );
+
+    }
 
   }
 
@@ -2599,15 +3408,64 @@ async function loadSchedules(){
   $("schedules").innerHTML =
     schedules
       .map(
-        ([date,x]) => `
+        ([date,x]) => {
+
+          const type =
+            x.type || "normal";
+
+          let typeLabel = "";
+
+          if(type === "exam"){
+            typeLabel = "試験期間";
+          }else if(type === "concert"){
+            typeLabel = "演奏会";
+          }else if(type === "club"){
+            typeLabel = "部活がある日";
+          }else if(type === "schoolHoliday"){
+            typeLabel = "学校が休みの日";
+          }else if(type === "event"){
+            typeLabel = "その他のイベント";
+          }else{
+            typeLabel = "通常の部活予定";
+          }
+
+          let mainDate = date;
+
+          if(
+            type === "exam" ||
+            type === "schoolHoliday"
+          ){
+
+            mainDate =
+              `${x.startDate || ""} 〜 ${x.endDate || ""}`;
+
+          }else if(
+            type === "concert" ||
+            type === "event"
+          ){
+
+            mainDate =
+              x.date || date;
+
+          }
+
+          return `
 
           <div class="item">
 
             <div class="item-main">
 
-              <strong>
-                ${esc(date)}
-              </strong>
+              <div>
+
+                <strong>
+                  ${esc(typeLabel)}
+                </strong>
+
+                <div class="small">
+                  ${esc(mainDate)}
+                </div>
+
+              </div>
 
               <div class="item-actions">
 
@@ -2627,6 +3485,12 @@ async function loadSchedules(){
               </div>
 
             </div>
+
+            ${
+              x.title
+                ? `<div>${esc(x.title)}</div>`
+                : ""
+            }
 
             ${
               x.time
@@ -2650,7 +3514,9 @@ async function loadSchedules(){
 
           </div>
 
-        `
+        `;
+
+        }
       )
       .join("");
 
@@ -2661,7 +3527,7 @@ async function loadSchedules(){
    予定変更
 ========================================= */
 
-async function editSchedule(date){
+async function editSchedule(key){
 
   if(!(await isAdmin())){
     return;
@@ -2672,7 +3538,7 @@ async function editSchedule(date){
       ref(
         db,
         "schedules/" +
-        date
+        key
       )
     );
 
@@ -2683,19 +3549,127 @@ async function editSchedule(date){
   const data =
     snapshot.val();
 
-  $("sdate").value =
-    date;
+  const type =
+    data.type || "normal";
 
-  $("stime").value =
-    data.time || "";
+  $("stype").value =
+    type;
 
-  $("splace").value =
-    data.place || "";
+  updateScheduleFields();
 
-  $("snote").value =
-    data.note || "";
 
-  $("sdate").scrollIntoView({
+  /* =========================
+     通常
+  ========================== */
+
+  if(type === "normal"){
+
+    $("sdate").value =
+      key;
+
+    $("stime").value =
+      data.time || "";
+
+    $("splace").value =
+      data.place || "";
+
+    $("snote").value =
+      data.note || "";
+
+  }
+
+
+  /* =========================
+     試験期間
+  ========================== */
+
+  if(type === "exam"){
+
+    $("examStartDate").value =
+      data.startDate || "";
+
+    $("examEndDate").value =
+      data.endDate || "";
+
+  }
+
+
+  /* =========================
+     演奏会
+  ========================== */
+
+  if(type === "concert"){
+
+    $("concertDate").value =
+      data.date || "";
+
+    $("concertTime").value =
+      data.time || "";
+
+    $("concertTitle").value =
+      data.title || "";
+
+    $("concertPlace").value =
+      data.place || "";
+
+    $("concertNote").value =
+      data.note || "";
+
+  }
+
+
+  /* =========================
+     部活がある日
+  ========================== */
+
+  if(type === "club"){
+
+    $("clubDate").value =
+      data.date || key;
+
+  }
+
+
+  /* =========================
+     学校が休みの日
+  ========================== */
+
+  if(type === "schoolHoliday"){
+
+    $("schoolHolidayStartDate").value =
+      data.startDate || "";
+
+    $("schoolHolidayEndDate").value =
+      data.endDate || "";
+
+  }
+
+
+  /* =========================
+     その他イベント
+  ========================== */
+
+  if(type === "event"){
+
+    $("eventDate").value =
+      data.date || "";
+
+    $("eventTime").value =
+      data.time || "";
+
+    $("eventTitle").value =
+      data.title || "";
+
+    $("eventPlace").value =
+      data.place || "";
+
+    $("eventNote").value =
+      data.note || "";
+
+  }
+
+
+  $("stype").scrollIntoView({
     behavior:"smooth",
     block:"center"
   });
@@ -2707,15 +3681,71 @@ async function editSchedule(date){
    予定削除
 ========================================= */
 
-async function deleteSchedule(date){
+async function deleteSchedule(key){
 
   if(!(await isAdmin())){
     return;
   }
 
+  const snapshot =
+    await get(
+      ref(
+        db,
+        "schedules/" +
+        key
+      )
+    );
+
+  if(!snapshot.exists()){
+    return;
+  }
+
+  const data =
+    snapshot.val();
+
+  let text =
+    "この予定を削除しますか？";
+
+  if(data.type === "exam"){
+
+    text =
+      `試験期間\n${data.startDate || ""}〜${data.endDate || ""}\n\n` +
+      "この予定を削除しますか？";
+
+  }else if(data.type === "schoolHoliday"){
+
+    text =
+      `学校が休みの日\n${data.startDate || ""}〜${data.endDate || ""}\n\n` +
+      "この予定を削除しますか？";
+
+  }else if(data.type === "concert"){
+
+    text =
+      `演奏会\n${data.title || ""}\n${data.date || ""}\n\n` +
+      "この予定を削除しますか？";
+
+  }else if(data.type === "event"){
+
+    text =
+      `その他のイベント\n${data.title || ""}\n${data.date || ""}\n\n` +
+      "この予定を削除しますか？";
+
+  }else if(data.type === "club"){
+
+    text =
+      `部活がある日\n${data.date || key}\n\n` +
+      "この予定を削除しますか？";
+
+  }else{
+
+    text =
+      `${key}の予定を削除しますか？`;
+
+  }
+
   const ok =
     confirm(
-      `${date}の予定を削除しますか？`
+      text
     );
 
   if(!ok){
@@ -2728,7 +3758,7 @@ async function deleteSchedule(date){
       ref(
         db,
         "schedules/" +
-        date
+        key
       )
     );
 
@@ -2834,6 +3864,17 @@ $("saveScheduleButton")
 
 
 /* =========================================
+   予定種類変更
+========================================= */
+
+$("stype")
+  .addEventListener(
+    "change",
+    updateScheduleFields
+  );
+
+
+/* =========================================
    Enterキー
 ========================================= */
 
@@ -2852,6 +3893,13 @@ $("password")
 
     }
   );
+
+
+/* =========================================
+   初期状態
+========================================= */
+
+updateScheduleFields();
 
 </script>
 
