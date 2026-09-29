@@ -111,6 +111,7 @@ button:disabled{
   margin-top:10px;
   font-size:14px;
   white-space:pre-wrap;
+  overflow-wrap:anywhere;
 }
 
 .error{
@@ -224,6 +225,7 @@ button:disabled{
 }
 
 @media(max-width:600px){
+
   .candidate-grid{
     grid-template-columns:1fr;
   }
@@ -235,6 +237,7 @@ button:disabled{
   .row button{
     width:100%;
   }
+
 }
 </style>
 </head>
@@ -253,7 +256,9 @@ button:disabled{
 
 <section id="login" class="card">
 
-  <h2 class="section-title">管理者ログイン</h2>
+  <h2 class="section-title">
+    管理者ログイン
+  </h2>
 
   <p class="small">
     管理者用パスワードを入力してください。
@@ -288,6 +293,8 @@ button:disabled{
 ========================= -->
 
 <section id="app" class="hidden">
+
+  <!-- ログアウト -->
 
   <div class="card">
 
@@ -343,12 +350,31 @@ button:disabled{
     </label>
 
     <select id="mgrade">
-      <option value="">選択してください</option>
-      <option value="中学1年">中学1年</option>
-      <option value="中学2年">中学2年</option>
-      <option value="中学3年">中学3年</option>
-      <option value="高校1年">高校1年</option>
-      <option value="高校2年">高校2年</option>
+
+      <option value="">
+        選択してください
+      </option>
+
+      <option value="中学1年">
+        中学1年
+      </option>
+
+      <option value="中学2年">
+        中学2年
+      </option>
+
+      <option value="中学3年">
+        中学3年
+      </option>
+
+      <option value="高校1年">
+        高校1年
+      </option>
+
+      <option value="高校2年">
+        高校2年
+      </option>
+
     </select>
 
     <label for="mclass">
@@ -356,7 +382,11 @@ button:disabled{
     </label>
 
     <select id="mclass">
-      <option value="">選択してください</option>
+
+      <option value="">
+        選択してください
+      </option>
+
       <option value="A">A組</option>
       <option value="B">B組</option>
       <option value="C">C組</option>
@@ -368,6 +398,7 @@ button:disabled{
       <option value="I">I組</option>
       <option value="J">J組</option>
       <option value="K">K組</option>
+
     </select>
 
     <button
@@ -398,7 +429,9 @@ button:disabled{
     </p>
 
     <div id="members">
-      <p class="small">読み込み中...</p>
+      <p class="small">
+        読み込み中...
+      </p>
     </div>
 
   </div>
@@ -444,6 +477,7 @@ button:disabled{
       ></div>
 
     </div>
+
 
     <div
       id="pdfCandidates"
@@ -550,7 +584,9 @@ button:disabled{
     </h2>
 
     <div id="schedules">
-      <p class="small">読み込み中...</p>
+      <p class="small">
+        読み込み中...
+      </p>
     </div>
 
   </div>
@@ -560,11 +596,11 @@ button:disabled{
 </main>
 
 
-<!-- =========================
-     Firebase
-========================= -->
-
 <script type="module">
+
+/* =========================================
+   Firebase
+========================================= */
 
 import {
   initializeApp
@@ -595,6 +631,7 @@ import {
 ========================================= */
 
 const firebaseConfig = {
+
   apiKey:
     "AIzaSyAK9yRrSSLsfYpLSyuzwRyI2ZZp32KeMSA",
 
@@ -615,12 +652,12 @@ const firebaseConfig = {
 
   appId:
     "1:55435007971:web:25f5c3b9dcd4324bc3f2d6"
+
 };
 
 
 /* =========================================
    管理者アカウント
-   メールアドレスは画面には表示しない
 ========================================= */
 
 const ADMIN_EMAIL =
@@ -656,19 +693,22 @@ const $ =
 function esc(value){
 
   return String(value ?? "")
-    .replace(/[&<>"']/g, c => ({
-      "&":"&amp;",
-      "<":"&lt;",
-      ">":"&gt;",
-      '"':"&quot;",
-      "'":"&#39;"
-    }[c]));
+    .replace(
+      /[&<>"']/g,
+      c => ({
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#39;"
+      }[c])
+    );
 
 }
 
 
 /* =========================================
-   メッセージ表示
+   メッセージ
 ========================================= */
 
 function message(
@@ -677,7 +717,12 @@ function message(
   type = ""
 ){
 
-  const el = $(id);
+  const el =
+    $(id);
+
+  if(!el){
+    return;
+  }
 
   el.className =
     text
@@ -713,21 +758,53 @@ async function isAdmin(){
     snapshot.exists() &&
     snapshot.val() === true
   );
+
 }
 
 
 /* =========================================
-   認証状態監視
+   認証状態
 ========================================= */
 
 onAuthStateChanged(
   auth,
   async user => {
 
-    if(
-      user &&
-      await isAdmin()
-    ){
+    if(!user){
+
+      $("login")
+        .classList
+        .remove("hidden");
+
+      $("app")
+        .classList
+        .add("hidden");
+
+      return;
+
+    }
+
+
+    try{
+
+      const admin =
+        await isAdmin();
+
+
+      if(!admin){
+
+        $("login")
+          .classList
+          .remove("hidden");
+
+        $("app")
+          .classList
+          .add("hidden");
+
+        return;
+
+      }
+
 
       $("login")
         .classList
@@ -737,13 +814,21 @@ onAuthStateChanged(
         .classList
         .remove("hidden");
 
+
       $("password").value = "";
+
 
       await loadMembers();
 
       await loadSchedules();
 
-    }else{
+
+    }catch(error){
+
+      console.error(
+        "認証状態確認エラー:",
+        error
+      );
 
       $("login")
         .classList
@@ -752,6 +837,17 @@ onAuthStateChanged(
       $("app")
         .classList
         .add("hidden");
+
+      message(
+        "loginMsg",
+        "管理者権限の確認に失敗しました。\n\n" +
+        "エラーコード: " +
+        (error.code || "不明") +
+        "\n" +
+        "詳細: " +
+        (error.message || "不明"),
+        "error"
+      );
 
     }
 
@@ -766,13 +862,14 @@ onAuthStateChanged(
 async function adminLogin(){
 
   const password =
-    $("password")
-      .value;
+    $("password").value;
+
 
   message(
     "loginMsg",
     ""
   );
+
 
   if(!password){
 
@@ -783,107 +880,178 @@ async function adminLogin(){
     );
 
     return;
+
   }
+
 
   const button =
     $("loginButton");
+
 
   button.disabled = true;
 
   button.textContent =
     "ログイン中...";
 
+
   try{
 
     /*
-      ここが重要。
-
-      メールアドレスは画面から入力させず、
-      管理者アカウントとして登録してある
-      ADMIN_EMAIL を内部で使用する。
+      Firebase Authentication
     */
 
-    await signInWithEmailAndPassword(
-      auth,
-      ADMIN_EMAIL,
-      password
+    const credential =
+      await signInWithEmailAndPassword(
+        auth,
+        ADMIN_EMAIL,
+        password
+      );
+
+
+    console.log(
+      "Authentication成功",
+      credential.user.uid,
+      credential.user.email
     );
 
+
     /*
-      ログインできても
-      admins/{UID} が true でなければ
-      管理画面には入れない。
+      管理者権限確認
     */
 
-    const admin =
-      await isAdmin();
+    let adminSnapshot;
 
-    if(!admin){
+
+    try{
+
+      adminSnapshot =
+        await get(
+          ref(
+            db,
+            "admins/" +
+            credential.user.uid
+          )
+        );
+
+    }catch(error){
+
+      console.error(
+        "admins読み込みエラー:",
+        error
+      );
+
 
       await signOut(auth);
 
+
       message(
         "loginMsg",
-        "このアカウントは管理者として登録されていません。",
+        "パスワードは正しい可能性がありますが、\n" +
+        "管理者権限の確認に失敗しました。\n\n" +
+        "エラーコード: " +
+        (error.code || "不明") +
+        "\n" +
+        "詳細: " +
+        (error.message || "不明"),
         "error"
       );
 
+
       return;
+
     }
+
+
+    /*
+      管理者ではない
+    */
+
+    if(
+      !adminSnapshot.exists() ||
+      adminSnapshot.val() !== true
+    ){
+
+      await signOut(auth);
+
+
+      message(
+        "loginMsg",
+        "ログインは成功しましたが、\n" +
+        "このアカウントは管理者として登録されていません。\n\n" +
+        "UID:\n" +
+        credential.user.uid +
+        "\n\n" +
+        "Firebase Realtime Database の\n" +
+        "admins/" +
+        credential.user.uid +
+        "\n" +
+        "を確認してください。",
+        "error"
+      );
+
+
+      return;
+
+    }
+
+
+    /*
+      完全にログイン成功
+    */
+
+    $("login")
+      .classList
+      .add("hidden");
+
+    $("app")
+      .classList
+      .remove("hidden");
+
+
+    $("password").value = "";
+
+
+    message(
+      "loginMsg",
+      "ログインしました。",
+      "success"
+    );
+
+
+    await loadMembers();
+
+    await loadSchedules();
+
 
   }catch(error){
 
     console.error(
-      "管理者ログインエラー:",
+      "Firebase Authenticationログインエラー:",
       error
     );
 
+
     let text =
-      "ログインできませんでした。\n";
+      "ログインできませんでした。\n\n";
 
-    if(
-      error &&
-      error.code
-    ){
 
-      switch(error.code){
+    text +=
+      "エラーコード: " +
+      (error.code || "不明") +
+      "\n";
 
-        case "auth/invalid-credential":
-        case "auth/wrong-password":
-        case "auth/user-not-found":
-          text +=
-            "パスワードを確認してください。";
-          break;
 
-        case "auth/too-many-requests":
-          text +=
-            "ログイン試行回数が多いため、一時的に制限されています。";
-          break;
+    text +=
+      "詳細: " +
+      (error.message || "不明");
 
-        case "auth/network-request-failed":
-          text +=
-            "ネットワーク接続を確認してください。";
-          break;
-
-        default:
-          text +=
-            "Firebase Authenticationの設定を確認してください。";
-          break;
-
-      }
-
-    }else{
-
-      text +=
-        "Firebaseとの通信を確認してください。";
-
-    }
 
     message(
       "loginMsg",
       text,
       "error"
     );
+
 
   }finally{
 
@@ -903,7 +1071,18 @@ async function adminLogin(){
 
 async function logout(){
 
-  await signOut(auth);
+  try{
+
+    await signOut(auth);
+
+  }catch(error){
+
+    console.error(
+      "ログアウトエラー:",
+      error
+    );
+
+  }
 
 }
 
@@ -918,23 +1097,28 @@ async function addMember(){
     return;
   }
 
+
   const id =
     $("mid")
       .value
       .trim();
+
 
   const name =
     $("mname")
       .value
       .trim();
 
+
   const grade =
     $("mgrade")
       .value;
 
+
   const className =
     $("mclass")
       .value;
+
 
   if(
     !id ||
@@ -950,6 +1134,7 @@ async function addMember(){
     );
 
     return;
+
   }
 
 
@@ -962,6 +1147,7 @@ async function addMember(){
       )
     );
 
+
   if(existing.exists()){
 
     message(
@@ -971,6 +1157,7 @@ async function addMember(){
     );
 
     return;
+
   }
 
 
@@ -989,10 +1176,6 @@ async function addMember(){
     }
   );
 
-
-  /*
-    初回パスワード設定用
-  */
 
   await set(
     ref(
@@ -1029,11 +1212,13 @@ async function addMember(){
 ========================================= */
 
 const gradeOrder = {
+
   "中学1年":0,
   "中学2年":1,
   "中学3年":2,
   "高校1年":3,
   "高校2年":4
+
 };
 
 
@@ -1042,6 +1227,7 @@ const gradeOrder = {
 ========================================= */
 
 const classOrder = {
+
   A:0,
   B:1,
   C:2,
@@ -1053,6 +1239,7 @@ const classOrder = {
   I:8,
   J:9,
   K:10
+
 };
 
 
@@ -1070,10 +1257,12 @@ async function loadMembers(){
       )
     );
 
+
   const data =
     snapshot.exists()
       ? snapshot.val()
       : {};
+
 
   const members =
     Object.entries(data);
@@ -1090,6 +1279,7 @@ async function loadMembers(){
           gradeOrder[b.grade] ?? 99
         );
 
+
       if(gradeDiff !== 0){
         return gradeDiff;
       }
@@ -1102,6 +1292,7 @@ async function loadMembers(){
         (
           classOrder[b.className] ?? 99
         );
+
 
       if(classDiff !== 0){
         return classDiff;
@@ -1127,6 +1318,7 @@ async function loadMembers(){
       "<p class='small'>まだ登録されていません。</p>";
 
     return;
+
   }
 
 
@@ -1138,6 +1330,7 @@ async function loadMembers(){
           <div class="item">
 
             <div>
+
               <strong>
                 ${esc(x.name)}
               </strong>
@@ -1145,12 +1338,15 @@ async function loadMembers(){
               <span class="small">
                 （${esc(id)}）
               </span>
+
             </div>
 
             <div class="small">
+
               ${esc(x.grade)}
               ・
               ${esc(x.className)}組
+
             </div>
 
             <div class="row">
@@ -1189,6 +1385,7 @@ async function editMember(id){
     return;
   }
 
+
   const snapshot =
     await get(
       ref(
@@ -1198,9 +1395,11 @@ async function editMember(id){
       )
     );
 
+
   if(!snapshot.exists()){
     return;
   }
+
 
   const data =
     snapshot.val();
@@ -1211,6 +1410,7 @@ async function editMember(id){
       "名前",
       data.name || ""
     );
+
 
   if(name === null){
     return;
@@ -1223,6 +1423,7 @@ async function editMember(id){
       data.grade || ""
     );
 
+
   if(grade === null){
     return;
   }
@@ -1233,6 +1434,7 @@ async function editMember(id){
       "クラス（A〜K）",
       data.className || ""
     );
+
 
   if(className === null){
     return;
@@ -1258,6 +1460,7 @@ async function editMember(id){
     );
 
     return;
+
   }
 
 
@@ -1273,6 +1476,7 @@ async function editMember(id){
     );
 
     return;
+
   }
 
 
@@ -1305,10 +1509,12 @@ async function deleteMember(id){
     return;
   }
 
+
   const ok =
     confirm(
       "この部員登録を削除しますか？"
     );
+
 
   if(!ok){
     return;
@@ -1345,10 +1551,6 @@ async function deleteMember(id){
 let pdfjsLib = null;
 
 
-/* =========================================
-   PDF.js読み込み
-========================================= */
-
 async function getPdfJs(){
 
   if(pdfjsLib){
@@ -1376,7 +1578,7 @@ async function getPdfJs(){
 
 
 /* =========================================
-   PDFからテキストを抽出
+   PDFテキスト抽出
 ========================================= */
 
 async function extractPdfLines(file){
@@ -1414,11 +1616,6 @@ async function extractPdfLines(file){
       await page.getTextContent();
 
 
-    /*
-      PDFの文字を
-      Y座標ごとの行にまとめる。
-    */
-
     const items =
       content.items
         .filter(
@@ -1432,17 +1629,27 @@ async function extractPdfLines(file){
             const transform =
               item.transform || [];
 
+
             return {
-              text:item.str.trim(),
-              x:Number(
-                transform[4] || 0
-              ),
-              y:Number(
-                transform[5] || 0
-              ),
-              width:Number(
-                item.width || 0
-              )
+
+              text:
+                item.str.trim(),
+
+              x:
+                Number(
+                  transform[4] || 0
+                ),
+
+              y:
+                Number(
+                  transform[5] || 0
+                ),
+
+              width:
+                Number(
+                  item.width || 0
+                )
+
             };
 
           }
@@ -1485,8 +1692,10 @@ async function extractPdfLines(file){
       if(!row){
 
         row = {
+
           y:item.y,
           items:[]
+
         };
 
         rows.push(row);
@@ -1516,7 +1725,8 @@ async function extractPdfLines(file){
       const text =
         row.items
           .map(
-            item => item.text
+            item =>
+              item.text
           )
           .join(" ")
           .replace(
@@ -1529,10 +1739,12 @@ async function extractPdfLines(file){
       if(text){
 
         allLines.push({
+
           page:pageNumber,
           y:row.y,
           items:row.items,
           text:text
+
         });
 
       }
@@ -1553,27 +1765,34 @@ async function extractPdfLines(file){
 
 function parseScheduleLines(lines){
 
-  /*
-    PDFの中から月を探す。
-
-    ただし「練習曲の目安」など
-    関係ない文字列は無視する。
-  */
-
   let month = null;
 
 
+  /*
+    PDFの最初の「○月」を探す。
+    練習曲関連は無視。
+  */
+
   for(const line of lines){
+
+    if(
+      line.text.includes("練習曲")
+    ){
+      continue;
+    }
+
 
     const match =
       line.text.match(
         /(\d{1,2})月/
       );
 
+
     if(match){
 
       const m =
         Number(match[1]);
+
 
       if(
         m >= 1 &&
@@ -1590,11 +1809,6 @@ function parseScheduleLines(lines){
 
   }
 
-
-  /*
-    月が見つからなかった場合は
-    現在の月を使用。
-  */
 
   if(!month){
 
@@ -1616,11 +1830,6 @@ function parseScheduleLines(lines){
   let currentDate = null;
 
 
-  /*
-    PDF抽出後の文字列を
-    順番に処理する。
-  */
-
   for(
     let i = 0;
     i < lines.length;
@@ -1632,11 +1841,11 @@ function parseScheduleLines(lines){
 
 
     /*
-      練習曲関連は完全に無視
+      練習曲は完全無視
     */
 
     if(
-      raw.includes("練習曲の目安")
+      raw.includes("練習曲")
     ){
 
       continue;
@@ -1644,19 +1853,11 @@ function parseScheduleLines(lines){
     }
 
 
-    /*
-      「○月○日」
-    */
-
     let dateMatch =
       raw.match(
         /(\d{1,2})月\s*(\d{1,2})日?/
       );
 
-
-    /*
-      「10/1」のような表記にも対応
-    */
 
     if(!dateMatch){
 
@@ -1671,10 +1872,15 @@ function parseScheduleLines(lines){
     if(dateMatch){
 
       const m =
-        Number(dateMatch[1]);
+        Number(
+          dateMatch[1]
+        );
+
 
       const d =
-        Number(dateMatch[2]);
+        Number(
+          dateMatch[2]
+        );
 
 
       if(
@@ -1686,18 +1892,15 @@ function parseScheduleLines(lines){
 
         month = m;
 
+
         currentDate = {
+
           year:year,
           month:m,
           day:d
+
         };
 
-
-        /*
-          日付の後ろに
-          時間・場所などが続いている場合、
-          同じ行も解析する。
-        */
 
         const rest =
           raw
@@ -1716,13 +1919,17 @@ function parseScheduleLines(lines){
               rest
             );
 
+
           if(candidate){
+
             candidates.push(
               candidate
             );
+
           }
 
         }
+
 
         continue;
 
@@ -1730,12 +1937,6 @@ function parseScheduleLines(lines){
 
     }
 
-
-    /*
-      日付が確定している場合、
-      次の行にある時間や場所を
-      補足として扱う。
-    */
 
     if(currentDate){
 
@@ -1747,13 +1948,6 @@ function parseScheduleLines(lines){
 
 
       if(candidate){
-
-        /*
-          まったく関係ない文章を
-          予定として登録しないため、
-          活動時間・場所・不在など
-          予定表らしい内容を含む場合だけ採用。
-        */
 
         if(
           containsScheduleInformation(
@@ -1813,38 +2007,45 @@ function parseScheduleLines(lines){
 
 
 /* =========================================
-   予定らしい文字か
+   予定情報判定
 ========================================= */
 
 function containsScheduleInformation(text){
 
   return (
+
     /\d{1,2}:\d{2}/.test(text) ||
+
     /音楽練習室/.test(text) ||
+
     /不在/.test(text) ||
+
     /文化祭/.test(text) ||
+
     /リハーサル/.test(text) ||
+
     /準備/.test(text) ||
+
     /休み/.test(text)
+
   );
 
 }
 
 
 /* =========================================
-   1行から予定候補を作る
+   予定候補作成
 ========================================= */
 
-function makeCandidate(dateObj,text){
+function makeCandidate(
+  dateObj,
+  text
+){
 
   if(!text){
     return null;
   }
 
-
-  /*
-    練習曲は無視
-  */
 
   if(
     text.includes("練習曲")
@@ -1883,10 +2084,6 @@ function makeCandidate(dateObj,text){
     `${yyyy}-${mm}-${dd}`;
 
 
-  /*
-    時間
-  */
-
   const timeMatches =
     text.match(
       /\d{1,2}:\d{2}\s*[〜~\-－]\s*\d{1,2}:\d{2}/g
@@ -1899,21 +2096,12 @@ function makeCandidate(dateObj,text){
       : "";
 
 
-  /*
-    「15:45〜18:00」の
-    前後に余計な空白がある場合
-  */
-
   time =
     time.replace(
       /\s+/g,
       ""
     );
 
-
-  /*
-    場所
-  */
 
   let place = "";
 
@@ -1928,18 +2116,14 @@ function makeCandidate(dateObj,text){
   }
 
 
-  /*
-    備考
-
-    時間・場所・練習曲関連を
-    取り除いて残ったもの。
-  */
-
   let note =
     text;
 
 
-  if(time){
+  if(
+    time &&
+    timeMatches
+  ){
 
     note =
       note.replace(
@@ -1974,16 +2158,6 @@ function makeCandidate(dateObj,text){
       .trim();
 
 
-  /*
-    「富田林教会」など、
-    PDF内の予定表外の文字が
-    単独で入ってきた場合に
-    そのまま予定にしない。
-
-    ただし「不在」「文化祭」などは
-    備考として残す。
-  */
-
   if(
     !time &&
     !place &&
@@ -1996,10 +2170,12 @@ function makeCandidate(dateObj,text){
 
 
   return {
+
     date:date,
     time:time,
     place:place,
     note:note
+
   };
 
 }
@@ -2030,6 +2206,7 @@ async function readSchedulePDF(){
     );
 
     return;
+
   }
 
 
@@ -2081,7 +2258,8 @@ async function readSchedulePDF(){
 
       message(
         "pdfStatus",
-        "PDFから予定を見つけられませんでした。\n\nこのPDFが画像として保存されている場合は、文字情報を読み取れない可能性があります。",
+        "PDFから予定を見つけられませんでした。\n\n" +
+        "このPDFが画像として保存されている場合は、文字情報を読み取れない可能性があります。",
         "error"
       );
 
@@ -2116,8 +2294,9 @@ async function readSchedulePDF(){
 
     message(
       "pdfStatus",
-      "PDFの読み込みに失敗しました。\n" +
-      (error.message || ""),
+      "PDFの読み込みに失敗しました。\n\n" +
+      "エラー：" +
+      (error.message || "不明"),
       "error"
     );
 
@@ -2134,7 +2313,7 @@ async function readSchedulePDF(){
 
 
 /* =========================================
-   PDF候補表示
+   PDF候補
 ========================================= */
 
 let pdfCandidatesData = [];
@@ -2251,7 +2430,7 @@ function renderCandidates(
 
 
 /* =========================================
-   選択したPDF予定を登録
+   PDF予定登録
 ========================================= */
 
 async function registerCandidates(){
@@ -2293,19 +2472,22 @@ async function registerCandidates(){
       const time =
         box.querySelector(
           ".candidate-time"
-        ).value.trim();
+        ).value
+        .trim();
 
 
       const place =
         box.querySelector(
           ".candidate-place"
-        ).value.trim();
+        ).value
+        .trim();
 
 
       const note =
         box.querySelector(
           ".candidate-note"
-        ).value.trim();
+        ).value
+        .trim();
 
 
       if(!date){
@@ -2314,10 +2496,12 @@ async function registerCandidates(){
 
 
       selected.push({
+
         date,
         time,
         place,
         note
+
       });
 
     }
@@ -2358,10 +2542,12 @@ async function registerCandidates(){
           item.date
         ),
         {
+
           time:item.time,
           place:item.place,
           note:item.note,
           updatedAt:Date.now()
+
         }
       );
 
@@ -2388,7 +2574,12 @@ async function registerCandidates(){
 
     message(
       "candidateMsg",
-      "予定の登録に失敗しました。",
+      "予定の登録に失敗しました。\n\n" +
+      "エラーコード: " +
+      (error.code || "不明") +
+      "\n" +
+      "詳細: " +
+      (error.message || "不明"),
       "error"
     );
 
@@ -2416,8 +2607,7 @@ async function saveSchedule(){
 
 
   const date =
-    $("sdate")
-      .value;
+    $("sdate").value;
 
 
   const time =
@@ -2447,44 +2637,71 @@ async function saveSchedule(){
     );
 
     return;
+
   }
 
 
-  await set(
-    ref(
-      db,
-      "schedules/" +
-      date
-    ),
-    {
-      time:time,
-      place:place,
-      note:note,
-      updatedAt:Date.now()
-    }
-  );
+  try{
+
+    await set(
+      ref(
+        db,
+        "schedules/" +
+        date
+      ),
+      {
+
+        time:time,
+        place:place,
+        note:note,
+        updatedAt:Date.now()
+
+      }
+    );
 
 
-  message(
-    "scheduleMsg",
-    "予定を保存しました。",
-    "success"
-  );
+    message(
+      "scheduleMsg",
+      "予定を保存しました。",
+      "success"
+    );
 
 
-  $("sdate").value = "";
-  $("stime").value = "";
-  $("splace").value = "";
-  $("snote").value = "";
+    $("sdate").value = "";
+    $("stime").value = "";
+    $("splace").value = "";
+    $("snote").value = "";
 
 
-  await loadSchedules();
+    await loadSchedules();
+
+
+  }catch(error){
+
+    console.error(
+      "予定保存エラー:",
+      error
+    );
+
+
+    message(
+      "scheduleMsg",
+      "予定の保存に失敗しました。\n\n" +
+      "エラーコード: " +
+      (error.code || "不明") +
+      "\n" +
+      "詳細: " +
+      (error.message || "不明"),
+      "error"
+    );
+
+  }
 
 }
 
 
 /* =========================================
-   登録済み予定読み込み
+   登録済み予定
 ========================================= */
 
 async function loadSchedules(){
@@ -2553,7 +2770,6 @@ async function loadSchedules(){
                 : ""
             }
 
-
             <div class="row">
 
               <button
@@ -2613,19 +2829,24 @@ async function editSchedule(date){
   $("sdate").value =
     date;
 
+
   $("stime").value =
     data.time || "";
 
+
   $("splace").value =
     data.place || "";
+
 
   $("snote").value =
     data.note || "";
 
 
   window.scrollTo({
+
     top:0,
     behavior:"smooth"
+
   });
 
 }
@@ -2653,16 +2874,40 @@ async function deleteSchedule(date){
   }
 
 
-  await remove(
-    ref(
-      db,
-      "schedules/" +
-      date
-    )
-  );
+  try{
+
+    await remove(
+      ref(
+        db,
+        "schedules/" +
+        date
+      )
+    );
 
 
-  await loadSchedules();
+    await loadSchedules();
+
+
+  }catch(error){
+
+    console.error(
+      "予定削除エラー:",
+      error
+    );
+
+
+    message(
+      "scheduleMsg",
+      "予定の削除に失敗しました。\n\n" +
+      "エラーコード: " +
+      (error.code || "不明") +
+      "\n" +
+      "詳細: " +
+      (error.message || "不明"),
+      "error"
+    );
+
+  }
 
 }
 
@@ -2703,7 +2948,7 @@ window.registerCandidates =
 
 
 /* =========================================
-   ボタンイベント
+   ボタン
 ========================================= */
 
 $("loginButton")
@@ -2749,7 +2994,7 @@ $("saveScheduleButton")
 
 
 /* =========================================
-   Enterキーでもログイン
+   Enterキー
 ========================================= */
 
 $("password")
@@ -2767,7 +3012,6 @@ $("password")
 
     }
   );
-
 
 </script>
 
