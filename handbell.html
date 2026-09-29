@@ -3,183 +3,92 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>部活動欠席連絡｜清教学園ハンドベル部</title>
+<title>管理者設定｜清教学園ハンドベル部</title>
 
 <style>
-*{
-  box-sizing:border-box
-}
+*{box-sizing:border-box}
 
 body{
   margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif;
   background:#f5f7fb;
-  color:#20242a
+  color:#20242a;
+  font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif;
 }
 
 header{
   background:#fff;
-  padding:16px 18px 12px;
-  position:sticky;
-  top:0;
-  z-index:10;
-  border-bottom:1px solid #e7eaf0
+  padding:20px;
+  border-bottom:1px solid #e5e8ed;
 }
 
-.header-top{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  min-height:42px
-}
-
-.header-title{
+h1{
   margin:0;
-  font-size:22px;
-  font-weight:800;
   text-align:center;
-  flex:1;
-  cursor:pointer
-}
-
-.club{
-  text-align:center;
-  color:#66717e;
-  font-size:13px;
-  margin:2px 0 10px
-}
-
-.header-side{
-  display:flex;
-  align-items:center;
-  gap:7px;
-  min-width:42px
-}
-
-.header-side.right{
-  justify-content:flex-end
-}
-
-.header-spacer{
-  width:42px
-}
-
-.profile-mini{
-  display:flex;
-  align-items:center;
-  gap:7px;
-  min-width:0
-}
-
-.profile-mini-text{
-  font-size:13px;
-  font-weight:700;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis
-}
-
-.icon-button{
-  width:40px;
-  height:40px;
-  padding:0;
-  border-radius:50%;
-  background:#eef3fb;
-  color:#333;
-  font-size:22px;
-  display:flex;
-  align-items:center;
-  justify-content:center
-}
-
-.header-actions{
-  display:flex;
-  align-items:center;
-  justify-content:flex-end;
-  gap:6px
-}
-
-.header-actions button{
-  padding:7px 9px;
-  font-size:12px;
-  border-radius:9px
-}
-
-.header-actions .logout{
-  background:#fff;
-  color:#555;
-  border:1px solid #d9dee7
-}
-
-button{
-  border:0;
-  border-radius:12px;
-  padding:12px 10px;
-  font-size:15px;
-  font-weight:700;
-  cursor:pointer
+  font-size:21px;
 }
 
 main{
-  max-width:720px;
+  max-width:800px;
   margin:auto;
-  padding:18px
+  padding:18px;
 }
 
-.card,
-.panel{
+.card{
   background:#fff;
   border-radius:18px;
   padding:16px;
   margin-bottom:16px;
-  box-shadow:0 2px 12px #0000000b
+  box-shadow:0 2px 12px #0000000b;
 }
 
 .hidden{
-  display:none!important
+  display:none!important;
 }
 
 label{
   display:block;
   font-weight:700;
   font-size:14px;
-  margin:14px 0 6px
+  margin:12px 0 5px;
 }
 
-input,
-select,
-textarea{
+input,select,textarea{
   width:100%;
-  max-width:100%;
-  min-width:0;
-  padding:12px;
+  padding:11px;
   border:1px solid #d9dee7;
   border-radius:10px;
   font-size:16px;
-  background:#fff
+  background:#fff;
 }
 
 textarea{
-  min-height:85px;
-  resize:vertical
+  min-height:150px;
+  resize:vertical;
+}
+
+button{
+  border:0;
+  border-radius:10px;
+  padding:11px 14px;
+  font-weight:700;
+  cursor:pointer;
 }
 
 .primary{
-  width:100%;
-  margin-top:16px;
   background:#1f6feb;
-  color:#fff
+  color:#fff;
+  width:100%;
+  margin-top:14px;
 }
 
 .secondary{
   background:#eef3fb;
-  color:#333
 }
 
 .danger{
   background:#fff0f0;
-  color:#d33;
-  border:1px solid #f0b8b8
+  color:#b22;
+  border:1px solid #efbbbb;
 }
 
 .msg{
@@ -187,255 +96,101 @@ textarea{
   border-radius:10px;
   background:#fff8df;
   color:#69520a;
+  margin-top:10px;
   font-size:14px;
-  margin-top:12px
 }
 
 .error{
   background:#fff0f0;
-  color:#9b1c1c
-}
-
-.userbar{
-  background:#f5f8ff;
-  border-radius:12px;
-  padding:12px;
-  margin-bottom:14px
-}
-
-/* =========================
-   カレンダー共通
-========================= */
-
-.week,
-.days{
-  display:grid;
-  grid-template-columns:repeat(7,minmax(0,1fr));
-  gap:5px
-}
-
-.week div{
-  text-align:center;
-  font-size:12px;
-  color:#7b8490;
-  padding:5px 0
-}
-
-.day{
-  min-height:72px;
-  background:#f8f9fb;
-  border-radius:10px;
-  padding:6px;
-  cursor:pointer;
-  overflow:hidden;
-  border:2px solid transparent;
-  transition:.15s
-}
-
-.day:hover{
-  border-color:#dbe5f7
-}
-
-.day.empty{
-  background:transparent;
-  cursor:default;
-  border-color:transparent
-}
-
-.day.off{
-  opacity:.45
-}
-
-.day.club-day{
-  background:#fff0f0;
-  opacity:1
-}
-
-.day.selected-day{
-  border-color:#1f6feb;
-  background:#eaf2ff
-}
-
-.day.club-day.selected-day{
-  background:#eaf2ff
-}
-
-.daynum{
-  font-weight:700;
-  font-size:14px
-}
-
-.count{
-  display:inline-block;
-  margin-top:8px;
-  background:#e8f0ff;
-  color:#1f6feb;
-  border-radius:999px;
-  padding:3px 7px;
-  font-size:12px;
-  font-weight:700
-}
-
-.dot{
-  display:block;
-  margin-top:7px;
-  font-size:11px;
-  color:#64707d;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis
-}
-
-.monthbar{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:14px
-}
-
-.monthbar button{
-  background:#eef3fb;
-  padding:8px 12px
-}
-
-.month-title{
-  font-size:18px;
-  font-weight:800
-}
-
-/* =========================
-   フォーム内カレンダー
-========================= */
-
-.form-calendar{
-  margin-top:8px;
-  padding:12px;
-  background:#f8f9fb;
-  border-radius:14px
-}
-
-.form-calendar .day{
-  min-height:60px;
-  padding:5px
-}
-
-.form-calendar .daynum{
-  font-size:13px
-}
-
-.form-calendar .dot{
-  font-size:10px
-}
-
-.selected-date-box{
-  margin-top:10px;
-  padding:11px 12px;
-  background:#eef3fb;
-  border-radius:10px;
-  font-weight:700;
-  font-size:14px
+  color:#9b1c1c;
 }
 
 .item{
   border:1px solid #e3e7ed;
   border-radius:12px;
   padding:12px;
-  margin:10px 0
-}
-
-.meta{
-  font-size:13px;
-  color:#66717e;
-  margin-top:4px
-}
-
-.badge{
-  display:inline-block;
-  border-radius:999px;
-  padding:4px 8px;
-  background:#eef3fb;
-  font-size:12px;
-  font-weight:700
+  margin:10px 0;
 }
 
 .row{
   display:flex;
   gap:8px;
-  margin-top:10px
+  margin-top:10px;
 }
 
 .row button{
-  flex:1
+  flex:1;
 }
 
 .small{
   font-size:12px;
-  color:#77818e
+  color:#6f7882;
 }
 
-.page-back{
-  margin-bottom:10px
+.note{
+  background:#f5f8ff;
+  border-radius:10px;
+  padding:11px;
+  font-size:13px;
+  line-height:1.6;
 }
 
-.reason-note{
+.preview{
+  max-width:100%;
+  max-height:360px;
+  display:block;
+  margin:12px auto;
+  border-radius:10px;
+  border:1px solid #e3e7ed;
+}
+
+.progress{
+  height:8px;
+  background:#e8edf5;
+  border-radius:99px;
+  overflow:hidden;
+  margin-top:10px;
+}
+
+.progress>div{
+  height:100%;
+  width:0;
+  background:#1f6feb;
+  transition:width .2s;
+}
+
+.ocrline{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  margin-top:10px;
+}
+
+.ocrline button{
+  white-space:nowrap;
+}
+
+.schedule-grid{
+  display:grid;
+  grid-template-columns:34px 115px 1fr 1fr;
+  gap:7px;
+  align-items:center;
+}
+
+.schedule-grid input{
+  min-width:0;
+  padding:9px;
+}
+
+.schedule-grid .head{
   font-size:12px;
-  color:#77818e;
-  margin-top:6px
+  font-weight:700;
+  color:#68717c;
 }
 
-@media(max-width:480px){
-
-  header{
-    padding-left:10px;
-    padding-right:10px
-  }
-
-  .header-title{
-    font-size:19px
-  }
-
-  .header-actions{
-    gap:4px
-  }
-
-  .header-actions button{
-    padding:6px 7px;
-    font-size:11px
-  }
-
-  .profile-mini-text{
-    font-size:12px
-  }
-
-  .icon-button{
-    width:38px;
-    height:38px
-  }
-
-  .header-spacer{
-    width:38px
-  }
-
-  .form-calendar{
-    padding:8px
-  }
-
-  .form-calendar .days{
-    gap:3px
-  }
-
-  .form-calendar .day{
-    min-height:55px;
-    padding:4px
-  }
-
-  .form-calendar .daynum{
-    font-size:12px
-  }
-
-  .form-calendar .dot{
-    font-size:9px
-  }
+.check{
+  width:20px;
+  height:20px;
 }
 </style>
 </head>
@@ -443,577 +198,256 @@ textarea{
 <body>
 
 <header>
-
-  <div class="header-top">
-
-    <div
-      id="loggedInLeft"
-      class="header-side hidden"
-    >
-
-      <div class="profile-mini">
-
-        <button
-          class="icon-button"
-          onclick="showMyPage()"
-          aria-label="マイページ"
-        >
-          👤
-        </button>
-
-        <div
-          id="profileMiniText"
-          class="profile-mini-text"
-        ></div>
-
-      </div>
-
-    </div>
-
-    <div
-      id="loggedOutLeft"
-      class="header-spacer"
-    ></div>
-
-    <h1
-      class="header-title"
-      onclick="backHome()"
-    >
-      部活動欠席連絡
-    </h1>
-
-    <div
-      id="loggedOutRight"
-      class="header-side right"
-    >
-
-      <button onclick="showLogin()">
-        ログイン
-      </button>
-
-    </div>
-
-    <div
-      id="loggedInRight"
-      class="header-side right hidden"
-    >
-
-      <div class="header-actions">
-
-        <button onclick="showForm()">
-          欠席連絡
-        </button>
-
-        <button onclick="showEdit()">
-          連絡を修正
-        </button>
-
-        <button
-          class="logout"
-          onclick="logout()"
-        >
-          ログアウト
-        </button>
-
-      </div>
-
-    </div>
-
-  </div>
-
-  <div class="club">
-    清教学園ハンドベル部
-  </div>
-
+<h1>清教学園ハンドベル部 管理者設定</h1>
 </header>
-
 
 <main>
 
-<section id="calendarView">
+<!-- ログイン -->
+<section id="login" class="card">
 
-  <div class="card">
+<h2>管理者ログイン</h2>
 
-    <div class="monthbar">
+<label>パスワード</label>
 
-      <button onclick="changeMonth(-1)">
-        ‹
-      </button>
+<input
+  id="password"
+  type="password"
+  autocomplete="current-password"
+>
 
-      <div
-        class="month-title"
-        id="monthTitle"
-      ></div>
+<button
+  class="primary"
+  onclick="adminLogin()"
+>
+ログイン
+</button>
 
-      <button onclick="changeMonth(1)">
-        ›
-      </button>
-
-    </div>
-
-    <div class="week">
-
-      <div>月</div>
-      <div>火</div>
-      <div>水</div>
-      <div>木</div>
-      <div>金</div>
-      <div>土</div>
-      <div>日</div>
-
-    </div>
-
-    <div
-      class="days"
-      id="days"
-    ></div>
-
-  </div>
+<div id="loginMsg"></div>
 
 </section>
 
 
-<section
-  id="detailView"
-  class="panel hidden"
+<!-- 管理画面 -->
+<section id="app" class="hidden">
+
+<div class="card">
+<button
+  class="secondary"
+  onclick="logout()"
+>
+ログアウト
+</button>
+</div>
+
+
+<!-- 部員登録 -->
+<div class="card">
+
+<h2>部員登録</h2>
+
+<label>学校ID</label>
+<input id="mid">
+
+<label>名前</label>
+<input id="mname">
+
+<label>学年</label>
+
+<select id="mgrade">
+
+<option value="中学1年">中学1年</option>
+<option value="中学2年">中学2年</option>
+<option value="中学3年">中学3年</option>
+<option value="高校1年">高校1年</option>
+<option value="高校2年">高校2年</option>
+
+</select>
+
+<label>クラス</label>
+<input id="mclass">
+
+<button
+  class="primary"
+  onclick="addMember()"
+>
+登録する
+</button>
+
+<div id="memberMsg"></div>
+
+</div>
+
+
+<!-- 部員一覧 -->
+<div class="card">
+
+<h2>部員一覧</h2>
+
+<div id="members"></div>
+
+</div>
+
+
+<!-- 予定表 -->
+<div class="card">
+
+<h2>清教学園ハンドベル部予定表</h2>
+
+<div class="note">
+
+予定表の画像をアップロードすると、
+画像内の文字を読み取って予定を作成します。
+
+<br>
+
+<strong>
+登録前に内容を確認・修正できます。
+</strong>
+
+</div>
+
+
+<label>予定表の画像</label>
+
+<input
+  id="scheduleImage"
+  type="file"
+  accept="image/*"
 >
 
-  <button
-    class="secondary"
-    onclick="backHome()"
-  >
-    ← カレンダーに戻る
-  </button>
-
-  <div id="detail"></div>
-
-</section>
-
-
-<section
-  id="loginView"
-  class="panel hidden"
+<img
+  id="schedulePreview"
+  class="preview hidden"
+  alt="予定表プレビュー"
 >
 
-  <button
-    class="secondary"
-    onclick="backHome()"
-  >
-    ← 戻る
-  </button>
 
-  <h2>
-    ログイン
-  </h2>
+<div class="ocrline">
 
-  <label>
-    学校ID
-  </label>
+<button
+  class="secondary"
+  onclick="readScheduleImage()"
+>
+画像を読み取る
+</button>
 
-  <input
-    id="loginId"
-    autocomplete="username"
-  >
+<span
+  id="ocrStatus"
+  class="small"
+></span>
 
-  <label>
-    パスワード
-  </label>
-
-  <input
-    id="loginPassword"
-    type="password"
-    autocomplete="current-password"
-  >
-
-  <button
-    class="primary"
-    onclick="login()"
-  >
-    ログイン
-  </button>
-
-  <div id="loginMsg"></div>
-
-  <button
-    class="secondary"
-    style="width:100%;margin-top:12px"
-    onclick="showSetup()"
-  >
-    初めてログインする方はこちら
-  </button>
-
-</section>
+</div>
 
 
-<section
-  id="setupView"
-  class="panel hidden"
+<div class="progress">
+
+<div id="ocrProgress"></div>
+
+</div>
+
+
+<label>読み取った文字</label>
+
+<textarea
+  id="ocrText"
+  placeholder="画像を読み取ると、ここに文字が入ります。"
+></textarea>
+
+
+<!-- 読み取り結果 -->
+<div id="detectedBox" class="hidden">
+
+<label>登録する予定を確認</label>
+
+<div class="small">
+チェックを入れた行だけ登録されます。
+日付・時間・場所は登録前に修正できます。
+</div>
+
+<div id="detectedSchedules"></div>
+
+<button
+  class="primary"
+  onclick="registerDetectedSchedules()"
+>
+チェックした予定を登録
+</button>
+
+<div id="imageScheduleMsg"></div>
+
+</div>
+
+
+<hr
+  style="
+    border:0;
+    border-top:1px solid #e5e8ed;
+    margin:20px 0;
+  "
 >
 
-  <button
-    class="secondary"
-    onclick="showLogin()"
-  >
-    ← ログインに戻る
-  </button>
 
-  <h2>
-    初回パスワード設定
-  </h2>
+<h3>手入力</h3>
 
-  <p class="small">
-    管理者に登録された学校IDを入力して、自分でパスワードを設定します。
-  </p>
+<label>日付</label>
+<input id="sdate" type="date">
 
-  <label>
-    学校ID
-  </label>
-
-  <input
-    id="setupId"
-  >
-
-  <label>
-    新しいパスワード（6文字以上）
-  </label>
-
-  <input
-    id="setupPassword"
-    type="password"
-  >
-
-  <label>
-    確認
-  </label>
-
-  <input
-    id="setupPassword2"
-    type="password"
-  >
-
-  <button
-    class="primary"
-    onclick="setupPassword()"
-  >
-    設定する
-  </button>
-
-  <div id="setupMsg"></div>
-
-</section>
-
-
-<section
-  id="myPageView"
-  class="panel hidden"
+<label>時間</label>
+<input
+  id="stime"
+  placeholder="例：17:00〜19:00"
 >
 
-  <button
-    class="secondary page-back"
-    onclick="backHome()"
-  >
-    ← ホームに戻る
-  </button>
+<label>場所</label>
+<input id="splace">
 
-  <h2>
-    マイページ
-  </h2>
-
-  <p class="small">
-    学年・クラス・名前・パスワードを変更できます。
-  </p>
-
-  <label>
-    学年
-  </label>
-
-  <select id="myGrade">
-
-    <option value="1">1</option>
-    <option value="2">2</option>
-    <option value="3">3</option>
-    <option value="4">4</option>
-    <option value="5">5</option>
-    <option value="6">6</option>
-
-  </select>
-
-  <label>
-    クラス
-  </label>
-
-  <input
-    id="myClass"
-  >
-
-  <label>
-    名前
-  </label>
-
-  <input
-    id="myName"
-  >
-
-  <button
-    class="primary"
-    onclick="saveProfile()"
-  >
-    プロフィールを保存
-  </button>
-
-  <h3 style="margin-top:24px">
-    パスワード変更
-  </h3>
-
-  <label>
-    新しいパスワード（6文字以上）
-  </label>
-
-  <input
-    id="myPassword"
-    type="password"
-  >
-
-  <label>
-    確認
-  </label>
-
-  <input
-    id="myPassword2"
-    type="password"
-  >
-
-  <button
-    class="primary"
-    onclick="changePassword()"
-  >
-    パスワードを変更
-  </button>
-
-  <div id="myPageMsg"></div>
-
-</section>
-
-
-<section
-  id="formView"
-  class="panel hidden"
+<button
+  class="primary"
+  onclick="saveSchedule()"
 >
+予定を保存
+</button>
 
-  <button
-    class="secondary"
-    onclick="backFromForm()"
-  >
-    ← 戻る
-  </button>
+<div id="scheduleMsg"></div>
 
-  <h2 id="formTitle">
-    欠席連絡
-  </h2>
+<div id="schedules"></div>
 
-  <div
-    id="profileBox"
-    class="userbar"
-  ></div>
-
-  <label>
-    欠席理由（必須）
-  </label>
-
-  <select
-    id="reasonType"
-    onchange="toggleOtherReason()"
-  >
-
-    <option value="">
-      理由を選択してください
-    </option>
-
-    <option value="体調不良・けが">
-      体調不良・けが
-    </option>
-
-    <option value="通院">
-      通院
-    </option>
-
-    <option value="家庭の用事・旅行">
-      家庭の用事・旅行
-    </option>
-
-    <option value="他の部活動">
-      他の部活動
-    </option>
-
-    <option value="塾・習い事">
-      塾・習い事
-    </option>
-
-    <option value="冠婚葬祭">
-      冠婚葬祭
-    </option>
-
-    <option value="追試・補講・課題">
-      追試・補講・課題
-    </option>
-
-    <option value="セミナー">
-      セミナー
-    </option>
-
-    <option value="委員会・コアなどの仕事">
-      委員会・コアなどの仕事
-    </option>
-
-    <option value="2者懇談・3者懇談">
-      2者懇談・3者懇談
-    </option>
-
-    <option value="英検など">
-      英検など
-    </option>
-
-    <option value="その他">
-      その他
-    </option>
-
-  </select>
-
-  <div
-    id="otherReasonBox"
-    class="hidden"
-  >
-
-    <label>
-      その他の理由（必須）
-    </label>
-
-    <textarea
-      id="otherReason"
-      placeholder="理由を入力してください"
-    ></textarea>
-
-  </div>
-
-  <label>
-    日付（必須）
-  </label>
-
-  <div class="form-calendar">
-
-    <div class="monthbar">
-
-      <button
-        type="button"
-        onclick="changeFormMonth(-1)"
-      >
-        ‹
-      </button>
-
-      <div
-        class="month-title"
-        id="formMonthTitle"
-      ></div>
-
-      <button
-        type="button"
-        onclick="changeFormMonth(1)"
-      >
-        ›
-      </button>
-
-    </div>
-
-    <div class="week">
-
-      <div>月</div>
-      <div>火</div>
-      <div>水</div>
-      <div>木</div>
-      <div>金</div>
-      <div>土</div>
-      <div>日</div>
-
-    </div>
-
-    <div
-      class="days"
-      id="formDays"
-    ></div>
-
-    <div
-      id="selectedDateBox"
-      class="selected-date-box"
-    >
-      日付を選択してください
-    </div>
-
-  </div>
-
-  <div id="formNotice"></div>
-
-  <button
-    class="primary"
-    onclick="saveNotice()"
-  >
-    登録する
-  </button>
-
-</section>
-
-
-<section
-  id="editView"
-  class="panel hidden"
->
-
-  <button
-    class="secondary"
-    onclick="backHome()"
-  >
-    ← ホームに戻る
-  </button>
-
-  <h2>
-    連絡を修正
-  </h2>
-
-  <div id="myNotices"></div>
+</div>
 
 </section>
 
 </main>
 
 
+<!-- OCRライブラリ -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+
 <script type="module">
 
-import{
+import {
   initializeApp
 }
 from
 "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 
-
-import{
+import {
   getAuth,
   onAuthStateChanged,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-  updatePassword
+  signOut
 }
 from
 "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
-
-import{
+import {
   getDatabase,
   ref,
   get,
   set,
   update,
-  remove,
-  push
+  remove
 }
 from
 "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
@@ -1023,291 +457,128 @@ from
    Firebase設定
 ========================= */
 
-const firebaseConfig = {
+const ADMIN_EMAIL="kazuma.cosmos@gmail.com";
+
+const firebaseConfig={
 
   apiKey:
-    "AIzaSyAK9ySLSfYpLSyluzwRyI22Zp32KeMSA",
+  "AIzaSyAK9yRsSLSfYpLSyluzwRyI22Zp32KeMSA",
 
   authDomain:
-    "seikyo-handbell-club.firebaseapp.com",
+  "seikyo-handbell-club.firebaseapp.com",
 
   databaseURL:
-    "https://seikyo-handbell-club-default-rtdb.firebaseio.com",
+  "https://seikyo-handbell-club-default-rtdb.firebaseio.com",
 
   projectId:
-    "seikyo-handbell-club",
+  "seikyo-handbell-club",
 
   storageBucket:
-    "seikyo-handbell-club.firebasestorage.app",
+  "seikyo-handbell-club.firebasestorage.app",
 
   messagingSenderId:
-    "55435007971",
+  "55435007971",
 
   appId:
-    "1:55435007971:web:25f5c3b9dcd4324bc3f2d6"
-
+  "1:55435007971:web:25f5c3b9dcd4324bc3f2d6"
 };
 
 
-const app =
-  initializeApp(firebaseConfig);
+const app=initializeApp(firebaseConfig);
+
+const auth=getAuth(app);
+
+const db=getDatabase(app);
 
 
-const auth =
-  getAuth(app);
+const $=id =>
+document.getElementById(id);
 
 
-const db =
-  getDatabase(app);
+const esc=s =>
+String(s??"").replace(
+  /[&<>"']/g,
+  c=>({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  }[c])
+);
 
 
-const $ =
-  id =>
-    document.getElementById(id);
+function message(id,text,error=false){
+
+  $(id).className=
+    text
+      ? (error ? "msg error" : "msg")
+      : "";
+
+  $(id).textContent=text;
+
+}
 
 
-let profile =
-  null;
+/* =========================
+   管理者確認
+========================= */
 
+async function isAdmin(){
 
-let currentUser =
-  null;
+  if(!auth.currentUser)
+    return false;
 
+  const s=
+    await get(
+      ref(
+        db,
+        "admins/"+auth.currentUser.uid
+      )
+    );
 
-let editingId =
-  null;
-
-
-let current =
-  new Date();
-
-
-let formCurrent =
-  new Date();
-
-
-let selectedDate =
-  "";
-
-
-const DOMAIN =
-  "@seikyo-handbell-club.local";
-
-
-const esc =
-  s =>
-    String(s ?? "")
-      .replace(
-        /[&<>"']/g,
-        c =>
-          ({
-            "&":"&amp;",
-            "<":"&lt;",
-            ">":"&gt;",
-            '"':"&quot;",
-            "'":"&#39;"
-          }[c])
-      );
-
-
-const pad =
-  n =>
-    String(n)
-      .padStart(2,"0");
-
-
-const ymd =
-  (y,m,d) =>
-    `${y}-${pad(m+1)}-${pad(d)}`;
-
-
-const jp =
-  s => {
-
-    let [
-      a,
-      b,
-      c
-    ] =
-      s.split("-");
-
-
-    return `${a}年${+b}月${+c}日`;
-
-  };
-
-
-const email =
-  id =>
-    String(id).trim() +
-    DOMAIN;
-
-
-function hide(){
-
-  [
-    "calendarView",
-    "detailView",
-    "loginView",
-    "setupView",
-    "myPageView",
-    "formView",
-    "editView"
-  ]
-  .forEach(
-    x =>
-      $(x)
-        .classList
-        .add("hidden")
+  return(
+    s.exists() &&
+    s.val()===true
   );
 
 }
 
 
-function backHome(){
-
-  editingId =
-    null;
-
-
-  hide();
-
-
-  $("calendarView")
-    .classList
-    .remove("hidden");
-
-
-  render();
-
-}
-
-
-function showLogin(){
-
-  hide();
-
-
-  $("loginView")
-    .classList
-    .remove("hidden");
-
-}
-
-
-function showSetup(){
-
-  hide();
-
-
-  $("setupView")
-    .classList
-    .remove("hidden");
-
-}
-
-
-async function loadProfile(){
-
-  if(!currentUser)
-    return;
-
-
-  const s =
-    await get(
-      ref(
-        db,
-        "members/" +
-        currentUser.uid
-      )
-    );
-
-
-  profile =
-    s.exists()
-      ? s.val()
-      : null;
-
-
-  if(profile){
-
-    const text =
-      `高校${esc(profile.grade)}年${esc(profile.className)}組　${esc(profile.name)}`;
-
-
-    $("profileMiniText")
-      .innerHTML =
-        text;
-
-
-    $("profileBox")
-      .textContent =
-        `${profile.name}（高校${profile.grade}年${profile.className}組）`;
-
-  }
-
-}
-
+/* =========================
+   ログイン状態
+========================= */
 
 onAuthStateChanged(
   auth,
-  async u => {
+  async user=>{
 
-    currentUser =
-      u;
+    if(
+      user &&
+      await isAdmin()
+    ){
 
-
-    if(u){
-
-      await loadProfile();
-
-
-      $("loggedOutLeft")
+      $("login")
         .classList
         .add("hidden");
 
-
-      $("loggedOutRight")
-        .classList
-        .add("hidden");
-
-
-      $("loggedInLeft")
+      $("app")
         .classList
         .remove("hidden");
 
+      loadMembers();
 
-      $("loggedInRight")
-        .classList
-        .remove("hidden");
-
-
-      render();
+      loadSchedules();
 
     }else{
 
-      $("loggedOutLeft")
+      $("login")
         .classList
         .remove("hidden");
 
-
-      $("loggedOutRight")
-        .classList
-        .remove("hidden");
-
-
-      $("loggedInLeft")
+      $("app")
         .classList
         .add("hidden");
-
-
-      $("loggedInRight")
-        .classList
-        .add("hidden");
-
-
-      profile =
-        null;
 
     }
 
@@ -1317,213 +588,39 @@ onAuthStateChanged(
 
 /* =========================
    ログイン
-   ※ Firebaseの実際のエラーを表示
 ========================= */
 
-async function login(){
-
-  let id =
-    $("loginId")
-      .value
-      .trim();
-
-
-  let pw =
-    $("loginPassword")
-      .value;
-
-
-  if(!id || !pw){
-
-    $("loginMsg")
-      .innerHTML =
-        '<div class="msg error">IDとパスワードを入力してください。</div>';
-
-
-    return;
-
-  }
-
+async function adminLogin(){
 
   try{
-
-    console.log("Firebaseログイン開始");
-    console.log("学校ID:", id);
-    console.log("ログイン用メール:", email(id));
-
 
     await signInWithEmailAndPassword(
       auth,
-      email(id),
-      pw
+      ADMIN_EMAIL,
+      $("password").value
     );
 
+    if(
+      !(await isAdmin())
+    ){
 
-    console.log("Firebaseログイン成功");
+      await signOut(auth);
 
+      message(
+        "loginMsg",
+        "このアカウントは管理者として登録されていません。",
+        true
+      );
 
-    backHome();
+    }
 
   }catch(e){
 
-    console.error(
-      "Firebaseログインエラー:",
-      e
+    message(
+      "loginMsg",
+      "ログインできませんでした。コード："+e.code,
+      true
     );
-
-
-    console.error(
-      "エラーコード:",
-      e.code
-    );
-
-
-    console.error(
-      "エラーメッセージ:",
-      e.message
-    );
-
-
-    $("loginMsg")
-      .innerHTML =
-        `
-        <div class="msg error">
-
-          ログインできませんでした。<br><br>
-
-          <strong>エラーコード：</strong>
-          ${esc(e.code || "不明")}<br>
-
-          <strong>エラー内容：</strong>
-          ${esc(e.message || "不明")}
-
-        </div>
-        `;
-
-  }
-
-}
-
-
-async function setupPassword(){
-
-  let id =
-    $("setupId")
-      .value
-      .trim();
-
-
-  let p =
-    $("setupPassword")
-      .value;
-
-
-  let p2 =
-    $("setupPassword2")
-      .value;
-
-
-  if(
-    !id ||
-    p.length < 6 ||
-    p !== p2
-  ){
-
-    $("setupMsg")
-      .innerHTML =
-        '<div class="msg error">入力内容を確認してください。</div>';
-
-
-    return;
-
-  }
-
-
-  try{
-
-    let exists =
-      await get(
-        ref(
-          db,
-          "memberIds/" +
-          id
-        )
-      );
-
-
-    if(!exists.exists())
-      throw Error(
-        "not-registered"
-      );
-
-
-    let reg =
-      await get(
-        ref(
-          db,
-          "memberRegistrations/" +
-          id
-        )
-      );
-
-
-    if(!reg.exists())
-      throw Error(
-        "no-data"
-      );
-
-
-    let data =
-      reg.val();
-
-
-    let cred =
-      await createUserWithEmailAndPassword(
-        auth,
-        email(id),
-        p
-      );
-
-
-    await set(
-      ref(
-        db,
-        "members/" +
-        cred.user.uid
-      ),
-      {
-        schoolId:id,
-        name:data.name,
-        grade:data.grade,
-        className:data.className
-      }
-    );
-
-
-    await update(
-      ref(
-        db,
-        "memberIds/" +
-        id
-      ),
-      {
-        accountCreated:true,
-        uid:cred.user.uid
-      }
-    );
-
-
-    backHome();
-
-
-  }catch(e){
-
-    console.error(e);
-
-
-    $("setupMsg")
-      .innerHTML =
-        '<div class="msg error">そのIDが登録されていないか、すでに初回設定済みです。</div>';
 
   }
 
@@ -1532,1577 +629,1074 @@ async function setupPassword(){
 
 function logout(){
 
-  if(
-    !confirm(
-      "ログアウトしますか？"
-    )
-  )
-    return;
-
-
   signOut(auth);
 
 }
 
 
-async function render(){
+/* =========================
+   部員登録
+========================= */
 
-  let y =
-    current.getFullYear();
+async function addMember(){
+
+  if(!(await isAdmin()))
+    return;
+
+  const id=
+    $("mid").value.trim();
+
+  const name=
+    $("mname").value.trim();
+
+  const grade=
+    $("mgrade").value;
+
+  const cl=
+    $("mclass").value.trim();
 
 
-  let m =
-    current.getMonth();
+  if(
+    !id ||
+    !name ||
+    !cl
+  ){
 
-
-  $("monthTitle")
-    .textContent =
-      `${y}年${m+1}月`;
-
-
-  let ss =
-    await get(
-      ref(
-        db,
-        "schedules"
-      )
+    return message(
+      "memberMsg",
+      "すべて入力してください。",
+      true
     );
 
-
-  let ns =
-    await get(
-      ref(
-        db,
-        "notices"
-      )
-    );
+  }
 
 
-  let sch =
-    ss.exists()
-      ? ss.val()
-      : {};
-
-
-  let all =
-    ns.exists()
-      ? ns.val()
-      : {};
-
-
-  let first =
+  if(
     (
-      new Date(
-        y,
-        m,
-        1
-      ).getDay() +
-      6
-    ) % 7;
-
-
-  let last =
-    new Date(
-      y,
-      m+1,
-      0
-    ).getDate();
-
-
-  let h =
-    "";
-
-
-  for(
-    let i=0;
-    i<first;
-    i++
-  ){
-
-    h +=
-      '<div class="day empty"></div>';
-
-  }
-
-
-  for(
-    let d=1;
-    d<=last;
-    d++
-  ){
-
-    let date =
-      ymd(
-        y,
-        m,
-        d
-      );
-
-
-    let has =
-      !!sch[date];
-
-
-    let count =
-      Object
-        .values(all)
-        .filter(
-          n =>
-            n.date === date
+      await get(
+        ref(
+          db,
+          "memberRegistrations/"+id
         )
-        .length;
-
-
-    h += `
-
-      <div
-        class="day ${has ? "club-day" : "off"}"
-        onclick="openDay('${date}')"
-      >
-
-        <div class="daynum">
-          ${d}
-        </div>
-
-        ${
-          count
-            ?
-            `<span class="count">
-              ${count}件
-            </span>`
-            :
-            ""
-        }
-
-        <span class="dot">
-          ${
-            has
-              ?
-              esc(
-                sch[date].time ||
-                "部活あり"
-              )
-              :
-              "部活なし"
-          }
-        </span>
-
-      </div>
-
-    `;
-
-  }
-
-
-  $("days")
-    .innerHTML =
-      h;
-
-}
-
-
-function changeMonth(n){
-
-  current =
-    new Date(
-      current.getFullYear(),
-      current.getMonth()+n,
-      1
-    );
-
-
-  render();
-
-}
-
-
-async function openDay(date){
-
-  hide();
-
-
-  $("detailView")
-    .classList
-    .remove("hidden");
-
-
-  let ss =
-    await get(
-      ref(
-        db,
-        "schedules/" +
-        date
       )
-    );
-
-
-  let ns =
-    await get(
-      ref(
-        db,
-        "notices"
-      )
-    );
-
-
-  let sch =
-    ss.exists()
-      ? ss.val()
-      : null;
-
-
-  let all =
-    ns.exists()
-      ? ns.val()
-      : {};
-
-
-  let list =
-    Object
-      .values(all)
-      .filter(
-        n =>
-          n.date === date
-      );
-
-
-  let h =
-    `<h2>${jp(date)}</h2>`;
-
-
-  if(!sch){
-
-    $("detail")
-      .innerHTML =
-        h +
-        '<div class="msg error">この日は部活動がありません。</div>';
-
-
-    return;
-
-  }
-
-
-  h += `
-
-    <div class="userbar">
-
-      <strong>
-        部活動あり
-      </strong>
-
-      ${esc(
-        sch.time || ""
-      )}
-
-      <br>
-
-      ${esc(
-        sch.place || ""
-      )}
-
-    </div>
-
-    <h3>
-      連絡 ${list.length}件
-    </h3>
-
-  `;
-
-
-  h +=
-
-    list.length
-
-      ?
-
-      list
-        .map(
-          n =>
-            `
-
-            <div class="item">
-
-              <strong>
-
-                ${esc(n.name)}
-
-                <span class="badge">
-                  ${esc(n.reason)}
-                </span>
-
-              </strong>
-
-            </div>
-
-            `
-        )
-        .join("")
-
-      :
-
-      `
-      <p class="small">
-        現在、連絡はありません。
-      </p>
-      `;
-
-
-  $("detail")
-    .innerHTML =
-      h;
-
-}
-
-
-function showForm(id=null){
-
-  if(
-    !currentUser ||
-    !profile
+    ).exists()
   ){
 
-    showLogin();
-
-    return;
-
-  }
-
-
-  editingId =
-    id;
-
-
-  hide();
-
-
-  $("formView")
-    .classList
-    .remove("hidden");
-
-
-  $("formTitle")
-    .textContent =
-      id
-        ?
-        "連絡を修正"
-        :
-        "欠席連絡";
-
-
-  $("profileBox")
-    .textContent =
-      `${profile.name}（高校${profile.grade}年${profile.className}組）`;
-
-
-  $("reasonType")
-    .value =
-      "";
-
-
-  $("otherReason")
-    .value =
-      "";
-
-
-  $("otherReasonBox")
-    .classList
-    .add("hidden");
-
-
-  $("formNotice")
-    .innerHTML =
-      "";
-
-
-  if(!id){
-
-    selectedDate =
-      "";
-
-    formCurrent =
-      new Date();
-
-  }
-
-
-  renderFormCalendar();
-
-}
-
-
-function backFromForm(){
-
-  if(editingId){
-
-    showEdit();
-
-  }else{
-
-    backHome();
-
-  }
-
-}
-
-
-function toggleOtherReason(){
-
-  const type =
-    $("reasonType")
-      .value;
-
-
-  const box =
-    $("otherReasonBox");
-
-
-  if(
-    type === "その他"
-  ){
-
-    box
-      .classList
-      .remove("hidden");
-
-  }else{
-
-    box
-      .classList
-      .add("hidden");
-
-
-    $("otherReason")
-      .value =
-        "";
-
-  }
-
-}
-
-
-async function renderFormCalendar(){
-
-  let y =
-    formCurrent.getFullYear();
-
-
-  let m =
-    formCurrent.getMonth();
-
-
-  $("formMonthTitle")
-    .textContent =
-      `${y}年${m+1}月`;
-
-
-  let ss =
-    await get(
-      ref(
-        db,
-        "schedules"
-      )
+    return message(
+      "memberMsg",
+      "そのIDはすでに登録されています。",
+      true
     );
-
-
-  let ns =
-    await get(
-      ref(
-        db,
-        "notices"
-      )
-    );
-
-
-  let sch =
-    ss.exists()
-      ? ss.val()
-      : {};
-
-
-  let all =
-    ns.exists()
-      ? ns.val()
-      : {};
-
-
-  let first =
-    (
-      new Date(
-        y,
-        m,
-        1
-      ).getDay() +
-      6
-    ) % 7;
-
-
-  let last =
-    new Date(
-      y,
-      m+1,
-      0
-    ).getDate();
-
-
-  let h =
-    "";
-
-
-  for(
-    let i=0;
-    i<first;
-    i++
-  ){
-
-    h +=
-      '<div class="day empty"></div>';
-
-  }
-
-
-  for(
-    let d=1;
-    d<=last;
-    d++
-  ){
-
-    let date =
-      ymd(
-        y,
-        m,
-        d
-      );
-
-
-    let hasClub =
-      !!sch[date];
-
-
-    let count =
-      Object
-        .values(all)
-        .filter(
-          n =>
-            n.date === date &&
-            n.uid === currentUser?.uid
-        )
-        .length;
-
-
-    let selected =
-      date === selectedDate;
-
-
-    h += `
-
-      <div
-        class="day
-          ${hasClub ? "club-day" : "off"}
-          ${selected ? "selected-day" : ""}
-        "
-        onclick="selectFormDate('${date}')"
-      >
-
-        <div class="daynum">
-          ${d}
-        </div>
-
-        ${
-          count
-            ?
-            `<span class="count">
-              登録済
-            </span>`
-            :
-            ""
-        }
-
-        <span class="dot">
-          ${
-            hasClub
-              ?
-              esc(
-                sch[date].time ||
-                "部活あり"
-              )
-              :
-              "部活なし"
-          }
-        </span>
-
-      </div>
-
-    `;
-
-  }
-
-
-  $("formDays")
-    .innerHTML =
-      h;
-
-
-  updateSelectedDateBox();
-
-}
-
-
-function changeFormMonth(n){
-
-  formCurrent =
-    new Date(
-      formCurrent.getFullYear(),
-      formCurrent.getMonth()+n,
-      1
-    );
-
-
-  renderFormCalendar();
-
-}
-
-
-async function selectFormDate(date){
-
-  selectedDate =
-    date;
-
-
-  renderFormCalendar();
-
-
-  checkDate();
-
-}
-
-
-function updateSelectedDateBox(){
-
-  if(!selectedDate){
-
-    $("selectedDateBox")
-      .textContent =
-        "日付を選択してください";
-
-
-    return;
-
-  }
-
-
-  $("selectedDateBox")
-    .textContent =
-      `選択中：${jp(selectedDate)}`;
-
-}
-
-
-async function checkDate(){
-
-  let d =
-    selectedDate;
-
-
-  if(!d){
-
-    $("formNotice")
-      .innerHTML =
-        "";
-
-
-    return;
-
-  }
-
-
-  let s =
-    await get(
-      ref(
-        db,
-        "schedules/" +
-        d
-      )
-    );
-
-
-  if(s.exists()){
-
-    $("formNotice")
-      .innerHTML =
-        `
-
-        <div class="msg">
-
-          部活：
-          ${esc(
-            s.val().time || ""
-          )}
-
-          /
-
-          ${esc(
-            s.val().place || ""
-          )}
-
-        </div>
-
-        `;
-
-  }else{
-
-    $("formNotice")
-      .innerHTML =
-        `
-
-        <div class="msg error">
-
-          この日は部活動がないため、
-          連絡できません。
-
-        </div>
-
-        `;
-
-  }
-
-}
-
-
-async function hasNoticeOnDate(
-  date
-){
-
-  const s =
-    await get(
-      ref(
-        db,
-        "notices"
-      )
-    );
-
-
-  if(!s.exists())
-    return false;
-
-
-  return Object
-    .entries(
-      s.val()
-    )
-    .some(
-      ([id,n]) =>
-        n.uid ===
-          currentUser.uid &&
-
-        n.date ===
-          date &&
-
-        id !==
-          editingId
-    );
-
-}
-
-
-async function saveNotice(){
-
-  let d =
-    selectedDate;
-
-
-  let reasonType =
-    $("reasonType")
-      .value;
-
-
-  let otherReason =
-    $("otherReason")
-      .value
-      .trim();
-
-
-  let r =
-    reasonType === "その他"
-      ?
-      otherReason
-      :
-      reasonType;
-
-
-  if(
-    !d ||
-    !reasonType
-  ){
-
-    alert(
-      "日付と欠席理由は必須です。"
-    );
-
-
-    return;
-
-  }
-
-
-  if(
-    reasonType === "その他" &&
-    !otherReason
-  ){
-
-    alert(
-      "その他の理由を入力してください。"
-    );
-
-
-    return;
-
-  }
-
-
-  let schedule =
-    await get(
-      ref(
-        db,
-        "schedules/" +
-        d
-      )
-    );
-
-
-  if(
-    !schedule.exists()
-  ){
-
-    alert(
-      "その日は部活動がありません。"
-    );
-
-
-    return;
-
-  }
-
-
-  if(
-    await hasNoticeOnDate(
-      d
-    )
-  ){
-
-    alert(
-      "この日はすでに連絡を登録しています。\n同じ日に2件は登録できません。"
-    );
-
-
-    return;
-
-  }
-
-
-  const wasEditing =
-    !!editingId;
-
-
-  if(wasEditing){
-
-    await update(
-      ref(
-        db,
-        "notices/" +
-        editingId
-      ),
-      {
-
-        reason:
-          r,
-
-        date:
-          d,
-
-        updatedAt:
-          Date.now()
-
-      }
-    );
-
-
-    alert(
-      "変更しました。"
-    );
-
-
-    editingId =
-      null;
-
-
-    showEdit();
-
-
-    return;
 
   }
 
 
   await set(
-    push(
-      ref(
-        db,
-        "notices"
-      )
+    ref(
+      db,
+      "memberRegistrations/"+id
     ),
     {
-
-      uid:
-        currentUser.uid,
-
-      schoolId:
-        profile.schoolId,
-
-      name:
-        profile.name,
-
-      reason:
-        r,
-
-      date:
-        d,
-
-      createdAt:
-        Date.now(),
-
-      updatedAt:
-        Date.now()
-
+      schoolId:id,
+      name:name,
+      grade:grade,
+      className:cl,
+      createdAt:Date.now()
     }
   );
 
 
-  alert(
+  await set(
+    ref(
+      db,
+      "memberIds/"+id
+    ),
+    {
+      accountCreated:false
+    }
+  );
+
+
+  $("mid").value="";
+  $("mname").value="";
+  $("mclass").value="";
+
+
+  message(
+    "memberMsg",
     "登録しました。"
   );
 
 
-  $("reasonType")
-    .value =
-      "";
-
-
-  $("otherReason")
-    .value =
-      "";
-
-
-  $("otherReasonBox")
-    .classList
-    .add("hidden");
-
-
-  $("formNotice")
-    .innerHTML =
-      "";
-
-
-  selectedDate =
-    "";
-
-
-  formCurrent =
-    new Date();
-
-
-  renderFormCalendar();
+  loadMembers();
 
 }
 
 
-async function showEdit(){
+/* =========================
+   部員一覧
+========================= */
 
-  if(!currentUser){
+async function loadMembers(){
 
-    showLogin();
-
-    return;
-
-  }
-
-
-  hide();
-
-
-  $("editView")
-    .classList
-    .remove("hidden");
-
-
-  let s =
+  const s=
     await get(
       ref(
         db,
-        "notices"
+        "memberRegistrations"
       )
     );
 
-
-  let all =
+  const v=
     s.exists()
+      ? s.val()
+      : {};
+
+  const a=
+    Object.entries(v);
+
+
+  $("members").innerHTML=
+
+    a.length
+
       ?
-      s.val()
+
+      a.map(
+        ([id,x])=>
+
+        `
+        <div class="item">
+
+          <strong>
+            ${esc(id)}
+            　
+            ${esc(x.name)}
+          </strong>
+
+          <div>
+            ${esc(x.grade)}
+            ${esc(x.className)}組
+          </div>
+
+          <div class="row">
+
+            <button
+              onclick="editMember('${id}')"
+            >
+              変更
+            </button>
+
+            <button
+              class="danger"
+              onclick="deleteMember('${id}')"
+            >
+              削除
+            </button>
+
+          </div>
+
+        </div>
+        `
+      ).join("")
+
       :
-      {};
+
+      "<p class='small'>まだ登録されていません。</p>";
+
+}
 
 
-  let list =
-    Object
-      .entries(all)
-      .filter(
-        ([id,n]) =>
-          n.uid ===
-          currentUser.uid
-      );
+/* =========================
+   部員変更
+========================= */
+
+async function editMember(id){
+
+  const s=
+    await get(
+      ref(
+        db,
+        "memberRegistrations/"+id
+      )
+    );
+
+  if(!s.exists())
+    return;
 
 
-  list.sort(
-    (a,b) =>
-      String(b[1].date)
-        .localeCompare(
-          String(a[1].date)
-        )
+  const x=s.val();
+
+
+  const name=
+    prompt(
+      "名前",
+      x.name
+    );
+
+
+  const grade=
+    prompt(
+      "学年\n\n中学1年\n中学2年\n中学3年\n高校1年\n高校2年",
+      x.grade
+    );
+
+
+  const cl=
+    prompt(
+      "クラス",
+      x.className
+    );
+
+
+  if(
+    name===null ||
+    grade===null ||
+    cl===null
+  )
+    return;
+
+
+  await update(
+    ref(
+      db,
+      "memberRegistrations/"+id
+    ),
+    {
+      name:name,
+      grade:grade,
+      className:cl
+    }
   );
 
 
-  $("myNotices")
-    .innerHTML =
-
-      list.length
-
-        ?
-
-        list
-          .map(
-            ([id,n]) =>
-              `
-
-              <div class="item">
-
-                <strong>
-                  ${jp(n.date)}
-                </strong>
-
-                <div class="meta">
-
-                  理由：
-                  ${esc(n.reason)}
-
-                </div>
-
-                <div class="row">
-
-                  <button
-                    onclick="editNotice('${id}')"
-                  >
-                    修正
-                  </button>
-
-                  <button
-                    class="danger"
-                    onclick="deleteNotice('${id}')"
-                  >
-                    削除
-                  </button>
-
-                </div>
-
-              </div>
-
-              `
-          )
-          .join("")
-
-        :
-
-        `
-        <p class="small">
-          登録された連絡がありません。
-        </p>
-        `;
+  loadMembers();
 
 }
 
 
-async function editNotice(id){
+/* =========================
+   部員削除
+========================= */
 
-  let s =
-    await get(
-      ref(
-        db,
-        "notices/" +
-        id
-      )
-    );
-
-
-  if(
-    !s.exists() ||
-    s.val().uid !==
-      currentUser.uid
-  )
-    return;
-
-
-  let n =
-    s.val();
-
-
-  editingId =
-    id;
-
-
-  hide();
-
-
-  $("formView")
-    .classList
-    .remove("hidden");
-
-
-  $("formTitle")
-    .textContent =
-      "連絡を修正";
-
-
-  $("profileBox")
-    .textContent =
-      `${profile.name}（高校${profile.grade}年${profile.className}組）`;
-
-
-  const reasonOptions = [
-
-    "体調不良・けが",
-    "通院",
-    "家庭の用事・旅行",
-    "他の部活動",
-    "塾・習い事",
-    "冠婚葬祭",
-    "追試・補講・課題",
-    "セミナー",
-    "委員会・コアなどの仕事",
-    "2者懇談・3者懇談",
-    "英検など"
-
-  ];
-
-
-  if(
-    reasonOptions.includes(
-      n.reason
-    )
-  ){
-
-    $("reasonType")
-      .value =
-        n.reason;
-
-
-    $("otherReason")
-      .value =
-        "";
-
-  }else{
-
-    $("reasonType")
-      .value =
-        "その他";
-
-
-    $("otherReason")
-      .value =
-        n.reason || "";
-
-  }
-
-
-  toggleOtherReason();
-
-
-  if(n.date){
-
-    let [
-      y,
-      m
-    ] =
-      n.date
-        .split("-")
-        .map(Number);
-
-
-    formCurrent =
-      new Date(
-        y,
-        m-1,
-        1
-      );
-
-
-    selectedDate =
-      n.date;
-
-  }else{
-
-    formCurrent =
-      new Date();
-
-
-    selectedDate =
-      "";
-
-  }
-
-
-  renderFormCalendar();
-
-
-  checkDate();
-
-}
-
-
-async function deleteNotice(id){
+async function deleteMember(id){
 
   if(
     !confirm(
-      "この連絡を削除しますか？"
+      "この部員登録を削除しますか？"
     )
   )
     return;
 
 
-  let s =
-    await get(
-      ref(
-        db,
-        "notices/" +
-        id
-      )
-    );
+  await remove(
+    ref(
+      db,
+      "memberRegistrations/"+id
+    )
+  );
 
 
-  if(
-    s.exists() &&
-    s.val().uid ===
-      currentUser.uid
-  ){
-
-    await remove(
-      ref(
-        db,
-        "notices/" +
-        id
-      )
-    );
-
-  }
+  await remove(
+    ref(
+      db,
+      "memberIds/"+id
+    )
+  );
 
 
-  showEdit();
+  loadMembers();
 
 }
 
 
-async function showMyPage(){
+/* =========================
+   画像選択
+========================= */
 
-  if(
-    !currentUser ||
-    !profile
-  ){
+$("scheduleImage")
+.addEventListener(
+  "change",
+  event=>{
 
-    showLogin();
+    const file=
+      event.target.files?.[0];
 
-    return;
+    if(!file)
+      return;
+
+
+    const url=
+      URL.createObjectURL(file);
+
+
+    $("schedulePreview").src=url;
+
+    $("schedulePreview")
+      .classList
+      .remove("hidden");
 
   }
+);
 
 
-  hide();
+/* =========================
+   OCR
+========================= */
+
+async function readScheduleImage(){
+
+  const file=
+    $("scheduleImage")
+      .files?.[0];
 
 
-  $("myPageView")
-    .classList
-    .remove("hidden");
+  if(!file){
 
-
-  $("myGrade").value =
-    String(
-      profile.grade ??
-      "1"
+    return message(
+      "imageScheduleMsg",
+      "先に予定表の画像を選択してください。",
+      true
     );
 
-
-  $("myClass").value =
-    profile.className ??
-    "";
+  }
 
 
-  $("myName").value =
-    profile.name ??
-    "";
+  if(!window.Tesseract){
 
-
-  $("myPassword").value =
-    "";
-
-
-  $("myPassword2").value =
-    "";
-
-
-  $("myPageMsg")
-    .innerHTML =
-      "";
-
-}
-
-
-async function saveProfile(){
-
-  if(
-    !currentUser ||
-    !profile
-  )
-    return;
-
-
-  const grade =
-    $("myGrade")
-      .value;
-
-
-  const className =
-    $("myClass")
-      .value
-      .trim();
-
-
-  const name =
-    $("myName")
-      .value
-      .trim();
-
-
-  if(
-    !grade ||
-    !className ||
-    !name
-  ){
-
-    $("myPageMsg")
-      .innerHTML =
-        '<div class="msg error">学年・クラス・名前を入力してください。</div>';
-
-
-    return;
+    return message(
+      "imageScheduleMsg",
+      "画像読み取り機能を読み込めませんでした。ページを再読み込みしてください。",
+      true
+    );
 
   }
+
+
+  $("ocrProgress")
+    .style
+    .width="0%";
+
+  $("ocrStatus")
+    .textContent="読み取り中…";
 
 
   try{
 
-    await update(
+    const result=
+      await Tesseract.recognize(
+        file,
+        "jpn+eng",
+        {
+
+          logger:data=>{
+
+            if(
+              data.status===
+              "recognizing text"
+            ){
+
+              const p=
+                Math.round(
+                  (data.progress||0)*100
+                );
+
+
+              $("ocrProgress")
+                .style
+                .width=p+"%";
+
+
+              $("ocrStatus")
+                .textContent=
+                "読み取り中… "+p+"%";
+
+            }
+
+          }
+
+        }
+      );
+
+
+    const text=
+      result.data.text || "";
+
+
+    $("ocrText").value=text;
+
+
+    $("ocrProgress")
+      .style
+      .width="100%";
+
+
+    $("ocrStatus")
+      .textContent="読み取り完了";
+
+
+    buildDetectedSchedules(text);
+
+
+  }catch(e){
+
+    $("ocrStatus")
+      .textContent="";
+
+
+    message(
+      "imageScheduleMsg",
+      "画像の読み取りに失敗しました。別の画像で試してください。",
+      true
+    );
+
+  }
+
+}
+
+
+/* =========================
+   OCR文字の整理
+========================= */
+
+function normalizeDigits(text){
+
+  return text
+
+    .replace(
+      /[０-９]/g,
+      c =>
+      String.fromCharCode(
+        c.charCodeAt(0)-0xfee0
+      )
+    )
+
+    .replace(/[：]/g,":")
+    .replace(/[／]/g,"/");
+
+}
+
+
+/* =========================
+   OCR → 予定候補
+========================= */
+
+function buildDetectedSchedules(text){
+
+  const lines=
+    normalizeDigits(text)
+      .split(/\r?\n/)
+      .map(x=>x.trim())
+      .filter(Boolean);
+
+
+  const entries=[];
+
+  const now=
+    new Date();
+
+  const currentYear=
+    now.getFullYear();
+
+  let currentMonth=null;
+
+
+  for(
+    const line of lines
+  ){
+
+    const monthMatch=
+      line.match(
+        /(?:^|[^\d])(\d{1,2})\s*(?:月|\/)/
+      );
+
+
+    if(
+      monthMatch &&
+      !line.match(
+        /\d{1,2}\s*[:：]\s*\d{2}/
+      )
+    ){
+
+      currentMonth=
+        Number(
+          monthMatch[1]
+        );
+
+    }
+
+
+    const dates=[];
+
+
+    let match;
+
+
+    /* 〇月〇日 */
+
+    const re1=
+      /(\d{1,2})\s*月\s*(\d{1,2})\s*日/g;
+
+
+    while(
+      (match=re1.exec(line))
+    ){
+
+      dates.push([
+        Number(match[1]),
+        Number(match[2])
+      ]);
+
+    }
+
+
+    /* 〇/〇 */
+
+    const re2=
+      /(\d{1,2})\s*\/\s*(\d{1,2})/g;
+
+
+    while(
+      (match=re2.exec(line))
+    ){
+
+      dates.push([
+        Number(match[1]),
+        Number(match[2])
+      ]);
+
+    }
+
+
+    /* 〇日＋曜日 */
+
+    if(
+      !dates.length &&
+      currentMonth
+    ){
+
+      const dayOnly=
+        line.match(
+          /(?:^|[^\d])(\d{1,2})(?:日)?\s*(?:\([月火水木金土日]\)|[月火水木金土日])/
+        );
+
+
+      if(dayOnly){
+
+        dates.push([
+          currentMonth,
+          Number(dayOnly[1])
+        ]);
+
+      }
+
+    }
+
+
+    if(!dates.length)
+      continue;
+
+
+    /* 時間 */
+
+    const timeRange=
+      line.match(
+        /(\d{1,2})\s*[:時]\s*(\d{2})?\s*(?:〜|-|~|～)\s*(\d{1,2})\s*[:時]\s*(\d{2})?/
+      );
+
+
+    const singleTime=
+      line.match(
+        /(\d{1,2})\s*[:時]\s*(\d{2})?/
+      );
+
+
+    let time="";
+
+
+    if(timeRange){
+
+      time=
+        `${timeRange[1].padStart(2,"0")}:${(timeRange[2]||"00").padStart(2,"0")}〜${timeRange[3].padStart(2,"0")}:${(timeRange[4]||"00").padStart(2,"0")}`;
+
+    }else if(singleTime){
+
+      time=
+        `${singleTime[1].padStart(2,"0")}:${(singleTime[2]||"00").padStart(2,"0")}`;
+
+    }
+
+
+    for(
+      const [month,day]
+      of dates
+    ){
+
+      if(
+        month<1 ||
+        month>12 ||
+        day<1 ||
+        day>31
+      )
+        continue;
+
+
+      const date=
+        `${currentYear}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+
+
+      entries.push({
+
+        date:date,
+
+        time:time,
+
+        place:""
+
+      });
+
+    }
+
+  }
+
+
+  /* 日付重複を削除 */
+
+  const unique=[];
+
+  const seen=
+    new Set();
+
+
+  for(
+    const entry of entries
+  ){
+
+    if(
+      seen.has(entry.date)
+    )
+      continue;
+
+
+    seen.add(entry.date);
+
+    unique.push(entry);
+
+  }
+
+
+  renderDetected(unique);
+
+}
+
+
+/* =========================
+   読み取り結果表示
+========================= */
+
+function renderDetected(entries){
+
+  $("detectedBox")
+    .classList
+    .remove("hidden");
+
+
+  if(!entries.length){
+
+    $("detectedSchedules").innerHTML=
+      `
+      <p class="small">
+      日付を自動検出できませんでした。
+      上の「読み取った文字」を確認して、
+      下の手入力を使ってください。
+      </p>
+      `;
+
+    return;
+
+  }
+
+
+  $("detectedSchedules").innerHTML=
+
+    `
+    <div class="schedule-grid">
+
+      <div class="head">
+        登録
+      </div>
+
+      <div class="head">
+        日付
+      </div>
+
+      <div class="head">
+        時間
+      </div>
+
+      <div class="head">
+        場所
+      </div>
+
+      ${
+        entries.map(
+          (entry,index)=>
+
+          `
+          <input
+            class="check"
+            type="checkbox"
+            id="use_${index}"
+            checked
+          >
+
+          <input
+            id="date_${index}"
+            type="date"
+            value="${entry.date}"
+          >
+
+          <input
+            id="time_${index}"
+            value="${esc(entry.time)}"
+            placeholder="例 17:00〜19:00"
+          >
+
+          <input
+            id="place_${index}"
+            value=""
+            placeholder="場所"
+          >
+          `
+        ).join("")
+      }
+
+    </div>
+    `;
+
+
+  $("detectedSchedules")
+    .dataset
+    .count=entries.length;
+
+}
+
+
+/* =========================
+   OCR結果をFirebase登録
+========================= */
+
+async function registerDetectedSchedules(){
+
+  if(!(await isAdmin()))
+    return;
+
+
+  const count=
+    Number(
+      $("detectedSchedules")
+        .dataset
+        .count || 0
+    );
+
+
+  if(!count)
+    return;
+
+
+  let registered=0;
+
+
+  for(
+    let i=0;
+    i<count;
+    i++
+  ){
+
+    if(
+      !$("use_"+i).checked
+    )
+      continue;
+
+
+    const date=
+      $("date_"+i).value;
+
+    const time=
+      $("time_"+i)
+        .value
+        .trim();
+
+    const place=
+      $("place_"+i)
+        .value
+        .trim();
+
+
+    if(!date)
+      continue;
+
+
+    await set(
       ref(
         db,
-        "members/" +
-        currentUser.uid
+        "schedules/"+date
       ),
       {
-
-        grade,
-        className,
-        name
-
+        time:time,
+        place:place,
+        updatedAt:Date.now()
       }
     );
 
 
-    profile = {
-
-      ...profile,
-
-      grade,
-      className,
-      name
-
-    };
-
-
-    await loadProfile();
-
-
-    $("myPageMsg")
-      .innerHTML =
-        '<div class="msg">プロフィールを保存しました。</div>';
-
-
-  }catch(e){
-
-    console.error(e);
-
-
-    $("myPageMsg")
-      .innerHTML =
-        '<div class="msg error">保存できませんでした。</div>';
+    registered++;
 
   }
+
+
+  message(
+    "imageScheduleMsg",
+    registered+"件の予定を登録しました。"
+  );
+
+
+  loadSchedules();
 
 }
 
 
-async function changePassword(){
+/* =========================
+   手入力登録
+========================= */
 
-  const p =
-    $("myPassword")
-      .value;
+async function saveSchedule(){
 
-
-  const p2 =
-    $("myPassword2")
-      .value;
-
-
-  if(
-    p.length < 6 ||
-    p !== p2
-  ){
-
-    $("myPageMsg")
-      .innerHTML =
-        '<div class="msg error">パスワードは6文字以上で、確認と一致させてください。</div>';
-
-
+  if(!(await isAdmin()))
     return;
+
+
+  const date=
+    $("sdate").value;
+
+  const time=
+    $("stime")
+      .value
+      .trim();
+
+  const place=
+    $("splace")
+      .value
+      .trim();
+
+
+  if(!date){
+
+    return message(
+      "scheduleMsg",
+      "日付を入力してください。",
+      true
+    );
 
   }
 
 
-  try{
+  await set(
+    ref(
+      db,
+      "schedules/"+date
+    ),
+    {
+      time:time,
+      place:place,
+      updatedAt:Date.now()
+    }
+  );
 
-    await updatePassword(
-      currentUser,
-      p
+
+  message(
+    "scheduleMsg",
+    "保存しました。"
+  );
+
+
+  loadSchedules();
+
+}
+
+
+/* =========================
+   予定一覧
+========================= */
+
+async function loadSchedules(){
+
+  const s=
+    await get(
+      ref(
+        db,
+        "schedules"
+      )
     );
 
 
-    $("myPassword").value =
-      "";
+  const v=
+    s.exists()
+      ? s.val()
+      : {};
 
 
-    $("myPassword2").value =
-      "";
+  const a=
+    Object.entries(v)
+      .sort();
 
 
-    $("myPageMsg")
-      .innerHTML =
-        '<div class="msg">パスワードを変更しました。</div>';
+  $("schedules").innerHTML=
 
+    a.length
 
-  }catch(e){
+      ?
 
-    console.error(e);
+      a.map(
+        ([date,x])=>
 
+        `
+        <div class="item">
 
-    $("myPageMsg")
-      .innerHTML =
-        '<div class="msg error">パスワードを変更できませんでした。いったんログアウトして再ログインしてから、もう一度お試しください。</div>';
+          <strong>
+            ${esc(date)}
+          </strong>
 
-  }
+          <br>
+
+          ${esc(x.time||"")}
+
+          <br>
+
+          ${esc(x.place||"")}
+
+          <div class="row">
+
+            <button
+              onclick="editSchedule('${date}')"
+            >
+              変更
+            </button>
+
+            <button
+              class="danger"
+              onclick="deleteSchedule('${date}')"
+            >
+              削除
+            </button>
+
+          </div>
+
+        </div>
+        `
+      ).join("")
+
+      :
+
+      "<p class='small'>予定はありません。</p>";
 
 }
 
 
-window.showLogin =
-  showLogin;
+/* =========================
+   予定変更
+========================= */
+
+async function editSchedule(date){
+
+  const s=
+    await get(
+      ref(
+        db,
+        "schedules/"+date
+      )
+    );
 
 
-window.showSetup =
-  showSetup;
+  if(!s.exists())
+    return;
 
 
-window.login =
-  login;
+  const x=
+    s.val();
 
 
-window.setupPassword =
-  setupPassword;
+  $("sdate").value=date;
+
+  $("stime").value=
+    x.time || "";
+
+  $("splace").value=
+    x.place || "";
+
+}
 
 
-window.logout =
+/* =========================
+   予定削除
+========================= */
+
+async function deleteSchedule(date){
+
+  if(
+    !confirm(
+      date+"の予定を削除しますか？"
+    )
+  )
+    return;
+
+
+  await remove(
+    ref(
+      db,
+      "schedules/"+date
+    )
+  );
+
+
+  loadSchedules();
+
+}
+
+
+/* =========================
+   HTMLから呼び出す関数
+========================= */
+
+window.adminLogin=
+  adminLogin;
+
+window.logout=
   logout;
 
+window.addMember=
+  addMember;
 
-window.changeMonth =
-  changeMonth;
+window.editMember=
+  editMember;
 
+window.deleteMember=
+  deleteMember;
 
-window.openDay =
-  openDay;
+window.saveSchedule=
+  saveSchedule;
 
+window.editSchedule=
+  editSchedule;
 
-window.showForm =
-  showForm;
+window.deleteSchedule=
+  deleteSchedule;
 
+window.readScheduleImage=
+  readScheduleImage;
 
-window.backFromForm =
-  backFromForm;
-
-
-window.showEdit =
-  showEdit;
-
-
-window.toggleOtherReason =
-  toggleOtherReason;
-
-
-window.changeFormMonth =
-  changeFormMonth;
-
-
-window.selectFormDate =
-  selectFormDate;
-
-
-window.checkDate =
-  checkDate;
-
-
-window.saveNotice =
-  saveNotice;
-
-
-window.editNotice =
-  editNotice;
-
-
-window.deleteNotice =
-  deleteNotice;
-
-
-window.showMyPage =
-  showMyPage;
-
-
-window.saveProfile =
-  saveProfile;
-
-
-window.changePassword =
-  changePassword;
-
-
-window.backHome =
-  backHome;
-
-
-render();
+window.registerDetectedSchedules=
+  registerDetectedSchedules;
 
 </script>
 
