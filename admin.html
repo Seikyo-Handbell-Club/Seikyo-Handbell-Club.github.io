@@ -3,241 +3,98 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-
 <title>管理者設定｜清教学園ハンドベル部</title>
 
 <style>
-*{
-  box-sizing:border-box;
-}
-
+*{box-sizing:border-box}
 body{
   margin:0;
   background:#f5f7fb;
   color:#20242a;
-  font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif;
+  font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif
 }
-
 header{
   background:#fff;
   padding:20px;
-  border-bottom:1px solid #e5e8ed;
+  border-bottom:1px solid #e5e8ed
 }
-
 h1{
   margin:0;
   text-align:center;
-  font-size:21px;
+  font-size:21px
 }
-
 main{
-  max-width:850px;
+  max-width:800px;
   margin:auto;
-  padding:18px;
+  padding:18px
 }
-
 .card{
   background:#fff;
   border-radius:18px;
   padding:16px;
   margin-bottom:16px;
-  box-shadow:0 2px 12px #0000000b;
+  box-shadow:0 2px 12px #0000000b
 }
-
-.hidden{
-  display:none!important;
-}
-
+.hidden{display:none!important}
 label{
   display:block;
   font-weight:700;
   font-size:14px;
-  margin:12px 0 5px;
+  margin:12px 0 5px
 }
-
-input,
-select,
-textarea{
+input,select{
   width:100%;
   padding:11px;
   border:1px solid #d9dee7;
   border-radius:10px;
-  font-size:16px;
-  background:#fff;
+  font-size:16px
 }
-
-textarea{
-  min-height:80px;
-  resize:vertical;
-}
-
 button{
   border:0;
   border-radius:10px;
   padding:11px 14px;
   font-weight:700;
-  cursor:pointer;
-  font-size:14px;
+  cursor:pointer
 }
-
-button:disabled{
-  opacity:.55;
-  cursor:not-allowed;
-}
-
 .primary{
   background:#1f6feb;
   color:#fff;
   width:100%;
-  margin-top:14px;
+  margin-top:14px
 }
-
-.secondary{
-  background:#eef3fb;
-  color:#20242a;
-}
-
+.secondary{background:#eef3fb}
 .danger{
   background:#fff0f0;
   color:#b22;
-  border:1px solid #efbbbb;
+  border:1px solid #efbbbb
 }
-
 .msg{
   padding:12px;
   border-radius:10px;
   background:#fff8df;
   color:#69520a;
   margin-top:10px;
-  font-size:14px;
-  white-space:pre-wrap;
-  overflow-wrap:anywhere;
+  font-size:14px
 }
-
 .error{
   background:#fff0f0;
-  color:#9b1c1c;
+  color:#9b1c1c
 }
-
-.success{
-  background:#effaf1;
-  color:#176b2c;
-}
-
 .item{
   border:1px solid #e3e7ed;
   border-radius:12px;
   padding:12px;
-  margin:10px 0;
+  margin:10px 0
 }
-
 .row{
   display:flex;
   gap:8px;
-  margin-top:10px;
+  margin-top:10px
 }
-
-.row button{
-  flex:1;
-}
-
+.row button{flex:1}
 .small{
   font-size:12px;
-  color:#6f7882;
-}
-
-.section-title{
-  margin-top:0;
-  margin-bottom:4px;
-}
-
-.sub-title{
-  margin-top:0;
-  color:#68717d;
-  font-size:13px;
-}
-
-.pdf-box{
-  border:2px dashed #cfd7e3;
-  border-radius:14px;
-  padding:16px;
-  background:#fafbfd;
-  margin-top:10px;
-}
-
-.pdf-box input{
-  background:#fff;
-}
-
-.candidate{
-  border:1px solid #dfe4eb;
-  border-radius:14px;
-  padding:14px;
-  margin-top:12px;
-  background:#fff;
-}
-
-.candidate-head{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin-bottom:10px;
-}
-
-.candidate-head input[type="checkbox"]{
-  width:20px;
-  height:20px;
-  flex:none;
-}
-
-.candidate-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-}
-
-.candidate-grid label{
-  margin:0;
-  font-size:12px;
-  color:#66717e;
-}
-
-.candidate-grid input,
-.candidate-grid textarea{
-  margin-top:4px;
-  font-size:14px;
-}
-
-.pdf-status{
-  margin-top:10px;
-  white-space:pre-wrap;
-}
-
-.loading{
-  opacity:.7;
-  pointer-events:none;
-}
-
-.divider{
-  height:1px;
-  background:#e5e8ed;
-  margin:20px 0;
-}
-
-@media(max-width:600px){
-
-  .candidate-grid{
-    grid-template-columns:1fr;
-  }
-
-  .row{
-    flex-direction:column;
-  }
-
-  .row button{
-    width:100%;
-  }
-
+  color:#6f7882
 }
 </style>
 </head>
@@ -245,351 +102,110 @@ button:disabled{
 <body>
 
 <header>
-  <h1>清教学園ハンドベル部 管理者設定</h1>
+<h1>清教学園ハンドベル部 管理者設定</h1>
 </header>
 
 <main>
 
-<!-- =========================
-     ログイン
-========================= -->
-
 <section id="login" class="card">
+  <h2>管理者ログイン</h2>
 
-  <h2 class="section-title">
-    管理者ログイン
-  </h2>
+  <label>メールアドレス</label>
+  <input id="email" type="email" value="kazuma.cosmos@gmail.com">
 
-  <p class="small">
-    管理者用パスワードを入力してください。
-  </p>
+  <label>パスワード</label>
+  <input id="password" type="password">
 
-  <label for="password">
-    パスワード
-  </label>
-
-  <input
-    id="password"
-    type="password"
-    autocomplete="current-password"
-    placeholder="パスワード"
-  >
-
-  <button
-    id="loginButton"
-    class="primary"
-    type="button"
-  >
-    ログイン
-  </button>
+  <button class="primary" onclick="adminLogin()">ログイン</button>
 
   <div id="loginMsg"></div>
 
+  <p class="small">
+    管理者アカウントはFirebase Authenticationで作成し、
+    Realtime Databaseの admins/{UID} に true を登録してください。
+  </p>
 </section>
 
 
-<!-- =========================
-     管理画面
-========================= -->
-
 <section id="app" class="hidden">
 
-  <!-- ログアウト -->
-
-  <div class="card">
-
-    <button
-      id="logoutButton"
-      class="secondary"
-      type="button"
-    >
-      ログアウト
-    </button>
-
-  </div>
-
-
-  <!-- =========================
-       部員登録
-  ========================== -->
-
-  <div class="card">
+<div class="card">
+  <button class="secondary" onclick="logout()">ログアウト</button>
+</div>
 
-    <h2 class="section-title">
-      部員登録
-    </h2>
 
-    <p class="sub-title">
-      部員の学校ID・名前・学年・クラスを登録します。
-    </p>
+<div class="card">
 
-    <label for="mid">
-      学校ID
-    </label>
+<h2>部員登録</h2>
 
-    <input
-      id="mid"
-      type="text"
-      autocomplete="off"
-      placeholder="学校ID"
-    >
+<label>学校ID</label>
+<input id="mid">
 
-    <label for="mname">
-      名前
-    </label>
+<label>名前</label>
+<input id="mname">
 
-    <input
-      id="mname"
-      type="text"
-      autocomplete="off"
-      placeholder="名前"
-    >
+<label>学年</label>
+<select id="mgrade">
+  <option value="1">中学1年</option>
+  <option value="2">中学2年</option>
+  <option value="3">中学3年</option>
+  <option value="4">高校1年</option>
+  <option value="5">高校2年</option>
+</select>
 
-    <label for="mgrade">
-      学年
-    </label>
+<label>クラス</label>
+<select id="mclass">
+  <option value="A">A組</option>
+  <option value="B">B組</option>
+  <option value="C">C組</option>
+  <option value="D">D組</option>
+  <option value="E">E組</option>
+  <option value="F">F組</option>
+  <option value="G">G組</option>
+  <option value="H">H組</option>
+  <option value="I">I組</option>
+  <option value="J">J組</option>
+  <option value="K">K組</option>
+</select>
 
-    <select id="mgrade">
+<button class="primary" onclick="addMember()">登録する</button>
 
-      <option value="">
-        選択してください
-      </option>
+<div id="memberMsg"></div>
 
-      <option value="中学1年">
-        中学1年
-      </option>
+</div>
 
-      <option value="中学2年">
-        中学2年
-      </option>
 
-      <option value="中学3年">
-        中学3年
-      </option>
+<div class="card">
 
-      <option value="高校1年">
-        高校1年
-      </option>
+<h2>部員一覧</h2>
 
-      <option value="高校2年">
-        高校2年
-      </option>
+<div id="members"></div>
 
-    </select>
+</div>
 
-    <label for="mclass">
-      クラス
-    </label>
 
-    <select id="mclass">
+<div class="card">
 
-      <option value="">
-        選択してください
-      </option>
+<h2>清教学園ハンドベル部予定表</h2>
 
-      <option value="A">A組</option>
-      <option value="B">B組</option>
-      <option value="C">C組</option>
-      <option value="D">D組</option>
-      <option value="E">E組</option>
-      <option value="F">F組</option>
-      <option value="G">G組</option>
-      <option value="H">H組</option>
-      <option value="I">I組</option>
-      <option value="J">J組</option>
-      <option value="K">K組</option>
+<label>日付</label>
+<input id="sdate" type="date">
 
-    </select>
+<label>時間</label>
+<input id="stime" placeholder="例：17:00〜19:00">
 
-    <button
-      id="addMemberButton"
-      class="primary"
-      type="button"
-    >
-      登録する
-    </button>
+<label>場所</label>
+<input id="splace">
 
-    <div id="memberMsg"></div>
+<button class="primary" onclick="saveSchedule()">
+予定を保存
+</button>
 
-  </div>
+<div id="scheduleMsg"></div>
 
+<div id="schedules"></div>
 
-  <!-- =========================
-       部員一覧
-  ========================== -->
-
-  <div class="card">
-
-    <h2 class="section-title">
-      部員一覧
-    </h2>
-
-    <p class="sub-title">
-      学年 → クラス → 名前の順に表示しています。
-    </p>
-
-    <div id="members">
-      <p class="small">
-        読み込み中...
-      </p>
-    </div>
-
-  </div>
-
-
-  <!-- =========================
-       PDF予定表読み込み
-  ========================== -->
-
-  <div class="card">
-
-    <h2 class="section-title">
-      清教学園ハンドベル部予定表
-    </h2>
-
-    <p class="sub-title">
-      PDFから予定を読み込み、確認して登録できます。
-    </p>
-
-    <div class="pdf-box">
-
-      <label for="schedulePdf">
-        予定表PDF
-      </label>
-
-      <input
-        id="schedulePdf"
-        type="file"
-        accept="application/pdf,.pdf"
-      >
-
-      <button
-        id="readPdfButton"
-        class="primary"
-        type="button"
-      >
-        PDFを読み込む
-      </button>
-
-      <div
-        id="pdfStatus"
-        class="pdf-status"
-      ></div>
-
-    </div>
-
-
-    <div
-      id="pdfCandidates"
-      class="hidden"
-    >
-
-      <div class="divider"></div>
-
-      <h3>
-        読み取った予定
-      </h3>
-
-      <p class="small">
-        登録したい予定にチェックを入れて、内容を確認してください。
-        「練習曲の目安」は読み取りません。
-      </p>
-
-      <div id="candidateList"></div>
-
-      <button
-        id="registerCandidatesButton"
-        class="primary"
-        type="button"
-      >
-        選択した予定を登録
-      </button>
-
-      <div id="candidateMsg"></div>
-
-    </div>
-
-  </div>
-
-
-  <!-- =========================
-       手動予定登録
-  ========================== -->
-
-  <div class="card">
-
-    <h2 class="section-title">
-      予定を手動で登録
-    </h2>
-
-    <label for="sdate">
-      日付
-    </label>
-
-    <input
-      id="sdate"
-      type="date"
-    >
-
-    <label for="stime">
-      時間
-    </label>
-
-    <input
-      id="stime"
-      type="text"
-      placeholder="例：15:45〜18:00"
-    >
-
-    <label for="splace">
-      場所
-    </label>
-
-    <input
-      id="splace"
-      type="text"
-      placeholder="例：音楽練習室"
-    >
-
-    <label for="snote">
-      その他・備考
-    </label>
-
-    <textarea
-      id="snote"
-      placeholder="必要な場合のみ入力"
-    ></textarea>
-
-    <button
-      id="saveScheduleButton"
-      class="primary"
-      type="button"
-    >
-      予定を保存
-    </button>
-
-    <div id="scheduleMsg"></div>
-
-  </div>
-
-
-  <!-- =========================
-       登録済み予定
-  ========================== -->
-
-  <div class="card">
-
-    <h2 class="section-title">
-      登録済み予定
-    </h2>
-
-    <div id="schedules">
-      <p class="small">
-        読み込み中...
-      </p>
-    </div>
-
-  </div>
+</div>
 
 </section>
 
@@ -598,22 +214,16 @@ button:disabled{
 
 <script type="module">
 
-/* =========================================
-   Firebase
-========================================= */
-
 import {
   initializeApp
-} from
-"https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 
 import {
   getAuth,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut
-} from
-"https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
 import {
   getDatabase,
@@ -622,122 +232,78 @@ import {
   set,
   update,
   remove
-} from
-"https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
 
 
-/* =========================================
+/* =========================
    Firebase設定
-========================================= */
+========================= */
 
 const firebaseConfig = {
-
-  apiKey:
-    "AIzaSyAK9yRrSSLsfYpLSyuzwRyI2ZZp32KeMSA",
-
-  authDomain:
-    "seikyo-handbell-club.firebaseapp.com",
-
-  databaseURL:
-    "https://seikyo-handbell-club-default-rtdb.firebaseio.com",
-
-  projectId:
-    "seikyo-handbell-club",
-
-  storageBucket:
-    "seikyo-handbell-club.firebasestorage.app",
-
-  messagingSenderId:
-    "55435007971",
-
-  appId:
-    "1:55435007971:web:25f5c3b9dcd4324bc3f2d6"
-
+  apiKey: "AIzaSyAK9yRrSSLsfYpLSyluzwRyI22Zp32KeMSA",
+  authDomain: "seikyo-handbell-club.firebaseapp.com",
+  databaseURL: "https://seikyo-handbell-club-default-rtdb.firebaseio.com",
+  projectId: "seikyo-handbell-club",
+  storageBucket: "seikyo-handbell-club.firebasestorage.app",
+  messagingSenderId: "55435007971",
+  appId: "1:55435007971:web:25f5c3b9dcd4324bc3f2d6"
 };
 
 
-/* =========================================
-   管理者アカウント
-========================================= */
-
-const ADMIN_EMAIL =
-  "kazuma.cosmos@gmail.com";
-
-
-/* =========================================
+/* =========================
    Firebase初期化
-========================================= */
+========================= */
 
-const app =
-  initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 
-const auth =
-  getAuth(app);
+const auth = getAuth(app);
 
-const db =
-  getDatabase(app);
+const db = getDatabase(app);
 
-
-/* =========================================
-   DOM
-========================================= */
-
-const $ =
-  id => document.getElementById(id);
+const $ = id => document.getElementById(id);
 
 
-/* =========================================
+/* =========================
    HTMLエスケープ
-========================================= */
+========================= */
 
-function esc(value){
-
-  return String(value ?? "")
-    .replace(
-      /[&<>"']/g,
-      c => ({
-        "&":"&amp;",
-        "<":"&lt;",
-        ">":"&gt;",
-        '"':"&quot;",
-        "'":"&#39;"
-      }[c])
-    );
-
+function esc(s){
+  return String(s ?? "").replace(
+    /[&<>"']/g,
+    c => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#39;"
+    }[c])
+  );
 }
 
 
-/* =========================================
-   メッセージ
-========================================= */
+/* =========================
+   メッセージ表示
+========================= */
 
-function message(
-  id,
-  text,
-  type = ""
-){
+function message(id,text,error=false){
 
-  const el =
-    $(id);
+  const el = $(id);
 
-  if(!el){
+  if(!text){
+    el.className = "";
+    el.textContent = "";
     return;
   }
 
-  el.className =
-    text
-      ? `msg ${type}`
-      : "";
+  el.className = error ? "msg error" : "msg";
 
-  el.textContent =
-    text || "";
-
+  el.textContent = text;
 }
 
 
-/* =========================================
-   管理者権限確認
-========================================= */
+/* =========================
+   管理者確認
+========================= */
 
 async function isAdmin(){
 
@@ -745,351 +311,136 @@ async function isAdmin(){
     return false;
   }
 
-  const snapshot =
-    await get(
-      ref(
-        db,
-        "admins/" +
-        auth.currentUser.uid
-      )
-    );
-
-  return (
-    snapshot.exists() &&
-    snapshot.val() === true
+  const snap = await get(
+    ref(db,"admins/" + auth.currentUser.uid)
   );
 
+  return snap.exists() && snap.val() === true;
 }
 
 
-/* =========================================
-   認証状態
-========================================= */
+/* =========================
+   ログイン状態
+========================= */
 
-onAuthStateChanged(
-  auth,
-  async user => {
+onAuthStateChanged(auth, async user => {
 
-    if(!user){
-
-      $("login")
-        .classList
-        .remove("hidden");
-
-      $("app")
-        .classList
-        .add("hidden");
-
-      return;
-
-    }
-
+  if(user){
 
     try{
 
-      const admin =
-        await isAdmin();
+      const ok = await isAdmin();
 
+      if(ok){
 
-      if(!admin){
+        $("login").classList.add("hidden");
 
-        $("login")
-          .classList
-          .remove("hidden");
+        $("app").classList.remove("hidden");
 
-        $("app")
-          .classList
-          .add("hidden");
+        await loadMembers();
 
-        return;
+        await loadSchedules();
 
+      }else{
+
+        await signOut(auth);
+
+        $("login").classList.remove("hidden");
+
+        $("app").classList.add("hidden");
+
+        message(
+          "loginMsg",
+          "このアカウントは管理者として登録されていません。",
+          true
+        );
       }
 
+    }catch(e){
 
-      $("login")
-        .classList
-        .add("hidden");
-
-      $("app")
-        .classList
-        .remove("hidden");
-
-
-      $("password").value = "";
-
-
-      await loadMembers();
-
-      await loadSchedules();
-
-
-    }catch(error){
-
-      console.error(
-        "認証状態確認エラー:",
-        error
-      );
-
-      $("login")
-        .classList
-        .remove("hidden");
-
-      $("app")
-        .classList
-        .add("hidden");
+      console.error(e);
 
       message(
         "loginMsg",
-        "管理者権限の確認に失敗しました。\n\n" +
-        "エラーコード: " +
-        (error.code || "不明") +
-        "\n" +
-        "詳細: " +
-        (error.message || "不明"),
-        "error"
+        "管理者情報を確認できませんでした。Firebaseの設定を確認してください。",
+        true
       );
 
     }
 
+  }else{
+
+    $("login").classList.remove("hidden");
+
+    $("app").classList.add("hidden");
+
   }
-);
+
+});
 
 
-/* =========================================
+/* =========================
    管理者ログイン
-========================================= */
+========================= */
 
 async function adminLogin(){
 
-  const password =
-    $("password").value;
+  const email = $("email").value.trim();
 
+  const password = $("password").value;
 
-  message(
-    "loginMsg",
-    ""
-  );
+  message("loginMsg","");
 
-
-  if(!password){
+  if(!email || !password){
 
     message(
       "loginMsg",
-      "パスワードを入力してください。",
-      "error"
+      "メールアドレスとパスワードを入力してください。",
+      true
     );
 
     return;
-
   }
-
-
-  const button =
-    $("loginButton");
-
-
-  button.disabled = true;
-
-  button.textContent =
-    "ログイン中...";
-
 
   try{
 
-    /*
-      Firebase Authentication
-    */
-
-    const credential =
-      await signInWithEmailAndPassword(
-        auth,
-        ADMIN_EMAIL,
-        password
-      );
-
-
-    console.log(
-      "Authentication成功",
-      credential.user.uid,
-      credential.user.email
+    await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
     );
 
+  }catch(e){
 
-    /*
-      管理者権限確認
-    */
+    console.error("Firebase Auth error:",e);
 
-    let adminSnapshot;
-
-
-    try{
-
-      adminSnapshot =
-        await get(
-          ref(
-            db,
-            "admins/" +
-            credential.user.uid
-          )
-        );
-
-    }catch(error){
-
-      console.error(
-        "admins読み込みエラー:",
-        error
-      );
-
-
-      await signOut(auth);
-
-
-      message(
-        "loginMsg",
-        "パスワードは正しい可能性がありますが、\n" +
-        "管理者権限の確認に失敗しました。\n\n" +
-        "エラーコード: " +
-        (error.code || "不明") +
-        "\n" +
-        "詳細: " +
-        (error.message || "不明"),
-        "error"
-      );
-
-
-      return;
-
-    }
-
-
-    /*
-      管理者ではない
-    */
-
-    if(
-      !adminSnapshot.exists() ||
-      adminSnapshot.val() !== true
-    ){
-
-      await signOut(auth);
-
-
-      message(
-        "loginMsg",
-        "ログインは成功しましたが、\n" +
-        "このアカウントは管理者として登録されていません。\n\n" +
-        "UID:\n" +
-        credential.user.uid +
-        "\n\n" +
-        "Firebase Realtime Database の\n" +
-        "admins/" +
-        credential.user.uid +
-        "\n" +
-        "を確認してください。",
-        "error"
-      );
-
-
-      return;
-
-    }
-
-
-    /*
-      完全にログイン成功
-    */
-
-    $("login")
-      .classList
-      .add("hidden");
-
-    $("app")
-      .classList
-      .remove("hidden");
-
-
-    $("password").value = "";
-
+    let detail = e?.code || e?.message || "不明なエラー";
 
     message(
       "loginMsg",
-      "ログインしました。",
-      "success"
+      "ログインできませんでした。\nエラーコード: " + detail,
+      true
     );
-
-
-    await loadMembers();
-
-    await loadSchedules();
-
-
-  }catch(error){
-
-    console.error(
-      "Firebase Authenticationログインエラー:",
-      error
-    );
-
-
-    let text =
-      "ログインできませんでした。\n\n";
-
-
-    text +=
-      "エラーコード: " +
-      (error.code || "不明") +
-      "\n";
-
-
-    text +=
-      "詳細: " +
-      (error.message || "不明");
-
-
-    message(
-      "loginMsg",
-      text,
-      "error"
-    );
-
-
-  }finally{
-
-    button.disabled = false;
-
-    button.textContent =
-      "ログイン";
 
   }
 
 }
 
 
-/* =========================================
+/* =========================
    ログアウト
-========================================= */
+========================= */
 
-async function logout(){
+function logout(){
 
-  try{
-
-    await signOut(auth);
-
-  }catch(error){
-
-    console.error(
-      "ログアウトエラー:",
-      error
-    );
-
-  }
+  signOut(auth);
 
 }
 
 
-/* =========================================
+/* =========================
    部員登録
-========================================= */
+========================= */
 
 async function addMember(){
 
@@ -1097,55 +448,30 @@ async function addMember(){
     return;
   }
 
+  const id = $("mid").value.trim();
 
-  const id =
-    $("mid")
-      .value
-      .trim();
+  const name = $("mname").value.trim();
 
+  const grade = $("mgrade").value;
 
-  const name =
-    $("mname")
-      .value
-      .trim();
+  const className = $("mclass").value;
 
 
-  const grade =
-    $("mgrade")
-      .value;
-
-
-  const className =
-    $("mclass")
-      .value;
-
-
-  if(
-    !id ||
-    !name ||
-    !grade ||
-    !className
-  ){
+  if(!id || !name || !className){
 
     message(
       "memberMsg",
-      "学校ID・名前・学年・クラスをすべて入力してください。",
-      "error"
+      "すべて入力してください。",
+      true
     );
 
     return;
-
   }
 
 
-  const existing =
-    await get(
-      ref(
-        db,
-        "memberRegistrations/" +
-        id
-      )
-    );
+  const existing = await get(
+    ref(db,"memberRegistrations/" + id)
+  );
 
 
   if(existing.exists()){
@@ -1153,20 +479,15 @@ async function addMember(){
     message(
       "memberMsg",
       "その学校IDはすでに登録されています。",
-      "error"
+      true
     );
 
     return;
-
   }
 
 
   await set(
-    ref(
-      db,
-      "memberRegistrations/" +
-      id
-    ),
+    ref(db,"memberRegistrations/" + id),
     {
       schoolId:id,
       name:name,
@@ -1178,11 +499,7 @@ async function addMember(){
 
 
   await set(
-    ref(
-      db,
-      "memberIds/" +
-      id
-    ),
+    ref(db,"memberIds/" + id),
     {
       accountCreated:false
     }
@@ -1190,15 +507,17 @@ async function addMember(){
 
 
   $("mid").value = "";
+
   $("mname").value = "";
-  $("mgrade").value = "";
-  $("mclass").value = "";
+
+  $("mgrade").value = "1";
+
+  $("mclass").value = "A";
 
 
   message(
     "memberMsg",
-    "登録しました。",
-    "success"
+    "登録しました。"
   );
 
 
@@ -1207,177 +526,127 @@ async function addMember(){
 }
 
 
-/* =========================================
-   学年順
-========================================= */
+/* =========================
+   学年順・クラス順・名前順
+========================= */
 
-const gradeOrder = {
+function sortMembers(a,b){
 
-  "中学1年":0,
-  "中学2年":1,
-  "中学3年":2,
-  "高校1年":3,
-  "高校2年":4
+  const ga = Number(a[1]?.grade ?? 99);
 
-};
+  const gb = Number(b[1]?.grade ?? 99);
 
-
-/* =========================================
-   クラス順
-========================================= */
-
-const classOrder = {
-
-  A:0,
-  B:1,
-  C:2,
-  D:3,
-  E:4,
-  F:5,
-  G:6,
-  H:7,
-  I:8,
-  J:9,
-  K:10
-
-};
+  if(ga !== gb){
+    return ga - gb;
+  }
 
 
-/* =========================================
+  const ca = String(a[1]?.className ?? "");
+
+  const cb = String(b[1]?.className ?? "");
+
+  if(ca !== cb){
+    return ca.localeCompare(cb,"ja");
+  }
+
+
+  const na = String(a[1]?.name ?? "");
+
+  const nb = String(b[1]?.name ?? "");
+
+  return na.localeCompare(nb,"ja");
+}
+
+
+/* =========================
    部員一覧
-========================================= */
+========================= */
 
 async function loadMembers(){
 
-  const snapshot =
-    await get(
-      ref(
-        db,
-        "memberRegistrations"
-      )
-    );
-
-
-  const data =
-    snapshot.exists()
-      ? snapshot.val()
-      : {};
-
-
-  const members =
-    Object.entries(data);
-
-
-  members.sort(
-    ([,a],[,b]) => {
-
-      const gradeDiff =
-        (
-          gradeOrder[a.grade] ?? 99
-        ) -
-        (
-          gradeOrder[b.grade] ?? 99
-        );
-
-
-      if(gradeDiff !== 0){
-        return gradeDiff;
-      }
-
-
-      const classDiff =
-        (
-          classOrder[a.className] ?? 99
-        ) -
-        (
-          classOrder[b.className] ?? 99
-        );
-
-
-      if(classDiff !== 0){
-        return classDiff;
-      }
-
-
-      return String(
-        a.name || ""
-      ).localeCompare(
-        String(
-          b.name || ""
-        ),
-        "ja"
-      );
-
-    }
+  const snap = await get(
+    ref(db,"memberRegistrations")
   );
 
+  const data = snap.exists() ? snap.val() : {};
 
-  if(!members.length){
+  const list = Object.entries(data);
+
+  list.sort(sortMembers);
+
+
+  if(!list.length){
 
     $("members").innerHTML =
       "<p class='small'>まだ登録されていません。</p>";
 
     return;
-
   }
 
 
-  $("members").innerHTML =
-    members
-      .map(
-        ([id,x]) => `
+  $("members").innerHTML = list.map(
+    ([id,x]) => {
 
-          <div class="item">
+      const gradeNames = {
+        "1":"中学1年",
+        "2":"中学2年",
+        "3":"中学3年",
+        "4":"高校1年",
+        "5":"高校2年"
+      };
 
-            <div>
+      const grade =
+        gradeNames[String(x.grade)] ||
+        String(x.grade ?? "");
 
-              <strong>
-                ${esc(x.name)}
-              </strong>
 
-              <span class="small">
-                （${esc(id)}）
-              </span>
+      const className =
+        String(x.className ?? "") +
+        (x.className ? "組" : "");
 
-            </div>
 
-            <div class="small">
+      return `
+        <div class="item">
 
-              ${esc(x.grade)}
-              ・
-              ${esc(x.className)}組
+          <strong>
+            ${esc(x.name)}
+          </strong>
 
-            </div>
+          <div>
+            ${esc(grade)} ${esc(className)}
+          </div>
 
-            <div class="row">
+          <div class="small">
+            学校ID：${esc(id)}
+          </div>
 
-              <button
-                onclick="editMember('${esc(id)}')"
-              >
-                変更
-              </button>
+          <div class="row">
 
-              <button
-                class="danger"
-                onclick="deleteMember('${esc(id)}')"
-              >
-                削除
-              </button>
+            <button onclick="editMember('${esc(id)}')">
+              変更
+            </button>
 
-            </div>
+            <button
+              class="danger"
+              onclick="deleteMember('${esc(id)}')"
+            >
+              削除
+            </button>
 
           </div>
 
-        `
-      )
-      .join("");
+        </div>
+      `;
+
+    }
+  ).join("");
 
 }
 
 
-/* =========================================
+/* =========================
    部員変更
-========================================= */
+========================= */
 
 async function editMember(id){
 
@@ -1386,110 +655,69 @@ async function editMember(id){
   }
 
 
-  const snapshot =
-    await get(
-      ref(
-        db,
-        "memberRegistrations/" +
-        id
-      )
-    );
+  const snap = await get(
+    ref(db,"memberRegistrations/" + id)
+  );
 
 
-  if(!snapshot.exists()){
+  if(!snap.exists()){
     return;
   }
 
 
-  const data =
-    snapshot.val();
+  const x = snap.val();
 
 
-  const name =
-    prompt(
-      "名前",
-      data.name || ""
-    );
-
+  const name = prompt(
+    "名前",
+    x.name || ""
+  );
 
   if(name === null){
     return;
   }
 
 
-  const grade =
-    prompt(
-      "学年\n\n中学1年\n中学2年\n中学3年\n高校1年\n高校2年",
-      data.grade || ""
-    );
-
+  const grade = prompt(
+    "学年\n1=中1\n2=中2\n3=中3\n4=高1\n5=高2",
+    x.grade || ""
+  );
 
   if(grade === null){
     return;
   }
 
 
-  const className =
-    prompt(
-      "クラス（A〜K）",
-      data.className || ""
-    );
-
+  const className = prompt(
+    "クラス（A〜K）",
+    x.className || ""
+  );
 
   if(className === null){
     return;
   }
 
 
-  const normalizedClass =
-    className
-      .replace("組","")
-      .trim()
-      .toUpperCase();
-
-
   if(
-    !Object.prototype.hasOwnProperty.call(
-      gradeOrder,
-      grade
-    )
+    !name.trim() ||
+    !["1","2","3","4","5"].includes(grade) ||
+    !/^[A-K]$/i.test(className.trim())
   ){
 
     alert(
-      "学年は「中学1年」〜「高校2年」で入力してください。"
+      "入力内容を確認してください。"
     );
 
     return;
-
-  }
-
-
-  if(
-    !Object.prototype.hasOwnProperty.call(
-      classOrder,
-      normalizedClass
-    )
-  ){
-
-    alert(
-      "クラスはA〜Kで入力してください。"
-    );
-
-    return;
-
   }
 
 
   await update(
-    ref(
-      db,
-      "memberRegistrations/" +
-      id
-    ),
+    ref(db,"memberRegistrations/" + id),
     {
       name:name.trim(),
       grade:grade,
-      className:normalizedClass
+      className:className.trim().toUpperCase()
     }
   );
 
@@ -1499,9 +727,9 @@ async function editMember(id){
 }
 
 
-/* =========================================
+/* =========================
    部員削除
-========================================= */
+========================= */
 
 async function deleteMember(id){
 
@@ -1510,10 +738,9 @@ async function deleteMember(id){
   }
 
 
-  const ok =
-    confirm(
-      "この部員登録を削除しますか？"
-    );
+  const ok = confirm(
+    "この部員登録を削除しますか？"
+  );
 
 
   if(!ok){
@@ -1522,20 +749,12 @@ async function deleteMember(id){
 
 
   await remove(
-    ref(
-      db,
-      "memberRegistrations/" +
-      id
-    )
+    ref(db,"memberRegistrations/" + id)
   );
 
 
   await remove(
-    ref(
-      db,
-      "memberIds/" +
-      id
-    )
+    ref(db,"memberIds/" + id)
   );
 
 
@@ -1544,1060 +763,9 @@ async function deleteMember(id){
 }
 
 
-/* =========================================
-   PDF.js
-========================================= */
-
-let pdfjsLib = null;
-
-
-async function getPdfJs(){
-
-  if(pdfjsLib){
-    return pdfjsLib;
-  }
-
-
-  const module =
-    await import(
-      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs"
-    );
-
-
-  module.GlobalWorkerOptions.workerSrc =
-    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
-
-
-  pdfjsLib =
-    module;
-
-
-  return pdfjsLib;
-
-}
-
-
-/* =========================================
-   PDFテキスト抽出
-========================================= */
-
-async function extractPdfLines(file){
-
-  const pdf =
-    await getPdfJs();
-
-
-  const buffer =
-    await file.arrayBuffer();
-
-
-  const document =
-    await pdf.getDocument({
-      data:buffer
-    }).promise;
-
-
-  const allLines = [];
-
-
-  for(
-    let pageNumber = 1;
-    pageNumber <= document.numPages;
-    pageNumber++
-  ){
-
-    const page =
-      await document.getPage(
-        pageNumber
-      );
-
-
-    const content =
-      await page.getTextContent();
-
-
-    const items =
-      content.items
-        .filter(
-          item =>
-            item.str &&
-            item.str.trim()
-        )
-        .map(
-          item => {
-
-            const transform =
-              item.transform || [];
-
-
-            return {
-
-              text:
-                item.str.trim(),
-
-              x:
-                Number(
-                  transform[4] || 0
-                ),
-
-              y:
-                Number(
-                  transform[5] || 0
-                ),
-
-              width:
-                Number(
-                  item.width || 0
-                )
-
-            };
-
-          }
-        );
-
-
-    items.sort(
-      (a,b) => {
-
-        if(
-          Math.abs(
-            a.y - b.y
-          ) > 3
-        ){
-
-          return b.y - a.y;
-
-        }
-
-        return a.x - b.x;
-
-      }
-    );
-
-
-    const rows = [];
-
-
-    for(const item of items){
-
-      let row =
-        rows.find(
-          r =>
-            Math.abs(
-              r.y - item.y
-            ) < 4
-        );
-
-
-      if(!row){
-
-        row = {
-
-          y:item.y,
-          items:[]
-
-        };
-
-        rows.push(row);
-
-      }
-
-
-      row.items.push(item);
-
-    }
-
-
-    rows.sort(
-      (a,b) =>
-        b.y - a.y
-    );
-
-
-    for(const row of rows){
-
-      row.items.sort(
-        (a,b) =>
-          a.x - b.x
-      );
-
-
-      const text =
-        row.items
-          .map(
-            item =>
-              item.text
-          )
-          .join(" ")
-          .replace(
-            /\s+/g,
-            " "
-          )
-          .trim();
-
-
-      if(text){
-
-        allLines.push({
-
-          page:pageNumber,
-          y:row.y,
-          items:row.items,
-          text:text
-
-        });
-
-      }
-
-    }
-
-  }
-
-
-  return allLines;
-
-}
-
-
-/* =========================================
-   PDF予定解析
-========================================= */
-
-function parseScheduleLines(lines){
-
-  let month = null;
-
-
-  /*
-    PDFの最初の「○月」を探す。
-    練習曲関連は無視。
-  */
-
-  for(const line of lines){
-
-    if(
-      line.text.includes("練習曲")
-    ){
-      continue;
-    }
-
-
-    const match =
-      line.text.match(
-        /(\d{1,2})月/
-      );
-
-
-    if(match){
-
-      const m =
-        Number(match[1]);
-
-
-      if(
-        m >= 1 &&
-        m <= 12
-      ){
-
-        month = m;
-
-        break;
-
-      }
-
-    }
-
-  }
-
-
-  if(!month){
-
-    month =
-      new Date()
-        .getMonth() + 1;
-
-  }
-
-
-  const year =
-    new Date()
-      .getFullYear();
-
-
-  const candidates = [];
-
-
-  let currentDate = null;
-
-
-  for(
-    let i = 0;
-    i < lines.length;
-    i++
-  ){
-
-    const raw =
-      lines[i].text;
-
-
-    /*
-      練習曲は完全無視
-    */
-
-    if(
-      raw.includes("練習曲")
-    ){
-
-      continue;
-
-    }
-
-
-    let dateMatch =
-      raw.match(
-        /(\d{1,2})月\s*(\d{1,2})日?/
-      );
-
-
-    if(!dateMatch){
-
-      dateMatch =
-        raw.match(
-          /(\d{1,2})[\/／](\d{1,2})/
-        );
-
-    }
-
-
-    if(dateMatch){
-
-      const m =
-        Number(
-          dateMatch[1]
-        );
-
-
-      const d =
-        Number(
-          dateMatch[2]
-        );
-
-
-      if(
-        m >= 1 &&
-        m <= 12 &&
-        d >= 1 &&
-        d <= 31
-      ){
-
-        month = m;
-
-
-        currentDate = {
-
-          year:year,
-          month:m,
-          day:d
-
-        };
-
-
-        const rest =
-          raw
-            .replace(
-              dateMatch[0],
-              ""
-            )
-            .trim();
-
-
-        if(rest){
-
-          const candidate =
-            makeCandidate(
-              currentDate,
-              rest
-            );
-
-
-          if(candidate){
-
-            candidates.push(
-              candidate
-            );
-
-          }
-
-        }
-
-
-        continue;
-
-      }
-
-    }
-
-
-    if(currentDate){
-
-      const candidate =
-        makeCandidate(
-          currentDate,
-          raw
-        );
-
-
-      if(candidate){
-
-        if(
-          containsScheduleInformation(
-            raw
-          )
-        ){
-
-          candidates.push(
-            candidate
-          );
-
-        }
-
-      }
-
-    }
-
-  }
-
-
-  /*
-    重複削除
-  */
-
-  const unique =
-    new Map();
-
-
-  for(const item of candidates){
-
-    const key =
-      [
-        item.date,
-        item.time,
-        item.place,
-        item.note
-      ].join("|");
-
-
-    if(!unique.has(key)){
-
-      unique.set(
-        key,
-        item
-      );
-
-    }
-
-  }
-
-
-  return Array.from(
-    unique.values()
-  );
-
-}
-
-
-/* =========================================
-   予定情報判定
-========================================= */
-
-function containsScheduleInformation(text){
-
-  return (
-
-    /\d{1,2}:\d{2}/.test(text) ||
-
-    /音楽練習室/.test(text) ||
-
-    /不在/.test(text) ||
-
-    /文化祭/.test(text) ||
-
-    /リハーサル/.test(text) ||
-
-    /準備/.test(text) ||
-
-    /休み/.test(text)
-
-  );
-
-}
-
-
-/* =========================================
-   予定候補作成
-========================================= */
-
-function makeCandidate(
-  dateObj,
-  text
-){
-
-  if(!text){
-    return null;
-  }
-
-
-  if(
-    text.includes("練習曲")
-  ){
-
-    return null;
-
-  }
-
-
-  const yyyy =
-    String(
-      dateObj.year
-    );
-
-
-  const mm =
-    String(
-      dateObj.month
-    ).padStart(
-      2,
-      "0"
-    );
-
-
-  const dd =
-    String(
-      dateObj.day
-    ).padStart(
-      2,
-      "0"
-    );
-
-
-  const date =
-    `${yyyy}-${mm}-${dd}`;
-
-
-  const timeMatches =
-    text.match(
-      /\d{1,2}:\d{2}\s*[〜~\-－]\s*\d{1,2}:\d{2}/g
-    );
-
-
-  let time =
-    timeMatches
-      ? timeMatches[0]
-      : "";
-
-
-  time =
-    time.replace(
-      /\s+/g,
-      ""
-    );
-
-
-  let place = "";
-
-
-  if(
-    text.includes("音楽練習室")
-  ){
-
-    place =
-      "音楽練習室";
-
-  }
-
-
-  let note =
-    text;
-
-
-  if(
-    time &&
-    timeMatches
-  ){
-
-    note =
-      note.replace(
-        timeMatches[0],
-        ""
-      );
-
-  }
-
-
-  if(place){
-
-    note =
-      note.replace(
-        place,
-        ""
-      );
-
-  }
-
-
-  note =
-    note
-      .replace(
-        /練習曲の目安/g,
-        ""
-      )
-      .replace(
-        /\s+/g,
-        " "
-      )
-      .trim();
-
-
-  if(
-    !time &&
-    !place &&
-    !/不在|文化祭|リハーサル|準備|休み/.test(note)
-  ){
-
-    return null;
-
-  }
-
-
-  return {
-
-    date:date,
-    time:time,
-    place:place,
-    note:note
-
-  };
-
-}
-
-
-/* =========================================
-   PDF読み込み
-========================================= */
-
-async function readSchedulePDF(){
-
-  if(!(await isAdmin())){
-    return;
-  }
-
-
-  const file =
-    $("schedulePdf")
-      .files[0];
-
-
-  if(!file){
-
-    message(
-      "pdfStatus",
-      "PDFファイルを選択してください。",
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  const button =
-    $("readPdfButton");
-
-
-  button.disabled = true;
-
-  button.textContent =
-    "PDFを読み込んでいます...";
-
-
-  $("pdfCandidates")
-    .classList
-    .add("hidden");
-
-
-  message(
-    "pdfStatus",
-    "PDFを解析しています..."
-  );
-
-
-  try{
-
-    const lines =
-      await extractPdfLines(
-        file
-      );
-
-
-    if(!lines.length){
-
-      throw new Error(
-        "PDFから文字を読み取れませんでした。"
-      );
-
-    }
-
-
-    const candidates =
-      parseScheduleLines(
-        lines
-      );
-
-
-    if(!candidates.length){
-
-      message(
-        "pdfStatus",
-        "PDFから予定を見つけられませんでした。\n\n" +
-        "このPDFが画像として保存されている場合は、文字情報を読み取れない可能性があります。",
-        "error"
-      );
-
-      return;
-
-    }
-
-
-    renderCandidates(
-      candidates
-    );
-
-
-    message(
-      "pdfStatus",
-      `${candidates.length}件の予定候補を読み取りました。`
-    );
-
-
-    $("pdfCandidates")
-      .classList
-      .remove("hidden");
-
-
-  }catch(error){
-
-    console.error(
-      "PDF読み込みエラー:",
-      error
-    );
-
-
-    message(
-      "pdfStatus",
-      "PDFの読み込みに失敗しました。\n\n" +
-      "エラー：" +
-      (error.message || "不明"),
-      "error"
-    );
-
-  }finally{
-
-    button.disabled = false;
-
-    button.textContent =
-      "PDFを読み込む";
-
-  }
-
-}
-
-
-/* =========================================
-   PDF候補
-========================================= */
-
-let pdfCandidatesData = [];
-
-
-function renderCandidates(
-  candidates
-){
-
-  pdfCandidatesData =
-    candidates;
-
-
-  const container =
-    $("candidateList");
-
-
-  container.innerHTML =
-    candidates
-      .map(
-        (item,index) => `
-
-          <div
-            class="candidate"
-            data-index="${index}"
-          >
-
-            <div class="candidate-head">
-
-              <input
-                type="checkbox"
-                class="candidate-check"
-                checked
-              >
-
-              <strong>
-                予定 ${index + 1}
-              </strong>
-
-            </div>
-
-
-            <div class="candidate-grid">
-
-              <div>
-
-                <label>
-                  日付
-                </label>
-
-                <input
-                  class="candidate-date"
-                  type="date"
-                  value="${esc(item.date)}"
-                >
-
-              </div>
-
-
-              <div>
-
-                <label>
-                  時間
-                </label>
-
-                <input
-                  class="candidate-time"
-                  type="text"
-                  value="${esc(item.time)}"
-                  placeholder="例：15:45〜18:00"
-                >
-
-              </div>
-
-
-              <div>
-
-                <label>
-                  場所
-                </label>
-
-                <input
-                  class="candidate-place"
-                  type="text"
-                  value="${esc(item.place)}"
-                >
-
-              </div>
-
-
-              <div>
-
-                <label>
-                  その他・備考
-                </label>
-
-                <input
-                  class="candidate-note"
-                  type="text"
-                  value="${esc(item.note)}"
-                >
-
-              </div>
-
-            </div>
-
-          </div>
-
-        `
-      )
-      .join("");
-
-}
-
-
-/* =========================================
-   PDF予定登録
-========================================= */
-
-async function registerCandidates(){
-
-  if(!(await isAdmin())){
-    return;
-  }
-
-
-  const boxes =
-    document.querySelectorAll(
-      ".candidate"
-    );
-
-
-  const selected = [];
-
-
-  boxes.forEach(
-    box => {
-
-      const check =
-        box.querySelector(
-          ".candidate-check"
-        );
-
-
-      if(!check.checked){
-        return;
-      }
-
-
-      const date =
-        box.querySelector(
-          ".candidate-date"
-        ).value;
-
-
-      const time =
-        box.querySelector(
-          ".candidate-time"
-        ).value
-        .trim();
-
-
-      const place =
-        box.querySelector(
-          ".candidate-place"
-        ).value
-        .trim();
-
-
-      const note =
-        box.querySelector(
-          ".candidate-note"
-        ).value
-        .trim();
-
-
-      if(!date){
-        return;
-      }
-
-
-      selected.push({
-
-        date,
-        time,
-        place,
-        note
-
-      });
-
-    }
-  );
-
-
-  if(!selected.length){
-
-    message(
-      "candidateMsg",
-      "登録する予定を1つ以上選択してください。",
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  const button =
-    $("registerCandidatesButton");
-
-
-  button.disabled = true;
-
-  button.textContent =
-    "登録しています...";
-
-
-  try{
-
-    for(const item of selected){
-
-      await set(
-        ref(
-          db,
-          "schedules/" +
-          item.date
-        ),
-        {
-
-          time:item.time,
-          place:item.place,
-          note:item.note,
-          updatedAt:Date.now()
-
-        }
-      );
-
-    }
-
-
-    message(
-      "candidateMsg",
-      `${selected.length}件の予定を登録しました。`,
-      "success"
-    );
-
-
-    await loadSchedules();
-
-
-  }catch(error){
-
-    console.error(
-      "PDF予定登録エラー:",
-      error
-    );
-
-
-    message(
-      "candidateMsg",
-      "予定の登録に失敗しました。\n\n" +
-      "エラーコード: " +
-      (error.code || "不明") +
-      "\n" +
-      "詳細: " +
-      (error.message || "不明"),
-      "error"
-    );
-
-  }finally{
-
-    button.disabled = false;
-
-    button.textContent =
-      "選択した予定を登録";
-
-  }
-
-}
-
-
-/* =========================================
-   手動予定保存
-========================================= */
+/* =========================
+   予定保存
+========================= */
 
 async function saveSchedule(){
 
@@ -2606,26 +774,11 @@ async function saveSchedule(){
   }
 
 
-  const date =
-    $("sdate").value;
+  const date = $("sdate").value;
 
+  const time = $("stime").value.trim();
 
-  const time =
-    $("stime")
-      .value
-      .trim();
-
-
-  const place =
-    $("splace")
-      .value
-      .trim();
-
-
-  const note =
-    $("snote")
-      .value
-      .trim();
+  const place = $("splace").value.trim();
 
 
   if(!date){
@@ -2633,172 +786,113 @@ async function saveSchedule(){
     message(
       "scheduleMsg",
       "日付を入力してください。",
-      "error"
+      true
     );
 
     return;
-
   }
 
 
-  try{
-
-    await set(
-      ref(
-        db,
-        "schedules/" +
-        date
-      ),
-      {
-
-        time:time,
-        place:place,
-        note:note,
-        updatedAt:Date.now()
-
-      }
-    );
+  await set(
+    ref(db,"schedules/" + date),
+    {
+      date:date,
+      time:time,
+      place:place,
+      updatedAt:Date.now()
+    }
+  );
 
 
-    message(
-      "scheduleMsg",
-      "予定を保存しました。",
-      "success"
-    );
+  message(
+    "scheduleMsg",
+    "保存しました。"
+  );
 
 
-    $("sdate").value = "";
-    $("stime").value = "";
-    $("splace").value = "";
-    $("snote").value = "";
-
-
-    await loadSchedules();
-
-
-  }catch(error){
-
-    console.error(
-      "予定保存エラー:",
-      error
-    );
-
-
-    message(
-      "scheduleMsg",
-      "予定の保存に失敗しました。\n\n" +
-      "エラーコード: " +
-      (error.code || "不明") +
-      "\n" +
-      "詳細: " +
-      (error.message || "不明"),
-      "error"
-    );
-
-  }
+  await loadSchedules();
 
 }
 
 
-/* =========================================
-   登録済み予定
-========================================= */
+/* =========================
+   予定一覧
+========================= */
 
 async function loadSchedules(){
 
-  const snapshot =
-    await get(
-      ref(
-        db,
-        "schedules"
-      )
-    );
+  const snap = await get(
+    ref(db,"schedules")
+  );
+
+  const data = snap.exists()
+    ? snap.val()
+    : {};
 
 
-  const data =
-    snapshot.exists()
-      ? snapshot.val()
-      : {};
+  const list = Object.entries(data);
+
+  list.sort(
+    (a,b) => a[0].localeCompare(b[0])
+  );
 
 
-  const schedules =
-    Object.entries(data)
-      .sort(
-        ([a],[b]) =>
-          a.localeCompare(b)
-      );
-
-
-  if(!schedules.length){
+  if(!list.length){
 
     $("schedules").innerHTML =
       "<p class='small'>予定はありません。</p>";
 
     return;
-
   }
 
 
-  $("schedules").innerHTML =
-    schedules
-      .map(
-        ([date,x]) => `
+  $("schedules").innerHTML = list.map(
+    ([date,x]) => {
 
-          <div class="item">
+      return `
+        <div class="item">
 
-            <strong>
-              ${esc(date)}
-            </strong>
+          <strong>
+            ${esc(date)}
+          </strong>
 
-            ${
-              x.time
-                ? `<div>${esc(x.time)}</div>`
-                : ""
-            }
+          <div>
+            ${esc(x.time || "")}
+          </div>
 
-            ${
-              x.place
-                ? `<div>${esc(x.place)}</div>`
-                : ""
-            }
+          <div>
+            ${esc(x.place || "")}
+          </div>
 
-            ${
-              x.note
-                ? `<div class="small">
-                    備考：${esc(x.note)}
-                   </div>`
-                : ""
-            }
+          <div class="row">
 
-            <div class="row">
+            <button
+              onclick="editSchedule('${esc(date)}')"
+            >
+              変更
+            </button>
 
-              <button
-                onclick="editSchedule('${esc(date)}')"
-              >
-                変更
-              </button>
-
-              <button
-                class="danger"
-                onclick="deleteSchedule('${esc(date)}')"
-              >
-                削除
-              </button>
-
-            </div>
+            <button
+              class="danger"
+              onclick="deleteSchedule('${esc(date)}')"
+            >
+              削除
+            </button>
 
           </div>
 
-        `
-      )
-      .join("");
+        </div>
+      `;
+
+    }
+  ).join("");
 
 }
 
 
-/* =========================================
+/* =========================
    予定変更
-========================================= */
+========================= */
 
 async function editSchedule(date){
 
@@ -2807,54 +901,37 @@ async function editSchedule(date){
   }
 
 
-  const snapshot =
-    await get(
-      ref(
-        db,
-        "schedules/" +
-        date
-      )
-    );
+  const snap = await get(
+    ref(db,"schedules/" + date)
+  );
 
 
-  if(!snapshot.exists()){
+  if(!snap.exists()){
     return;
   }
 
 
-  const data =
-    snapshot.val();
+  const x = snap.val();
 
 
-  $("sdate").value =
-    date;
+  $("sdate").value = date;
 
+  $("stime").value = x.time || "";
 
-  $("stime").value =
-    data.time || "";
-
-
-  $("splace").value =
-    data.place || "";
-
-
-  $("snote").value =
-    data.note || "";
+  $("splace").value = x.place || "";
 
 
   window.scrollTo({
-
-    top:0,
+    top:document.body.scrollHeight,
     behavior:"smooth"
-
   });
 
 }
 
 
-/* =========================================
+/* =========================
    予定削除
-========================================= */
+========================= */
 
 async function deleteSchedule(date){
 
@@ -2863,155 +940,42 @@ async function deleteSchedule(date){
   }
 
 
-  const ok =
-    confirm(
-      `${date}の予定を削除しますか？`
-    );
-
-
-  if(!ok){
+  if(!confirm(
+    date + " の予定を削除しますか？"
+  )){
     return;
   }
 
 
-  try{
-
-    await remove(
-      ref(
-        db,
-        "schedules/" +
-        date
-      )
-    );
+  await remove(
+    ref(db,"schedules/" + date)
+  );
 
 
-    await loadSchedules();
-
-
-  }catch(error){
-
-    console.error(
-      "予定削除エラー:",
-      error
-    );
-
-
-    message(
-      "scheduleMsg",
-      "予定の削除に失敗しました。\n\n" +
-      "エラーコード: " +
-      (error.code || "不明") +
-      "\n" +
-      "詳細: " +
-      (error.message || "不明"),
-      "error"
-    );
-
-  }
+  await loadSchedules();
 
 }
 
 
-/* =========================================
-   グローバル公開
-========================================= */
+/* =========================
+   HTMLから呼び出せるようにする
+========================= */
 
-window.adminLogin =
-  adminLogin;
+window.adminLogin = adminLogin;
 
-window.logout =
-  logout;
+window.logout = logout;
 
-window.addMember =
-  addMember;
+window.addMember = addMember;
 
-window.editMember =
-  editMember;
+window.editMember = editMember;
 
-window.deleteMember =
-  deleteMember;
+window.deleteMember = deleteMember;
 
-window.saveSchedule =
-  saveSchedule;
+window.saveSchedule = saveSchedule;
 
-window.editSchedule =
-  editSchedule;
+window.editSchedule = editSchedule;
 
-window.deleteSchedule =
-  deleteSchedule;
-
-window.readSchedulePDF =
-  readSchedulePDF;
-
-window.registerCandidates =
-  registerCandidates;
-
-
-/* =========================================
-   ボタン
-========================================= */
-
-$("loginButton")
-  .addEventListener(
-    "click",
-    adminLogin
-  );
-
-
-$("logoutButton")
-  .addEventListener(
-    "click",
-    logout
-  );
-
-
-$("addMemberButton")
-  .addEventListener(
-    "click",
-    addMember
-  );
-
-
-$("readPdfButton")
-  .addEventListener(
-    "click",
-    readSchedulePDF
-  );
-
-
-$("registerCandidatesButton")
-  .addEventListener(
-    "click",
-    registerCandidates
-  );
-
-
-$("saveScheduleButton")
-  .addEventListener(
-    "click",
-    saveSchedule
-  );
-
-
-/* =========================================
-   Enterキー
-========================================= */
-
-$("password")
-  .addEventListener(
-    "keydown",
-    event => {
-
-      if(
-        event.key === "Enter"
-      ){
-
-        adminLogin();
-
-      }
-
-    }
-  );
+window.deleteSchedule = deleteSchedule;
 
 </script>
 
