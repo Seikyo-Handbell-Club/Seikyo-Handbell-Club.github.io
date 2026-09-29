@@ -28,13 +28,6 @@ header{
 
 /* =========================
    ヘッダー
-   タイトル
-   ↓
-   部活名
-   ↓
-   マイページ
-   ↓
-   操作ボタン
 ========================= */
 
 .header-top{
@@ -113,7 +106,14 @@ header{
   font-weight:700;
   white-space:nowrap;
   overflow:hidden;
-  text-overflow:ellipsis
+  text-overflow:ellipsis;
+  cursor:pointer;
+  padding:8px 5px;
+  border-radius:8px
+}
+
+.profile-mini-text:hover{
+  background:#f1f5fb
 }
 
 .icon-button{
@@ -331,10 +331,7 @@ textarea{
   font-weight:700
 }
 
-/*
-  ホームカレンダーでは時間を表示しない。
-  詳細画面では時間を表示する。
-*/
+/* ホームカレンダーでは時間を表示しない */
 
 .dot{
   display:block;
@@ -350,17 +347,36 @@ textarea{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  margin-bottom:14px
+  margin-bottom:14px;
+  gap:8px
 }
 
 .monthbar button{
   background:#eef3fb;
-  padding:8px 12px
+  padding:8px 12px;
+  flex:none
+}
+
+.month-center{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-width:0;
+  flex:1
 }
 
 .month-title{
   font-size:18px;
-  font-weight:800
+  font-weight:800;
+  white-space:nowrap
+}
+
+.today-button{
+  background:#eef3fb!important;
+  padding:7px 9px!important;
+  font-size:12px!important;
+  white-space:nowrap
 }
 
 /* =========================
@@ -530,6 +546,102 @@ textarea{
     font-size:9px
   }
 
+  .month-title{
+    font-size:16px
+  }
+
+  .today-button{
+    font-size:11px!important;
+    padding:7px 7px!important
+  }
+
+}
+
+
+/* =========================
+   スマホ横向き・タブレット
+========================= */
+
+@media(min-width:481px) and (orientation:landscape){
+
+  header{
+    padding:10px 16px
+  }
+
+  .header-top{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+    grid-template-areas:
+      "brand brand brand"
+      "user actions login";
+    align-items:center;
+    column-gap:12px
+  }
+
+  .header-brand{
+    grid-area:brand;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    width:100%;
+    margin-bottom:8px
+  }
+
+  .header-title{
+    width:auto;
+    font-size:20px;
+    white-space:nowrap
+  }
+
+  .club{
+    width:auto;
+    margin:0;
+    font-size:12px;
+    white-space:nowrap
+  }
+
+  .header-user-row{
+    grid-area:user;
+    justify-content:flex-start;
+    margin:0
+  }
+
+  .header-action-row{
+    grid-area:actions;
+    justify-content:center;
+    margin:0
+  }
+
+  .header-actions{
+    width:auto;
+    max-width:none;
+    flex-wrap:nowrap
+  }
+
+  .header-actions button{
+    padding:6px 8px;
+    font-size:11px
+  }
+
+  .header-login{
+    grid-area:login;
+    justify-content:flex-end
+  }
+
+  .header-login button{
+    width:auto;
+    min-width:100px
+  }
+
+  .profile-mini{
+    justify-content:flex-start
+  }
+
+  .profile-mini-text{
+    max-width:300px
+  }
+
 }
 
 
@@ -570,6 +682,15 @@ textarea{
     padding:3px 5px
   }
 
+  .month-title{
+    font-size:15px
+  }
+
+  .today-button{
+    font-size:10px!important;
+    padding:6px 6px!important
+  }
+
 }
 </style>
 </head>
@@ -580,7 +701,7 @@ textarea{
 
   <div class="header-top">
 
-    <!-- タイトル＋部活名を1セットとして最上部に配置 -->
+    <!-- タイトル＋部活名 -->
 
     <div
       class="header-brand"
@@ -618,6 +739,9 @@ textarea{
         <div
           id="profileMiniText"
           class="profile-mini-text"
+          onclick="showMyPage()"
+          role="button"
+          tabindex="0"
         ></div>
 
       </div>
@@ -625,7 +749,7 @@ textarea{
     </div>
 
 
-    <!-- ログアウト中はここを空けておく -->
+    <!-- ログアウト中 -->
 
     <div
       id="loggedOutLeft"
@@ -696,10 +820,21 @@ textarea{
         ‹
       </button>
 
-      <div
-        class="month-title"
-        id="monthTitle"
-      ></div>
+      <div class="month-center">
+
+        <div
+          class="month-title"
+          id="monthTitle"
+        ></div>
+
+        <button
+          class="today-button"
+          onclick="goCurrentMonth()"
+        >
+          今月に戻る
+        </button>
+
+      </div>
 
       <button onclick="changeMonth(1)">
         ›
@@ -885,12 +1020,29 @@ textarea{
 
   <select id="myGrade">
 
-    <option value="1">1</option>
-    <option value="2">2</option>
-    <option value="3">3</option>
-    <option value="4">4</option>
-    <option value="5">5</option>
-    <option value="6">6</option>
+    <option value="">
+      選択してください
+    </option>
+
+    <option value="中学1年">
+      中学1年
+    </option>
+
+    <option value="中学2年">
+      中学2年
+    </option>
+
+    <option value="中学3年">
+      中学3年
+    </option>
+
+    <option value="高校1年">
+      高校1年
+    </option>
+
+    <option value="高校2年">
+      高校2年
+    </option>
 
   </select>
 
@@ -898,9 +1050,25 @@ textarea{
     クラス
   </label>
 
-  <input
-    id="myClass"
-  >
+  <select id="myClass">
+
+    <option value="">
+      選択してください
+    </option>
+
+    <option value="A">A組</option>
+    <option value="B">B組</option>
+    <option value="C">C組</option>
+    <option value="D">D組</option>
+    <option value="E">E組</option>
+    <option value="F">F組</option>
+    <option value="G">G組</option>
+    <option value="H">H組</option>
+    <option value="I">I組</option>
+    <option value="J">J組</option>
+    <option value="K">K組</option>
+
+  </select>
 
   <label>
     名前
@@ -972,6 +1140,36 @@ textarea{
     class="userbar"
   ></div>
 
+
+  <!-- 連絡の種類 -->
+
+  <label>
+    連絡の種類（必須）
+  </label>
+
+  <select id="noticeType">
+
+    <option value="欠席">
+      欠席
+    </option>
+
+    <option value="遅刻">
+      遅刻
+    </option>
+
+    <option value="早退">
+      早退
+    </option>
+
+    <option value="途中抜け">
+      途中抜け
+    </option>
+
+  </select>
+
+
+  <!-- 欠席理由 -->
+
   <label>
     欠席理由（必須）
   </label>
@@ -1035,6 +1233,7 @@ textarea{
 
   </select>
 
+
   <div
     id="otherReasonBox"
     class="hidden"
@@ -1051,6 +1250,9 @@ textarea{
 
   </div>
 
+
+  <!-- 日付 -->
+
   <label>
     日付（必須）
   </label>
@@ -1066,10 +1268,14 @@ textarea{
         ‹
       </button>
 
-      <div
-        class="month-title"
-        id="formMonthTitle"
-      ></div>
+      <div class="month-center">
+
+        <div
+          class="month-title"
+          id="formMonthTitle"
+        ></div>
+
+      </div>
 
       <button
         type="button"
@@ -1300,16 +1506,15 @@ const email =
 
 
 /* =========================
-   学年・クラス表示を整える
+   学年・クラス表示
+   管理者側と同じ形式
 ========================= */
 
 function getProfileGrade(){
 
   return String(
     profile?.grade ?? ""
-  )
-  .replace(/^高校/,"")
-  .replace(/年$/,"");
+  );
 
 }
 
@@ -1332,7 +1537,7 @@ function getProfileDisplay(){
   const className =
     getProfileClass();
 
-  return `高校${grade}年${className}組　${profile?.name ?? ""}`;
+  return `${grade}${className}組　${profile?.name ?? ""}`;
 
 }
 
@@ -1345,7 +1550,7 @@ function getProfileBoxDisplay(){
   const className =
     getProfileClass();
 
-  return `${profile?.name ?? ""}（高校${grade}年${className}組）`;
+  return `${profile?.name ?? ""}（${grade}${className}組）`;
 
 }
 
@@ -1524,7 +1729,6 @@ onAuthStateChanged(
 
 /* =========================
    ログイン
-   ※ Firebaseの実際のエラーを表示
 ========================= */
 
 async function login(){
@@ -1611,6 +1815,10 @@ async function login(){
 
 }
 
+
+/* =========================
+   初回パスワード設定
+========================= */
 
 async function setupPassword(){
 
@@ -1752,6 +1960,31 @@ function logout(){
 }
 
 
+/* =========================
+   今月に戻る
+========================= */
+
+function goCurrentMonth(){
+
+  const now =
+    new Date();
+
+  current =
+    new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      1
+    );
+
+  render();
+
+}
+
+
+/* =========================
+   ホームカレンダー
+========================= */
+
 async function render(){
 
   let y =
@@ -1861,8 +2094,8 @@ async function render(){
 
 
     /*
-      ホームのカレンダーには
-      時間を表示しない。
+      ホームカレンダーでは
+      部活時間を表示しない。
     */
 
     h += `
@@ -1914,6 +2147,10 @@ function changeMonth(n){
 
 }
 
+
+/* =========================
+   日付詳細
+========================= */
 
 async function openDay(date){
 
@@ -1987,8 +2224,7 @@ async function openDay(date){
 
 
   /*
-    日付をクリックした詳細画面では
-    部活時間を表示する。
+    詳細画面では部活時間を表示。
   */
 
   h += `
@@ -2040,6 +2276,10 @@ async function openDay(date){
                 ${esc(n.name)}
 
                 <span class="badge">
+                  ${esc(n.type || "欠席")}
+                </span>
+
+                <span class="badge">
                   ${esc(n.reason)}
                 </span>
 
@@ -2066,6 +2306,10 @@ async function openDay(date){
 
 }
 
+
+/* =========================
+   欠席連絡フォーム
+========================= */
 
 function showForm(id=null){
 
@@ -2105,6 +2349,11 @@ function showForm(id=null){
   $("profileBox")
     .textContent =
       getProfileBoxDisplay();
+
+
+  $("noticeType")
+    .value =
+      "欠席";
 
 
   $("reasonType")
@@ -2192,6 +2441,10 @@ function toggleOtherReason(){
 
 }
 
+
+/* =========================
+   フォーム内カレンダー
+========================= */
 
 async function renderFormCalendar(){
 
@@ -2310,6 +2563,11 @@ async function renderFormCalendar(){
       date === selectedDate;
 
 
+    /*
+      フォーム内カレンダーも
+      部活時間は表示しない。
+    */
+
     h += `
 
       <div
@@ -2333,19 +2591,6 @@ async function renderFormCalendar(){
             :
             ""
         }
-
-        <span class="dot">
-          ${
-            hasClub
-              ?
-              esc(
-                sch[date].time ||
-                "部活あり"
-              )
-              :
-              "部活なし"
-          }
-        </span>
 
       </div>
 
@@ -2390,7 +2635,6 @@ async function selectFormDate(date){
 
   checkDate();
 
-
 }
 
 
@@ -2414,6 +2658,10 @@ function updateSelectedDateBox(){
 
 }
 
+
+/* =========================
+   選択日確認
+========================= */
 
 async function checkDate(){
 
@@ -2486,6 +2734,10 @@ async function checkDate(){
 }
 
 
+/* =========================
+   同日重複確認
+========================= */
+
 async function hasNoticeOnDate(
   date
 ){
@@ -2522,10 +2774,19 @@ async function hasNoticeOnDate(
 }
 
 
+/* =========================
+   連絡保存
+========================= */
+
 async function saveNotice(){
 
   let d =
     selectedDate;
+
+
+  let type =
+    $("noticeType")
+      .value;
 
 
   let reasonType =
@@ -2549,11 +2810,12 @@ async function saveNotice(){
 
   if(
     !d ||
+    !type ||
     !reasonType
   ){
 
     alert(
-      "日付と欠席理由は必須です。"
+      "連絡の種類・日付・欠席理由は必須です。"
     );
 
 
@@ -2631,6 +2893,9 @@ async function saveNotice(){
       ),
       {
 
+        type:
+          type,
+
         reason:
           r,
 
@@ -2679,6 +2944,9 @@ async function saveNotice(){
       name:
         profile.name,
 
+      type:
+        type,
+
       reason:
         r,
 
@@ -2698,6 +2966,16 @@ async function saveNotice(){
   alert(
     "登録しました。"
   );
+
+
+  /*
+    登録後はフォームに残り、
+    次の連絡を続けて登録できる。
+  */
+
+  $("noticeType")
+    .value =
+      "欠席";
 
 
   $("reasonType")
@@ -2732,6 +3010,10 @@ async function saveNotice(){
 
 }
 
+
+/* =========================
+   連絡修正
+========================= */
 
 async function showEdit(){
 
@@ -2808,6 +3090,13 @@ async function showEdit(){
 
                 <div class="meta">
 
+                  種類：
+                  ${esc(n.type || "欠席")}
+
+                </div>
+
+                <div class="meta">
+
                   理由：
                   ${esc(n.reason)}
 
@@ -2846,6 +3135,10 @@ async function showEdit(){
 
 }
 
+
+/* =========================
+   連絡編集
+========================= */
 
 async function editNotice(id){
 
@@ -2892,6 +3185,35 @@ async function editNotice(id){
     .textContent =
       getProfileBoxDisplay();
 
+
+  /*
+    連絡の種類
+  */
+
+  const noticeTypes = [
+
+    "欠席",
+    "遅刻",
+    "早退",
+    "途中抜け"
+
+  ];
+
+
+  $("noticeType")
+    .value =
+      noticeTypes.includes(
+        n.type
+      )
+        ?
+        n.type
+        :
+        "欠席";
+
+
+  /*
+    理由
+  */
 
   const reasonOptions = [
 
@@ -2984,6 +3306,10 @@ async function editNotice(id){
 }
 
 
+/* =========================
+   連絡削除
+========================= */
+
 async function deleteNotice(id){
 
   if(
@@ -3026,6 +3352,10 @@ async function deleteNotice(id){
 }
 
 
+/* =========================
+   マイページ
+========================= */
+
 async function showMyPage(){
 
   if(
@@ -3048,10 +3378,14 @@ async function showMyPage(){
     .remove("hidden");
 
 
+  /*
+    管理者側と同じ値をセット
+  */
+
   $("myGrade").value =
     String(
-      getProfileGrade() ||
-      "1"
+      profile.grade ??
+      ""
     );
 
 
@@ -3079,6 +3413,10 @@ async function showMyPage(){
 }
 
 
+/* =========================
+   プロフィール保存
+========================= */
+
 async function saveProfile(){
 
   if(
@@ -3095,8 +3433,7 @@ async function saveProfile(){
 
   const className =
     $("myClass")
-      .value
-      .trim();
+      .value;
 
 
   const name =
@@ -3172,6 +3509,10 @@ async function saveProfile(){
 }
 
 
+/* =========================
+   パスワード変更
+========================= */
+
 async function changePassword(){
 
   const p =
@@ -3234,6 +3575,10 @@ async function changePassword(){
 }
 
 
+/* =========================
+   windowへ公開
+========================= */
+
 window.showLogin =
   showLogin;
 
@@ -3256,6 +3601,10 @@ window.logout =
 
 window.changeMonth =
   changeMonth;
+
+
+window.goCurrentMonth =
+  goCurrentMonth;
 
 
 window.openDay =
@@ -3317,6 +3666,10 @@ window.changePassword =
 window.backHome =
   backHome;
 
+
+/* =========================
+   初期表示
+========================= */
 
 render();
 
