@@ -399,6 +399,11 @@ textarea{
   white-space:nowrap
 }
 
+.calendar-label{margin-top:5px;font-size:11px;line-height:1.2;font-weight:800;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.exam-periods{display:flex;flex-direction:column;gap:5px;margin:0 0 8px;}
+.exam-period{background:#eaf8ea;color:#2f6b35;border-radius:8px;padding:5px 8px;font-size:11px;font-weight:800;text-align:center;}
+.calendar-holiday .daynum{color:#d23a3a;}
+
 /* =========================
    時刻入力
 ========================= */
@@ -897,6 +902,8 @@ textarea{
       <div>日</div>
 
     </div>
+
+    <div id="examPeriods" class="exam-periods"></div>
 
     <div
       class="days"
@@ -1685,6 +1692,32 @@ function getProfileBoxDisplay(){
 
 
 /* =========================
+   日本の休日判定
+========================= */
+
+function getJapaneseHolidays(year){
+  const h={};
+  const add=(date,name)=>h[date]=name;
+  const nthMonday=(month,n)=>{const d=new Date(year,month,1);return ((8-d.getDay())%7+1)+(n-1)*7;};
+  const fmt=d=>ymd(d.getFullYear(),d.getMonth(),d.getDate());
+  add(`${year}-01-01`,`元日`); add(`${year}-02-11`,`建国記念の日`); add(`${year}-02-23`,`天皇誕生日`);
+  add(`${year}-04-29`,`昭和の日`); add(`${year}-05-03`,`憲法記念日`); add(`${year}-05-04`,`みどりの日`); add(`${year}-05-05`,`こどもの日`);
+  add(`${year}-08-11`,`山の日`); add(`${year}-11-03`,`文化の日`); add(`${year}-11-23`,`勤労感謝の日`);
+  add(`${year}-01-${String(nthMonday(0,2)).padStart(2,"0")}`,`成人の日`);
+  add(`${year}-07-${String(nthMonday(6,3)).padStart(2,"0")}`,`海の日`);
+  add(`${year}-09-${String(nthMonday(8,3)).padStart(2,"0")}`,`敬老の日`);
+  add(`${year}-10-${String(nthMonday(9,2)).padStart(2,"0")}`,`スポーツの日`);
+  const vernal=Math.floor(20.8431+0.242194*(year-1980)-Math.floor((year-1980)/4));
+  const autumnal=Math.floor(23.2488+0.242194*(year-1980)-Math.floor((year-1980)/4));
+  add(`${year}-03-${String(vernal).padStart(2,"0")}`,`春分の日`); add(`${year}-09-${String(autumnal).padStart(2,"0")}`,`秋分の日`);
+  Object.keys(h).forEach(date=>{const d=new Date(`${date}T00:00:00`);if(d.getDay()!==0)return;let n=new Date(d);do{n.setDate(n.getDate()+1)}while(n.getDay()===0||h[fmt(n)]);add(fmt(n),`振替休日`);});
+  for(let month=0;month<12;month++){const last=new Date(year,month+1,0).getDate();for(let day=2;day<last;day++){const date=ymd(year,month,day);if(h[date])continue;if(h[ymd(year,month,day-1)]&&h[ymd(year,month,day+1)])add(date,`国民の休日`);}}
+  return h;
+}
+function isSunday(date){return new Date(`${date}T00:00:00`).getDay()===0;}
+function isJapaneseHoliday(date){return !!getJapaneseHolidays(Number(date.slice(0,4)))[date];}
+
+/* =========================
    スケジュール判定
 ========================= */
 
@@ -1743,21 +1776,19 @@ function getSchedulesForDate(
 
 
         if(
-          (
-            s.type === "exam" ||
-            s.type === "schoolHoliday"
-          ) &&
-          dateInRange(
-            date,
-            s.startDate,
-            s.endDate
-          )
+          s.type === "exam" &&
+          dateInRange(date,s.startDate,s.endDate)
         ){
-
           result.push(s);
-
           return;
+        }
 
+        if(
+          s.type === "schoolHoliday" &&
+          (s.date === date || (!s.date && s.startDate === date))
+        ){
+          result.push(s);
+          return;
         }
 
 
@@ -2693,114 +2724,48 @@ async function refreshCalendarData(){
 
 function renderCalendarData(y,m,sch,all){
 
-  const first =
-    (
-      new Date(
-        y,
-        m,
-        1
-      ).getDay() +
-      6
-    ) % 7;
+  const first=((new Date(y,m,1).getDay()+6)%7);
+  const last=new Date(y,m+1,0).getDate();
+  let h="";
 
-  const last =
-    new Date(
-      y,
-      m+1,
-      0
-    ).getDate();
+  for(let i=0;i<first;i++) h+='<div class="day empty"></div>';
 
-  let h =
-    "";
-
-  for(
-    let i=0;
-    i<first;
-    i++
-  ){
-
-    h +=
-      '<div class="day empty"></div>';
-
-  }
-
-  for(
-    let d=1;
-    d<=last;
-    d++
-  ){
-
-    const date =
-      ymd(
-        y,
-        m,
-        d
-      );
-
-    const scheduleList =
-      getSchedulesForDate(
-        sch,
-        date
-      );
-
-    const count =
-      Object
-        .values(all || {})
-        .filter(
-          n =>
-            n &&
-            n.date === date
-        )
-        .length;
-
-    const dayClass =
-      getScheduleDayClass(
-        scheduleList
-      );
-
-    const today =
-      ymd(
-        new Date().getFullYear(),
-        new Date().getMonth(),
-        new Date().getDate()
-      ) === date;
-
-    const background =
-      getScheduleBackground(
-        scheduleList
-      );
-
-    h += `
-
-      <div
-        class="day ${dayClass} ${today ? "today-day" : ""}"
-        ${background ? `style="background:${background}"` : ""}
-        onclick="openDay('${date}')"
-      >
-
-        <div class="daynum">
-          ${d}
-        </div>
-
-        ${
-          count
-            ?
-            `<span class="count">
-              ${count}件
-            </span>`
-            :
-            ""
-        }
-
+  for(let d=1;d<=last;d++){
+    const date=ymd(y,m,d);
+    const scheduleList=getSchedulesForDate(sch,date);
+    const sunday=isSunday(date);
+    const holiday=isJapaneseHoliday(date);
+    const count=Object.values(all||{}).filter(n=>n&&n.date===date).length;
+    const dayClass=getScheduleDayClass(scheduleList);
+    const today=ymd(new Date().getFullYear(),new Date().getMonth(),new Date().getDate())===date;
+    const scheduleBackground=getScheduleBackground(scheduleList);
+    const background=(sunday||holiday)&&!scheduleList.length?"#fff0f0":scheduleBackground;
+    const concert=scheduleList.find(s=>s&&s.type==="concert");
+    const event=scheduleList.find(s=>s&&s.type==="event");
+    const schoolHoliday=scheduleList.find(s=>s&&s.type==="schoolHoliday");
+    let label="";
+    if(concert&&concert.title) label=concert.title;
+    else if(event&&event.title) label=event.title;
+    else if(schoolHoliday&&schoolHoliday.title) label=schoolHoliday.title;
+    const holidayClass=(sunday||holiday)?" calendar-holiday":"";
+    h+=`
+      <div class="day ${dayClass}${holidayClass} ${today?"today-day":""}" ${background?`style="background:${background}"`:""} onclick="openDay('${date}')">
+        <div class="daynum">${d}</div>
+        ${label?`<div class="calendar-label">${esc(label)}</div>`:""}
+        ${count?`<span class="count">${count}件</span>`:""}
       </div>
-
     `;
-
   }
 
-  $("days")
-    .innerHTML =
-      h;
+  const monthStart=ymd(y,m,1),monthEnd=ymd(y,m,last);
+  const exams=Object.values(sch||{}).filter(s=>s&&s.type==="exam"&&s.startDate&&s.endDate&&s.endDate>=monthStart&&s.startDate<=monthEnd);
+  $("examPeriods").innerHTML=exams.map(exam=>{
+    const start=exam.startDate<monthStart?monthStart:exam.startDate;
+    const end=exam.endDate>monthEnd?monthEnd:exam.endDate;
+    return `<div class="exam-period">試験期間　${esc(start)} 〜 ${esc(end)}</div>`;
+  }).join("");
+
+  $("days").innerHTML=h;
 
 }
 
@@ -3021,12 +2986,7 @@ function renderDayDetail(date,schedules,all){
       if(type === "schoolHoliday"){
 
         h += `
-          <strong>学校が休みの日</strong>
-          <br>
-          期間：
-          ${esc(schedule.startDate || "")}
-          〜
-          ${esc(schedule.endDate || "")}
+          ${schedule.title ? `<strong>${esc(schedule.title)}</strong>` : ""}
           <br><br>
         `;
 
