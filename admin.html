@@ -3,315 +3,216 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-
-<title>管理者設定｜清教学園ハンドベル部</title>
+<title>部活おやすみ連絡｜清教学園ハンドベル部</title>
 
 <style>
-*{
-  box-sizing:border-box;
-}
-
+*{box-sizing:border-box}
 body{
   margin:0;
-  background:#f5f7fb;
-  color:#20242a;
   font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif;
+  background:#f5f7fb;
+  color:#20242a
 }
-
 header{
   background:#fff;
-  padding:20px;
-  border-bottom:1px solid #e5e8ed;
+  padding:20px 18px 14px;
+  position:sticky;
+  top:0;
+  z-index:10;
+  border-bottom:1px solid #e7eaf0
 }
-
 h1{
-  margin:0;
+  font-size:22px;
+  margin:0 0 5px;
+  text-align:center
+}
+.club{
   text-align:center;
-  font-size:21px;
+  color:#66717e;
+  font-size:13px;
+  margin-bottom:15px
 }
-
+.actions{
+  display:flex;
+  gap:10px
+}
+button{
+  border:0;
+  border-radius:12px;
+  padding:12px 10px;
+  font-size:15px;
+  font-weight:700;
+  cursor:pointer
+}
+.actions button{
+  flex:1;
+  background:#1f6feb;
+  color:#fff
+}
+.actions button:last-child{
+  background:#fff;
+  color:#1f6feb;
+  border:1px solid #1f6feb
+}
 main{
-  max-width:850px;
+  max-width:720px;
   margin:auto;
-  padding:18px;
+  padding:18px
 }
-
-.card{
+.card,.panel{
   background:#fff;
   border-radius:18px;
   padding:16px;
   margin-bottom:16px;
-  box-shadow:0 2px 12px #0000000b;
+  box-shadow:0 2px 12px #0000000b
 }
-
 .hidden{
-  display:none!important;
+  display:none!important
 }
-
 label{
   display:block;
   font-weight:700;
   font-size:14px;
-  margin:12px 0 5px;
+  margin:14px 0 6px
 }
-
-input,
-select,
-textarea{
+input,select,textarea{
   width:100%;
-  padding:11px;
+  padding:12px;
   border:1px solid #d9dee7;
   border-radius:10px;
   font-size:16px;
-  background:#fff;
+  background:#fff
 }
-
 textarea{
-  min-height:80px;
-  resize:vertical;
+  min-height:85px
 }
-
-button{
-  border:0;
-  border-radius:10px;
-  padding:11px 14px;
-  font-weight:700;
-  cursor:pointer;
-  font-size:14px;
-}
-
-button:disabled{
-  opacity:.55;
-  cursor:not-allowed;
-}
-
 .primary{
-  background:#1f6feb;
-  color:#fff;
   width:100%;
-  margin-top:14px;
+  margin-top:16px;
+  background:#1f6feb;
+  color:#fff
 }
-
 .secondary{
   background:#eef3fb;
-  color:#20242a;
+  color:#333
 }
-
 .danger{
   background:#fff0f0;
-  color:#b22;
-  border:1px solid #efbbbb;
+  color:#d33;
+  border:1px solid #f0b8b8
 }
-
 .msg{
   padding:12px;
   border-radius:10px;
   background:#fff8df;
   color:#69520a;
-  margin-top:10px;
   font-size:14px;
-  white-space:pre-wrap;
-  overflow-wrap:anywhere;
+  margin-top:12px
 }
-
 .error{
   background:#fff0f0;
-  color:#9b1c1c;
+  color:#9b1c1c
 }
-
-.success{
-  background:#effaf1;
-  color:#176b2c;
+.userbar{
+  background:#f5f8ff;
+  border-radius:12px;
+  padding:12px;
+  margin-bottom:14px
 }
-
+.week,.days{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:5px
+}
+.week div{
+  text-align:center;
+  font-size:12px;
+  color:#7b8490;
+  padding:5px 0
+}
+.day{
+  min-height:72px;
+  background:#f8f9fb;
+  border-radius:10px;
+  padding:6px;
+  cursor:pointer
+}
+.day.empty{
+  background:transparent;
+  cursor:default
+}
+.day.off{
+  opacity:.45
+}
+.daynum{
+  font-weight:700;
+  font-size:14px
+}
+.count{
+  display:inline-block;
+  margin-top:8px;
+  background:#e8f0ff;
+  color:#1f6feb;
+  border-radius:999px;
+  padding:3px 7px;
+  font-size:12px;
+  font-weight:700
+}
+.dot{
+  display:block;
+  margin-top:7px;
+  font-size:11px;
+  color:#64707d
+}
+.monthbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:14px
+}
+.monthbar button{
+  background:#eef3fb;
+  padding:8px 12px
+}
+.month-title{
+  font-size:18px;
+  font-weight:800
+}
 .item{
   border:1px solid #e3e7ed;
   border-radius:12px;
   padding:12px;
-  margin:10px 0;
+  margin:10px 0
 }
-
+.meta{
+  font-size:13px;
+  color:#66717e;
+  margin-top:4px
+}
+.badge{
+  display:inline-block;
+  border-radius:999px;
+  padding:4px 8px;
+  background:#eef3fb;
+  font-size:12px;
+  font-weight:700
+}
 .row{
   display:flex;
   gap:8px;
-  margin-top:10px;
+  margin-top:10px
 }
-
 .row button{
-  flex:1;
+  flex:1
 }
-
 .small{
   font-size:12px;
-  color:#6f7882;
+  color:#77818e
 }
-
-.section-title{
-  margin-top:0;
-  margin-bottom:4px;
-}
-
-.sub-title{
-  margin-top:0;
-  color:#68717d;
-  font-size:13px;
-}
-
-.pdf-box{
-  border:2px dashed #cfd7e3;
-  border-radius:14px;
-  padding:16px;
-  background:#fafbfd;
-  margin-top:10px;
-}
-
-.pdf-box input{
-  background:#fff;
-}
-
-.candidate{
-  border:1px solid #dfe4eb;
-  border-radius:14px;
-  padding:14px;
-  margin-top:12px;
-  background:#fff;
-}
-
-.candidate-head{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin-bottom:10px;
-}
-
-.candidate-head input[type="checkbox"]{
-  width:20px;
-  height:20px;
-  flex:none;
-}
-
-.candidate-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-}
-
-.candidate-grid label{
-  margin:0;
-  font-size:12px;
-  color:#66717e;
-}
-
-.candidate-grid input,
-.candidate-grid textarea{
-  margin-top:4px;
-  font-size:14px;
-}
-
-.pdf-status{
-  margin-top:10px;
-  white-space:pre-wrap;
-}
-
-.loading{
-  opacity:.7;
-  pointer-events:none;
-}
-
-.divider{
-  height:1px;
-  background:#e5e8ed;
-  margin:20px 0;
-}
-
-/* =========================
-   追加：ログアウト右上
-========================= */
-
-.app-topbar{
-  display:flex;
-  justify-content:flex-end;
-  margin-bottom:16px;
-}
-
-.logout-button{
-  background:#f5f7fa;
-  color:#68717d;
-  border:1px solid #dfe4eb;
-  padding:7px 11px;
-  border-radius:8px;
-  font-size:13px;
-}
-
-/* =========================
-   追加：一覧の右側ボタン
-========================= */
-
-.item-main{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-}
-
-.item-name{
-  display:flex;
-  align-items:center;
-  gap:5px;
-  flex-wrap:wrap;
-  min-width:0;
-}
-
-.item-actions{
-  display:flex;
-  align-items:center;
-  gap:5px;
-  flex-shrink:0;
-}
-
-.item-actions button{
-  flex:none;
-  padding:5px 8px;
-  font-size:12px;
-  font-weight:600;
-  border-radius:7px;
-  background:#f7f8fa;
-  color:#68717d;
-  border:1px solid #e1e5ea;
-}
-
-.item-actions button:hover{
-  background:#eef1f5;
-}
-
-.item-actions .delete-button{
-  background:transparent;
-  color:#a06a6a;
-  border-color:#ead6d6;
-}
-
-.item-actions .delete-button:hover{
-  background:#fff4f4;
-}
-
-@media(max-width:600px){
-
-  .candidate-grid{
-    grid-template-columns:1fr;
-  }
-
-  .item-main{
-    align-items:flex-start;
-  }
-
-  .item-actions{
-    margin-left:auto;
-  }
-
-  .item-actions button{
-    padding:5px 7px;
-  }
-
+.linkbtn{
+  background:none;
+  color:#1f6feb;
+  padding:4px 0
 }
 </style>
 </head>
@@ -319,40 +220,151 @@ button:disabled{
 <body>
 
 <header>
-  <h1>清教学園ハンドベル部 管理者設定</h1>
+
+  <h1>部活おやすみ連絡</h1>
+
+  <div class="club">
+    清教学園ハンドベル部
+  </div>
+
+  <div id="loggedOut" class="actions">
+
+    <button onclick="showLogin()">
+      ログイン
+    </button>
+
+    <button onclick="showSetup()">
+      初回パスワード設定
+    </button>
+
+  </div>
+
+  <div id="loggedIn" class="hidden">
+
+    <div id="userbar" class="userbar"></div>
+
+    <div class="actions">
+
+      <button onclick="showForm()">
+        欠席連絡
+      </button>
+
+      <button onclick="showEdit()">
+        連絡を修正
+      </button>
+
+    </div>
+
+    <button
+      class="linkbtn"
+      onclick="logout()"
+    >
+      ログアウト
+    </button>
+
+  </div>
+
 </header>
+
 
 <main>
 
-<!-- =========================
-     ログイン
-========================= -->
+<section id="calendarView">
 
-<section id="login" class="card">
+  <div class="card">
 
-  <h2 class="section-title">
-    管理者ログイン
-  </h2>
+    <div class="monthbar">
 
-  <p class="small">
-    管理者用パスワードを入力してください。
-  </p>
+      <button onclick="changeMonth(-1)">
+        ‹
+      </button>
 
-  <label for="password">
+      <div
+        class="month-title"
+        id="monthTitle"
+      ></div>
+
+      <button onclick="changeMonth(1)">
+        ›
+      </button>
+
+    </div>
+
+    <div class="week">
+
+      <div>月</div>
+      <div>火</div>
+      <div>水</div>
+      <div>木</div>
+      <div>金</div>
+      <div>土</div>
+      <div>日</div>
+
+    </div>
+
+    <div
+      class="days"
+      id="days"
+    ></div>
+
+  </div>
+
+</section>
+
+
+<section
+  id="detailView"
+  class="panel hidden"
+>
+
+  <button
+    class="secondary"
+    onclick="backHome()"
+  >
+    ← カレンダーに戻る
+  </button>
+
+  <div id="detail"></div>
+
+</section>
+
+
+<section
+  id="loginView"
+  class="panel hidden"
+>
+
+  <button
+    class="secondary"
+    onclick="backHome()"
+  >
+    ← 戻る
+  </button>
+
+  <h2>ログイン</h2>
+
+  <label>
+    学校ID
+  </label>
+
+  <input
+    id="loginId"
+    autocomplete="username"
+  >
+
+  <label>
     パスワード
   </label>
 
   <input
-    id="password"
+    id="loginPassword"
     type="password"
     autocomplete="current-password"
-    placeholder="パスワード"
   >
 
   <button
-    id="loginButton"
     class="primary"
-    type="button"
+    onclick="login()"
   >
     ログイン
   </button>
@@ -361,311 +373,148 @@ button:disabled{
 
 </section>
 
-<!-- =========================
-     管理画面
-========================= -->
 
-<section id="app" class="hidden">
+<section
+  id="setupView"
+  class="panel hidden"
+>
+
+  <button
+    class="secondary"
+    onclick="backHome()"
+  >
+    ← 戻る
+  </button>
+
+  <h2>初回パスワード設定</h2>
+
+  <p class="small">
+    管理者に登録された学校IDを入力して、自分でパスワードを設定します。
+  </p>
+
+  <label>
+    学校ID
+  </label>
+
+  <input id="setupId">
+
+  <label>
+    新しいパスワード（6文字以上）
+  </label>
+
+  <input
+    id="setupPassword"
+    type="password"
+  >
+
+  <label>
+    確認
+  </label>
+
+  <input
+    id="setupPassword2"
+    type="password"
+  >
+
+  <button
+    class="primary"
+    onclick="setupPassword()"
+  >
+    設定する
+  </button>
+
+  <div id="setupMsg"></div>
+
+</section>
+
+
+<section
+  id="formView"
+  class="panel hidden"
+>
+
+  <button
+    class="secondary"
+    onclick="backHome()"
+  >
+    ← 戻る
+  </button>
+
+  <h2 id="formTitle">
+    欠席連絡
+  </h2>
+
+  <div
+    id="profileBox"
+    class="userbar"
+  ></div>
+
+  <label>
+    連絡の種類
+  </label>
+
+  <select
+    id="type"
+    onchange="updateTimeFields()"
+  >
+    <option>欠席</option>
+    <option>遅刻</option>
+    <option>早退</option>
+    <option>途中抜け</option>
+  </select>
+
+  <label>
+    日付
+  </label>
+
+  <input
+    id="date"
+    type="date"
+    onchange="checkDate()"
+  >
+
+  <div id="timeFields"></div>
 
-  <!-- ログアウト -->
+  <label>
+    理由（必須）
+  </label>
 
-  <div class="app-topbar">
+  <textarea id="reason"></textarea>
 
-    <button
-      id="logoutButton"
-      class="logout-button"
-      type="button"
-    >
-      ログアウト
-    </button>
+  <div id="formNotice"></div>
 
-  </div>
+  <button
+    class="primary"
+    onclick="saveNotice()"
+  >
+    登録する
+  </button>
 
+</section>
 
-  <!-- =========================
-       清教学園ハンドベル部予定表
-  ========================== -->
 
-  <div class="card">
+<section
+  id="editView"
+  class="panel hidden"
+>
 
-    <h2 class="section-title">
-      清教学園ハンドベル部予定表
-    </h2>
+  <button
+    class="secondary"
+    onclick="backHome()"
+  >
+    ← 戻る
+  </button>
 
-    <p class="sub-title">
-      PDFから予定を読み込み、確認して登録できます。
-    </p>
+  <h2>
+    連絡を修正
+  </h2>
 
-    <div class="pdf-box">
-
-      <label for="schedulePdf">
-        予定表PDF
-      </label>
-
-      <input
-        id="schedulePdf"
-        type="file"
-        accept="application/pdf,.pdf"
-      >
-
-      <button
-        id="readPdfButton"
-        class="primary"
-        type="button"
-      >
-        PDFを読み込む
-      </button>
-
-      <div
-        id="pdfStatus"
-        class="pdf-status"
-      ></div>
-
-    </div>
-
-    <div
-      id="pdfCandidates"
-      class="hidden"
-    >
-
-      <div class="divider"></div>
-
-      <h3>
-        読み取った予定
-      </h3>
-
-      <p class="small">
-        登録したい予定にチェックを入れて、内容を確認してください。
-        「練習曲の目安」は読み取りません。
-      </p>
-
-      <div id="candidateList"></div>
-
-      <button
-        id="registerCandidatesButton"
-        class="primary"
-        type="button"
-      >
-        選択した予定を登録
-      </button>
-
-      <div id="candidateMsg"></div>
-
-    </div>
-
-  </div>
-
-
-  <!-- =========================
-       手動予定登録
-  ========================== -->
-
-  <div class="card">
-
-    <h2 class="section-title">
-      予定を手動で登録
-    </h2>
-
-    <label for="sdate">
-      日付
-    </label>
-
-    <input
-      id="sdate"
-      type="date"
-    >
-
-    <label for="stime">
-      時間
-    </label>
-
-    <input
-      id="stime"
-      type="text"
-      placeholder="例：15:45〜18:00"
-    >
-
-    <label for="splace">
-      場所
-    </label>
-
-    <input
-      id="splace"
-      type="text"
-      placeholder="例：音楽練習室"
-    >
-
-    <label for="snote">
-      その他・備考
-    </label>
-
-    <textarea
-      id="snote"
-      placeholder="必要な場合のみ入力"
-    ></textarea>
-
-    <button
-      id="saveScheduleButton"
-      class="primary"
-      type="button"
-    >
-      予定を保存
-    </button>
-
-    <div id="scheduleMsg"></div>
-
-  </div>
-
-
-  <!-- =========================
-       部員登録
-  ========================== -->
-
-  <div class="card">
-
-    <h2 class="section-title">
-      部員登録
-    </h2>
-
-    <p class="sub-title">
-      部員の学校ID・名前・学年・クラスを登録します。
-    </p>
-
-    <label for="mid">
-      学校ID
-    </label>
-
-    <input
-      id="mid"
-      type="text"
-      autocomplete="off"
-      placeholder="学校ID"
-    >
-
-    <label for="mname">
-      名前
-    </label>
-
-    <input
-      id="mname"
-      type="text"
-      autocomplete="off"
-      placeholder="名前"
-    >
-
-    <label for="mgrade">
-      学年
-    </label>
-
-    <select id="mgrade">
-
-      <option value="">
-        選択してください
-      </option>
-
-      <option value="中学1年">
-        中学1年
-      </option>
-
-      <option value="中学2年">
-        中学2年
-      </option>
-
-      <option value="中学3年">
-        中学3年
-      </option>
-
-      <option value="高校1年">
-        高校1年
-      </option>
-
-      <option value="高校2年">
-        高校2年
-      </option>
-
-    </select>
-
-    <label for="mclass">
-      クラス
-    </label>
-
-    <select id="mclass">
-
-      <option value="">
-        選択してください
-      </option>
-
-      <option value="A">A組</option>
-      <option value="B">B組</option>
-      <option value="C">C組</option>
-      <option value="D">D組</option>
-      <option value="E">E組</option>
-      <option value="F">F組</option>
-      <option value="G">G組</option>
-      <option value="H">H組</option>
-      <option value="I">I組</option>
-      <option value="J">J組</option>
-      <option value="K">K組</option>
-
-    </select>
-
-    <button
-      id="addMemberButton"
-      class="primary"
-      type="button"
-    >
-      登録する
-    </button>
-
-    <div id="memberMsg"></div>
-
-  </div>
-
-
-  <!-- =========================
-       部員名簿
-  ========================== -->
-
-  <div class="card">
-
-    <h2 class="section-title">
-      部員名簿
-    </h2>
-
-    <p class="sub-title">
-      学年 → クラス → 名前の順に表示しています。
-    </p>
-
-    <div id="members">
-      <p class="small">
-        読み込み中...
-      </p>
-    </div>
-
-  </div>
-
-
-  <!-- =========================
-       登録済み予定
-  ========================== -->
-
-  <div class="card">
-
-    <h2 class="section-title">
-      登録済みの予定
-    </h2>
-
-    <div id="schedules">
-      <p class="small">
-        読み込み中...
-      </p>
-    </div>
-
-  </div>
+  <div id="myNotices"></div>
 
 </section>
 
 </main>
+
 
 <script type="module">
 
@@ -682,6 +531,7 @@ import {
   getAuth,
   onAuthStateChanged,
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signOut
 } from
 "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
@@ -692,13 +542,15 @@ import {
   get,
   set,
   update,
-  remove
+  remove,
+  push
 } from
 "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
 
 
 /* =========================================
    Firebase設定
+   ※ 正しいAPIキー
 ========================================= */
 
 const firebaseConfig = {
@@ -727,18 +579,6 @@ const firebaseConfig = {
 };
 
 
-/* =========================================
-   管理者アカウント
-========================================= */
-
-const ADMIN_EMAIL =
-  "kazuma.cosmos@gmail.com";
-
-
-/* =========================================
-   Firebase初期化
-========================================= */
-
 const app =
   initializeApp(firebaseConfig);
 
@@ -748,171 +588,195 @@ const auth =
 const db =
   getDatabase(app);
 
-
-/* =========================================
-   DOM
-========================================= */
-
 const $ =
   id => document.getElementById(id);
 
+let profile = null;
+let currentUser = null;
+let editingId = null;
+let current = new Date();
 
-/* =========================================
-   HTMLエスケープ
-========================================= */
-
-function esc(value){
-
-  return String(value ?? "")
-    .replace(
-      /[&<>"']/g,
-      c => ({
-        "&":"&amp;",
-        "<":"&lt;",
-        ">":"&gt;",
-        '"':"&quot;",
-        "'":"&#39;"
-      }[c])
-    );
-
-}
+const DOMAIN =
+  "@seikyo-handbell-club.local";
 
 
 /* =========================================
-   メッセージ
+   共通関数
 ========================================= */
 
-function message(
-  id,
-  text,
-  type = ""
-){
+const esc =
+  s =>
+    String(s ?? "")
+      .replace(
+        /[&<>"']/g,
+        c =>
+          ({
+            "&":"&amp;",
+            "<":"&lt;",
+            ">":"&gt;",
+            '"':"&quot;",
+            "'":"&#39;"
+          }[c])
+      );
 
-  const el =
-    $(id);
+const pad =
+  n =>
+    String(n).padStart(2,"0");
 
-  if(!el){
-    return;
-  }
+const ymd =
+  (y,m,d) =>
+    `${y}-${pad(m+1)}-${pad(d)}`;
 
-  el.className =
-    text
-      ? `msg ${type}`
-      : "";
+const jp =
+  s => {
 
-  el.textContent =
-    text || "";
+    let [a,b,c] =
+      s.split("-");
 
-}
+    return `${a}年${+b}月${+c}日`;
+
+  };
+
+const email =
+  id =>
+    String(id).trim() + DOMAIN;
 
 
 /* =========================================
-   管理者権限確認
+   画面切り替え
 ========================================= */
 
-async function isAdmin(){
+function hide(){
 
-  if(!auth.currentUser){
-    return false;
-  }
-
-  const snapshot =
-    await get(
-      ref(
-        db,
-        "admins/" +
-        auth.currentUser.uid
-      )
-    );
-
-  return (
-    snapshot.exists() &&
-    snapshot.val() === true
+  [
+    "calendarView",
+    "detailView",
+    "loginView",
+    "setupView",
+    "formView",
+    "editView"
+  ].forEach(
+    x =>
+      $(x)
+        .classList
+        .add("hidden")
   );
 
 }
 
 
+function backHome(){
+
+  hide();
+
+  $("calendarView")
+    .classList
+    .remove("hidden");
+
+  render();
+
+}
+
+
+function showLogin(){
+
+  hide();
+
+  $("loginView")
+    .classList
+    .remove("hidden");
+
+}
+
+
+function showSetup(){
+
+  hide();
+
+  $("setupView")
+    .classList
+    .remove("hidden");
+
+}
+
+
 /* =========================================
-   認証状態
+   プロフィール
+========================================= */
+
+async function loadProfile(){
+
+  if(!currentUser){
+    return;
+  }
+
+  const s =
+    await get(
+      ref(
+        db,
+        "members/" +
+        currentUser.uid
+      )
+    );
+
+  profile =
+    s.exists()
+      ? s.val()
+      : null;
+
+  if(profile){
+
+    $("userbar").innerHTML =
+      `<strong>${esc(profile.name)}</strong>` +
+      `${esc(profile.grade)}年` +
+      `${esc(profile.className)}組　` +
+      `ID：${esc(profile.schoolId)}`;
+
+    $("profileBox").textContent =
+      `${profile.name}` +
+      `（${profile.grade}年` +
+      `${profile.className}組）`;
+
+  }
+
+}
+
+
+/* =========================================
+   ログイン状態
 ========================================= */
 
 onAuthStateChanged(
   auth,
-  async user => {
+  async u => {
 
-    if(!user){
+    currentUser = u;
 
-      $("login")
-        .classList
-        .remove("hidden");
+    if(u){
 
-      $("app")
-        .classList
-        .add("hidden");
+      await loadProfile();
 
-      return;
-
-    }
-
-    try{
-
-      const admin =
-        await isAdmin();
-
-      if(!admin){
-
-        $("login")
-          .classList
-          .remove("hidden");
-
-        $("app")
-          .classList
-          .add("hidden");
-
-        return;
-
-      }
-
-      $("login")
+      $("loggedOut")
         .classList
         .add("hidden");
 
-      $("app")
+      $("loggedIn")
         .classList
         .remove("hidden");
 
-      $("password").value = "";
+      render();
 
-      await loadMembers();
+    }else{
 
-      await loadSchedules();
-
-    }catch(error){
-
-      console.error(
-        "認証状態確認エラー:",
-        error
-      );
-
-      $("login")
+      $("loggedOut")
         .classList
         .remove("hidden");
 
-      $("app")
+      $("loggedIn")
         .classList
         .add("hidden");
 
-      message(
-        "loginMsg",
-        "管理者権限の確認に失敗しました。\n\n" +
-        "エラーコード: " +
-        (error.code || "不明") +
-        "\n" +
-        "詳細: " +
-        (error.message || "不明"),
-        "error"
-      );
+      profile = null;
 
     }
 
@@ -921,169 +785,169 @@ onAuthStateChanged(
 
 
 /* =========================================
-   管理者ログイン
+   ログイン
 ========================================= */
 
-async function adminLogin(){
+async function login(){
 
-  const password =
-    $("password").value;
+  const id =
+    $("loginId")
+      .value
+      .trim();
 
-  message(
-    "loginMsg",
-    ""
-  );
+  const pw =
+    $("loginPassword")
+      .value;
 
-  if(!password){
+  if(!id || !pw){
 
-    message(
-      "loginMsg",
-      "パスワードを入力してください。",
-      "error"
-    );
+    $("loginMsg").innerHTML =
+      '<div class="msg error">' +
+      'IDとパスワードを入力してください。' +
+      '</div>';
 
     return;
 
   }
 
-  const button =
-    $("loginButton");
+  try{
 
-  button.disabled = true;
+    await signInWithEmailAndPassword(
+      auth,
+      email(id),
+      pw
+    );
 
-  button.textContent =
-    "ログイン中...";
+    $("loginMsg").innerHTML = "";
+
+    backHome();
+
+  }catch(e){
+
+    console.error(
+      "ログインエラー:",
+      e
+    );
+
+    $("loginMsg").innerHTML =
+      '<div class="msg error">' +
+      'IDまたはパスワードが正しくありません。' +
+      '</div>';
+
+  }
+
+}
+
+
+/* =========================================
+   初回パスワード設定
+========================================= */
+
+async function setupPassword(){
+
+  const id =
+    $("setupId")
+      .value
+      .trim();
+
+  const p =
+    $("setupPassword")
+      .value;
+
+  const p2 =
+    $("setupPassword2")
+      .value;
+
+  if(
+    !id ||
+    p.length < 6 ||
+    p !== p2
+  ){
+
+    $("setupMsg").innerHTML =
+      '<div class="msg error">' +
+      '入力内容を確認してください。' +
+      '</div>';
+
+    return;
+
+  }
 
   try{
 
-    const credential =
-      await signInWithEmailAndPassword(
+    const exists =
+      await get(
+        ref(
+          db,
+          "memberIds/" +
+          id
+        )
+      );
+
+    if(!exists.exists()){
+      throw Error("not-registered");
+    }
+
+    const reg =
+      await get(
+        ref(
+          db,
+          "memberRegistrations/" +
+          id
+        )
+      );
+
+    if(!reg.exists()){
+      throw Error("no-data");
+    }
+
+    const data =
+      reg.val();
+
+    const cred =
+      await createUserWithEmailAndPassword(
         auth,
-        ADMIN_EMAIL,
-        password
+        email(id),
+        p
       );
 
-    console.log(
-      "Authentication成功",
-      credential.user.uid,
-      credential.user.email
+    await set(
+      ref(
+        db,
+        "members/" +
+        cred.user.uid
+      ),
+      {
+        schoolId:id,
+        name:data.name,
+        grade:data.grade,
+        className:data.className
+      }
     );
 
-    let adminSnapshot;
-
-    try{
-
-      adminSnapshot =
-        await get(
-          ref(
-            db,
-            "admins/" +
-            credential.user.uid
-          )
-        );
-
-    }catch(error){
-
-      console.error(
-        "admins読み込みエラー:",
-        error
-      );
-
-      await signOut(auth);
-
-      message(
-        "loginMsg",
-        "パスワードは正しい可能性がありますが、\n" +
-        "管理者権限の確認に失敗しました。\n\n" +
-        "エラーコード: " +
-        (error.code || "不明") +
-        "\n" +
-        "詳細: " +
-        (error.message || "不明"),
-        "error"
-      );
-
-      return;
-
-    }
-
-    if(
-      !adminSnapshot.exists() ||
-      adminSnapshot.val() !== true
-    ){
-
-      await signOut(auth);
-
-      message(
-        "loginMsg",
-        "ログインは成功しましたが、\n" +
-        "このアカウントは管理者として登録されていません。\n\n" +
-        "UID:\n" +
-        credential.user.uid +
-        "\n\n" +
-        "Firebase Realtime Database の\n" +
-        "admins/" +
-        credential.user.uid +
-        "\n" +
-        "を確認してください。",
-        "error"
-      );
-
-      return;
-
-    }
-
-    $("login")
-      .classList
-      .add("hidden");
-
-    $("app")
-      .classList
-      .remove("hidden");
-
-    $("password").value = "";
-
-    message(
-      "loginMsg",
-      "ログインしました。",
-      "success"
+    await update(
+      ref(
+        db,
+        "memberIds/" +
+        id
+      ),
+      {
+        accountCreated:true,
+        uid:cred.user.uid
+      }
     );
 
-    await loadMembers();
+    backHome();
 
-    await loadSchedules();
+  }catch(e){
 
-  }catch(error){
+    console.error(e);
 
-    console.error(
-      "Firebase Authenticationログインエラー:",
-      error
-    );
-
-    let text =
-      "ログインできませんでした。\n\n";
-
-    text +=
-      "エラーコード: " +
-      (error.code || "不明") +
-      "\n";
-
-    text +=
-      "詳細: " +
-      (error.message || "不明");
-
-    message(
-      "loginMsg",
-      text,
-      "error"
-    );
-
-  }finally{
-
-    button.disabled = false;
-
-    button.textContent =
-      "ログイン";
+    $("setupMsg").innerHTML =
+      '<div class="msg error">' +
+      'そのIDが登録されていないか、' +
+      'すでに初回設定済みです。' +
+      '</div>';
 
   }
 
@@ -1094,1480 +958,29 @@ async function adminLogin(){
    ログアウト
 ========================================= */
 
-async function logout(){
+function logout(){
 
-  try{
-
-    await signOut(auth);
-
-  }catch(error){
-
-    console.error(
-      "ログアウトエラー:",
-      error
-    );
-
-  }
+  signOut(auth);
 
 }
 
 
 /* =========================================
-   部員登録
+   カレンダー
 ========================================= */
 
-async function addMember(){
+async function render(){
 
-  if(!(await isAdmin())){
-    return;
-  }
+  const y =
+    current.getFullYear();
 
-  const id =
-    $("mid")
-      .value
-      .trim();
+  const m =
+    current.getMonth();
 
-  const name =
-    $("mname")
-      .value
-      .trim();
+  $("monthTitle").textContent =
+    `${y}年${m+1}月`;
 
-  const grade =
-    $("mgrade")
-      .value;
-
-  const className =
-    $("mclass")
-      .value;
-
-  if(
-    !id ||
-    !name ||
-    !grade ||
-    !className
-  ){
-
-    message(
-      "memberMsg",
-      "学校ID・名前・学年・クラスをすべて入力してください。",
-      "error"
-    );
-
-    return;
-
-  }
-
-  const existing =
-    await get(
-      ref(
-        db,
-        "memberRegistrations/" +
-        id
-      )
-    );
-
-  if(existing.exists()){
-
-    message(
-      "memberMsg",
-      "その学校IDはすでに登録されています。",
-      "error"
-    );
-
-    return;
-
-  }
-
-  await set(
-    ref(
-      db,
-      "memberRegistrations/" +
-      id
-    ),
-    {
-      schoolId:id,
-      name:name,
-      grade:grade,
-      className:className,
-      createdAt:Date.now()
-    }
-  );
-
-  await set(
-    ref(
-      db,
-      "memberIds/" +
-      id
-    ),
-    {
-      accountCreated:false
-    }
-  );
-
-  $("mid").value = "";
-  $("mname").value = "";
-  $("mgrade").value = "";
-  $("mclass").value = "";
-
-  message(
-    "memberMsg",
-    "登録しました。",
-    "success"
-  );
-
-  await loadMembers();
-
-}
-
-
-/* =========================================
-   学年順
-========================================= */
-
-const gradeOrder = {
-
-  "中学1年":0,
-  "中学2年":1,
-  "中学3年":2,
-  "高校1年":3,
-  "高校2年":4
-
-};
-
-
-/* =========================================
-   クラス順
-========================================= */
-
-const classOrder = {
-
-  A:0,
-  B:1,
-  C:2,
-  D:3,
-  E:4,
-  F:5,
-  G:6,
-  H:7,
-  I:8,
-  J:9,
-  K:10
-
-};
-
-
-/* =========================================
-   部員一覧
-========================================= */
-
-async function loadMembers(){
-
-  const snapshot =
-    await get(
-      ref(
-        db,
-        "memberRegistrations"
-      )
-    );
-
-  const data =
-    snapshot.exists()
-      ? snapshot.val()
-      : {};
-
-  const members =
-    Object.entries(data);
-
-  members.sort(
-    ([,a],[,b]) => {
-
-      const gradeDiff =
-        (
-          gradeOrder[a.grade] ?? 99
-        ) -
-        (
-          gradeOrder[b.grade] ?? 99
-        );
-
-      if(gradeDiff !== 0){
-        return gradeDiff;
-      }
-
-      const classDiff =
-        (
-          classOrder[a.className] ?? 99
-        ) -
-        (
-          classOrder[b.className] ?? 99
-        );
-
-      if(classDiff !== 0){
-        return classDiff;
-      }
-
-      return String(
-        a.name || ""
-      ).localeCompare(
-        String(
-          b.name || ""
-        ),
-        "ja"
-      );
-
-    }
-  );
-
-  if(!members.length){
-
-    $("members").innerHTML =
-      "<p class='small'>まだ登録されていません。</p>";
-
-    return;
-
-  }
-
-  $("members").innerHTML =
-    members
-      .map(
-        ([id,x]) => `
-
-          <div class="item">
-
-            <div class="item-main">
-
-              <div class="item-name">
-
-                <strong>
-                  ${esc(x.name)}
-                </strong>
-
-                <span class="small">
-                  （${esc(id)}）
-                </span>
-
-              </div>
-
-              <div class="item-actions">
-
-                <button
-                  onclick="editMember('${esc(id)}')"
-                >
-                  変更
-                </button>
-
-                <button
-                  class="delete-button"
-                  onclick="deleteMember('${esc(id)}')"
-                >
-                  削除
-                </button>
-
-              </div>
-
-            </div>
-
-            <div class="small">
-
-              ${esc(x.grade)}
-              ・
-              ${esc(x.className)}組
-
-            </div>
-
-          </div>
-
-        `
-      )
-      .join("");
-
-}
-
-
-/* =========================================
-   部員変更
-========================================= */
-
-async function editMember(id){
-
-  if(!(await isAdmin())){
-    return;
-  }
-
-  const snapshot =
-    await get(
-      ref(
-        db,
-        "memberRegistrations/" +
-        id
-      )
-    );
-
-  if(!snapshot.exists()){
-    return;
-  }
-
-  const data =
-    snapshot.val();
-
-  const name =
-    prompt(
-      "名前",
-      data.name || ""
-    );
-
-  if(name === null){
-    return;
-  }
-
-  const grade =
-    prompt(
-      "学年\n\n中学1年\n中学2年\n中学3年\n高校1年\n高校2年",
-      data.grade || ""
-    );
-
-  if(grade === null){
-    return;
-  }
-
-  const className =
-    prompt(
-      "クラス（A〜K）",
-      data.className || ""
-    );
-
-  if(className === null){
-    return;
-  }
-
-  const normalizedClass =
-    className
-      .replace("組","")
-      .trim()
-      .toUpperCase();
-
-  if(
-    !Object.prototype.hasOwnProperty.call(
-      gradeOrder,
-      grade
-    )
-  ){
-
-    alert(
-      "学年は「中学1年」〜「高校2年」で入力してください。"
-    );
-
-    return;
-
-  }
-
-  if(
-    !Object.prototype.hasOwnProperty.call(
-      classOrder,
-      normalizedClass
-    )
-  ){
-
-    alert(
-      "クラスはA〜Kで入力してください。"
-    );
-
-    return;
-
-  }
-
-  await update(
-    ref(
-      db,
-      "memberRegistrations/" +
-      id
-    ),
-    {
-      name:name.trim(),
-      grade:grade,
-      className:normalizedClass
-    }
-  );
-
-  await loadMembers();
-
-}
-
-
-/* =========================================
-   部員削除
-========================================= */
-
-async function deleteMember(id){
-
-  if(!(await isAdmin())){
-    return;
-  }
-
-  const ok =
-    confirm(
-      "この部員登録を削除しますか？"
-    );
-
-  if(!ok){
-    return;
-  }
-
-  await remove(
-    ref(
-      db,
-      "memberRegistrations/" +
-      id
-    )
-  );
-
-  await remove(
-    ref(
-      db,
-      "memberIds/" +
-      id
-    )
-  );
-
-  await loadMembers();
-
-}
-
-
-/* =========================================
-   PDF.js
-========================================= */
-
-let pdfjsLib = null;
-
-async function getPdfJs(){
-
-  if(pdfjsLib){
-    return pdfjsLib;
-  }
-
-  const module =
-    await import(
-      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs"
-    );
-
-  module.GlobalWorkerOptions.workerSrc =
-    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
-
-  pdfjsLib =
-    module;
-
-  return pdfjsLib;
-
-}
-
-
-/* =========================================
-   PDFテキスト抽出
-========================================= */
-
-async function extractPdfLines(file){
-
-  const pdf =
-    await getPdfJs();
-
-  const buffer =
-    await file.arrayBuffer();
-
-  const document =
-    await pdf.getDocument({
-      data:buffer
-    }).promise;
-
-  const allLines = [];
-
-  for(
-    let pageNumber = 1;
-    pageNumber <= document.numPages;
-    pageNumber++
-  ){
-
-    const page =
-      await document.getPage(
-        pageNumber
-      );
-
-    const content =
-      await page.getTextContent();
-
-    const items =
-      content.items
-        .filter(
-          item =>
-            item.str &&
-            item.str.trim()
-        )
-        .map(
-          item => {
-
-            const transform =
-              item.transform || [];
-
-            return {
-
-              text:
-                item.str.trim(),
-
-              x:
-                Number(
-                  transform[4] || 0
-                ),
-
-              y:
-                Number(
-                  transform[5] || 0
-                ),
-
-              width:
-                Number(
-                  item.width || 0
-                )
-
-            };
-
-          }
-        );
-
-    items.sort(
-      (a,b) => {
-
-        if(
-          Math.abs(
-            a.y - b.y
-          ) > 3
-        ){
-
-          return b.y - a.y;
-
-        }
-
-        return a.x - b.x;
-
-      }
-    );
-
-    const rows = [];
-
-    for(const item of items){
-
-      let row =
-        rows.find(
-          r =>
-            Math.abs(
-              r.y - item.y
-            ) < 4
-        );
-
-      if(!row){
-
-        row = {
-
-          y:item.y,
-          items:[]
-
-        };
-
-        rows.push(row);
-
-      }
-
-      row.items.push(item);
-
-    }
-
-    rows.sort(
-      (a,b) =>
-        b.y - a.y
-    );
-
-    for(const row of rows){
-
-      row.items.sort(
-        (a,b) =>
-          a.x - b.x
-      );
-
-      const text =
-        row.items
-          .map(
-            item =>
-              item.text
-          )
-          .join(" ")
-          .replace(
-            /\s+/g,
-            " "
-          )
-          .trim();
-
-      if(text){
-
-        allLines.push({
-
-          page:pageNumber,
-          y:row.y,
-          items:row.items,
-          text:text
-
-        });
-
-      }
-
-    }
-
-  }
-
-  return allLines;
-
-}
-
-
-/* =========================================
-   PDF予定解析
-========================================= */
-
-function parseScheduleLines(lines){
-
-  let month = null;
-
-  for(const line of lines){
-
-    if(
-      line.text.includes("練習曲")
-    ){
-      continue;
-    }
-
-    const match =
-      line.text.match(
-        /(\d{1,2})月/
-      );
-
-    if(match){
-
-      const m =
-        Number(match[1]);
-
-      if(
-        m >= 1 &&
-        m <= 12
-      ){
-
-        month = m;
-
-        break;
-
-      }
-
-    }
-
-  }
-
-  if(!month){
-
-    month =
-      new Date()
-        .getMonth() + 1;
-
-  }
-
-  const year =
-    new Date()
-      .getFullYear();
-
-  const candidates = [];
-
-  let currentDate = null;
-
-  for(
-    let i = 0;
-    i < lines.length;
-    i++
-  ){
-
-    const raw =
-      lines[i].text;
-
-    if(
-      raw.includes("練習曲")
-    ){
-
-      continue;
-
-    }
-
-    let dateMatch =
-      raw.match(
-        /(\d{1,2})月\s*(\d{1,2})日?/
-      );
-
-    if(!dateMatch){
-
-      dateMatch =
-        raw.match(
-          /(\d{1,2})[\/／](\d{1,2})/
-        );
-
-    }
-
-    if(dateMatch){
-
-      const m =
-        Number(
-          dateMatch[1]
-        );
-
-      const d =
-        Number(
-          dateMatch[2]
-        );
-
-      if(
-        m >= 1 &&
-        m <= 12 &&
-        d >= 1 &&
-        d <= 31
-      ){
-
-        month = m;
-
-        currentDate = {
-
-          year:year,
-          month:m,
-          day:d
-
-        };
-
-        const rest =
-          raw
-            .replace(
-              dateMatch[0],
-              ""
-            )
-            .trim();
-
-        if(rest){
-
-          const candidate =
-            makeCandidate(
-              currentDate,
-              rest
-            );
-
-          if(candidate){
-
-            candidates.push(
-              candidate
-            );
-
-          }
-
-        }
-
-        continue;
-
-      }
-
-    }
-
-    if(currentDate){
-
-      const candidate =
-        makeCandidate(
-          currentDate,
-          raw
-        );
-
-      if(candidate){
-
-        if(
-          containsScheduleInformation(
-            raw
-          )
-        ){
-
-          candidates.push(
-            candidate
-          );
-
-        }
-
-      }
-
-    }
-
-  }
-
-  const unique =
-    new Map();
-
-  for(const item of candidates){
-
-    const key =
-      [
-        item.date,
-        item.time,
-        item.place,
-        item.note
-      ].join("|");
-
-    if(!unique.has(key)){
-
-      unique.set(
-        key,
-        item
-      );
-
-    }
-
-  }
-
-  return Array.from(
-    unique.values()
-  );
-
-}
-
-
-/* =========================================
-   予定情報判定
-========================================= */
-
-function containsScheduleInformation(text){
-
-  return (
-
-    /\d{1,2}:\d{2}/.test(text) ||
-
-    /音楽練習室/.test(text) ||
-
-    /不在/.test(text) ||
-
-    /文化祭/.test(text) ||
-
-    /リハーサル/.test(text) ||
-
-    /準備/.test(text) ||
-
-    /休み/.test(text)
-
-  );
-
-}
-
-
-/* =========================================
-   予定候補作成
-========================================= */
-
-function makeCandidate(
-  dateObj,
-  text
-){
-
-  if(!text){
-    return null;
-  }
-
-  if(
-    text.includes("練習曲")
-  ){
-
-    return null;
-
-  }
-
-  const yyyy =
-    String(
-      dateObj.year
-    );
-
-  const mm =
-    String(
-      dateObj.month
-    ).padStart(
-      2,
-      "0"
-    );
-
-  const dd =
-    String(
-      dateObj.day
-    ).padStart(
-      2,
-      "0"
-    );
-
-  const date =
-    `${yyyy}-${mm}-${dd}`;
-
-  const timeMatches =
-    text.match(
-      /\d{1,2}:\d{2}\s*[〜~\-－]\s*\d{1,2}:\d{2}/g
-    );
-
-  let time =
-    timeMatches
-      ? timeMatches[0]
-      : "";
-
-  time =
-    time.replace(
-      /\s+/g,
-      ""
-    );
-
-  let place = "";
-
-  if(
-    text.includes("音楽練習室")
-  ){
-
-    place =
-      "音楽練習室";
-
-  }
-
-  let note =
-    text;
-
-  if(
-    time &&
-    timeMatches
-  ){
-
-    note =
-      note.replace(
-        timeMatches[0],
-        ""
-      );
-
-  }
-
-  if(place){
-
-    note =
-      note.replace(
-        place,
-        ""
-      );
-
-  }
-
-  note =
-    note
-      .replace(
-        /練習曲の目安/g,
-        ""
-      )
-      .replace(
-        /\s+/g,
-        " "
-      )
-      .trim();
-
-  if(
-    !time &&
-    !place &&
-    !/不在|文化祭|リハーサル|準備|休み/.test(note)
-  ){
-
-    return null;
-
-  }
-
-  return {
-
-    date:date,
-    time:time,
-    place:place,
-    note:note
-
-  };
-
-}
-
-
-/* =========================================
-   PDF読み込み
-========================================= */
-
-async function readSchedulePDF(){
-
-  if(!(await isAdmin())){
-    return;
-  }
-
-  const file =
-    $("schedulePdf")
-      .files[0];
-
-  if(!file){
-
-    message(
-      "pdfStatus",
-      "PDFファイルを選択してください。",
-      "error"
-    );
-
-    return;
-
-  }
-
-  const button =
-    $("readPdfButton");
-
-  button.disabled = true;
-
-  button.textContent =
-    "PDFを読み込んでいます...";
-
-  $("pdfCandidates")
-    .classList
-    .add("hidden");
-
-  message(
-    "pdfStatus",
-    "PDFを解析しています..."
-  );
-
-  try{
-
-    const lines =
-      await extractPdfLines(
-        file
-      );
-
-    if(!lines.length){
-
-      throw new Error(
-        "PDFから文字を読み取れませんでした。"
-      );
-
-    }
-
-    const candidates =
-      parseScheduleLines(
-        lines
-      );
-
-    if(!candidates.length){
-
-      message(
-        "pdfStatus",
-        "PDFから予定を見つけられませんでした。\n\n" +
-        "このPDFが画像として保存されている場合は、文字情報を読み取れない可能性があります。",
-        "error"
-      );
-
-      return;
-
-    }
-
-    renderCandidates(
-      candidates
-    );
-
-    message(
-      "pdfStatus",
-      `${candidates.length}件の予定候補を読み取りました。`
-    );
-
-    $("pdfCandidates")
-      .classList
-      .remove("hidden");
-
-  }catch(error){
-
-    console.error(
-      "PDF読み込みエラー:",
-      error
-    );
-
-    message(
-      "pdfStatus",
-      "PDFの読み込みに失敗しました。\n\n" +
-      "エラー：" +
-      (error.message || "不明"),
-      "error"
-    );
-
-  }finally{
-
-    button.disabled = false;
-
-    button.textContent =
-      "PDFを読み込む";
-
-  }
-
-}
-
-
-/* =========================================
-   PDF候補
-========================================= */
-
-let pdfCandidatesData = [];
-
-function renderCandidates(
-  candidates
-){
-
-  pdfCandidatesData =
-    candidates;
-
-  const container =
-    $("candidateList");
-
-  container.innerHTML =
-    candidates
-      .map(
-        (item,index) => `
-
-          <div
-            class="candidate"
-            data-index="${index}"
-          >
-
-            <div class="candidate-head">
-
-              <input
-                type="checkbox"
-                class="candidate-check"
-                checked
-              >
-
-              <strong>
-                予定 ${index + 1}
-              </strong>
-
-            </div>
-
-            <div class="candidate-grid">
-
-              <div>
-
-                <label>
-                  日付
-                </label>
-
-                <input
-                  class="candidate-date"
-                  type="date"
-                  value="${esc(item.date)}"
-                >
-
-              </div>
-
-              <div>
-
-                <label>
-                  時間
-                </label>
-
-                <input
-                  class="candidate-time"
-                  type="text"
-                  value="${esc(item.time)}"
-                  placeholder="例：15:45〜18:00"
-                >
-
-              </div>
-
-              <div>
-
-                <label>
-                  場所
-                </label>
-
-                <input
-                  class="candidate-place"
-                  type="text"
-                  value="${esc(item.place)}"
-                >
-
-              </div>
-
-              <div>
-
-                <label>
-                  その他・備考
-                </label>
-
-                <input
-                  class="candidate-note"
-                  type="text"
-                  value="${esc(item.note)}"
-                >
-
-              </div>
-
-            </div>
-
-          </div>
-
-        `
-      )
-      .join("");
-
-}
-
-
-/* =========================================
-   PDF予定登録
-========================================= */
-
-async function registerCandidates(){
-
-  if(!(await isAdmin())){
-    return;
-  }
-
-  const boxes =
-    document.querySelectorAll(
-      ".candidate"
-    );
-
-  const selected = [];
-
-  boxes.forEach(
-    box => {
-
-      const check =
-        box.querySelector(
-          ".candidate-check"
-        );
-
-      if(!check.checked){
-        return;
-      }
-
-      const date =
-        box.querySelector(
-          ".candidate-date"
-        ).value;
-
-      const time =
-        box.querySelector(
-          ".candidate-time"
-        ).value
-        .trim();
-
-      const place =
-        box.querySelector(
-          ".candidate-place"
-        ).value
-        .trim();
-
-      const note =
-        box.querySelector(
-          ".candidate-note"
-        ).value
-        .trim();
-
-      if(!date){
-        return;
-      }
-
-      selected.push({
-
-        date,
-        time,
-        place,
-        note
-
-      });
-
-    }
-  );
-
-  if(!selected.length){
-
-    message(
-      "candidateMsg",
-      "登録する予定を1つ以上選択してください。",
-      "error"
-    );
-
-    return;
-
-  }
-
-  const button =
-    $("registerCandidatesButton");
-
-  button.disabled = true;
-
-  button.textContent =
-    "登録しています...";
-
-  try{
-
-    for(const item of selected){
-
-      await set(
-        ref(
-          db,
-          "schedules/" +
-          item.date
-        ),
-        {
-
-          time:item.time,
-          place:item.place,
-          note:item.note,
-          updatedAt:Date.now()
-
-        }
-      );
-
-    }
-
-    message(
-      "candidateMsg",
-      `${selected.length}件の予定を登録しました。`,
-      "success"
-    );
-
-    await loadSchedules();
-
-  }catch(error){
-
-    console.error(
-      "PDF予定登録エラー:",
-      error
-    );
-
-    message(
-      "candidateMsg",
-      "予定の登録に失敗しました。\n\n" +
-      "エラーコード: " +
-      (error.code || "不明") +
-      "\n" +
-      "詳細: " +
-      (error.message || "不明"),
-      "error"
-    );
-
-  }finally{
-
-    button.disabled = false;
-
-    button.textContent =
-      "選択した予定を登録";
-
-  }
-
-}
-
-
-/* =========================================
-   手動予定保存
-========================================= */
-
-async function saveSchedule(){
-
-  if(!(await isAdmin())){
-    return;
-  }
-
-  const date =
-    $("sdate").value;
-
-  const time =
-    $("stime")
-      .value
-      .trim();
-
-  const place =
-    $("splace")
-      .value
-      .trim();
-
-  const note =
-    $("snote")
-      .value
-      .trim();
-
-  if(!date){
-
-    message(
-      "scheduleMsg",
-      "日付を入力してください。",
-      "error"
-    );
-
-    return;
-
-  }
-
-  try{
-
-    await set(
-      ref(
-        db,
-        "schedules/" +
-        date
-      ),
-      {
-
-        time:time,
-        place:place,
-        note:note,
-        updatedAt:Date.now()
-
-      }
-    );
-
-    message(
-      "scheduleMsg",
-      "予定を保存しました。",
-      "success"
-    );
-
-    $("sdate").value = "";
-    $("stime").value = "";
-    $("splace").value = "";
-    $("snote").value = "";
-
-    await loadSchedules();
-
-  }catch(error){
-
-    console.error(
-      "予定保存エラー:",
-      error
-    );
-
-    message(
-      "scheduleMsg",
-      "予定の保存に失敗しました。\n\n" +
-      "エラーコード: " +
-      (error.code || "不明") +
-      "\n" +
-      "詳細: " +
-      (error.message || "不明"),
-      "error"
-    );
-
-  }
-
-}
-
-
-/* =========================================
-   登録済み予定
-========================================= */
-
-async function loadSchedules(){
-
-  const snapshot =
+  const ss =
     await get(
       ref(
         db,
@@ -2575,99 +988,136 @@ async function loadSchedules(){
       )
     );
 
-  const data =
-    snapshot.exists()
-      ? snapshot.val()
+  const ns =
+    await get(
+      ref(
+        db,
+        "notices"
+      )
+    );
+
+  const sch =
+    ss.exists()
+      ? ss.val()
       : {};
 
-  const schedules =
-    Object.entries(data)
-      .sort(
-        ([a],[b]) =>
-          a.localeCompare(b)
-      );
+  const all =
+    ns.exists()
+      ? ns.val()
+      : {};
 
-  if(!schedules.length){
+  const first =
+    (
+      new Date(
+        y,
+        m,
+        1
+      ).getDay() + 6
+    ) % 7;
 
-    $("schedules").innerHTML =
-      "<p class='small'>予定はありません。</p>";
+  const last =
+    new Date(
+      y,
+      m + 1,
+      0
+    ).getDate();
 
-    return;
+  let h = "";
+
+  for(
+    let i = 0;
+    i < first;
+    i++
+  ){
+
+    h +=
+      '<div class="day empty"></div>';
 
   }
 
-  $("schedules").innerHTML =
-    schedules
-      .map(
-        ([date,x]) => `
+  for(
+    let d = 1;
+    d <= last;
+    d++
+  ){
 
-          <div class="item">
+    const date =
+      ymd(
+        y,
+        m,
+        d
+      );
 
-            <div class="item-main">
+    const has =
+      !!sch[date];
 
-              <strong>
-                ${esc(date)}
-              </strong>
+    const count =
+      Object.values(all)
+        .filter(
+          n =>
+            n.date === date
+        )
+        .length;
 
-              <div class="item-actions">
+    h +=
+      `<div class="day ${has ? "" : "off"}" onclick="openDay('${date}')">` +
 
-                <button
-                  onclick="editSchedule('${esc(date)}')"
-                >
-                  変更
-                </button>
+      `<div class="daynum">${d}</div>` +
 
-                <button
-                  class="delete-button"
-                  onclick="deleteSchedule('${esc(date)}')"
-                >
-                  削除
-                </button>
+      (
+        count
+          ? `<span class="count">${count}件</span>`
+          : ""
+      ) +
 
-              </div>
+      `<span class="dot">` +
 
-            </div>
+      (
+        has
+          ? esc(
+              sch[date].time ||
+              "部活あり"
+            )
+          : "部活なし"
+      ) +
 
-            ${
-              x.time
-                ? `<div>${esc(x.time)}</div>`
-                : ""
-            }
+      `</span></div>`;
 
-            ${
-              x.place
-                ? `<div>${esc(x.place)}</div>`
-                : ""
-            }
+  }
 
-            ${
-              x.note
-                ? `<div class="small">
-                    備考：${esc(x.note)}
-                   </div>`
-                : ""
-            }
+  $("days").innerHTML =
+    h;
 
-          </div>
+}
 
-        `
-      )
-      .join("");
+
+function changeMonth(n){
+
+  current =
+    new Date(
+      current.getFullYear(),
+      current.getMonth() + n,
+      1
+    );
+
+  render();
 
 }
 
 
 /* =========================================
-   予定変更
+   日付詳細
 ========================================= */
 
-async function editSchedule(date){
+async function openDay(date){
 
-  if(!(await isAdmin())){
-    return;
-  }
+  hide();
 
-  const snapshot =
+  $("detailView")
+    .classList
+    .remove("hidden");
+
+  const ss =
     await get(
       ref(
         db,
@@ -2676,83 +1126,586 @@ async function editSchedule(date){
       )
     );
 
-  if(!snapshot.exists()){
+  const ns =
+    await get(
+      ref(
+        db,
+        "notices"
+      )
+    );
+
+  const sch =
+    ss.exists()
+      ? ss.val()
+      : null;
+
+  const all =
+    ns.exists()
+      ? ns.val()
+      : {};
+
+  const list =
+    Object.values(all)
+      .filter(
+        n =>
+          n.date === date
+      );
+
+  let h =
+    `<h2>${jp(date)}</h2>`;
+
+  if(!sch){
+
+    $("detail").innerHTML =
+      h +
+      '<div class="msg error">' +
+      'この日は部活動がありません。' +
+      '</div>';
+
     return;
+
   }
 
-  const data =
-    snapshot.val();
+  h +=
+    `<div class="userbar">` +
+    `<strong>部活動あり</strong>` +
+    `${esc(sch.time || "")}<br>` +
+    `${esc(sch.place || "")}` +
+    `</div>`;
 
-  $("sdate").value =
-    date;
+  h +=
+    `<h3>連絡 ${list.length}件</h3>`;
 
-  $("stime").value =
-    data.time || "";
+  h +=
+    list.length
 
-  $("splace").value =
-    data.place || "";
+      ? list
+          .map(
+            n =>
+              `<div class="item">` +
+              `<strong>` +
+              `${esc(n.name)} ` +
+              `<span class="badge">` +
+              `${esc(n.type)}` +
+              `</span>` +
+              `</strong>` +
 
-  $("snote").value =
-    data.note || "";
+              (
+                n.time
+                  ? `<div class="meta">${esc(n.time)}</div>`
+                  : ""
+              ) +
 
-  $("sdate").scrollIntoView({
-    behavior:"smooth",
-    block:"center"
-  });
+              `<div class="meta">` +
+              `理由：${esc(n.reason)}` +
+              `</div>` +
+
+              `</div>`
+          )
+          .join("")
+
+      : "<p class='small'>現在、連絡はありません。</p>";
+
+  $("detail").innerHTML =
+    h;
 
 }
 
 
 /* =========================================
-   予定削除
+   欠席連絡フォーム
 ========================================= */
 
-async function deleteSchedule(date){
+function showForm(id = null){
 
-  if(!(await isAdmin())){
-    return;
+  if(
+    !currentUser ||
+    !profile
+  ){
+
+    return showLogin();
+
   }
 
-  const ok =
-    confirm(
-      `${date}の予定を削除しますか？`
+  editingId =
+    id;
+
+  hide();
+
+  $("formView")
+    .classList
+    .remove("hidden");
+
+  $("formTitle").textContent =
+    id
+      ? "連絡を修正"
+      : "欠席連絡";
+
+  $("type").value =
+    "欠席";
+
+  $("date").value =
+    "";
+
+  $("reason").value =
+    "";
+
+  $("formNotice").innerHTML =
+    "";
+
+  updateTimeFields();
+
+}
+
+
+/* =========================================
+   時間欄
+========================================= */
+
+function updateTimeFields(
+  v = ""
+){
+
+  const t =
+    $("type").value;
+
+  let l = "";
+  let p = "";
+
+  if(t === "遅刻"){
+
+    l =
+      "到着予定時刻";
+
+    p =
+      "例：17:30";
+
+  }
+
+  if(t === "早退"){
+
+    l =
+      "帰る予定時刻";
+
+    p =
+      "例：17:30";
+
+  }
+
+  if(t === "途中抜け"){
+
+    l =
+      "抜ける時間〜戻る時間";
+
+    p =
+      "例：18:00〜19:00";
+
+  }
+
+  $("timeFields").innerHTML =
+    l
+
+      ? `<label>${l}</label>` +
+        `<input id="time" value="${esc(v)}" placeholder="${p}">`
+
+      : "";
+
+}
+
+
+/* =========================================
+   日付確認
+========================================= */
+
+async function checkDate(){
+
+  const d =
+    $("date").value;
+
+  if(!d){
+
+    $("formNotice").innerHTML =
+      "";
+
+    return;
+
+  }
+
+  const s =
+    await get(
+      ref(
+        db,
+        "schedules/" +
+        d
+      )
     );
 
-  if(!ok){
+  if(!s.exists()){
+
+    $("formNotice").innerHTML =
+      '<div class="msg error">' +
+      'この日は部活動がないため、連絡できません。' +
+      '</div>';
+
     return;
+
   }
 
-  try{
+  $("formNotice").innerHTML =
+    `<div class="msg">` +
+    `部活：${esc(s.val().time || "")} / ` +
+    `${esc(s.val().place || "")}` +
+    `</div>`;
+
+}
+
+
+/* =========================================
+   欠席連絡保存
+   ★ 同じ日に1人1件まで
+========================================= */
+
+async function saveNotice(){
+
+  const d =
+    $("date").value;
+
+  const r =
+    $("reason")
+      .value
+      .trim();
+
+  const t =
+    $("type").value;
+
+  const time =
+    $("time")?.value
+      .trim() || "";
+
+  if(!d || !r){
+
+    alert(
+      "日付と理由は必須です。"
+    );
+
+    return;
+
+  }
+
+  if(!currentUser || !profile){
+
+    alert(
+      "ログインしてください。"
+    );
+
+    return;
+
+  }
+
+  const schedule =
+    await get(
+      ref(
+        db,
+        "schedules/" +
+        d
+      )
+    );
+
+  if(!schedule.exists()){
+
+    alert(
+      "その日は部活動がありません。"
+    );
+
+    return;
+
+  }
+
+
+  /* =====================================
+     ★ 同じ日の重複チェック
+     自分自身の修正は除外する
+  ===================================== */
+
+  const noticesSnapshot =
+    await get(
+      ref(
+        db,
+        "notices"
+      )
+    );
+
+  const allNotices =
+    noticesSnapshot.exists()
+      ? noticesSnapshot.val()
+      : {};
+
+  const duplicate =
+    Object.entries(allNotices)
+      .some(
+        ([id,n]) =>
+
+          n.uid === currentUser.uid &&
+
+          n.date === d &&
+
+          id !== editingId
+
+      );
+
+  if(duplicate){
+
+    alert(
+      "同じ日の欠席連絡は1件までです。\n" +
+      "すでにその日の連絡が登録されています。\n\n" +
+      "内容を変更したい場合は、" +
+      "「連絡を修正」から修正してください。"
+    );
+
+    return;
+
+  }
+
+
+  /* =====================================
+     新規登録 / 修正
+  ===================================== */
+
+  if(editingId){
+
+    await update(
+      ref(
+        db,
+        "notices/" +
+        editingId
+      ),
+      {
+        type:t,
+        date:d,
+        time:time,
+        reason:r,
+        updatedAt:Date.now()
+      }
+    );
+
+  }else{
+
+    await set(
+      push(
+        ref(
+          db,
+          "notices"
+        )
+      ),
+      {
+        uid:currentUser.uid,
+        schoolId:profile.schoolId,
+        name:profile.name,
+        type:t,
+        date:d,
+        time:time,
+        reason:r,
+        createdAt:Date.now(),
+        updatedAt:Date.now()
+      }
+    );
+
+  }
+
+  editingId =
+    null;
+
+  alert(
+    "登録しました。"
+  );
+
+  backHome();
+
+}
+
+
+/* =========================================
+   自分の連絡一覧
+========================================= */
+
+async function showEdit(){
+
+  if(!currentUser){
+
+    return showLogin();
+
+  }
+
+  hide();
+
+  $("editView")
+    .classList
+    .remove("hidden");
+
+  const s =
+    await get(
+      ref(
+        db,
+        "notices"
+      )
+    );
+
+  const all =
+    s.exists()
+      ? s.val()
+      : {};
+
+  const list =
+    Object.entries(all)
+      .filter(
+        ([id,n]) =>
+          n.uid === currentUser.uid
+      );
+
+  $("myNotices").innerHTML =
+
+    list.length
+
+      ? list
+          .map(
+            ([id,n]) =>
+
+              `<div class="item">` +
+
+              `<strong>` +
+              `${jp(n.date)}　` +
+              `${esc(n.type)}` +
+              `</strong>` +
+
+              (
+                n.time
+                  ? `<div class="meta">${esc(n.time)}</div>`
+                  : ""
+              ) +
+
+              `<div class="meta">` +
+              `理由：${esc(n.reason)}` +
+              `</div>` +
+
+              `<div class="row">` +
+
+              `<button onclick="editNotice('${id}')">` +
+              `修正` +
+              `</button>` +
+
+              `<button class="danger" onclick="deleteNotice('${id}')">` +
+              `削除` +
+              `</button>` +
+
+              `</div>` +
+
+              `</div>`
+          )
+          .join("")
+
+      : "<p class='small'>登録された連絡がありません。</p>";
+
+}
+
+
+/* =========================================
+   連絡修正
+========================================= */
+
+async function editNotice(id){
+
+  const s =
+    await get(
+      ref(
+        db,
+        "notices/" +
+        id
+      )
+    );
+
+  if(
+    !s.exists() ||
+    s.val().uid !== currentUser.uid
+  ){
+
+    return;
+
+  }
+
+  const n =
+    s.val();
+
+  editingId =
+    id;
+
+  hide();
+
+  $("formView")
+    .classList
+    .remove("hidden");
+
+  $("formTitle").textContent =
+    "連絡を修正";
+
+  $("type").value =
+    n.type;
+
+  $("date").value =
+    n.date;
+
+  $("reason").value =
+    n.reason;
+
+  updateTimeFields(
+    n.time || ""
+  );
+
+  checkDate();
+
+}
+
+
+/* =========================================
+   連絡削除
+========================================= */
+
+async function deleteNotice(id){
+
+  if(
+    !confirm(
+      "この連絡を削除しますか？"
+    )
+  ){
+
+    return;
+
+  }
+
+  const s =
+    await get(
+      ref(
+        db,
+        "notices/" +
+        id
+      )
+    );
+
+  if(
+    s.exists() &&
+    s.val().uid === currentUser.uid
+  ){
 
     await remove(
       ref(
         db,
-        "schedules/" +
-        date
+        "notices/" +
+        id
       )
     );
 
-    await loadSchedules();
-
-  }catch(error){
-
-    console.error(
-      "予定削除エラー:",
-      error
-    );
-
-    message(
-      "scheduleMsg",
-      "予定の削除に失敗しました。\n\n" +
-      "エラーコード: " +
-      (error.code || "不明") +
-      "\n" +
-      "詳細: " +
-      (error.message || "不明"),
-      "error"
-    );
-
   }
+
+  showEdit();
 
 }
 
@@ -2761,97 +1714,57 @@ async function deleteSchedule(date){
    グローバル公開
 ========================================= */
 
-window.adminLogin =
-  adminLogin;
+window.showLogin =
+  showLogin;
+
+window.showSetup =
+  showSetup;
+
+window.login =
+  login;
+
+window.setupPassword =
+  setupPassword;
 
 window.logout =
   logout;
 
-window.addMember =
-  addMember;
+window.changeMonth =
+  changeMonth;
 
-window.editMember =
-  editMember;
+window.openDay =
+  openDay;
 
-window.deleteMember =
-  deleteMember;
+window.showForm =
+  showForm;
 
-window.saveSchedule =
-  saveSchedule;
+window.showEdit =
+  showEdit;
 
-window.editSchedule =
-  editSchedule;
+window.updateTimeFields =
+  updateTimeFields;
 
-window.deleteSchedule =
-  deleteSchedule;
+window.checkDate =
+  checkDate;
 
-window.readSchedulePDF =
-  readSchedulePDF;
+window.saveNotice =
+  saveNotice;
 
-window.registerCandidates =
-  registerCandidates;
+window.editNotice =
+  editNotice;
 
+window.deleteNotice =
+  deleteNotice;
 
-/* =========================================
-   ボタン
-========================================= */
-
-$("loginButton")
-  .addEventListener(
-    "click",
-    adminLogin
-  );
-
-$("logoutButton")
-  .addEventListener(
-    "click",
-    logout
-  );
-
-$("addMemberButton")
-  .addEventListener(
-    "click",
-    addMember
-  );
-
-$("readPdfButton")
-  .addEventListener(
-    "click",
-    readSchedulePDF
-  );
-
-$("registerCandidatesButton")
-  .addEventListener(
-    "click",
-    registerCandidates
-  );
-
-$("saveScheduleButton")
-  .addEventListener(
-    "click",
-    saveSchedule
-  );
+window.backHome =
+  backHome;
 
 
 /* =========================================
-   Enterキー
+   初期表示
 ========================================= */
 
-$("password")
-  .addEventListener(
-    "keydown",
-    event => {
-
-      if(
-        event.key === "Enter"
-      ){
-
-        adminLogin();
-
-      }
-
-    }
-  );
+render();
 
 </script>
 
