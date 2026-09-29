@@ -83,13 +83,6 @@ header{
   min-width:0
 }
 
-.header-side{
-  display:flex;
-  align-items:center;
-  gap:7px;
-  min-width:0
-}
-
 .profile-mini{
   display:flex;
   align-items:center;
@@ -331,16 +324,10 @@ textarea{
   font-weight:700
 }
 
-/* ホームカレンダーでは時間を表示しない */
+/* カレンダーでは部活時間を表示しない */
 
 .dot{
-  display:block;
-  margin-top:7px;
-  font-size:11px;
-  color:#64707d;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis
+  display:none
 }
 
 .monthbar{
@@ -380,6 +367,31 @@ textarea{
 }
 
 /* =========================
+   時刻入力
+========================= */
+
+.time-box{
+  margin-top:8px;
+  padding:12px;
+  background:#f8f9fb;
+  border-radius:12px
+}
+
+.time-box label{
+  margin-top:4px
+}
+
+.time-box input{
+  margin-bottom:4px
+}
+
+.time-note{
+  font-size:12px;
+  color:#77818e;
+  margin-top:5px
+}
+
+/* =========================
    フォーム内カレンダー
 ========================= */
 
@@ -400,7 +412,7 @@ textarea{
 }
 
 .form-calendar .dot{
-  font-size:10px
+  display:none
 }
 
 .selected-date-box{
@@ -431,7 +443,8 @@ textarea{
   padding:4px 8px;
   background:#eef3fb;
   font-size:12px;
-  font-weight:700
+  font-weight:700;
+  margin-left:4px
 }
 
 .row{
@@ -540,10 +553,6 @@ textarea{
 
   .form-calendar .daynum{
     font-size:12px
-  }
-
-  .form-calendar .dot{
-    font-size:9px
   }
 
   .month-title{
@@ -701,8 +710,6 @@ textarea{
 
   <div class="header-top">
 
-    <!-- タイトル＋部活名 -->
-
     <div
       class="header-brand"
       onclick="backHome()"
@@ -718,8 +725,6 @@ textarea{
 
     </div>
 
-
-    <!-- ログイン中：マイページ＋名前 -->
 
     <div
       id="loggedInLeft"
@@ -749,15 +754,11 @@ textarea{
     </div>
 
 
-    <!-- ログアウト中 -->
-
     <div
       id="loggedOutLeft"
       class="header-user-row hidden"
     ></div>
 
-
-    <!-- ログイン中：操作ボタン -->
 
     <div
       id="loggedInRight"
@@ -785,8 +786,6 @@ textarea{
 
     </div>
 
-
-    <!-- ログアウト中：ログイン -->
 
     <div
       id="loggedOutRight"
@@ -1141,13 +1140,14 @@ textarea{
   ></div>
 
 
-  <!-- 連絡の種類 -->
-
   <label>
     連絡の種類（必須）
   </label>
 
-  <select id="noticeType">
+  <select
+    id="noticeType"
+    onchange="updateTimeFields()"
+  >
 
     <option value="欠席">
       欠席
@@ -1168,7 +1168,63 @@ textarea{
   </select>
 
 
-  <!-- 欠席理由 -->
+  <div
+    id="timeFields"
+    class="time-box hidden"
+  >
+
+    <div id="lateTimeBox" class="hidden">
+
+      <label>
+        到着予定時刻
+      </label>
+
+      <input
+        id="startTime"
+        type="time"
+      >
+
+    </div>
+
+
+    <div id="earlyTimeBox" class="hidden">
+
+      <label>
+        退出予定時刻
+      </label>
+
+      <input
+        id="earlyLeaveTime"
+        type="time"
+      >
+
+    </div>
+
+
+    <div id="breakTimeBox" class="hidden">
+
+      <label>
+        退出時刻
+      </label>
+
+      <input
+        id="breakOutTime"
+        type="time"
+      >
+
+      <label>
+        戻る予定時刻
+      </label>
+
+      <input
+        id="breakReturnTime"
+        type="time"
+      >
+
+    </div>
+
+  </div>
+
 
   <label>
     欠席理由（必須）
@@ -1251,8 +1307,6 @@ textarea{
   </div>
 
 
-  <!-- 日付 -->
-
   <label>
     日付（必須）
   </label>
@@ -1274,6 +1328,14 @@ textarea{
           class="month-title"
           id="formMonthTitle"
         ></div>
+
+        <button
+          class="today-button"
+          type="button"
+          onclick="goCurrentFormMonth()"
+        >
+          今月に戻る
+        </button>
 
       </div>
 
@@ -1507,7 +1569,6 @@ const email =
 
 /* =========================
    学年・クラス表示
-   管理者側と同じ形式
 ========================= */
 
 function getProfileGrade(){
@@ -1554,6 +1615,10 @@ function getProfileBoxDisplay(){
 
 }
 
+
+/* =========================
+   画面切り替え
+========================= */
 
 function hide(){
 
@@ -1619,46 +1684,195 @@ function showSetup(){
 }
 
 
+/* =========================
+   プロフィール読み込み
+========================= */
+
+/*
+  Firebase Authenticationでログインできていても、
+  members/{UID} が無い場合がある。
+
+  その場合は、
+  ログインに使った学校ID
+  ↓
+  memberRegistrations/{学校ID}
+  ↓
+  members/{UID}
+
+  の順に復旧する。
+*/
+
 async function loadProfile(){
 
   if(!currentUser)
-    return;
+    return false;
 
 
-  const s =
-    await get(
+  try{
+
+    const memberRef =
       ref(
         db,
         "members/" +
         currentUser.uid
-      )
+      );
+
+
+    const s =
+      await get(
+        memberRef
+      );
+
+
+    if(s.exists()){
+
+      profile =
+        s.val();
+
+
+      updateProfileDisplay();
+
+
+      return true;
+
+    }
+
+
+    /*
+      members/{UID} が無い場合の復旧
+    */
+
+    const rawEmail =
+      String(
+        currentUser.email || ""
+      );
+
+
+    const schoolId =
+      rawEmail.endsWith(DOMAIN)
+        ?
+        rawEmail.slice(
+          0,
+          -DOMAIN.length
+        )
+        :
+        "";
+
+
+    if(!schoolId){
+
+      profile =
+        null;
+
+      return false;
+
+    }
+
+
+    const reg =
+      await get(
+        ref(
+          db,
+          "memberRegistrations/" +
+          schoolId
+        )
+      );
+
+
+    if(!reg.exists()){
+
+      profile =
+        null;
+
+      return false;
+
+    }
+
+
+    const data =
+      reg.val();
+
+
+    const restoredProfile = {
+
+      schoolId:
+        schoolId,
+
+      name:
+        data.name || "",
+
+      grade:
+        data.grade || "",
+
+      className:
+        data.className || ""
+
+    };
+
+
+    /*
+      members/{UID} を作り直す
+    */
+
+    await set(
+      memberRef,
+      restoredProfile
     );
 
 
-  profile =
-    s.exists()
-      ? s.val()
-      : null;
+    profile =
+      restoredProfile;
 
 
-  if(profile){
-
-    const text =
-      getProfileDisplay();
+    updateProfileDisplay();
 
 
-    $("profileMiniText")
-      .textContent =
-        text;
+    return true;
 
 
-    $("profileBox")
-      .textContent =
-        getProfileBoxDisplay();
+  }catch(e){
+
+    console.error(
+      "プロフィール読み込みエラー:",
+      e
+    );
+
+
+    profile =
+      null;
+
+
+    return false;
 
   }
 
 }
+
+
+function updateProfileDisplay(){
+
+  if(!profile)
+    return;
+
+
+  $("profileMiniText")
+    .textContent =
+      getProfileDisplay();
+
+
+  $("profileBox")
+    .textContent =
+      getProfileBoxDisplay();
+
+}
+
+
+/* =========================
+   認証状態
+========================= */
+
+let authProcessing =
+  false;
 
 
 onAuthStateChanged(
@@ -1669,59 +1883,141 @@ onAuthStateChanged(
       u;
 
 
-    if(u){
-
-      await loadProfile();
-
-
-      $("loggedOutLeft")
-        .classList
-        .add("hidden");
-
-
-      $("loggedOutRight")
-        .classList
-        .add("hidden");
-
-
-      $("loggedInLeft")
-        .classList
-        .remove("hidden");
-
-
-      $("loggedInRight")
-        .classList
-        .remove("hidden");
-
-
-      render();
-
-    }else{
-
-      $("loggedOutLeft")
-        .classList
-        .add("hidden");
-
-
-      $("loggedOutRight")
-        .classList
-        .remove("hidden");
-
-
-      $("loggedInLeft")
-        .classList
-        .add("hidden");
-
-
-      $("loggedInRight")
-        .classList
-        .add("hidden");
-
+    if(!u){
 
       profile =
         null;
 
+
+      $("loggedOutLeft")
+        .classList
+        .add("hidden");
+
+
+      $("loggedOutRight")
+        .classList
+        .remove("hidden");
+
+
+      $("loggedInLeft")
+        .classList
+        .add("hidden");
+
+
+      $("loggedInRight")
+        .classList
+        .add("hidden");
+
+
+      return;
+
     }
+
+
+    /*
+      Authenticationだけ成功した状態で
+      画面をログイン済みにしない。
+
+      先にプロフィールを取得する。
+    */
+
+    const loaded =
+      await loadProfile();
+
+
+    if(!loaded){
+
+      /*
+        認証自体は成功しているが、
+        生徒情報が取得できない場合。
+
+        ログアウトして中途半端なログイン状態を残さない。
+      */
+
+      console.error(
+        "認証成功後にプロフィールを取得できませんでした。"
+      );
+
+
+      try{
+
+        await signOut(auth);
+
+      }catch(e){
+
+        console.error(e);
+
+      }
+
+
+      $("loginMsg")
+        .innerHTML =
+          '<div class="msg error">ログインは確認できましたが、生徒情報を取得できませんでした。管理者に登録内容を確認してもらってください。</div>';
+
+
+      showLogin();
+
+
+      return;
+
+    }
+
+
+    /*
+      ここまで来て初めて
+      ログイン済みUIを表示する。
+    */
+
+    $("loggedOutLeft")
+      .classList
+      .add("hidden");
+
+
+    $("loggedOutRight")
+      .classList
+      .add("hidden");
+
+
+    $("loggedInLeft")
+      .classList
+      .remove("hidden");
+
+
+    $("loggedInRight")
+      .classList
+      .remove("hidden");
+
+
+    $("loginMsg")
+      .innerHTML =
+        "";
+
+
+    /*
+      ログイン直後だけカレンダーへ戻す。
+      すでに別ページを開いている場合は
+      その画面を勝手に変更しない。
+    */
+
+    if(
+      authProcessing
+    ){
+
+      authProcessing =
+        false;
+
+
+      hide();
+
+
+      $("calendarView")
+        .classList
+        .remove("hidden");
+
+    }
+
+
+    render();
 
   }
 );
@@ -1733,13 +2029,13 @@ onAuthStateChanged(
 
 async function login(){
 
-  let id =
+  const id =
     $("loginId")
       .value
       .trim();
 
 
-  let pw =
+  const pw =
     $("loginPassword")
       .value;
 
@@ -1756,12 +2052,41 @@ async function login(){
   }
 
 
+  $("loginMsg")
+    .innerHTML =
+      '<div class="msg">ログインしています……</div>';
+
+
+  authProcessing =
+    true;
+
+
   try{
 
-    console.log("Firebaseログイン開始");
-    console.log("学校ID:", id);
-    console.log("ログイン用メール:", email(id));
+    console.log(
+      "Firebaseログイン開始"
+    );
 
+
+    console.log(
+      "学校ID:",
+      id
+    );
+
+
+    /*
+      ここではbackHome()しない。
+
+      signInWithEmailAndPassword()
+      ↓
+      onAuthStateChanged()
+      ↓
+      プロフィール確認
+      ↓
+      正常ならホーム
+
+      という一本の流れにする。
+    */
 
     await signInWithEmailAndPassword(
       auth,
@@ -1770,12 +2095,11 @@ async function login(){
     );
 
 
-    console.log("Firebaseログイン成功");
-
-
-    backHome();
-
   }catch(e){
+
+    authProcessing =
+      false;
+
 
     console.error(
       "Firebaseログインエラー:",
@@ -1822,18 +2146,18 @@ async function login(){
 
 async function setupPassword(){
 
-  let id =
+  const id =
     $("setupId")
       .value
       .trim();
 
 
-  let p =
+  const p =
     $("setupPassword")
       .value;
 
 
-  let p2 =
+  const p2 =
     $("setupPassword2")
       .value;
 
@@ -1854,9 +2178,14 @@ async function setupPassword(){
   }
 
 
+  $("setupMsg")
+    .innerHTML =
+      '<div class="msg">設定しています……</div>';
+
+
   try{
 
-    let exists =
+    const exists =
       await get(
         ref(
           db,
@@ -1872,7 +2201,7 @@ async function setupPassword(){
       );
 
 
-    let reg =
+    const reg =
       await get(
         ref(
           db,
@@ -1888,16 +2217,38 @@ async function setupPassword(){
       );
 
 
-    let data =
+    const data =
       reg.val();
 
 
-    let cred =
+    const cred =
       await createUserWithEmailAndPassword(
         auth,
         email(id),
         p
       );
+
+
+    /*
+      Authenticationアカウントを作った直後に
+      members/{UID} を作る。
+    */
+
+    const newProfile = {
+
+      schoolId:
+        id,
+
+      name:
+        data.name || "",
+
+      grade:
+        data.grade || "",
+
+      className:
+        data.className || ""
+
+    };
 
 
     await set(
@@ -1906,12 +2257,7 @@ async function setupPassword(){
         "members/" +
         cred.user.uid
       ),
-      {
-        schoolId:id,
-        name:data.name,
-        grade:data.grade,
-        className:data.className
-      }
+      newProfile
     );
 
 
@@ -1922,23 +2268,71 @@ async function setupPassword(){
         id
       ),
       {
-        accountCreated:true,
-        uid:cred.user.uid
+
+        accountCreated:
+          true,
+
+        uid:
+          cred.user.uid
+
       }
     );
 
 
-    backHome();
+    /*
+      onAuthStateChangedが先に走って
+      profile=nullになる可能性があるので、
+      ここでも明示的に読み込む。
+    */
+
+    currentUser =
+      cred.user;
+
+
+    profile =
+      newProfile;
+
+
+    updateProfileDisplay();
+
+
+    authProcessing =
+      true;
+
+
+    /*
+      Authentication状態が確定した後は
+      onAuthStateChanged側でも確認する。
+    */
+
+    $("setupMsg")
+      .innerHTML =
+        "";
 
 
   }catch(e){
 
-    console.error(e);
+    console.error(
+      "初回設定エラー:",
+      e
+    );
 
 
     $("setupMsg")
       .innerHTML =
-        '<div class="msg error">そのIDが登録されていないか、すでに初回設定済みです。</div>';
+        `
+        <div class="msg error">
+
+          初回設定できませんでした。<br><br>
+
+          ${esc(
+            e.code ||
+            e.message ||
+            "登録内容を確認してください。"
+          )}
+
+        </div>
+        `;
 
   }
 
@@ -1969,6 +2363,7 @@ function goCurrentMonth(){
   const now =
     new Date();
 
+
   current =
     new Date(
       now.getFullYear(),
@@ -1976,7 +2371,27 @@ function goCurrentMonth(){
       1
     );
 
+
   render();
+
+}
+
+
+function goCurrentFormMonth(){
+
+  const now =
+    new Date();
+
+
+  formCurrent =
+    new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      1
+    );
+
+
+  renderFormCalendar();
 
 }
 
@@ -1987,11 +2402,11 @@ function goCurrentMonth(){
 
 async function render(){
 
-  let y =
+  const y =
     current.getFullYear();
 
 
-  let m =
+  const m =
     current.getMonth();
 
 
@@ -2000,7 +2415,7 @@ async function render(){
       `${y}年${m+1}月`;
 
 
-  let ss =
+  const ss =
     await get(
       ref(
         db,
@@ -2009,7 +2424,7 @@ async function render(){
     );
 
 
-  let ns =
+  const ns =
     await get(
       ref(
         db,
@@ -2018,19 +2433,23 @@ async function render(){
     );
 
 
-  let sch =
+  const sch =
     ss.exists()
-      ? ss.val()
-      : {};
+      ?
+      ss.val()
+      :
+      {};
 
 
-  let all =
+  const all =
     ns.exists()
-      ? ns.val()
-      : {};
+      ?
+      ns.val()
+      :
+      {};
 
 
-  let first =
+  const first =
     (
       new Date(
         y,
@@ -2041,7 +2460,7 @@ async function render(){
     ) % 7;
 
 
-  let last =
+  const last =
     new Date(
       y,
       m+1,
@@ -2071,7 +2490,7 @@ async function render(){
     d++
   ){
 
-    let date =
+    const date =
       ymd(
         y,
         m,
@@ -2079,11 +2498,11 @@ async function render(){
       );
 
 
-    let has =
+    const has =
       !!sch[date];
 
 
-    let count =
+    const count =
       Object
         .values(all)
         .filter(
@@ -2092,11 +2511,6 @@ async function render(){
         )
         .length;
 
-
-    /*
-      ホームカレンダーでは
-      部活時間を表示しない。
-    */
 
     h += `
 
@@ -2152,6 +2566,56 @@ function changeMonth(n){
    日付詳細
 ========================= */
 
+function getNoticeTimeText(n){
+
+  const type =
+    n.type || "欠席";
+
+
+  if(type === "遅刻"){
+
+    return n.startTime
+      ?
+      `到着予定 ${esc(n.startTime)}`
+      :
+      "";
+
+  }
+
+
+  if(type === "早退"){
+
+    return n.startTime
+      ?
+      `退出予定 ${esc(n.startTime)}`
+      :
+      "";
+
+  }
+
+
+  if(type === "途中抜け"){
+
+    if(
+      n.startTime &&
+      n.endTime
+    ){
+
+      return `${esc(n.startTime)}〜${esc(n.endTime)}`;
+
+    }
+
+
+    return "";
+
+  }
+
+
+  return "";
+
+}
+
+
 async function openDay(date){
 
   hide();
@@ -2162,7 +2626,7 @@ async function openDay(date){
     .remove("hidden");
 
 
-  let ss =
+  const ss =
     await get(
       ref(
         db,
@@ -2172,7 +2636,7 @@ async function openDay(date){
     );
 
 
-  let ns =
+  const ns =
     await get(
       ref(
         db,
@@ -2181,7 +2645,7 @@ async function openDay(date){
     );
 
 
-  let sch =
+  const sch =
     ss.exists()
       ?
       ss.val()
@@ -2189,7 +2653,7 @@ async function openDay(date){
       null;
 
 
-  let all =
+  const all =
     ns.exists()
       ?
       ns.val()
@@ -2197,7 +2661,7 @@ async function openDay(date){
       {};
 
 
-  let list =
+  const list =
     Object
       .values(all)
       .filter(
@@ -2222,10 +2686,6 @@ async function openDay(date){
 
   }
 
-
-  /*
-    詳細画面では部活時間を表示。
-  */
 
   h += `
 
@@ -2279,11 +2739,26 @@ async function openDay(date){
                   ${esc(n.type || "欠席")}
                 </span>
 
-                <span class="badge">
-                  ${esc(n.reason)}
-                </span>
-
               </strong>
+
+              ${
+                getNoticeTimeText(n)
+                  ?
+                  `
+                  <div class="meta">
+                    ${getNoticeTimeText(n)}
+                  </div>
+                  `
+                  :
+                  ""
+              }
+
+              <div class="meta">
+
+                理由：
+                ${esc(n.reason)}
+
+              </div>
 
             </div>
 
@@ -2351,35 +2826,59 @@ function showForm(id=null){
       getProfileBoxDisplay();
 
 
-  $("noticeType")
-    .value =
-      "欠席";
-
-
-  $("reasonType")
-    .value =
-      "";
-
-
-  $("otherReason")
-    .value =
-      "";
-
-
-  $("otherReasonBox")
-    .classList
-    .add("hidden");
-
-
-  $("formNotice")
-    .innerHTML =
-      "";
-
-
   if(!id){
+
+    $("noticeType")
+      .value =
+        "欠席";
+
+
+    $("startTime")
+      .value =
+        "";
+
+
+    $("earlyLeaveTime")
+      .value =
+        "";
+
+
+    $("breakOutTime")
+      .value =
+        "";
+
+
+    $("breakReturnTime")
+      .value =
+        "";
+
+
+    updateTimeFields();
+
+
+    $("reasonType")
+      .value =
+        "";
+
+
+    $("otherReason")
+      .value =
+        "";
+
+
+    $("otherReasonBox")
+      .classList
+      .add("hidden");
+
+
+    $("formNotice")
+      .innerHTML =
+        "";
+
 
     selectedDate =
       "";
+
 
     formCurrent =
       new Date();
@@ -2401,6 +2900,88 @@ function backFromForm(){
   }else{
 
     backHome();
+
+  }
+
+}
+
+
+/* =========================
+   時間入力表示
+========================= */
+
+function updateTimeFields(){
+
+  const type =
+    $("noticeType")
+      .value;
+
+
+  const timeFields =
+    $("timeFields");
+
+
+  const late =
+    $("lateTimeBox");
+
+
+  const early =
+    $("earlyTimeBox");
+
+
+  const between =
+    $("breakTimeBox");
+
+
+  late.classList
+    .add("hidden");
+
+
+  early.classList
+    .add("hidden");
+
+
+  between.classList
+    .add("hidden");
+
+
+  if(type === "欠席"){
+
+    timeFields
+      .classList
+      .add("hidden");
+
+
+    return;
+
+  }
+
+
+  timeFields
+    .classList
+    .remove("hidden");
+
+
+  if(type === "遅刻"){
+
+    late.classList
+      .remove("hidden");
+
+  }
+
+
+  if(type === "早退"){
+
+    early.classList
+      .remove("hidden");
+
+  }
+
+
+  if(type === "途中抜け"){
+
+    between.classList
+      .remove("hidden");
 
   }
 
@@ -2448,11 +3029,11 @@ function toggleOtherReason(){
 
 async function renderFormCalendar(){
 
-  let y =
+  const y =
     formCurrent.getFullYear();
 
 
-  let m =
+  const m =
     formCurrent.getMonth();
 
 
@@ -2461,7 +3042,7 @@ async function renderFormCalendar(){
       `${y}年${m+1}月`;
 
 
-  let ss =
+  const ss =
     await get(
       ref(
         db,
@@ -2470,7 +3051,7 @@ async function renderFormCalendar(){
     );
 
 
-  let ns =
+  const ns =
     await get(
       ref(
         db,
@@ -2479,7 +3060,7 @@ async function renderFormCalendar(){
     );
 
 
-  let sch =
+  const sch =
     ss.exists()
       ?
       ss.val()
@@ -2487,7 +3068,7 @@ async function renderFormCalendar(){
       {};
 
 
-  let all =
+  const all =
     ns.exists()
       ?
       ns.val()
@@ -2495,7 +3076,7 @@ async function renderFormCalendar(){
       {};
 
 
-  let first =
+  const first =
     (
       new Date(
         y,
@@ -2506,7 +3087,7 @@ async function renderFormCalendar(){
     ) % 7;
 
 
-  let last =
+  const last =
     new Date(
       y,
       m+1,
@@ -2536,7 +3117,7 @@ async function renderFormCalendar(){
     d++
   ){
 
-    let date =
+    const date =
       ymd(
         y,
         m,
@@ -2544,11 +3125,11 @@ async function renderFormCalendar(){
       );
 
 
-    let hasClub =
+    const hasClub =
       !!sch[date];
 
 
-    let count =
+    const count =
       Object
         .values(all)
         .filter(
@@ -2559,14 +3140,9 @@ async function renderFormCalendar(){
         .length;
 
 
-    let selected =
+    const selected =
       date === selectedDate;
 
-
-    /*
-      フォーム内カレンダーも
-      部活時間は表示しない。
-    */
 
     h += `
 
@@ -2665,7 +3241,7 @@ function updateSelectedDateBox(){
 
 async function checkDate(){
 
-  let d =
+  const d =
     selectedDate;
 
 
@@ -2681,7 +3257,7 @@ async function checkDate(){
   }
 
 
-  let s =
+  const s =
     await get(
       ref(
         db,
@@ -2775,32 +3351,198 @@ async function hasNoticeOnDate(
 
 
 /* =========================
+   時間値取得
+========================= */
+
+function getFormTimes(){
+
+  const type =
+    $("noticeType")
+      .value;
+
+
+  if(type === "欠席"){
+
+    return {
+      startTime:"",
+      endTime:""
+    };
+
+  }
+
+
+  if(type === "遅刻"){
+
+    return {
+      startTime:
+        $("startTime")
+          .value,
+
+      endTime:""
+    };
+
+  }
+
+
+  if(type === "早退"){
+
+    return {
+      startTime:
+        $("earlyLeaveTime")
+          .value,
+
+      endTime:""
+    };
+
+  }
+
+
+  if(type === "途中抜け"){
+
+    return {
+      startTime:
+        $("breakOutTime")
+          .value,
+
+      endTime:
+        $("breakReturnTime")
+          .value
+    };
+
+  }
+
+
+  return {
+    startTime:"",
+    endTime:""
+  };
+
+}
+
+
+/* =========================
+   時間入力確認
+========================= */
+
+function validateFormTimes(){
+
+  const type =
+    $("noticeType")
+      .value;
+
+
+  if(type === "欠席")
+    return true;
+
+
+  if(type === "遅刻"){
+
+    if(
+      !$("startTime")
+        .value
+    ){
+
+      alert(
+        "到着予定時刻を入力してください。"
+      );
+
+
+      return false;
+
+    }
+
+  }
+
+
+  if(type === "早退"){
+
+    if(
+      !$("earlyLeaveTime")
+        .value
+    ){
+
+      alert(
+        "退出予定時刻を入力してください。"
+      );
+
+
+      return false;
+
+    }
+
+  }
+
+
+  if(type === "途中抜け"){
+
+    const out =
+      $("breakOutTime")
+        .value;
+
+
+    const back =
+      $("breakReturnTime")
+        .value;
+
+
+    if(!out || !back){
+
+      alert(
+        "退出時刻と戻る予定時刻を入力してください。"
+      );
+
+
+      return false;
+
+    }
+
+
+    if(out >= back){
+
+      alert(
+        "戻る予定時刻は退出時刻より後にしてください。"
+      );
+
+
+      return false;
+
+    }
+
+  }
+
+
+  return true;
+
+}
+
+
+/* =========================
    連絡保存
 ========================= */
 
 async function saveNotice(){
 
-  let d =
+  const d =
     selectedDate;
 
 
-  let type =
+  const type =
     $("noticeType")
       .value;
 
 
-  let reasonType =
+  const reasonType =
     $("reasonType")
       .value;
 
 
-  let otherReason =
+  const otherReason =
     $("otherReason")
       .value
       .trim();
 
 
-  let r =
+  const r =
     reasonType === "その他"
       ?
       otherReason
@@ -2839,7 +3581,16 @@ async function saveNotice(){
   }
 
 
-  let schedule =
+  if(
+    !validateFormTimes()
+  ){
+
+    return;
+
+  }
+
+
+  const schedule =
     await get(
       ref(
         db,
@@ -2879,6 +3630,10 @@ async function saveNotice(){
   }
 
 
+  const times =
+    getFormTimes();
+
+
   const wasEditing =
     !!editingId;
 
@@ -2895,6 +3650,12 @@ async function saveNotice(){
 
         type:
           type,
+
+        startTime:
+          times.startTime,
+
+        endTime:
+          times.endTime,
 
         reason:
           r,
@@ -2947,6 +3708,12 @@ async function saveNotice(){
       type:
         type,
 
+      startTime:
+        times.startTime,
+
+      endTime:
+        times.endTime,
+
       reason:
         r,
 
@@ -2976,6 +3743,29 @@ async function saveNotice(){
   $("noticeType")
     .value =
       "欠席";
+
+
+  $("startTime")
+    .value =
+      "";
+
+
+  $("earlyLeaveTime")
+    .value =
+      "";
+
+
+  $("breakOutTime")
+    .value =
+      "";
+
+
+  $("breakReturnTime")
+    .value =
+      "";
+
+
+  updateTimeFields();
 
 
   $("reasonType")
@@ -3026,6 +3816,23 @@ async function showEdit(){
   }
 
 
+  if(!profile){
+
+    const loaded =
+      await loadProfile();
+
+
+    if(!loaded){
+
+      showLogin();
+
+      return;
+
+    }
+
+  }
+
+
   hide();
 
 
@@ -3034,7 +3841,7 @@ async function showEdit(){
     .remove("hidden");
 
 
-  let s =
+  const s =
     await get(
       ref(
         db,
@@ -3043,7 +3850,7 @@ async function showEdit(){
     );
 
 
-  let all =
+  const all =
     s.exists()
       ?
       s.val()
@@ -3051,7 +3858,7 @@ async function showEdit(){
       {};
 
 
-  let list =
+  const list =
     Object
       .entries(all)
       .filter(
@@ -3094,6 +3901,21 @@ async function showEdit(){
                   ${esc(n.type || "欠席")}
 
                 </div>
+
+                ${
+                  getNoticeTimeText(n)
+                    ?
+                    `
+                    <div class="meta">
+
+                      時刻：
+                      ${getNoticeTimeText(n)}
+
+                    </div>
+                    `
+                    :
+                    ""
+                }
 
                 <div class="meta">
 
@@ -3142,7 +3964,7 @@ async function showEdit(){
 
 async function editNotice(id){
 
-  let s =
+  const s =
     await get(
       ref(
         db,
@@ -3160,7 +3982,7 @@ async function editNotice(id){
     return;
 
 
-  let n =
+  const n =
     s.val();
 
 
@@ -3186,10 +4008,6 @@ async function editNotice(id){
       getProfileBoxDisplay();
 
 
-  /*
-    連絡の種類
-  */
-
   const noticeTypes = [
 
     "欠席",
@@ -3209,6 +4027,45 @@ async function editNotice(id){
         n.type
         :
         "欠席";
+
+
+  /*
+    時間を復元
+  */
+
+  $("startTime")
+    .value =
+      n.startTime || "";
+
+
+  $("earlyLeaveTime")
+    .value =
+      n.type === "早退"
+        ?
+        (n.startTime || "")
+        :
+        "";
+
+
+  $("breakOutTime")
+    .value =
+      n.type === "途中抜け"
+        ?
+        (n.startTime || "")
+        :
+        "";
+
+
+  $("breakReturnTime")
+    .value =
+      n.type === "途中抜け"
+        ?
+        (n.endTime || "")
+        :
+        "";
+
+
+  updateTimeFields();
 
 
   /*
@@ -3266,7 +4123,7 @@ async function editNotice(id){
 
   if(n.date){
 
-    let [
+    const [
       y,
       m
     ] =
@@ -3320,7 +4177,7 @@ async function deleteNotice(id){
     return;
 
 
-  let s =
+  const s =
     await get(
       ref(
         db,
@@ -3358,14 +4215,33 @@ async function deleteNotice(id){
 
 async function showMyPage(){
 
-  if(
-    !currentUser ||
-    !profile
-  ){
+  if(!currentUser){
 
     showLogin();
 
     return;
+
+  }
+
+
+  /*
+    念のため、マイページを開く直前にも
+    プロフィールを確認する。
+  */
+
+  if(!profile){
+
+    const loaded =
+      await loadProfile();
+
+
+    if(!loaded){
+
+      showLogin();
+
+      return;
+
+    }
 
   }
 
@@ -3377,10 +4253,6 @@ async function showMyPage(){
     .classList
     .remove("hidden");
 
-
-  /*
-    管理者側と同じ値をセット
-  */
 
   $("myGrade").value =
     String(
@@ -3487,7 +4359,7 @@ async function saveProfile(){
     };
 
 
-    await loadProfile();
+    updateProfileDisplay();
 
 
     $("myPageMsg")
@@ -3625,6 +4497,14 @@ window.showEdit =
 
 window.toggleOtherReason =
   toggleOtherReason;
+
+
+window.updateTimeFields =
+  updateTimeFields;
+
+
+window.goCurrentFormMonth =
+  goCurrentFormMonth;
 
 
 window.changeFormMonth =
