@@ -3,224 +3,43 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-
-<title>部活動欠席連絡｜清教学園ハンドベル部</title>
+<title>部活おやすみ連絡｜清教学園ハンドベル部</title>
 
 <style>
-*{
-  box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
 body{
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif;
   background:#f5f7fb;
-  color:#20242a;
+  color:#20242a
 }
-
-/* =========================
-   ヘッダー
-   ========================= */
 
 header{
   background:#fff;
-  padding:14px 18px;
+  padding:20px 18px 14px;
   position:sticky;
   top:0;
   z-index:10;
-  border-bottom:1px solid #e7eaf0;
-}
-
-.header-row{
-  position:relative;
-  min-height:46px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-/* 個人設定 */
-
-.profile-button{
-  position:absolute;
-  left:0;
-  top:50%;
-  transform:translateY(-50%);
-
-  display:flex;
-  align-items:center;
-  gap:7px;
-
-  background:#f5f7fb;
-  color:#333;
-
-  border:1px solid #e1e5eb;
-  border-radius:10px;
-
-  padding:7px 10px;
-  font-size:13px;
-  font-weight:700;
-
-  cursor:pointer;
-  white-space:nowrap;
-}
-
-.profile-icon{
-  width:22px;
-  height:22px;
-  border-radius:50%;
-  background:#e9edf3;
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  position:relative;
-  flex-shrink:0;
-}
-
-/* 人型アイコン */
-
-.profile-icon::before{
-  content:"";
-  width:7px;
-  height:7px;
-  background:#687482;
-  border-radius:50%;
-  position:absolute;
-  top:4px;
-}
-
-.profile-icon::after{
-  content:"";
-  width:12px;
-  height:7px;
-  background:#687482;
-  border-radius:8px 8px 5px 5px;
-  position:absolute;
-  bottom:4px;
-}
-
-
-/* タイトル */
-
-.title-area{
-  cursor:pointer;
-  text-align:center;
+  border-bottom:1px solid #e7eaf0
 }
 
 h1{
-  font-size:20px;
-  margin:0 0 2px;
-  text-align:center;
-  white-space:nowrap;
+  font-size:22px;
+  margin:0 0 5px;
+  text-align:center
 }
 
 .club{
   text-align:center;
   color:#66717e;
-  font-size:11px;
-  margin:0;
-  white-space:nowrap;
+  font-size:13px;
+  margin-bottom:15px
 }
 
-
-/* ログイン後ボタン */
-
-.header-actions{
-  position:absolute;
-  right:0;
-  top:50%;
-  transform:translateY(-50%);
-
+.actions{
   display:flex;
-  align-items:center;
-  gap:7px;
-}
-
-.header-actions button{
-  border:0;
-  border-radius:9px;
-  padding:8px 11px;
-  font-size:13px;
-  font-weight:700;
-  white-space:nowrap;
-  cursor:pointer;
-  background:#1f6feb;
-  color:#fff;
-}
-
-.header-actions .logout-button{
-  background:#fff;
-  color:#1f6feb;
-  border:1px solid #1f6feb;
-}
-
-
-/* ログイン前 */
-
-.top-login{
-  position:absolute;
-  right:0;
-  top:50%;
-  transform:translateY(-50%);
-}
-
-.top-login button{
-  background:#1f6feb;
-  color:#fff;
-  padding:8px 16px;
-  font-size:13px;
-  border-radius:9px;
-  border:0;
-  font-weight:700;
-  cursor:pointer;
-}
-
-
-/* =========================
-   共通
-   ========================= */
-
-main{
-  max-width:720px;
-  margin:auto;
-  padding:18px;
-}
-
-.card,
-.panel{
-  background:#fff;
-  border-radius:18px;
-  padding:16px;
-  margin-bottom:16px;
-  box-shadow:0 2px 12px #0000000b;
-}
-
-.hidden{
-  display:none!important;
-}
-
-label{
-  display:block;
-  font-weight:700;
-  font-size:14px;
-  margin:14px 0 6px;
-}
-
-input,
-select,
-textarea{
-  width:100%;
-  padding:12px;
-  border:1px solid #d9dee7;
-  border-radius:10px;
-  font-size:16px;
-  background:#fff;
-}
-
-textarea{
-  min-height:85px;
+  gap:10px
 }
 
 button{
@@ -229,25 +48,85 @@ button{
   padding:12px 10px;
   font-size:15px;
   font-weight:700;
-  cursor:pointer;
+  cursor:pointer
+}
+
+.actions button{
+  flex:1;
+  background:#1f6feb;
+  color:#fff
+}
+
+.actions button:last-child{
+  background:#fff;
+  color:#1f6feb;
+  border:1px solid #1f6feb
+}
+
+main{
+  max-width:720px;
+  margin:auto;
+  padding:18px
+}
+
+.card,.panel{
+  background:#fff;
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:16px;
+  box-shadow:0 2px 12px #0000000b
+}
+
+.hidden{
+  display:none!important
+}
+
+label{
+  display:block;
+  font-weight:700;
+  font-size:14px;
+  margin:14px 0 6px
+}
+
+input,select,textarea{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  display:block;
+  padding:12px;
+  border:1px solid #d9dee7;
+  border-radius:10px;
+  font-size:16px;
+  background:#fff
+}
+
+input[type="date"]{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  display:block
+}
+
+textarea{
+  min-height:85px
 }
 
 .primary{
   width:100%;
   margin-top:16px;
   background:#1f6feb;
-  color:#fff;
+  color:#fff
 }
 
 .secondary{
   background:#eef3fb;
-  color:#333;
+  color:#333
 }
 
 .danger{
   background:#fff0f0;
   color:#d33;
-  border:1px solid #f0b8b8;
+  border:1px solid #f0b8b8
 }
 
 .msg{
@@ -256,38 +135,32 @@ button{
   background:#fff8df;
   color:#69520a;
   font-size:14px;
-  margin-top:12px;
+  margin-top:12px
 }
 
 .error{
   background:#fff0f0;
-  color:#9b1c1c;
+  color:#9b1c1c
 }
 
 .userbar{
   background:#f5f8ff;
   border-radius:12px;
   padding:12px;
-  margin-bottom:14px;
+  margin-bottom:14px
 }
 
-
-/* =========================
-   カレンダー
-   ========================= */
-
-.week,
-.days{
+.week,.days{
   display:grid;
   grid-template-columns:repeat(7,1fr);
-  gap:5px;
+  gap:5px
 }
 
 .week div{
   text-align:center;
   font-size:12px;
   color:#7b8490;
-  padding:5px 0;
+  padding:5px 0
 }
 
 .day{
@@ -295,27 +168,21 @@ button{
   background:#f8f9fb;
   border-radius:10px;
   padding:6px;
-  cursor:pointer;
-}
-
-/* 部活がある日 */
-
-.day.club-day{
-  background:#fff0f0;
+  cursor:pointer
 }
 
 .day.empty{
   background:transparent;
-  cursor:default;
+  cursor:default
 }
 
 .day.off{
-  opacity:.45;
+  opacity:.45
 }
 
 .daynum{
   font-weight:700;
-  font-size:14px;
+  font-size:14px
 }
 
 .count{
@@ -326,66 +193,44 @@ button{
   border-radius:999px;
   padding:3px 7px;
   font-size:12px;
-  font-weight:700;
+  font-weight:700
 }
 
 .dot{
   display:block;
   margin-top:7px;
   font-size:11px;
-  color:#64707d;
+  color:#64707d
 }
 
 .monthbar{
   display:flex;
   align-items:center;
-  justify-content:center;
-  margin-bottom:14px;
-}
-
-.month-navigation{
-  display:flex;
-  align-items:center;
-  gap:8px;
+  justify-content:space-between;
+  margin-bottom:14px
 }
 
 .monthbar button{
   background:#eef3fb;
-  padding:8px 12px;
+  padding:8px 12px
 }
 
 .month-title{
   font-size:18px;
-  font-weight:800;
-  min-width:105px;
-  text-align:center;
+  font-weight:800
 }
-
-.today-button{
-  background:#eef3fb;
-  color:#333;
-  padding:8px 12px;
-  font-size:13px;
-  border-radius:9px;
-  margin-left:12px;
-}
-
-
-/* =========================
-   連絡一覧
-   ========================= */
 
 .item{
   border:1px solid #e3e7ed;
   border-radius:12px;
   padding:12px;
-  margin:10px 0;
+  margin:10px 0
 }
 
 .meta{
   font-size:13px;
   color:#66717e;
-  margin-top:4px;
+  margin-top:4px
 }
 
 .badge{
@@ -394,116 +239,32 @@ button{
   padding:4px 8px;
   background:#eef3fb;
   font-size:12px;
-  font-weight:700;
+  font-weight:700
 }
 
 .row{
   display:flex;
   gap:8px;
-  margin-top:10px;
+  margin-top:10px
 }
 
 .row button{
-  flex:1;
+  flex:1
 }
 
 .small{
   font-size:12px;
-  color:#77818e;
+  color:#77818e
 }
 
 .linkbtn{
   background:none;
   color:#1f6feb;
-  padding:8px 0;
-  display:block;
-  margin:8px auto 0;
+  padding:4px 0
 }
 
-
-/* =========================
-   個人設定
-   ========================= */
-
-.setting-section{
-  border-top:1px solid #e7eaf0;
-  margin-top:18px;
-  padding-top:8px;
-}
-
-.setting-note{
-  font-size:12px;
-  color:#77818e;
-  margin-top:6px;
-}
-
-
-/* =========================
-   スマホ用
-   ========================= */
-
-@media(max-width:700px){
-
-  header{
-    padding:10px 8px;
-  }
-
-  .header-row{
-    min-height:48px;
-  }
-
-  .profile-button{
-    padding:6px 7px;
-    gap:5px;
-    font-size:11px;
-    max-width:105px;
-    overflow:hidden;
-  }
-
-  .profile-button .profile-name{
-    overflow:hidden;
-    text-overflow:ellipsis;
-    max-width:65px;
-  }
-
-  .profile-icon{
-    width:21px;
-    height:21px;
-  }
-
-  h1{
-    font-size:16px;
-  }
-
-  .club{
-    font-size:9px;
-  }
-
-  .header-actions{
-    gap:3px;
-  }
-
-  .header-actions button{
-    padding:7px 6px;
-    font-size:10px;
-  }
-
-  .top-login button{
-    padding:7px 11px;
-    font-size:11px;
-  }
-
-  .month-title{
-    font-size:17px;
-    min-width:95px;
-  }
-
-  .today-button{
-    margin-left:10px;
-    padding:7px 10px;
-    font-size:12px;
-  }
-
+.other-reason{
+  margin-top:8px
 }
 </style>
 </head>
@@ -511,141 +272,39 @@ button{
 <body>
 
 <header>
+  <h1>部活おやすみ連絡</h1>
+  <div class="club">清教学園ハンドベル部</div>
 
-  <div class="header-row">
-
-
-    <!-- =========================
-         ログイン後：個人設定
-         ========================= -->
-
-    <button
-      id="profileButton"
-      class="profile-button hidden"
-      onclick="showProfileSettings()"
-    >
-
-      <span class="profile-icon"></span>
-
-      <span
-        id="headerUserName"
-        class="profile-name"
-      >
-        名前
-      </span>
-
-    </button>
-
-
-    <!-- =========================
-         タイトル
-         ========================= -->
-
-    <div
-      class="title-area"
-      onclick="backHome()"
-    >
-
-      <h1>
-        部活動欠席連絡
-      </h1>
-
-      <div class="club">
-        清教学園ハンドベル部
-      </div>
-
-    </div>
-
-
-    <!-- =========================
-         ログイン前
-         ========================= -->
-
-    <div
-      id="loggedOut"
-      class="top-login"
-    >
-
-      <button onclick="showLogin()">
-        ログイン
-      </button>
-
-    </div>
-
-
-    <!-- =========================
-         ログイン後
-         ========================= -->
-
-    <div
-      id="loggedIn"
-      class="header-actions hidden"
-    >
-
-      <button onclick="showForm()">
-        欠席連絡
-      </button>
-
-      <button onclick="showEdit()">
-        連絡を修正
-      </button>
-
-      <button
-        class="logout-button"
-        onclick="logout()"
-      >
-        ログアウト
-      </button>
-
-    </div>
-
+  <div id="loggedOut" class="actions">
+    <button onclick="showLogin()">ログイン</button>
+    <button onclick="showSetup()">初回パスワード設定</button>
   </div>
 
+  <div id="loggedIn" class="hidden">
+    <div id="userbar" class="userbar"></div>
+
+    <div class="actions">
+      <button onclick="showForm()">欠席連絡</button>
+      <button onclick="showEdit()">連絡を修正</button>
+    </div>
+
+    <button class="linkbtn" onclick="logout()">ログアウト</button>
+  </div>
 </header>
 
-
 <main>
-
-
-<!-- =========================
-     カレンダー
-     ========================= -->
 
 <section id="calendarView">
 
   <div class="card">
 
     <div class="monthbar">
-
-      <div class="month-navigation">
-
-        <button onclick="changeMonth(-1)">
-          ‹
-        </button>
-
-        <div
-          class="month-title"
-          id="monthTitle"
-        ></div>
-
-        <button onclick="changeMonth(1)">
-          ›
-        </button>
-
-      </div>
-
-      <button
-        class="today-button"
-        onclick="goThisMonth()"
-      >
-        今月
-      </button>
-
+      <button onclick="changeMonth(-1)">‹</button>
+      <div class="month-title" id="monthTitle"></div>
+      <button onclick="changeMonth(1)">›</button>
     </div>
 
-
     <div class="week">
-
       <div>月</div>
       <div>火</div>
       <div>水</div>
@@ -653,115 +312,46 @@ button{
       <div>金</div>
       <div>土</div>
       <div>日</div>
-
     </div>
 
-
-    <div
-      class="days"
-      id="days"
-    ></div>
+    <div class="days" id="days"></div>
 
   </div>
 
 </section>
 
 
+<section id="detailView" class="panel hidden">
 
-<!-- =========================
-     日付詳細
-     ========================= -->
-
-<section
-  id="detailView"
-  class="panel hidden"
->
-
-  <button
-    class="secondary"
-    onclick="backHome()"
-  >
-    ← カレンダーに戻る
-  </button>
+  <button class="secondary" onclick="backHome()">← カレンダーに戻る</button>
 
   <div id="detail"></div>
 
 </section>
 
 
+<section id="loginView" class="panel hidden">
 
-<!-- =========================
-     ログイン
-     ========================= -->
-
-<section
-  id="loginView"
-  class="panel hidden"
->
-
-  <button
-    class="secondary"
-    onclick="backHome()"
-  >
-    ← 戻る
-  </button>
+  <button class="secondary" onclick="backHome()">← 戻る</button>
 
   <h2>ログイン</h2>
 
-  <label>
-    学校ID
-  </label>
+  <label>学校ID</label>
+  <input id="loginId" autocomplete="username">
 
-  <input
-    id="loginId"
-    autocomplete="username"
-  >
+  <label>パスワード</label>
+  <input id="loginPassword" type="password" autocomplete="current-password">
 
-  <label>
-    パスワード
-  </label>
-
-  <input
-    id="loginPassword"
-    type="password"
-    autocomplete="current-password"
-  >
-
-  <button
-    class="primary"
-    onclick="login()"
-  >
-    ログイン
-  </button>
-
-  <button
-    class="linkbtn"
-    onclick="showSetup()"
-  >
-    初回パスワード設定
-  </button>
+  <button class="primary" onclick="login()">ログイン</button>
 
   <div id="loginMsg"></div>
 
 </section>
 
 
+<section id="setupView" class="panel hidden">
 
-<!-- =========================
-     初回パスワード設定
-     ========================= -->
-
-<section
-  id="setupView"
-  class="panel hidden"
->
-
-  <button
-    class="secondary"
-    onclick="showLogin()"
-  >
-    ← ログインに戻る
-  </button>
+  <button class="secondary" onclick="backHome()">← 戻る</button>
 
   <h2>初回パスワード設定</h2>
 
@@ -769,88 +359,41 @@ button{
     管理者に登録された学校IDを入力して、自分でパスワードを設定します。
   </p>
 
-  <label>
-    学校ID
-  </label>
-
+  <label>学校ID</label>
   <input id="setupId">
 
-  <label>
-    新しいパスワード（6文字以上）
-  </label>
+  <label>新しいパスワード（6文字以上）</label>
+  <input id="setupPassword" type="password">
 
-  <input
-    id="setupPassword"
-    type="password"
-  >
+  <label>確認</label>
+  <input id="setupPassword2" type="password">
 
-  <label>
-    確認
-  </label>
-
-  <input
-    id="setupPassword2"
-    type="password"
-  >
-
-  <button
-    class="primary"
-    onclick="setupPassword()"
-  >
-    設定する
-  </button>
+  <button class="primary" onclick="setupPassword()">設定する</button>
 
   <div id="setupMsg"></div>
 
 </section>
 
 
+<section id="formView" class="panel hidden">
 
-<!-- =========================
-     欠席連絡
-     ========================= -->
+  <button class="secondary" onclick="backHome()">← 戻る</button>
 
-<section
-  id="formView"
-  class="panel hidden"
->
+  <h2 id="formTitle">欠席連絡</h2>
 
-  <button
-    id="formBackButton"
-    class="secondary"
-    onclick="backHome()"
-  >
-    ← 戻る
-  </button>
+  <div id="profileBox" class="userbar"></div>
 
-  <h2 id="formTitle">
-    欠席連絡
-  </h2>
+  <label>連絡の種類</label>
 
-  <div
-    id="profileBox"
-    class="userbar"
-  ></div>
-
-  <label>
-    連絡の種類
-  </label>
-
-  <select
-    id="type"
-    onchange="updateTimeFields()"
-  >
-
+  <select id="type" onchange="updateTimeFields()">
     <option>欠席</option>
     <option>遅刻</option>
     <option>早退</option>
     <option>途中抜け</option>
-
   </select>
 
-  <label>
-    日付
-  </label>
+
+  <label>日付</label>
 
   <input
     id="date"
@@ -858,231 +401,77 @@ button{
     onchange="checkDate()"
   >
 
+
   <div id="timeFields"></div>
 
-  <label>
-    理由（必須）
-  </label>
 
-  <textarea id="reason"></textarea>
+  <label>理由（必須）</label>
+
+  <select id="reason" onchange="updateOtherReason()">
+    <option value="">理由を選択してください</option>
+    <option value="体調不良・けが">体調不良・けが</option>
+    <option value="通院">通院</option>
+    <option value="家庭の用事・旅行">家庭の用事・旅行</option>
+    <option value="他の部活動">他の部活動</option>
+    <option value="塾・習い事">塾・習い事</option>
+    <option value="冠婚葬祭">冠婚葬祭</option>
+    <option value="追試・補講・課題">追試・補講・課題</option>
+    <option value="セミナー">セミナー</option>
+    <option value="委員会・コアなどの仕事">委員会・コアなどの仕事</option>
+    <option value="2者懇談・3者懇談">2者懇談・3者懇談</option>
+    <option value="英検など">英検など</option>
+    <option value="その他">その他</option>
+  </select>
+
+
+  <div id="otherReasonBox" class="hidden other-reason">
+
+    <label>その他の理由</label>
+
+    <input
+      id="otherReason"
+      type="text"
+      placeholder="理由を入力してください"
+    >
+
+  </div>
+
 
   <div id="formNotice"></div>
 
-  <button
-    class="primary"
-    onclick="saveNotice()"
-  >
-    登録する
-  </button>
+  <button class="primary" onclick="saveNotice()">登録する</button>
 
 </section>
 
 
+<section id="editView" class="panel hidden">
 
-<!-- =========================
-     連絡を修正
-     ========================= -->
+  <button class="secondary" onclick="backHome()">← 戻る</button>
 
-<section
-  id="editView"
-  class="panel hidden"
->
-
-  <button
-    class="secondary"
-    onclick="backHome()"
-  >
-    ← 戻る
-  </button>
-
-  <h2>
-    連絡を修正
-  </h2>
+  <h2>連絡を修正</h2>
 
   <div id="myNotices"></div>
 
 </section>
 
-
-
-<!-- =========================
-     個人設定
-     ========================= -->
-
-<section
-  id="profileView"
-  class="panel hidden"
->
-
-  <button
-    class="secondary"
-    onclick="backHome()"
-  >
-    ← カレンダーに戻る
-  </button>
-
-  <h2>
-    個人設定
-  </h2>
-
-
-  <div class="userbar">
-
-    <strong id="settingsCurrentName">
-      名前
-    </strong>
-
-    <br>
-
-    <span class="small">
-      学校ID：
-      <span id="settingsSchoolId"></span>
-    </span>
-
-  </div>
-
-
-  <div class="setting-section">
-
-    <h3>
-      部員情報
-    </h3>
-
-
-    <label>
-      名前
-    </label>
-
-    <input
-      id="settingsName"
-      type="text"
-    >
-
-
-    <label>
-      学年
-    </label>
-
-    <select id="settingsGrade">
-
-      <option value="中学1年">中学1年</option>
-      <option value="中学2年">中学2年</option>
-      <option value="中学3年">中学3年</option>
-      <option value="高校1年">高校1年</option>
-      <option value="高校2年">高校2年</option>
-
-    </select>
-
-
-    <label>
-      クラス
-    </label>
-
-    <select id="settingsClass">
-
-      <option value="A">A</option>
-      <option value="B">B</option>
-      <option value="C">C</option>
-      <option value="D">D</option>
-      <option value="E">E</option>
-      <option value="F">F</option>
-      <option value="G">G</option>
-      <option value="H">H</option>
-      <option value="I">I</option>
-      <option value="J">J</option>
-      <option value="K">K</option>
-
-    </select>
-
-
-    <p class="setting-note">
-      学校IDは個人設定から変更できません。
-    </p>
-
-
-    <button
-      class="primary"
-      onclick="saveProfileSettings()"
-    >
-      部員情報を保存
-    </button>
-
-    <div id="profileMsg"></div>
-
-  </div>
-
-
-
-  <div class="setting-section">
-
-    <h3>
-      パスワード変更
-    </h3>
-
-
-    <label>
-      新しいパスワード（6文字以上）
-    </label>
-
-    <input
-      id="newPassword"
-      type="password"
-      autocomplete="new-password"
-    >
-
-
-    <label>
-      新しいパスワード（確認）
-    </label>
-
-    <input
-      id="newPassword2"
-      type="password"
-      autocomplete="new-password"
-    >
-
-
-    <button
-      class="primary"
-      onclick="changePassword()"
-    >
-      パスワードを変更
-    </button>
-
-    <div id="passwordMsg"></div>
-
-  </div>
-
-</section>
-
-
 </main>
-
 
 
 <script type="module">
 
-
-/* =========================================================
-   Firebase
-   ========================================================= */
-
-import {
+import{
   initializeApp
-} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 
-
-import {
+import{
   getAuth,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  updatePassword,
   signOut
-} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
-
-import {
+import{
   getDatabase,
   ref,
   get,
@@ -1090,74 +479,40 @@ import {
   update,
   remove,
   push
-} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
 
 
-const firebaseConfig = {
-
-  apiKey:
-  "AIzaSyAK9yRsSLSfYpLSyluzwRyI22Zp32KeMSA",
-
-  authDomain:
-  "seikyo-handbell-club.firebaseapp.com",
-
-  databaseURL:
-  "https://seikyo-handbell-club-default-rtdb.firebaseio.com",
-
-  projectId:
-  "seikyo-handbell-club",
-
-  storageBucket:
-  "seikyo-handbell-club.firebasestorage.app",
-
-  messagingSenderId:
-  "55435007971",
-
-  appId:
-  "1:55435007971:web:25f5c3b9dcd4324bc3f2d6"
-
+const firebaseConfig={
+  apiKey:"AIzaSyAK9yRrSSLsfYpLSyuzwRyI2ZZp32KeMSA",
+  authDomain:"seikyo-handbell-club.firebaseapp.com",
+  databaseURL:"https://seikyo-handbell-club-default-rtdb.firebaseio.com",
+  projectId:"seikyo-handbell-club",
+  storageBucket:"seikyo-handbell-club.firebasestorage.app",
+  messagingSenderId:"55435007971",
+  appId:"1:55435007971:web:25f5b9c3dcd4324bc3f2d6"
 };
 
 
-const app =
-  initializeApp(firebaseConfig);
+const app=initializeApp(firebaseConfig);
+
+const auth=getAuth(app);
+
+const db=getDatabase(app);
+
+const $=id=>document.getElementById(id);
+
+let profile=null;
+let currentUser=null;
+let editingId=null;
+let current=new Date();
+
+const DOMAIN="@seikyo-handbell-club.local";
 
 
-const auth =
-  getAuth(app);
-
-
-const db =
-  getDatabase(app);
-
-
-/* =========================================================
-   共通
-   ========================================================= */
-
-const $ =
-  id =>
-  document.getElementById(id);
-
-
-let profile = null;
-
-let currentUser = null;
-
-let editingId = null;
-
-let current = new Date();
-
-
-const DOMAIN =
-  "@seikyo-handbell-club.local";
-
-
-const esc =
-  s =>
-  String(s ?? "").replace(
+const esc=s=>
+  String(s??"").replace(
     /[&<>"']/g,
-    c => ({
+    c=>({
       "&":"&amp;",
       "<":"&lt;",
       ">":"&gt;",
@@ -1167,35 +522,21 @@ const esc =
   );
 
 
-const pad =
-  n =>
-  String(n).padStart(2,"0");
+const pad=n=>String(n).padStart(2,"0");
 
-
-const ymd =
-  (y,m,d) =>
+const ymd=(y,m,d)=>
   `${y}-${pad(m+1)}-${pad(d)}`;
 
+const jp=s=>{
+  let[a,b,c]=s.split("-");
+  return `${a}年${+b}月${+c}日`;
+};
 
-const jp =
-  s => {
-
-    let [a,b,c] =
-      s.split("-");
-
-    return `${a}年${+b}月${+c}日`;
-
-  };
-
-
-const email =
-  id =>
+const email=id=>
   String(id).trim()+DOMAIN;
 
 
-/* =========================================================
-   画面切り替え
-   ========================================================= */
+/* 画面切り替え */
 
 function hide(){
 
@@ -1205,10 +546,8 @@ function hide(){
     "loginView",
     "setupView",
     "formView",
-    "editView",
-    "profileView"
-  ].forEach(
-    x =>
+    "editView"
+  ].forEach(x=>
     $(x).classList.add("hidden")
   );
 
@@ -1219,8 +558,7 @@ function backHome(){
 
   hide();
 
-  $("calendarView")
-    .classList.remove("hidden");
+  $("calendarView").classList.remove("hidden");
 
   render();
 
@@ -1231,8 +569,7 @@ function showLogin(){
 
   hide();
 
-  $("loginView")
-    .classList.remove("hidden");
+  $("loginView").classList.remove("hidden");
 
 }
 
@@ -1241,134 +578,63 @@ function showSetup(){
 
   hide();
 
-  $("setupView")
-    .classList.remove("hidden");
+  $("setupView").classList.remove("hidden");
 
 }
 
 
-/* =========================================================
-   部員情報
-   ========================================================= */
+/* プロフィール */
 
 async function loadProfile(){
 
-  if(!currentUser)
-    return;
+  if(!currentUser)return;
 
-
-  const s =
+  const s=
     await get(
-      ref(
-        db,
-        "members/"+currentUser.uid
-      )
+      ref(db,"members/"+currentUser.uid)
     );
 
-
-  profile =
-    s.exists()
-    ? s.val()
-    : null;
-
+  profile=
+    s.exists()?s.val():null;
 
   if(profile){
 
-    $("headerUserName").textContent =
-      profile.name || "名前";
-
-
-    $("settingsCurrentName").textContent =
-      profile.name || "名前";
-
-
-    $("settingsSchoolId").textContent =
-      profile.schoolId || "";
-
-
-    $("userbar").innerHTML =
+    $("userbar").innerHTML=
       `<strong>${esc(profile.name)}</strong>
-       ${esc(profile.grade)}${esc(profile.className)}組
+       ${esc(profile.grade)}年${esc(profile.className)}組
       　ID：${esc(profile.schoolId)}`;
 
-
-    $("profileBox").textContent =
-      `${profile.name}（${profile.grade}${profile.className}組）`;
-
-
-    $("settingsName").value =
-      profile.name || "";
-
-
-    $("settingsGrade").value =
-      profile.grade || "高校1年";
-
-
-    $("settingsClass").value =
-      profile.className || "A";
+    $("profileBox").textContent=
+      `${profile.name}（${profile.grade}年${profile.className}組）`;
 
   }
 
 }
 
 
-/* =========================================================
-   ログイン状態
-   ========================================================= */
-
 onAuthStateChanged(
   auth,
-  async u => {
+  async u=>{
 
-    currentUser = u;
-
+    currentUser=u;
 
     if(u){
 
-      $("loggedOut")
-        .classList.add("hidden");
+      await loadProfile();
 
+      $("loggedOut").classList.add("hidden");
 
-      $("loggedIn")
-        .classList.remove("hidden");
-
-
-      $("profileButton")
-        .classList.remove("hidden");
-
-
-      try{
-
-        await loadProfile();
-
-      }catch(e){
-
-        console.error(
-          "部員情報の読み込みに失敗しました:",
-          e
-        );
-
-      }
-
+      $("loggedIn").classList.remove("hidden");
 
       render();
 
-
     }else{
 
-      $("loggedOut")
-        .classList.remove("hidden");
+      $("loggedOut").classList.remove("hidden");
 
+      $("loggedIn").classList.add("hidden");
 
-      $("loggedIn")
-        .classList.add("hidden");
-
-
-      $("profileButton")
-        .classList.add("hidden");
-
-
-      profile = null;
+      profile=null;
 
     }
 
@@ -1376,32 +642,20 @@ onAuthStateChanged(
 );
 
 
-/* =========================================================
-   ログイン
-   ========================================================= */
+/* ログイン */
 
 async function login(){
 
-  let id =
-    $("loginId")
-    .value
-    .trim();
+  let id=$("loginId").value.trim();
 
+  let pw=$("loginPassword").value;
 
-  let pw =
-    $("loginPassword")
-    .value;
+  if(!id||!pw){
 
-
-  if(!id || !pw){
-
-    $("loginMsg").innerHTML =
+    return $("loginMsg").innerHTML=
       '<div class="msg error">IDとパスワードを入力してください。</div>';
 
-    return;
-
   }
-
 
   try{
 
@@ -1411,106 +665,64 @@ async function login(){
       pw
     );
 
-
     backHome();
-
 
   }catch(e){
 
-    console.error(e);
-
-
-    $("loginMsg").innerHTML =
-      `<div class="msg error">
-        IDまたはパスワードが正しくありません。
-      </div>`;
+    $("loginMsg").innerHTML=
+      '<div class="msg error">IDまたはパスワードが正しくありません。</div>';
 
   }
 
 }
 
 
-/* =========================================================
-   初回パスワード設定
-   ========================================================= */
+/* 初回パスワード設定 */
 
 async function setupPassword(){
 
-  let id =
-    $("setupId")
-    .value
-    .trim();
+  let id=$("setupId").value.trim();
 
+  let p=$("setupPassword").value;
 
-  let p =
-    $("setupPassword")
-    .value;
+  let p2=$("setupPassword2").value;
 
+  if(!id||p.length<6||p!==p2){
 
-  let p2 =
-    $("setupPassword2")
-    .value;
-
-
-  if(
-    !id ||
-    p.length < 6 ||
-    p !== p2
-  ){
-
-    $("setupMsg").innerHTML =
+    return $("setupMsg").innerHTML=
       '<div class="msg error">入力内容を確認してください。</div>';
-
-    return;
 
   }
 
-
   try{
 
-    let exists =
+    let exists=
       await get(
-        ref(
-          db,
-          "memberIds/"+id
-        )
+        ref(db,"memberIds/"+id)
       );
-
 
     if(!exists.exists())
       throw Error("not-registered");
 
-
-    let reg =
+    let reg=
       await get(
-        ref(
-          db,
-          "memberRegistrations/"+id
-        )
+        ref(db,"memberRegistrations/"+id)
       );
-
 
     if(!reg.exists())
       throw Error("no-data");
 
+    let data=reg.val();
 
-    let data =
-      reg.val();
-
-
-    let cred =
+    let cred=
       await createUserWithEmailAndPassword(
         auth,
         email(id),
         p
       );
 
-
     await set(
-      ref(
-        db,
-        "members/"+cred.user.uid
-      ),
+      ref(db,"members/"+cred.user.uid),
       {
         schoolId:id,
         name:data.name,
@@ -1519,28 +731,21 @@ async function setupPassword(){
       }
     );
 
-
     await update(
-      ref(
-        db,
-        "memberIds/"+id
-      ),
+      ref(db,"memberIds/"+id),
       {
         accountCreated:true,
         uid:cred.user.uid
       }
     );
 
-
     backHome();
-
 
   }catch(e){
 
     console.error(e);
 
-
-    $("setupMsg").innerHTML =
+    $("setupMsg").innerHTML=
       '<div class="msg error">そのIDが登録されていないか、すでに初回設定済みです。</div>';
 
   }
@@ -1548,309 +753,49 @@ async function setupPassword(){
 }
 
 
-/* =========================================================
-   ログアウト
-   ========================================================= */
+/* ログアウト */
 
 function logout(){
 
-  if(
-    confirm("ログアウトしますか？")
-  ){
-
-    signOut(auth);
-
-  }
+  signOut(auth);
 
 }
 
 
-/* =========================================================
-   個人設定
-   ========================================================= */
-
-function showProfileSettings(){
-
-  if(
-    !currentUser ||
-    !profile
-  ){
-
-    return showLogin();
-
-  }
-
-
-  hide();
-
-
-  $("profileView")
-    .classList.remove("hidden");
-
-
-  $("profileMsg").innerHTML =
-    "";
-
-
-  $("passwordMsg").innerHTML =
-    "";
-
-
-  $("settingsName").value =
-    profile.name || "";
-
-
-  $("settingsGrade").value =
-    profile.grade || "高校1年";
-
-
-  $("settingsClass").value =
-    profile.className || "A";
-
-
-  $("settingsCurrentName").textContent =
-    profile.name || "名前";
-
-
-  $("settingsSchoolId").textContent =
-    profile.schoolId || "";
-
-
-  $("newPassword").value =
-    "";
-
-
-  $("newPassword2").value =
-    "";
-
-}
-
-
-/* =========================================================
-   個人情報変更
-   ========================================================= */
-
-async function saveProfileSettings(){
-
-  if(
-    !currentUser ||
-    !profile
-  ){
-
-    return;
-
-  }
-
-
-  const name =
-    $("settingsName")
-    .value
-    .trim();
-
-
-  const grade =
-    $("settingsGrade")
-    .value;
-
-
-  const className =
-    $("settingsClass")
-    .value;
-
-
-  if(!name){
-
-    $("profileMsg").innerHTML =
-      '<div class="msg error">名前を入力してください。</div>';
-
-    return;
-
-  }
-
-
-  try{
-
-    await update(
-      ref(
-        db,
-        "members/"+currentUser.uid
-      ),
-      {
-        name,
-        grade,
-        className
-      }
-    );
-
-
-    profile = {
-      ...profile,
-      name,
-      grade,
-      className
-    };
-
-
-    await loadProfile();
-
-
-    $("profileMsg").innerHTML =
-      '<div class="msg">部員情報を保存しました。</div>';
-
-
-  }catch(e){
-
-    console.error(e);
-
-
-    $("profileMsg").innerHTML =
-      '<div class="msg error">保存できませんでした。時間をおいてもう一度試してください。</div>';
-
-  }
-
-}
-
-
-/* =========================================================
-   パスワード変更
-   ========================================================= */
-
-async function changePassword(){
-
-  if(!currentUser)
-    return;
-
-
-  const p =
-    $("newPassword")
-    .value;
-
-
-  const p2 =
-    $("newPassword2")
-    .value;
-
-
-  if(
-    p.length < 6 ||
-    p !== p2
-  ){
-
-    $("passwordMsg").innerHTML =
-      '<div class="msg error">6文字以上で、2つのパスワードを同じにしてください。</div>';
-
-    return;
-
-  }
-
-
-  try{
-
-    await updatePassword(
-      currentUser,
-      p
-    );
-
-
-    $("newPassword").value =
-      "";
-
-
-    $("newPassword2").value =
-      "";
-
-
-    $("passwordMsg").innerHTML =
-      '<div class="msg">パスワードを変更しました。</div>';
-
-
-  }catch(e){
-
-    console.error(e);
-
-
-    if(
-      e.code ===
-      "auth/requires-recent-login"
-    ){
-
-      $("passwordMsg").innerHTML =
-        '<div class="msg error">安全のため、いったんログアウトしてもう一度ログインしてから変更してください。</div>';
-
-    }else{
-
-      $("passwordMsg").innerHTML =
-        '<div class="msg error">パスワードを変更できませんでした。</div>';
-
-    }
-
-  }
-
-}
-
-
-/* =========================================================
-   カレンダー
-   ========================================================= */
+/* カレンダー */
 
 async function render(){
 
-  let y =
-    current.getFullYear();
+  let y=current.getFullYear();
 
+  let m=current.getMonth();
 
-  let m =
-    current.getMonth();
-
-
-  $("monthTitle").textContent =
+  $("monthTitle").textContent=
     `${y}年${m+1}月`;
 
-
-  let ss =
+  let ss=
     await get(
       ref(db,"schedules")
     );
 
-
-  let ns =
+  let ns=
     await get(
       ref(db,"notices")
     );
 
+  let sch=
+    ss.exists()?ss.val():{};
 
-  let sch =
-    ss.exists()
-    ? ss.val()
-    : {};
+  let all=
+    ns.exists()?ns.val():{};
 
+  let first=
+    (new Date(y,m,1).getDay()+6)%7;
 
-  let all =
-    ns.exists()
-    ? ns.val()
-    : {};
+  let last=
+    new Date(y,m+1,0).getDate();
 
-
-  let first =
-    (
-      new Date(
-        y,
-        m,
-        1
-      ).getDay()+6
-    ) % 7;
-
-
-  let last =
-    new Date(
-      y,
-      m+1,
-      0
-    ).getDate();
-
-
-  let h = "";
-
+  let h="";
 
   for(
     let i=0;
@@ -1858,11 +803,9 @@ async function render(){
     i++
   ){
 
-    h +=
-      '<div class="day empty"></div>';
+    h+='<div class="day empty"></div>';
 
   }
-
 
   for(
     let d=1;
@@ -1870,171 +813,95 @@ async function render(){
     d++
   ){
 
-    let date =
+    let date=
       ymd(y,m,d);
 
-
-    let has =
+    let has=
       !!sch[date];
 
+    let count=
+      Object.values(all)
+        .filter(n=>n.date===date)
+        .length;
 
-    let count =
-      Object
-      .values(all)
-      .filter(
-        n =>
-        n.date === date
-      )
-      .length;
-
-
-    h += `
-
+    h+=`
       <div
-        class="day ${has ? "club-day" : "off"}"
+        class="day ${has?"":"off"}"
         onclick="openDay('${date}')"
       >
-
-        <div class="daynum">
-          ${d}
-        </div>
-
+        <div class="daynum">${d}</div>
         ${
           count
-          ?
-          `<span class="count">
-             ${count}件
-           </span>`
-          :
-          ""
+          ?`<span class="count">${count}件</span>`
+          :""
         }
-
         <span class="dot">
           ${
             has
-            ?
-            esc(
-              sch[date].time ||
-              "部活あり"
-            )
-            :
-            "部活なし"
+            ?esc(sch[date].time||"部活あり")
+            :"部活なし"
           }
         </span>
-
       </div>
-
     `;
 
   }
 
-
-  $("days").innerHTML = h;
-
-}
-
-
-/* =========================================================
-   今月へ戻る
-   ========================================================= */
-
-function goThisMonth(){
-
-  const now =
-    new Date();
-
-
-  current =
-    new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      1
-    );
-
-
-  render();
+  $("days").innerHTML=h;
 
 }
 
 
-/* =========================================================
-   月変更
-   ========================================================= */
+/* 月移動 */
 
 function changeMonth(n){
 
-  current =
+  current=
     new Date(
       current.getFullYear(),
       current.getMonth()+n,
       1
     );
 
-
   render();
 
 }
 
 
-/* =========================================================
-   日付詳細
-   ========================================================= */
+/* 日付詳細 */
 
 async function openDay(date){
 
   hide();
 
+  $("detailView").classList.remove("hidden");
 
-  $("detailView")
-    .classList.remove("hidden");
-
-
-  let ss =
+  let ss=
     await get(
-      ref(
-        db,
-        "schedules/"+date
-      )
+      ref(db,"schedules/"+date)
     );
 
-
-  let ns =
+  let ns=
     await get(
-      ref(
-        db,
-        "notices"
-      )
+      ref(db,"notices")
     );
 
+  let sch=
+    ss.exists()?ss.val():null;
 
-  let sch =
-    ss.exists()
-    ? ss.val()
-    : null;
+  let all=
+    ns.exists()?ns.val():{};
 
+  let list=
+    Object.values(all)
+      .filter(n=>n.date===date);
 
-  let all =
-    ns.exists()
-    ? ns.val()
-    : {};
-
-
-  let list =
-    Object
-    .values(all)
-    .filter(
-      n =>
-      n.date === date
-    );
-
-
-  let h =
+  let h=
     `<h2>${jp(date)}</h2>`;
-
 
   if(!sch){
 
-    $("detail").innerHTML =
+    $("detail").innerHTML=
       h+
       '<div class="msg error">この日は部活動がありません。</div>';
 
@@ -2042,508 +909,354 @@ async function openDay(date){
 
   }
 
-
-  h += `
-
+  h+=`
     <div class="userbar">
-
-      <strong>
-        部活動あり
-      </strong>
-
-      ${esc(sch.time || "")}
-
+      <strong>部活動あり</strong>
+      ${esc(sch.time||"")}
       <br>
-
-      ${esc(sch.place || "")}
-
+      ${esc(sch.place||"")}
     </div>
 
-    <h3>
-      連絡 ${list.length}件
-    </h3>
-
+    <h3>連絡 ${list.length}件</h3>
   `;
 
-
-  h +=
-
+  h+=
     list.length
-
     ?
+    list.map(n=>`
+      <div class="item">
 
-    list
-    .map(
-      n => `
+        <strong>
+          ${esc(n.name)}
+          <span class="badge">
+            ${esc(n.type)}
+          </span>
+        </strong>
 
-        <div class="item">
+        ${
+          n.time
+          ?`<div class="meta">${esc(n.time)}</div>`
+          :""
+        }
 
-          <strong>
-
-            ${esc(n.name)}
-
-            <span class="badge">
-              ${esc(n.type)}
-            </span>
-
-          </strong>
-
-
-          ${
-            n.time
-            ?
-            `<div class="meta">
-              ${esc(n.time)}
-             </div>`
-            :
-            ""
-          }
-
-
-          <div class="meta">
-            理由：${esc(n.reason)}
-          </div>
-
+        <div class="meta">
+          理由：${esc(n.reason)}
         </div>
 
-      `
-    )
-    .join("")
+      </div>
+    `).join("")
 
     :
 
     "<p class='small'>現在、連絡はありません。</p>";
 
-
-  $("detail").innerHTML =
-    h;
+  $("detail").innerHTML=h;
 
 }
 
 
-/* =========================================================
-   欠席連絡フォーム
-   ========================================================= */
+/* 欠席連絡フォーム */
 
 function showForm(id=null){
 
-  if(
-    !currentUser ||
-    !profile
-  ){
-
+  if(!currentUser||!profile)
     return showLogin();
 
-  }
-
-
-  editingId = id;
-
+  editingId=id;
 
   hide();
 
+  $("formView").classList.remove("hidden");
 
-  $("formView")
-    .classList.remove("hidden");
-
-
-  $("formTitle").textContent =
+  $("formTitle").textContent=
     id
-    ?
-    "連絡を修正"
-    :
-    "欠席連絡";
+    ?"連絡を修正"
+    :"欠席連絡";
 
+  $("type").value="欠席";
 
-  $("formBackButton").onclick =
-    backHome;
+  $("date").value="";
 
+  $("reason").value="";
 
-  $("formBackButton").textContent =
-    "← 戻る";
+  $("otherReason").value="";
 
-
-  $("type").value =
-    "欠席";
-
-
-  $("date").value =
-    "";
-
-
-  $("reason").value =
-    "";
-
-
-  $("formNotice").innerHTML =
-    "";
-
+  $("otherReasonBox").classList.add("hidden");
 
   updateTimeFields();
 
 }
 
 
-/* =========================================================
-   時間入力欄
-   ========================================================= */
+/* 遅刻・早退などの時間欄 */
 
 function updateTimeFields(v=""){
 
-  let t =
-    $("type").value;
+  let t=$("type").value;
 
+  let l="";
 
-  let l = "";
+  let p="";
 
-  let p = "";
+  if(t==="遅刻"){
 
+    l="到着予定時刻";
 
-  if(t === "遅刻"){
-
-    l =
-      "到着予定時刻";
-
-    p =
-      "例：17:30";
+    p="例：17:30";
 
   }
 
+  if(t==="早退"){
 
-  if(t === "早退"){
+    l="帰る予定時刻";
 
-    l =
-      "帰る予定時刻";
-
-    p =
-      "例：17:30";
+    p="例：17:30";
 
   }
 
+  if(t==="途中抜け"){
 
-  if(t === "途中抜け"){
+    l="抜ける時間〜戻る時間";
 
-    l =
-      "抜ける時間〜戻る時間";
-
-    p =
-      "例：18:00〜19:00";
+    p="例：18:00〜19:00";
 
   }
 
-
-  $("timeFields").innerHTML =
-
+  $("timeFields").innerHTML=
     l
-
     ?
-
-    `
-      <label>
-        ${l}
-      </label>
-
-      <input
-        id="time"
-        value="${esc(v)}"
-        placeholder="${p}"
-      >
-    `
-
+    `<label>${l}</label>
+     <input
+       id="time"
+       value="${esc(v)}"
+       placeholder="${p}"
+     >`
     :
-
     "";
 
 }
 
 
-/* =========================================================
-   日付確認
-   ========================================================= */
+/* その他の理由欄 */
 
-async function checkDate(){
+function updateOtherReason(){
 
-  let d =
-    $("date").value;
+  const value=$("reason").value;
 
+  if(value==="その他"){
 
-  if(!d){
+    $("otherReasonBox")
+      .classList.remove("hidden");
 
-    $("formNotice").innerHTML =
-      "";
+  }else{
 
-    return;
+    $("otherReasonBox")
+      .classList.add("hidden");
+
+    $("otherReason").value="";
 
   }
 
+}
 
-  let s =
+
+/* 日付チェック */
+
+async function checkDate(){
+
+  let d=$("date").value;
+
+  if(!d)
+    return $("formNotice").innerHTML="";
+
+  let s=
     await get(
-      ref(
-        db,
-        "schedules/"+d
-      )
+      ref(db,"schedules/"+d)
     );
 
-
-  $("formNotice").innerHTML =
-
+  $("formNotice").innerHTML=
     s.exists()
-
     ?
-
     `<div class="msg">
-
       部活：
-      ${esc(s.val().time || "")}
+      ${esc(s.val().time||"")}
       /
-      ${esc(s.val().place || "")}
-
+      ${esc(s.val().place||"")}
     </div>`
-
     :
-
     '<div class="msg error">この日は部活動がないため、連絡できません。</div>';
 
 }
 
 
-/* =========================================================
-   欠席連絡登録・修正
-   ========================================================= */
+/* 欠席連絡を保存 */
 
 async function saveNotice(){
 
-  let d =
+  let d=
     $("date").value;
 
+  let reason=
+    $("reason").value;
 
-  let r =
-    $("reason")
-    .value
-    .trim();
-
-
-  let t =
+  let t=
     $("type").value;
 
+  let time=
+    $("time")?.value.trim()||"";
 
-  let time =
-    $("time")?.value
-    .trim() || "";
+  let finalReason="";
 
+  if(reason==="その他"){
 
-  if(!d || !r){
+    finalReason=
+      $("otherReason").value.trim();
 
-    alert(
+    if(!finalReason){
+
+      return alert(
+        "その他の理由を入力してください。"
+      );
+
+    }
+
+  }else{
+
+    finalReason=reason;
+
+  }
+
+  if(!d||!reason){
+
+    return alert(
       "日付と理由は必須です。"
     );
 
-    return;
-
   }
 
-
   if(
-    !(
-      await get(
-        ref(
-          db,
-          "schedules/"+d
-        )
-      )
-    ).exists()
+    !(await get(
+      ref(db,"schedules/"+d)
+    )).exists()
   ){
 
-    alert(
+    return alert(
       "その日は部活動がありません。"
     );
 
-    return;
-
   }
 
-
-  /* =========================
-     修正
-     ========================= */
 
   if(editingId){
 
     await update(
-      ref(
-        db,
-        "notices/"+editingId
-      ),
+      ref(db,"notices/"+editingId),
       {
         type:t,
         date:d,
         time,
-        reason:r,
+        reason:finalReason,
         updatedAt:Date.now()
       }
     );
 
+  }else{
 
-    alert(
-      "修正しました。"
+    await set(
+      push(ref(db,"notices")),
+      {
+        uid:currentUser.uid,
+        schoolId:profile.schoolId,
+        name:profile.name,
+        type:t,
+        date:d,
+        time,
+        reason:finalReason,
+        createdAt:Date.now(),
+        updatedAt:Date.now()
+      }
     );
-
-
-    showEdit();
-
-    return;
 
   }
 
+  alert("登録しました。");
 
-  /* =========================
-     新規登録
-     ========================= */
-
-  await set(
-    push(
-      ref(db,"notices")
-    ),
-    {
-      uid:currentUser.uid,
-      schoolId:profile.schoolId,
-      name:profile.name,
-      type:t,
-      date:d,
-      time,
-      reason:r,
-      createdAt:Date.now(),
-      updatedAt:Date.now()
-    }
-  );
-
-
-  alert(
-    "登録しました。"
-  );
-
-
-  editingId = null;
-
-  $("date").value =
-    "";
-
-  $("reason").value =
-    "";
-
-  $("formNotice").innerHTML =
-    "";
-
-  $("type").value =
-    "欠席";
-
-  updateTimeFields();
+  backHome();
 
 }
 
 
-/* =========================================================
-   自分の連絡一覧
-   ========================================================= */
+/* 修正一覧 */
 
 async function showEdit(){
 
   if(!currentUser)
     return showLogin();
 
-
   hide();
 
+  $("editView").classList.remove("hidden");
 
-  $("editView")
-    .classList.remove("hidden");
-
-
-  let s =
+  let s=
     await get(
-      ref(
-        db,
-        "notices"
-      )
+      ref(db,"notices")
     );
 
+  let all=
+    s.exists()?s.val():{};
 
-  let all =
-    s.exists()
-    ? s.val()
-    : {};
+  let list=
+    Object.entries(all)
+      .filter(
+        ([id,n])=>
+          n.uid===currentUser.uid
+      );
 
-
-  let list =
-    Object
-    .entries(all)
-    .filter(
-      ([id,n]) =>
-        n.uid === currentUser.uid
-    );
-
-
-  $("myNotices").innerHTML =
-
+  $("myNotices").innerHTML=
     list.length
 
     ?
 
-    list
-    .map(
-      ([id,n]) => `
+    list.map(([id,n])=>`
 
-        <div class="item">
+      <div class="item">
 
-          <strong>
+        <strong>
+          ${jp(n.date)}
+         　
+          ${esc(n.type)}
+        </strong>
 
-            ${jp(n.date)}
-            　
-            ${esc(n.type)}
+        ${
+          n.time
+          ?`<div class="meta">${esc(n.time)}</div>`
+          :""
+        }
 
-          </strong>
+        <div class="meta">
+          理由：${esc(n.reason)}
+        </div>
 
+        <div class="row">
 
-          ${
-            n.time
-            ?
-            `<div class="meta">
-              ${esc(n.time)}
-             </div>`
-            :
-            ""
-          }
+          <button
+            onclick="editNotice('${id}')"
+          >
+            修正
+          </button>
 
-
-          <div class="meta">
-            理由：${esc(n.reason)}
-          </div>
-
-
-          <div class="row">
-
-            <button
-              onclick="editNotice('${id}')"
-            >
-              修正
-            </button>
-
-
-            <button
-              class="danger"
-              onclick="deleteNotice('${id}')"
-            >
-              削除
-            </button>
-
-          </div>
+          <button
+            class="danger"
+            onclick="deleteNotice('${id}')"
+          >
+            削除
+          </button>
 
         </div>
 
-      `
-    )
-    .join("")
+      </div>
+
+    `).join("")
 
     :
 
@@ -2552,196 +1265,142 @@ async function showEdit(){
 }
 
 
-/* =========================================================
-   連絡修正
-   ========================================================= */
+/* 連絡を修正 */
 
 async function editNotice(id){
 
-  let s =
+  let s=
     await get(
-      ref(
-        db,
-        "notices/"+id
-      )
+      ref(db,"notices/"+id)
     );
 
-
   if(
-    !s.exists() ||
-    s.val().uid !== currentUser.uid
-  ){
-
+    !s.exists()||
+    s.val().uid!==currentUser.uid
+  )
     return;
 
-  }
+  let n=s.val();
 
-
-  let n =
-    s.val();
-
-
-  editingId =
-    id;
-
+  editingId=id;
 
   hide();
 
+  $("formView").classList.remove("hidden");
 
-  $("formView")
-    .classList.remove("hidden");
-
-
-  $("formTitle").textContent =
+  $("formTitle").textContent=
     "連絡を修正";
 
-
-  /*
-   * 修正フォームの戻るボタンは
-   * カレンダーではなく連絡一覧へ戻す
-   */
-
-  $("formBackButton").onclick =
-    showEdit;
-
-
-  $("formBackButton").textContent =
-    "← 連絡一覧に戻る";
-
-
-  $("type").value =
+  $("type").value=
     n.type;
 
-
-  $("date").value =
+  $("date").value=
     n.date;
 
+  /*
+   * 保存されている理由が
+   * プルダウンの候補にある場合はそのまま表示。
+   * それ以外なら「その他」として扱う。
+   */
 
-  $("reason").value =
-    n.reason;
+  const reasonOptions=[
+    "体調不良・けが",
+    "通院",
+    "家庭の用事・旅行",
+    "他の部活動",
+    "塾・習い事",
+    "冠婚葬祭",
+    "追試・補講・課題",
+    "セミナー",
+    "委員会・コアなどの仕事",
+    "2者懇談・3者懇談",
+    "英検など"
+  ];
 
+  if(reasonOptions.includes(n.reason)){
+
+    $("reason").value=n.reason;
+
+    $("otherReason").value="";
+
+    $("otherReasonBox")
+      .classList.add("hidden");
+
+  }else{
+
+    $("reason").value="その他";
+
+    $("otherReason").value=
+      n.reason||"";
+
+    $("otherReasonBox")
+      .classList.remove("hidden");
+
+  }
 
   updateTimeFields(
-    n.time || ""
+    n.time||""
   );
-
 
   checkDate();
 
 }
 
 
-/* =========================================================
-   連絡削除
-   ========================================================= */
+/* 連絡削除 */
 
 async function deleteNotice(id){
 
   if(
-    !confirm(
+    confirm(
       "この連絡を削除しますか？"
     )
   ){
 
-    return;
+    let s=
+      await get(
+        ref(db,"notices/"+id)
+      );
+
+    if(
+      s.exists()&&
+      s.val().uid===currentUser.uid
+    ){
+
+      await remove(
+        ref(db,"notices/"+id)
+      );
+
+    }
+
+    showEdit();
 
   }
-
-
-  let s =
-    await get(
-      ref(
-        db,
-        "notices/"+id
-      )
-    );
-
-
-  if(
-    s.exists() &&
-    s.val().uid === currentUser.uid
-  ){
-
-    await remove(
-      ref(
-        db,
-        "notices/"+id
-      )
-    );
-
-  }
-
-
-  showEdit();
 
 }
 
 
-/* =========================================================
-   HTMLから呼び出す関数
-   ========================================================= */
+/* HTMLから呼び出す関数 */
 
-window.showLogin =
-  showLogin;
-
-window.showSetup =
-  showSetup;
-
-window.login =
-  login;
-
-window.setupPassword =
-  setupPassword;
-
-window.logout =
-  logout;
-
-window.changeMonth =
-  changeMonth;
-
-window.goThisMonth =
-  goThisMonth;
-
-window.openDay =
-  openDay;
-
-window.showForm =
-  showForm;
-
-window.showEdit =
-  showEdit;
-
-window.showProfileSettings =
-  showProfileSettings;
-
-window.saveProfileSettings =
-  saveProfileSettings;
-
-window.changePassword =
-  changePassword;
-
-window.updateTimeFields =
-  updateTimeFields;
-
-window.checkDate =
-  checkDate;
-
-window.saveNotice =
-  saveNotice;
-
-window.editNotice =
-  editNotice;
-
-window.deleteNotice =
-  deleteNotice;
-
-window.backHome =
-  backHome;
+window.showLogin=showLogin;
+window.showSetup=showSetup;
+window.login=login;
+window.setupPassword=setupPassword;
+window.logout=logout;
+window.changeMonth=changeMonth;
+window.openDay=openDay;
+window.showForm=showForm;
+window.showEdit=showEdit;
+window.updateTimeFields=updateTimeFields;
+window.checkDate=checkDate;
+window.saveNotice=saveNotice;
+window.editNotice=editNotice;
+window.deleteNotice=deleteNotice;
+window.backHome=backHome;
+window.updateOtherReason=updateOtherReason;
 
 
-/* =========================================================
-   初期表示
-   ========================================================= */
+/* 初期表示 */
 
 render();
 
