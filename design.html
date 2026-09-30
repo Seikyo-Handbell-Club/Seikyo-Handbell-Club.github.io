@@ -34,6 +34,7 @@ html,body{margin:0;width:100%;height:100%;background:transparent;overflow:hidden
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 import{getDatabase,ref,get}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
 const firebaseConfig={
   apiKey:"AIzaSyAK9yRsSLSfYpLSyluzwRyI22Zp32KeMSA",
@@ -47,6 +48,7 @@ const firebaseConfig={
 
 const app=initializeApp(firebaseConfig);
 const db=getDatabase(app);
+const auth=getAuth(app);
 const message=document.getElementById("bellMessage");
 const bellImage=document.getElementById("bellImage");
 
@@ -318,9 +320,14 @@ function changeBellMessage(){
 async function loadBellMessages(suppliedSchedules=null){
   try{
     let schedules;
+
     if(suppliedSchedules !== null){
       schedules=suppliedSchedules || {};
     }else{
+      const currentUser=auth.currentUser;
+      if(!currentUser){
+        throw new Error("Firebase Auth のログイン状態を確認できませんでした");
+      }
       const snapshot=await get(ref(db,"schedules"));
       schedules=snapshot.exists()?snapshot.val():{};
     }
@@ -339,12 +346,35 @@ async function loadBellMessages(suppliedSchedules=null){
     showMessage(first);
   }catch(error){
     console.error("ベルちゃんの予定取得に失敗しました",error);
-    bellMessages=["予定を確認してみてね！","今日も一日頑張ろうね！"];
+
+    /*
+      予定データを取得できない場合でも、2種類だけの予備セリフにはしない。
+      時間帯に応じた通常セリフをそのまま使うことで、ベルちゃんが
+      いつもの複数のセリフから喋れる状態を維持する。
+    */
+    const now=new Date();
+    bellMessages=[...new Set(buildRegularMessages([],now))];
     showMessage(pickRandom(bellMessages));
   }
 }
 
 bellImage.addEventListener("click",changeBellMessage);
+
+/*
+  iframe 内でも Firebase Auth のログイン状態を確認する。
+  親ページから予定が届けばそちらを優先し、届かない場合は
+  iframe 自身が認証済みユーザーとして schedules を取得する。
+*/
+let authReady=false;
+let authUser=null;
+
+onAuthStateChanged(auth,user=>{
+  authReady=true;
+  authUser=user;
+  if(!isEmbedded && user){
+    loadBellMessages();
+  }
+});
 
 if(!isEmbedded){
   loadBellMessages();
