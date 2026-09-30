@@ -177,10 +177,14 @@ h1 {
     0 14px 12px rgba(40, 55, 65, 0.15)
   );
 
-  animation: bellFloat 3.2s ease-in-out infinite;
-
   user-select: none;
-  pointer-events: none;
+  cursor: pointer;
+
+  transition: transform 0.15s ease;
+}
+
+.bell:active {
+  transform: scale(0.96);
 }
 
 /* 吹き出し */
@@ -188,7 +192,7 @@ h1 {
   position: absolute;
 
   right: 235px;
-  bottom: 175px;
+  bottom: 135px;
 
   width: min(330px, 34vw);
   min-width: 220px;
@@ -240,18 +244,6 @@ h1 {
   font-size: 11px;
 
   margin-bottom: 5px;
-}
-
-/* ベルちゃんのふわふわ */
-@keyframes bellFloat {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-8px);
-  }
 }
 
 /* 吹き出し登場 */
@@ -345,91 +337,4 @@ h1 {
 
     <h2>
       今月の予定
-    </h2>
-
-    <p>
-      ここに実際のカレンダーが入る想定。
-      まずはベルちゃんと吹き出しの雰囲気を確認するための試作です。
-    </p>
-
-
-    <!-- 仮カレンダー -->
-    <div class="dummy-calendar">
-
-      <div class="day">1</div>
-      <div class="day active">2</div>
-      <div class="day">3</div>
-      <div class="day event">4</div>
-      <div class="day">5</div>
-      <div class="day exam">6</div>
-      <div class="day">7</div>
-
-      <div class="day">8</div>
-      <div class="day active">9</div>
-      <div class="day">10</div>
-      <div class="day">11</div>
-      <div class="day event">12</div>
-      <div class="day">13</div>
-      <div class="day">14</div>
-
-    </div>
-
-
-    <!-- 色の説明 -->
-    <div class="legend">
-
-      <span>
-        <i class="dot blue"></i>
-        部活動
-      </span>
-
-      <span>
-        <i class="dot green"></i>
-        試験期間
-      </span>
-
-      <span>
-        <i class="dot purple"></i>
-        演奏会
-      </span>
-
-      <span>
-        <i class="dot red"></i>
-        学校が休み
-      </span>
-
-      <span>
-        <i class="dot orange"></i>
-        その他のイベント
-      </span>
-
-    </div>
-
-
-    <!-- ベルちゃんの吹き出し -->
-    <div class="bubble">
-
-      <small>
-        ベルちゃん
-      </small>
-
-      <span>
-        今日の部活は17:00〜19:00までだよ！
-      </span>
-
-    </div>
-
-
-    <!-- ベルちゃん -->
-    <img
-      class="bell"
-      src="bell.png"
-      alt="ベルちゃん"
-    >
-
-  </main>
-
-</div>
-
-</body>
-</html>
+    </
