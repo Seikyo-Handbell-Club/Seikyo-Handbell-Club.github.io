@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>清教学園ハンドベル部予定表 - デザイン試作</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Hiragino Sans",
+    "Yu Gothic",
+    sans-serif;
+  background: linear-gradient(
+    135deg,
+    #f7fbff 0%,
+    #eef5fb 55%,
+    #f9f5ef 100%
+  );
+  color: #263746;
+}
+
+.page {
+  width: min(1100px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 34px 0 120px;
+}
+
+/* ヘッダー */
+header {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid #dce5eb;
+  border-radius: 24px;
+  padding: 24px 28px;
+  box-shadow: 0 12px 35px rgba(48, 72, 92, 0.08);
+}
+
+.eyebrow {
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  color: #6d8291;
+  margin-bottom: 6px;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(25px, 4vw, 36px);
+  letter-spacing: 0.03em;
+}
+
+.sub {
+  margin: 8px 0 0;
+  color: #71818d;
+  font-size: 14px;
+}
+
+/* メイン */
+.hero {
+  margin-top: 22px;
+  background: white;
+  border-radius: 24px;
+  padding: 28px;
+  min-height: 520px;
+  box-shadow: 0 12px 35px rgba(48, 72, 92, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero h2 {
+  margin: 0;
+  font-size: 25px;
+}
+
+.hero p {
+  color: #71818d;
+  line-height: 1.8;
+}
+
+/* 仮カレンダー */
+.dummy-calendar {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  max-width: 760px;
+}
+
+.day {
+  height: 52px;
+  border-radius: 12px;
+  background: #f5f8fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #73828c;
+  font-size: 14px;
+}
+
+.day.active {
+  background: #e8f2ff;
+  color: #4774a2;
+  font-weight: 700;
+}
+
+.day.event {
+  background: #f0e9fb;
+  color: #7955a2;
+}
+
+.day.exam {
+  background: #e9f5eb;
+  color: #4e875d;
+}
+
+/* 色の説明 */
+.legend {
+  margin-top: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 20px;
+  font-size: 13px;
+  color: #667781;
+}
+
+.legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.blue {
+  background: #5d9be6;
+}
+
+.green {
+  background: #67ad72;
+}
+
+.purple {
+  background: #9b70c9;
+}
+
+.orange {
+  background: #e8a15a;
+}
+
+.red {
+  background: #dd6a6a;
+}
+
+/* ベルちゃん */
+.bell {
+  position: absolute;
+  right: 28px;
+  bottom: 22px;
+
+  width: min(230px, 27vw);
+  min-width: 135px;
+
+  filter: drop-shadow(
+    0 14px 12px rgba(40, 55, 65, 0.15)
+  );
+
+  animation: bellFloat 3.2s ease-in-out infinite;
+
+  user-select: none;
+  pointer-events: none;
+}
+
+/* 吹き出し */
+.bubble {
+  position: absolute;
+
+  right: 235px;
+  bottom: 175px;
+
+  width: min(330px, 34vw);
+  min-width: 220px;
+
+  background: white;
+
+  border: 2px solid #d9e5ed;
+  border-radius: 22px;
+
+  padding: 18px 20px;
+
+  box-shadow:
+    0 12px 28px rgba(48, 72, 92, 0.13);
+
+  font-size: 16px;
+  line-height: 1.65;
+
+  animation:
+    bubbleAppear
+    0.7s
+    cubic-bezier(0.2, 0.9, 0.25, 1.2)
+    both;
+}
+
+.bubble::after {
+  content: "";
+
+  position: absolute;
+
+  right: -13px;
+  bottom: 32px;
+
+  width: 22px;
+  height: 22px;
+
+  background: white;
+
+  border-top: 2px solid #d9e5ed;
+  border-right: 2px solid #d9e5ed;
+
+  transform: rotate(45deg);
+}
+
+.bubble small {
+  display: block;
+
+  color: #84939d;
+
+  font-size: 11px;
+
+  margin-bottom: 5px;
+}
+
+/* ベルちゃんのふわふわ */
+@keyframes bellFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* 吹き出し登場 */
+@keyframes bubbleAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.88) translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* スマホ */
+@media (max-width: 700px) {
+
+  .page {
+    width: calc(100% - 20px);
+    padding-top: 16px;
+  }
+
+  header,
+  .hero {
+    border-radius: 18px;
+    padding: 20px;
+  }
+
+  .hero {
+    padding-bottom: 250px;
+  }
+
+  .bell {
+    right: 18px;
+    bottom: 12px;
+    width: 145px;
+  }
+
+  .bubble {
+    right: 145px;
+    bottom: 115px;
+
+    width: calc(100% - 165px);
+    min-width: 0;
+
+    font-size: 14px;
+    padding: 13px 15px;
+  }
+
+  .bubble::after {
+    right: -11px;
+    bottom: 22px;
+
+    width: 18px;
+    height: 18px;
+  }
+
+  .dummy-calendar {
+    gap: 5px;
+  }
+
+  .day {
+    height: 42px;
+    font-size: 12px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="page">
+
+  <header>
+    <div class="eyebrow">
+      SEIKYO HANDBELL CLUB
+    </div>
+
+    <h1>
+      清教学園ハンドベル部予定表
+    </h1>
+
+    <p class="sub">
+      ホーム画面のデザイン試作
+    </p>
+  </header>
+
+
+  <main class="hero">
+
+    <h2>
+      今月の予定
+    </h2>
+
+    <p>
+      ここに実際のカレンダーが入る想定。
+      まずはベルちゃんと吹き出しの雰囲気を確認するための試作です。
+    </p>
+
+
+    <!-- 仮カレンダー -->
+    <div class="dummy-calendar">
+
+      <div class="day">1</div>
+      <div class="day active">2</div>
+      <div class="day">3</div>
+      <div class="day event">4</div>
+      <div class="day">5</div>
+      <div class="day exam">6</div>
+      <div class="day">7</div>
+
+      <div class="day">8</div>
+      <div class="day active">9</div>
+      <div class="day">10</div>
+      <div class="day">11</div>
+      <div class="day event">12</div>
+      <div class="day">13</div>
+      <div class="day">14</div>
+
+    </div>
+
+
+    <!-- 色の説明 -->
+    <div class="legend">
+
+      <span>
+        <i class="dot blue"></i>
+        部活動
+      </span>
+
+      <span>
+        <i class="dot green"></i>
+        試験期間
+      </span>
+
+      <span>
+        <i class="dot purple"></i>
+        演奏会
+      </span>
+
+      <span>
+        <i class="dot red"></i>
+        学校が休み
+      </span>
+
+      <span>
+        <i class="dot orange"></i>
+        その他のイベント
+      </span>
+
+    </div>
+
+
+    <!-- ベルちゃんの吹き出し -->
+    <div class="bubble">
+
+      <small>
+        ベルちゃん
+      </small>
+
+      <span>
+        今日の部活は17:00〜19:00までだよ！
+      </span>
+
+    </div>
+
+
+    <!-- ベルちゃん -->
+    <img
+      class="bell"
+      src="ベルちゃん 背景透過.png"
+      alt="ベルちゃん"
+    >
+
+  </main>
+
+</div>
+
+</body>
+</html>
