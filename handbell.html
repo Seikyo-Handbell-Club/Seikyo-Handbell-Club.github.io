@@ -2713,6 +2713,9 @@ async function refreshCalendarData(){
 
     calendarDataLoaded = true;
 
+    /* ベルちゃんにも、Firebaseから取得した最新の予定を渡す */
+    window.dispatchEvent(new CustomEvent("bellSchedulesUpdated"));
+
     /*
       月変更などで表示中の月が変わっていた場合も、
       取得完了後に現在の月を更新する。
@@ -5181,12 +5184,17 @@ render();
       frame.contentWindow.postMessage({
         type:"handbellSchedules",
         schedules:(typeof scheduleCache !== "undefined" && scheduleCache) ? scheduleCache : {}
-      },"*");
+      },window.location.origin);
     }catch(e){
       console.error("ベルちゃんへの予定データ送信に失敗しました",e);
     }
   }
+
+  window.sendSchedulesToBell=sendSchedulesToBell;
+
   window.addEventListener("load",sendSchedulesToBell);
+  window.addEventListener("bellSchedulesUpdated",sendSchedulesToBell);
+
   document.addEventListener("DOMContentLoaded",()=>{
     const frame=document.querySelector('iframe[src="design.html"]');
     if(frame)frame.addEventListener("load",sendSchedulesToBell);
