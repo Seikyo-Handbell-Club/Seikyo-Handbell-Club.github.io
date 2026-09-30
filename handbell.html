@@ -425,6 +425,42 @@ textarea{
   white-space:nowrap
 }
 
+
+/* カレンダー色の説明 */
+.calendar-legend{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:6px;
+  margin-top:14px;
+  padding-top:12px;
+  border-top:1px solid #e7eaf0;
+  font-size:11px;
+  color:#4d5661;
+  white-space:nowrap
+}
+
+.calendar-legend-item{
+  display:flex;
+  align-items:center;
+  gap:3px;
+  min-width:0
+}
+
+.calendar-legend-dot{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  flex:none
+}
+
+.legend-blue{background:#4a90e2}
+.legend-green{background:#55a868}
+.legend-purple{background:#8e63ce}
+.legend-red{background:#e05a5a}
+.legend-orange{background:#e58b35}
+
+
 /* =========================
    時刻入力
 ========================= */
@@ -2517,10 +2553,11 @@ async function render(){
 
 function sendSchedulesToBell(){
   const frame=document.querySelector(".bell-frame");
-  if(!frame || !frame.contentWindow) return;
+  if(!frame || !frame.contentWindow || scheduleCache === null) return;
   frame.contentWindow.postMessage({
     type:"handbell-schedules",
-    schedules:scheduleCache || {}
+    schedules:scheduleCache || {},
+    ready:true
   },"*");
 }
 
