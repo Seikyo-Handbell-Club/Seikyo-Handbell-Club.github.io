@@ -7,15 +7,21 @@
 <style>
 html,body{margin:0;width:100%;height:100%;background:transparent;overflow:hidden}
 .bell-area{position:relative;width:100%;height:100%;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
-.bell{position:absolute;right:0;bottom:0;width:155px;max-width:none;height:auto;filter:drop-shadow(0 12px 10px rgba(40,55,65,.15));cursor:pointer;user-select:none;transition:transform .15s ease}
+.bell{position:absolute;right:8px;bottom:4px;width:175px;max-width:62%;height:auto;filter:drop-shadow(0 12px 10px rgba(40,55,65,.15));cursor:pointer;user-select:none;transition:transform .15s ease}
 .bell:active{transform:scale(.96)}
-.bubble{position:absolute;right:0;top:0;width:205px;max-width:calc(100% - 8px);background:#fff;border:2px solid #d9e5ed;border-radius:18px;padding:7px 8px;box-shadow:0 10px 24px rgba(48,72,92,.12);font-size:10px;line-height:1.55;animation:bubbleAppear .55s cubic-bezier(.2,.9,.25,1.2) both;box-sizing:border-box}
-.bubble:after{content:"";position:absolute;right:20px;bottom:-7px;width:12px;height:12px;background:#fff;border-top:0;border-right:2px solid #d9e5ed;border-bottom:2px solid #d9e5ed;transform:rotate(45deg)}
-.bubble small{display:block;color:#84939d;font-size:8px;margin-bottom:2px}
+.bubble{position:absolute;right:166px;bottom:108px;width:220px;max-width:76%;background:#fff;border:2px solid #d9e5ed;border-radius:18px;padding:12px 15px;box-shadow:0 10px 24px rgba(48,72,92,.12);font-size:14px;line-height:1.55;animation:bubbleAppear .55s cubic-bezier(.2,.9,.25,1.2) both}
+.bubble:after{content:"";position:absolute;right:-11px;bottom:24px;width:18px;height:18px;background:#fff;border-top:2px solid #d9e5ed;border-right:2px solid #d9e5ed;transform:rotate(45deg)}
+.bubble small{display:block;color:#84939d;font-size:10px;margin-bottom:3px}
 @keyframes bubbleAppear{from{opacity:0;transform:scale(.9) translateY(7px)}to{opacity:1;transform:scale(1) translateY(0)}}
 
 
-
+/* 全画面共通：スマホ版サイズ */
+.bell{width:125px;right:3px;bottom:3px}
+.bubble{right:3px;top:4px;bottom:auto;width:205px;max-width:calc(100vw - 10px);font-size:10px;padding:7px 8px}
+.bubble:after{right:20px;bottom:-7px;width:12px;height:12px;background:#fff;border-top:0;border-right:2px solid #d9e5ed;border-bottom:2px solid #d9e5ed;transform:rotate(45deg)}
+.bubble small{font-size:8px;margin-bottom:2px}
+.logged-in .bell{width:145px}
+.logged-in .bubble{width:215px;top:4px;bottom:auto;max-width:calc(100vw - 10px)}
 
 </style>
 </head>
@@ -25,10 +31,17 @@ html,body{margin:0;width:100%;height:100%;background:transparent;overflow:hidden
   <img class="bell" src="bell.png" alt="ベルちゃん" id="bellImage">
 </div>
 
+<script>
+window.addEventListener("message",event=>{
+  if(event.data && event.data.type==="handbellSchedules"){
+    window.__parentSchedules=event.data.schedules || {};
+    window.dispatchEvent(new CustomEvent("parentSchedulesReady"));
+  }
+});
+</script>
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 import{getDatabase,ref,get}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
-import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
 const firebaseConfig={
   apiKey:"AIzaSyAK9yRsSLSfYpLSyluzwRyI22Zp32KeMSA",
@@ -42,7 +55,6 @@ const firebaseConfig={
 
 const app=initializeApp(firebaseConfig);
 const db=getDatabase(app);
-const auth=getAuth(app);
 const message=document.getElementById("bellMessage");
 const bellImage=document.getElementById("bellImage");
 
@@ -292,50 +304,38 @@ function changeBellMessage(){
   showMessage(next);
 }
 
-function applyBellSchedules(schedules){
-  const first=chooseBellMessage(schedules);
-  const values=Object.values(schedules || {}).filter(s=>s && typeof s === "object");
-  const now=new Date();
-  const today=dateString(now);
-  const regular=buildRegularMessages(values,now);
-  const club=getClubBeforeStartMessages(values,today,now);
-  const todayEvents=getEventSchedulesForDate(values,today);
-  const upcoming=getUpcomingEvents(values,today);
-  const all=[...regular,...club];
-  todayEvents.forEach(event=>all.push(`今日は${event.title || (event.type==="concert" ? "演奏会" : "イベント")}だね！`));
-  upcoming.forEach(event=>all.push(`もうすぐ${event.title || (event.type==="concert" ? "演奏会" : "イベント")}だね！`));
-  bellMessages=[...new Set(all)];
-  showMessage(first);
-}
-
 async function loadBellMessages(){
   try{
-    const snapshot=await get(ref(db,"schedules"));
-    const schedules=snapshot.exists()?snapshot.val():{};
-    applyBellSchedules(schedules);
+    let schedules;
+    if(window.__parentSchedules){
+      schedules=window.__parentSchedules;
+    }else{
+      const snapshot=await get(ref(db,"schedules"));
+      schedules=snapshot.exists()?snapshot.val():{};
+    }
+    const first=chooseBellMessage(schedules);
+    const values=Object.values(schedules || {}).filter(s=>s && typeof s === "object");
+    const now=new Date();
+    const today=dateString(now);
+    const regular=buildRegularMessages(values,now);
+    const club=getClubBeforeStartMessages(values,today,now);
+    const todayEvents=getEventSchedulesForDate(values,today);
+    const upcoming=getUpcomingEvents(values,today);
+    const all=[...regular,...club];
+    todayEvents.forEach(event=>all.push(`今日は${event.title || (event.type==="concert" ? "演奏会" : "イベント")}だね！`));
+    upcoming.forEach(event=>all.push(`もうすぐ${event.title || (event.type==="concert" ? "演奏会" : "イベント")}だね！`));
+    bellMessages=[...new Set(all)];
+    showMessage(first);
   }catch(error){
     console.error("ベルちゃんの予定取得に失敗しました",error);
+    bellMessages=["予定を確認してみてね！","今日も一日頑張ろうね！"];
+    showMessage(pickRandom(bellMessages));
   }
 }
 
-/*
-  handbell.html 側が認証済みのFirebaseデータを渡してくれた場合。
-  同じサイト内のiframeなので、Safariでも認証状態に依存せず
-  ベルちゃんへ同じ schedules データを渡せる。
-*/
-window.addEventListener("message",event=>{
-  if(event.origin!==window.location.origin)return;
-  if(!event.data || event.data.type!=="handbellSchedules")return;
-  applyBellSchedules(event.data.schedules || {});
-});
-
 bellImage.addEventListener("click",changeBellMessage);
-
-onAuthStateChanged(auth,user=>{
-  if(user){
-    loadBellMessages();
-  }
-});
+window.addEventListener("parentSchedulesReady",loadBellMessages);
+loadBellMessages();
 </script>
 </body>
 </html>
