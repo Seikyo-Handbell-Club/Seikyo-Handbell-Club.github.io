@@ -36,12 +36,13 @@ header{
   align-items:stretch;
   justify-content:flex-start;
   width:100%;
-  min-height:0;
-  gap:0
+  min-height:155px;
+  gap:0;
+  position:relative
 }
 
 .header-brand{
-  width:calc(100% - 190px);
+  width:calc(100% - 245px);
   text-align:left;
   cursor:pointer
 }
@@ -533,10 +534,9 @@ textarea{
 .bell-frame{
   position:absolute;
   right:0;
-  top:auto;
   bottom:0;
-  width:290px;
-  height:250px;
+  width:235px;
+  height:155px;
   border:0;
   background:transparent;
   z-index:9999;
@@ -592,15 +592,8 @@ textarea{
 header{
   padding:10px 10px 10px
 }
-.header-top{
-  position:relative;
-  min-height:118px
-}
-.header-brand{
-  width:calc(100% - 190px);
-  text-align:left;
-  padding-top:3px
-}
+
+
 .header-title{
   width:100%;
   font-size:21px;
@@ -652,14 +645,7 @@ header{
 .header-login button{
   max-width:180px
 }
-.bell-frame{
-  position:absolute;
-  right:0;
-  top:0;
-  bottom:auto;
-  width:225px;
-  height:155px
-}
+
 main{
   padding:12px
 }
@@ -2671,6 +2657,18 @@ async function render(){
 }
 
 
+function sendSchedulesToBell(){
+  const frame=document.querySelector(".bell-frame");
+  if(!frame || !frame.contentWindow || !scheduleCache)return;
+  frame.contentWindow.postMessage(
+    {
+      type:"handbellSchedules",
+      schedules:scheduleCache
+    },
+    window.location.origin
+  );
+}
+
 async function refreshCalendarData(){
 
   const token =
@@ -2693,6 +2691,8 @@ async function refreshCalendarData(){
         ss.val()
         :
         {};
+
+    sendSchedulesToBell();
 
     noticeCache =
       ns.exists()
@@ -5157,6 +5157,17 @@ window.backHome =
 
 render();
 
+
+
+const bellFrame =
+  document.querySelector(".bell-frame");
+
+if(bellFrame){
+  bellFrame.addEventListener(
+    "load",
+    sendSchedulesToBell
+  );
+}
 </script>
 
 
