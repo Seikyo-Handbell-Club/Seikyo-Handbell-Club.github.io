@@ -589,20 +589,23 @@ textarea{
    全画面共通：スマホ版レイアウト
 ========================= */
 header{
-  padding:10px 10px 10px
+  padding:10px 10px 10px;
+  overflow:visible
 }
 .header-top{
   position:relative;
-  min-height:118px
+  min-height:220px;
+  width:100%
 }
 .header-brand{
   position:absolute;
   left:0;
   top:10px;
-  width:calc(100% - 225px);
+  width:calc(100% - 215px);
   text-align:left;
   padding-top:3px;
-  margin:0
+  margin:0;
+  z-index:2
 }
 .header-title{
   width:100%;
@@ -616,7 +619,7 @@ header{
   text-align:left
 }
 .header-user-row{
-  width:calc(100% - 230px);
+  width:auto;
   justify-content:flex-start;
   margin-bottom:8px
 }
@@ -634,26 +637,36 @@ header{
   font-size:21px
 }
 .header-action-row{
-  width:calc(100% - 230px);
-  justify-content:flex-start
+  position:absolute;
+  left:0;
+  top:145px;
+  width:auto;
+  justify-content:flex-start;
+  z-index:3
 }
 .header-actions{
-  width:100%;
+  width:auto;
   gap:5px;
-  justify-content:flex-start
+  justify-content:flex-start;
+  flex-wrap:nowrap
 }
 .header-actions button{
-  flex:1 1 auto;
+  flex:0 0 auto;
   min-width:0;
-  padding:6px 4px;
+  height:38px;
+  padding:6px 10px;
   font-size:11px
 }
 .header-login{
   justify-content:flex-start;
-  width:calc(100% - 230px)
+  width:auto
 }
 .header-login button{
-  max-width:180px
+  width:110px;
+  max-width:none;
+  height:38px;
+  padding:6px 10px;
+  font-size:13px
 }
 .bell-frame{
   position:absolute;
@@ -661,7 +674,8 @@ header{
   top:0;
   bottom:auto;
   width:225px;
-  height:220px
+  height:220px;
+  z-index:1
 }
 main{
   padding:12px
