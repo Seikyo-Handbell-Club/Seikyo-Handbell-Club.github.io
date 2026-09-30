@@ -83,9 +83,14 @@ function receiveParentSchedules(schedules){
 
 window.addEventListener("message",event=>{
   if(!event.data || event.data.type !== "handbell-schedules") return;
-  if(event.data.ready !== true) return;
   receiveParentSchedules(event.data.schedules);
 });
+
+/* 親ページに「ベルちゃんの準備完了」を知らせる。
+   これで iframe の読み込み順に関係なく予定データを受け取れる。 */
+if(isEmbedded){
+  window.parent.postMessage({type:"handbell-ready"},"*");
+}
 
 function pad(n){
   return String(n).padStart(2,"0");

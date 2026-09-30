@@ -2568,6 +2568,13 @@ function setupBellBridge(){
   sendSchedulesToBell();
 }
 
+/* ベルちゃん側から準備完了通知が来たら、その時点の予定を送る。
+   iframe の読み込みと Firebase の取得の順番が前後しても確実に渡す。 */
+window.addEventListener("message",event=>{
+  if(!event.data || event.data.type !== "handbell-ready") return;
+  sendSchedulesToBell();
+});
+
 setupBellBridge();
 
 async function refreshCalendarData(){
