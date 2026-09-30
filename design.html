@@ -21,12 +21,24 @@ html,body{
   font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
 }
 
-.bell{
+/* =========================
+   ベルちゃん全体の位置
+   ここを変えるとベルちゃん＋吹き出しが一緒に動く
+   ========================= */
+
+.bell-character{
   position:absolute;
   right:8px;
   bottom:4px;
-  width:175px;
-  max-width:62%;
+  width:235px;
+}
+
+/* ベルちゃん */
+
+.bell{
+  display:block;
+  width:235px;
+  max-width:100%;
   height:auto;
   filter:drop-shadow(0 12px 10px rgba(40,55,65,.15));
   cursor:pointer;
@@ -38,42 +50,55 @@ html,body{
   transform:scale(.96);
 }
 
-/* ===== 吹き出しの位置 ===== */
-/* leftを大きく → 右へ */
-/* leftを小さく → 左へ */
-/* topを大きく → 下へ */
-/* topを小さく → 上へ */
+/* =========================
+   吹き出し
+   ベルちゃんの真上に固定
+   ========================= */
 
 .bubble{
   position:absolute;
-  left:20px;
-  top:20px;
-  transform:none;
+  left:50%;
+  bottom:100%;
+  transform:translateX(-50%);
 
-  width:220px;
-  max-width:76%;
+  width:260px;
+  max-width:90%;
+
   background:#fff;
   border:2px solid #d9e5ed;
   border-radius:18px;
   padding:12px 15px;
+
   box-shadow:0 10px 24px rgba(48,72,92,.12);
+
   font-size:14px;
   line-height:1.55;
+
   animation:bubbleAppear .55s cubic-bezier(.2,.9,.25,1.2) both;
 }
 
+/* 吹き出しのしっぽ */
+
 .bubble:after{
   content:"";
+
   position:absolute;
-  right:-11px;
-  bottom:24px;
+
+  left:50%;
+  bottom:-10px;
+
   width:18px;
   height:18px;
+
   background:#fff;
-  border-top:2px solid #d9e5ed;
+
   border-right:2px solid #d9e5ed;
-  transform:rotate(45deg);
+  border-bottom:2px solid #d9e5ed;
+
+  transform:translateX(-50%) rotate(45deg);
 }
+
+/* ベルちゃんの名前 */
 
 .bubble small{
   display:block;
@@ -82,40 +107,48 @@ html,body{
   margin-bottom:3px;
 }
 
+/* 吹き出し表示アニメーション */
+
 @keyframes bubbleAppear{
   from{
     opacity:0;
-    transform:scale(.9) translateY(7px);
+    transform:translateX(-50%) scale(.9) translateY(7px);
   }
+
   to{
     opacity:1;
-    transform:scale(1) translateY(0);
+    transform:translateX(-50%) scale(1) translateY(0);
   }
 }
 
+
+/* =========================
+   スマホなど狭い画面
+   ========================= */
+
 @media(max-width:700px){
 
-  .bell{
-    width:140px;
+  .bell-character{
     right:4px;
     bottom:4px;
+    width:180px;
+  }
+
+  .bell{
+    width:180px;
   }
 
   .bubble{
-    left:20px;
-    top:20px;
-    transform:none;
-    width:185px;
-    max-width:68%;
+    width:210px;
+    max-width:100%;
     font-size:12px;
     padding:10px 12px;
   }
 
   .bubble:after{
-    right:-10px;
-    bottom:21px;
     width:16px;
     height:16px;
+    bottom:-9px;
   }
 }
 </style>
@@ -126,41 +159,473 @@ html,body{
 
 <div class="bell-area">
 
-  <div class="bubble">
-    <small>ベルちゃん</small>
-    <span id="bellMessage">今日の部活は17:00〜19:00までだよ！</span>
-  </div>
+  <!-- ベルちゃん＋吹き出しを1つのセットにする -->
+  <div class="bell-character">
 
-  <img
-    class="bell"
-    src="bell.png"
-    alt="ベルちゃん"
-    onclick="changeBellMessage()"
-  >
+    <div class="bubble">
+      <small>ベルちゃん</small>
+      <span id="bellMessage">予定を確認してるよ！</span>
+    </div>
+
+    <img
+      class="bell"
+      src="bell.png"
+      alt="ベルちゃん"
+      id="bellImage"
+    >
+
+  </div>
 
 </div>
 
-<script>
 
-const bellMessages=[
-  "今月の活動回数は○回だね！",
-  "今月は定期試験があるね。頑張ってね！",
-  "今日の部活は○時〜○時までだよ！",
-  "もうすぐ○○演奏会があるね！",
-  "来週は文化祭だ〜♪",
+<script type="module">
+
+import{
+  initializeApp
+}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+
+import{
+  getDatabase,
+  ref,
+  get
+}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+
+
+/* =========================
+   Firebase
+   ========================= */
+
+const firebaseConfig={
+  apiKey:"AIzaSyAK9yRsSLSfYpLSyluzwRyI22Zp32KeMSA",
+  authDomain:"seikyo-handbell-club.firebaseapp.com",
+  databaseURL:"https://seikyo-handbell-club-default-rtdb.firebaseio.com",
+  projectId:"seikyo-handbell-club",
+  storageBucket:"seikyo-handbell-club.firebasestorage.app",
+  messagingSenderId:"55435007971",
+  appId:"1:55435007971:web:25f5c3b9dcd4324bc3f2d6"
+};
+
+const app=initializeApp(firebaseConfig);
+
+const db=getDatabase(app);
+
+
+/* =========================
+   ベルちゃんのメッセージ
+   ========================= */
+
+let bellMessages=[
   "今日も部活頑張ろうね！",
   "予定を確認してみてね！"
 ];
 
-function changeBellMessage(){
+const message=document.getElementById("bellMessage");
 
-  const message=document.getElementById("bellMessage");
 
-  let next=Math.floor(Math.random()*bellMessages.length);
+/* =========================
+   日付関係
+   ========================= */
 
-  message.textContent=bellMessages[next];
+function pad(n){
+  return String(n).padStart(2,"0");
+}
+
+
+function dateString(date=new Date()){
+  return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`;
+}
+
+
+function monthString(date=new Date()){
+  return `${date.getFullYear()}-${pad(date.getMonth()+1)}`;
+}
+
+
+function daysFromToday(date){
+
+  const today=new Date();
+
+  const a=new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
+  );
+
+  const b=new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate()
+  );
+
+  return Math.round((b-a)/86400000);
+}
+
+
+function formatDate(date){
+  return `${date.getMonth()+1}月${date.getDate()}日`;
+}
+
+
+/* =========================
+   通常部活メッセージ
+   ========================= */
+
+function addNormalMessage(list,schedule){
+
+  if(schedule.time && schedule.time!=="終日"){
+
+    list.push(
+      `今日の部活は${schedule.time}だよ！`
+    );
+
+  }else{
+
+    list.push(
+      "今日は部活があるよ！"
+    );
+
+  }
 
 }
+
+
+/* =========================
+   Firebaseの予定から
+   ベルちゃんのメッセージを作る
+   ========================= */
+
+function buildMessages(schedules){
+
+  const now=new Date();
+
+  const today=dateString(now);
+
+  const thisMonth=monthString(now);
+
+  const list=[];
+
+  const values=Object.values(
+    schedules || {}
+  ).filter(
+    s=>s && typeof s==="object"
+  );
+
+
+  /* 今日の予定 */
+
+  const todaySchedules=values.filter(
+    s=>s.date===today
+  );
+
+
+  /* 今日の部活 */
+
+  const todayNormal=todaySchedules.find(
+    s=>s.type==="normal"
+  );
+
+  if(todayNormal){
+
+    addNormalMessage(
+      list,
+      todayNormal
+    );
+
+  }
+
+
+  /* 今日の演奏会 */
+
+  const todayConcert=todaySchedules.find(
+    s=>s.type==="concert"
+  );
+
+  if(todayConcert){
+
+    list.push(
+      `今日は${todayConcert.title || "演奏会"}だね！`
+    );
+
+  }
+
+
+  /* 今日のイベント */
+
+  const todayEvent=todaySchedules.find(
+    s=>s.type==="event"
+  );
+
+  if(todayEvent){
+
+    list.push(
+      `今日は${todayEvent.title || "イベント"}だね！`
+    );
+
+  }
+
+
+  /* 今日が学校の休み */
+
+  const todayHoliday=todaySchedules.find(
+    s=>s.type==="schoolHoliday" && s.title
+  );
+
+  if(todayHoliday){
+
+    list.push(
+      `今日は${todayHoliday.title}だよ！`
+    );
+
+  }
+
+
+  /* 試験期間 */
+
+  const todayExam=values.find(
+    s=>
+      s.type==="exam" &&
+      s.startDate &&
+      s.endDate &&
+      today>=s.startDate &&
+      today<=s.endDate
+  );
+
+  if(todayExam){
+
+    list.push(
+      `今日は${todayExam.title || "定期試験"}の期間だね。頑張ってね！`
+    );
+
+  }
+
+
+  /* =========================
+     今月の部活回数
+     ========================= */
+
+  const monthNormalCount=values.filter(
+    s=>
+      s.type==="normal" &&
+      typeof s.date==="string" &&
+      s.date.startsWith(thisMonth)
+  ).length;
+
+
+  if(monthNormalCount>0){
+
+    list.push(
+      `今月の部活は${monthNormalCount}回だよ！`
+    );
+
+  }
+
+
+  /* =========================
+     もうすぐ演奏会
+     7日以内
+     ========================= */
+
+  const upcomingConcert=values
+    .filter(
+      s=>
+        s.type==="concert" &&
+        s.date &&
+        s.date>=today
+    )
+    .sort(
+      (a,b)=>
+        a.date.localeCompare(b.date)
+    )[0];
+
+
+  if(upcomingConcert){
+
+    const d=new Date(
+      `${upcomingConcert.date}T00:00:00`
+    );
+
+    const diff=daysFromToday(d);
+
+    if(diff>=0 && diff<=7){
+
+      list.push(
+        `もうすぐ${upcomingConcert.title || "演奏会"}だね！`
+      );
+
+    }
+
+  }
+
+
+  /* =========================
+     もうすぐイベント
+     7日以内
+     ========================= */
+
+  const upcomingEvent=values
+    .filter(
+      s=>
+        s.type==="event" &&
+        s.date &&
+        s.date>=today
+    )
+    .sort(
+      (a,b)=>
+        a.date.localeCompare(b.date)
+    )[0];
+
+
+  if(upcomingEvent){
+
+    const d=new Date(
+      `${upcomingEvent.date}T00:00:00`
+    );
+
+    const diff=daysFromToday(d);
+
+    if(diff>=0 && diff<=7){
+
+      list.push(
+        `もうすぐ${upcomingEvent.title || "イベント"}だね！`
+      );
+
+    }
+
+  }
+
+
+  /* 何もなかった場合 */
+
+  if(list.length===0){
+
+    list.push(
+      "予定を確認してみてね！",
+      "今日も部活頑張ろうね！"
+    );
+
+  }
+
+
+  /* 重複削除 */
+
+  return[
+    ...new Set(list)
+  ];
+
+}
+
+
+/* =========================
+   吹き出しに表示
+   ========================= */
+
+function showMessage(text){
+
+  message.textContent=text;
+
+}
+
+
+/* =========================
+   ベルちゃんをクリックしたとき
+   ========================= */
+
+function changeBellMessage(){
+
+  if(!bellMessages.length){
+    return;
+  }
+
+  let next=Math.floor(
+    Math.random()*bellMessages.length
+  );
+
+
+  if(
+    bellMessages.length>1 &&
+    bellMessages[next]===message.textContent
+  ){
+
+    next=(next+1)%bellMessages.length;
+
+  }
+
+
+  showMessage(
+    bellMessages[next]
+  );
+
+}
+
+
+/* =========================
+   Firebaseから予定取得
+   ========================= */
+
+async function loadBellMessages(){
+
+  try{
+
+    const snapshot=await get(
+      ref(db,"schedules")
+    );
+
+    const schedules=
+      snapshot.exists()
+        ? snapshot.val()
+        : {};
+
+
+    bellMessages=
+      buildMessages(schedules);
+
+
+    showMessage(
+      bellMessages[0]
+    );
+
+
+  }catch(error){
+
+    console.error(
+      "ベルちゃんの予定取得に失敗しました",
+      error
+    );
+
+
+    bellMessages=[
+      "予定を確認してみてね！",
+      "今日も部活頑張ろうね！"
+    ];
+
+
+    showMessage(
+      bellMessages[0]
+    );
+
+  }
+
+}
+
+
+/* =========================
+   ベルちゃんクリック
+   ========================= */
+
+document
+  .getElementById("bellImage")
+  .addEventListener(
+    "click",
+    changeBellMessage
+  );
+
+
+/* =========================
+   起動
+   ========================= */
+
+loadBellMessages();
 
 </script>
 
