@@ -336,6 +336,12 @@ textarea{
   border-color:#1f6feb;
 }
 
+.day.sunday-day,
+.day.national-holiday-day{
+  background:#fff0f0 !important;
+  opacity:1
+}
+
 .day.today-day{
   outline:2px solid #20242a;
   outline-offset:-2px
@@ -1854,6 +1860,81 @@ function hasClubSchedule(
 }
 
 
+function nthMonday(year, month, nth){
+  const first = new Date(year, month - 1, 1).getDay();
+  return 1 + ((8 - first) % 7) + (nth - 1) * 7;
+}
+
+function isJapaneseHoliday(date){
+  const [y,m,d] = date.split("-").map(Number);
+  const md = `${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+
+  const fixed = new Set([
+    "01-01", "02-11", "02-23", "04-29", "05-03", "05-04", "05-05",
+    "08-11", "11-03", "11-23"
+  ]);
+  if(fixed.has(md)) return true;
+
+  if(m === 1 && d === nthMonday(y,1,2)) return true;
+  if(m === 7 && d === nthMonday(y,7,3) && y !== 2020 && y !== 2021) return true;
+  if(m === 8 && d === 10 && y === 2020) return true;
+  if(m === 8 && d === 8 && y === 2021) return true;
+  if(m === 9 && d === nthMonday(y,9,3)) return true;
+  if(m === 10 && d === nthMonday(y,10,2) && y !== 2020 && y !== 2021) return true;
+  if(m === 7 && d === 24 && y === 2020) return true;
+  if(m === 7 && d === 23 && y === 2021) return true;
+
+  const vernal = Math.floor(20.8431 + 0.242194 * (y - 1980) - Math.floor((y - 1980) / 4));
+  const autumnal = Math.floor(23.2488 + 0.242194 * (y - 1980) - Math.floor((y - 1980) / 4));
+  if(m === 3 && d === vernal) return true;
+  if(m === 9 && d === autumnal) return true;
+
+  // 振替休日：日曜日に重なった祝日の翌日以降の平日
+  const current = new Date(y,m-1,d);
+  if(current.getDay() >= 1 && current.getDay() <= 6){
+    for(let back=1; back<=7; back++){
+      const prev = new Date(y,m-1,d-back);
+      if(prev.getDay() !== 0) continue;
+      const prevDate = `${prev.getFullYear()}-${String(prev.getMonth()+1).padStart(2,"0")}-${String(prev.getDate()).padStart(2,"0")}`;
+      if(isJapaneseHolidayBase(prevDate)){
+        return !isJapaneseHolidayBase(date);
+      }
+    }
+  }
+
+  // 祝日に挟まれた平日（国民の休日）
+  if(current.getDay() >= 1 && current.getDay() <= 5){
+    const prev = new Date(y,m-1,d-1);
+    const next = new Date(y,m-1,d+1);
+    const prevDate = `${prev.getFullYear()}-${String(prev.getMonth()+1).padStart(2,"0")}-${String(prev.getDate()).padStart(2,"0")}`;
+    const nextDate = `${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,"0")}-${String(next.getDate()).padStart(2,"0")}`;
+    if(isJapaneseHolidayBase(prevDate) && isJapaneseHolidayBase(nextDate)) return true;
+  }
+
+  return false;
+}
+
+function isJapaneseHolidayBase(date){
+  const [y,m,d] = date.split("-").map(Number);
+  const md = `${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+  const fixed = new Set([
+    "01-01", "02-11", "02-23", "04-29", "05-03", "05-04", "05-05",
+    "08-11", "11-03", "11-23"
+  ]);
+  if(fixed.has(md)) return true;
+  if(m === 1 && d === nthMonday(y,1,2)) return true;
+  if(m === 7 && d === nthMonday(y,7,3) && y !== 2020 && y !== 2021) return true;
+  if(y === 2020 && m === 8 && d === 10) return true;
+  if(y === 2021 && m === 8 && d === 8) return true;
+  if(m === 9 && d === nthMonday(y,9,3)) return true;
+  if(y === 2020 && m === 7 && d === 24) return true;
+  if(y === 2021 && m === 7 && d === 23) return true;
+  if(y !== 2020 && y !== 2021 && m === 10 && d === nthMonday(y,10,2)) return true;
+  const vernal = Math.floor(20.8431 + 0.242194 * (y - 1980) - Math.floor((y - 1980) / 4));
+  const autumnal = Math.floor(23.2488 + 0.242194 * (y - 1980) - Math.floor((y - 1980) / 4));
+  return (m === 3 && d === vernal) || (m === 9 && d === autumnal);
+}
+
 function getScheduleDayClass(scheduleList){
 
   if(scheduleList.some(s => s && (s.type === "normal" || !s.type))){
@@ -2819,6 +2900,10 @@ function renderCalendarData(y,m,sch,all){
         new Date().getDate()
       ) === date;
 
+    const weekday = new Date(y, m, d).getDay();
+    const sunday = weekday === 0;
+    const nationalHoliday = isJapaneseHoliday(date);
+
     const background =
       getScheduleBackground(
         scheduleList
@@ -2827,7 +2912,7 @@ function renderCalendarData(y,m,sch,all){
     h += `
 
       <div
-        class="day ${dayClass} ${today ? "today-day" : ""}"
+        class="day ${dayClass} ${sunday ? "sunday-day" : ""} ${nationalHoliday ? "national-holiday-day" : ""} ${today ? "today-day" : ""}"
         ${background ? `style="background:${background}"` : ""}
         onclick="openDay('${date}')"
       >
@@ -3691,6 +3776,10 @@ async function renderFormCalendar(){
         new Date().getDate()
       ) === date;
 
+    const weekday = new Date(y, m, d).getDay();
+    const sunday = weekday === 0;
+    const nationalHoliday = isJapaneseHoliday(date);
+
 
     const background =
       getScheduleBackground(
@@ -3703,6 +3792,8 @@ async function renderFormCalendar(){
       <div
         class="day
           ${dayClass}
+          ${sunday ? "sunday-day" : ""}
+          ${nationalHoliday ? "national-holiday-day" : ""}
           ${selected ? "selected-day" : ""}
           ${today ? "today-day" : ""}
         "
