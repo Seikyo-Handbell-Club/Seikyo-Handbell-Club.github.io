@@ -518,20 +518,36 @@ textarea{
 @media(max-width:480px){
 
   header{
-    padding:12px 10px 10px
+    padding:10px 10px 10px
+  }
+
+  .header-top{
+    position:relative;
+    min-height:118px
+  }
+
+  .header-brand{
+    width:calc(100% - 190px);
+    text-align:left;
+    padding-top:3px
   }
 
   .header-title{
+    width:100%;
     font-size:21px;
-    line-height:1.3
+    line-height:1.3;
+    text-align:left
   }
 
   .club{
     font-size:12px;
-    margin:2px 0 10px
+    margin:2px 0 10px;
+    text-align:left
   }
 
   .header-user-row{
+    width:calc(100% - 190px);
+    justify-content:flex-start;
     margin-bottom:8px
   }
 
@@ -551,9 +567,15 @@ textarea{
     font-size:21px
   }
 
+  .header-action-row{
+    width:calc(100% - 190px);
+    justify-content:flex-start
+  }
+
   .header-actions{
     width:100%;
-    gap:5px
+    gap:5px;
+    justify-content:flex-start
   }
 
   .header-actions button{
@@ -563,8 +585,22 @@ textarea{
     font-size:12px
   }
 
+  .header-login{
+    justify-content:flex-start;
+    width:calc(100% - 190px)
+  }
+
   .header-login button{
     max-width:180px
+  }
+
+  .bell-frame{
+    position:absolute;
+    right:0;
+    top:0;
+    bottom:auto;
+    width:185px;
+    height:118px
   }
 
   main{
@@ -703,6 +739,19 @@ textarea{
 /* =========================
    かなり狭いスマホ
 ========================= */
+
+
+.bell-frame{
+  position:fixed;
+  right:10px;
+  bottom:10px;
+  width:290px;
+  height:250px;
+  border:0;
+  background:transparent;
+  z-index:9999;
+  pointer-events:auto
+}
 
 @media(max-width:350px){
 
@@ -900,6 +949,13 @@ textarea{
     </div>
 
   </div>
+
+  <!-- ベルちゃん表示エリア（ベルちゃん本体のコードは design.html 側） -->
+  <iframe
+    src="design.html"
+    title="ベルちゃん"
+    class="bell-frame"
+  ></iframe>
 
 </header>
 
@@ -5263,13 +5319,6 @@ render();
 </script>
 
 
-
-<!-- ベルちゃん表示エリア（ベルちゃん本体のコードは design.html 側） -->
-<iframe
-  src="design.html"
-  title="ベルちゃん"
-  style="position:fixed;right:10px;bottom:10px;width:290px;height:250px;border:0;background:transparent;z-index:9999;pointer-events:auto;"
-></iframe>
 
 </body>
 </html>
