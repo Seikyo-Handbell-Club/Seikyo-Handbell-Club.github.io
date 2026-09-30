@@ -15,13 +15,13 @@ html,body{margin:0;width:100%;height:100%;background:transparent;overflow:hidden
 @keyframes bubbleAppear{from{opacity:0;transform:scale(.9) translateY(7px)}to{opacity:1;transform:scale(1) translateY(0)}}
 
 
-/* ベルちゃん共通レイアウト */
-.bell{width:180px;right:-35px;bottom:0}
-.bubble{left:auto;right:0;top:0;bottom:auto;width:210px;max-width:100%;box-sizing:border-box;font-size:10px;padding:7px 8px}
+/* 全画面共通：スマホ版サイズ */
+.bell{width:125px;right:3px;bottom:3px}
+.bubble{right:3px;bottom:42px;width:205px;max-width:calc(100vw - 8px);font-size:10px;padding:7px 8px}
 .bubble:after{right:20px;bottom:-7px;width:12px;height:12px;background:#fff;border-top:0;border-right:2px solid #d9e5ed;border-bottom:2px solid #d9e5ed;transform:rotate(45deg)}
 .bubble small{font-size:8px;margin-bottom:2px}
-.logged-in .bell{width:180px;right:-35px;bottom:0}
-.logged-in .bubble{left:auto;right:0;top:0;bottom:auto;width:210px;max-width:100%;box-sizing:border-box}
+.logged-in .bell{width:145px}
+.logged-in .bubble{width:215px;bottom:58px;max-width:calc(100vw - 8px)}
 
 </style>
 </head>
@@ -33,6 +33,7 @@ html,body{margin:0;width:100%;height:100%;background:transparent;overflow:hidden
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import{getDatabase,ref,get}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
 
 const firebaseConfig={
@@ -46,6 +47,7 @@ const firebaseConfig={
 };
 
 const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
 const db=getDatabase(app);
 const message=document.getElementById("bellMessage");
 const bellImage=document.getElementById("bellImage");
@@ -321,7 +323,18 @@ async function loadBellMessages(){
 }
 
 bellImage.addEventListener("click",changeBellMessage);
-loadBellMessages();
+
+// Firebase Authenticationのログイン状態を確認してから予定を読み込む。
+// schedules は Rules で auth != null が必要なので、認証前に get() しない。
+onAuthStateChanged(auth, user => {
+  if(user){
+    loadBellMessages();
+  }else{
+    console.warn("ベルちゃん：Firebaseにログインしていないため予定を読み込めません。");
+    bellMessages=["予定を確認してみてね！","今日も一日頑張ろうね！"];
+    showMessage(pickRandom(bellMessages));
+  }
+});
 </script>
 </body>
 </html>
