@@ -4,174 +4,187 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ベルちゃん</title>
-
 <style>
-html,body{
-  margin:0;
-  width:100%;
-  height:100%;
-  background:transparent;
-  overflow:hidden;
-}
-
-.bell-area{
-  position:relative;
-  width:100%;
-  height:100%;
-  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
-}
-
-/* ベルちゃんと吹き出しをまとめる */
-.bell-character{
-  position:absolute;
-  right:-50px;
-  bottom:4px;
-  width:480px;
-  transform:translateX(-15px);
-}
-
-/* ベルちゃん */
-.bell{
-  display:block;
-  width:230px;
-  max-width:100%;
-  height:auto;
-  filter:drop-shadow(0 12px 10px rgba(40,55,65,.15));
-  cursor:pointer;
-  user-select:none;
-  transition:transform .15s ease;
-}
-
-.bell:active{
-  transform:scale(.96);
-}
-
-/* 吹き出し */
-.bubble{
-  position:absolute;
-  left:50%;
-  bottom:225px;
-  width:220px;
-  box-sizing:border-box;
-  background:#fff;
-  border:2px solid #d9e5ed;
-  border-radius:18px;
-  padding:12px 15px;
-  box-shadow:0 10px 24px rgba(48,72,92,.12);
-  font-size:14px;
-  line-height:1.55;
-
-  /* ベルちゃんの中心に合わせる */
-  transform:translateX(-50%);
-
-  animation:bubbleAppear .55s cubic-bezier(.2,.9,.25,1.2) both;
-}
-
-/* 吹き出しのしっぽ */
-.bubble:after{
-  content:"";
-  position:absolute;
-  left:50%;
-  bottom:-11px;
-  width:18px;
-  height:18px;
-  margin-left:-10px;
-  background:#fff;
-  border-right:2px solid #d9e5ed;
-  border-bottom:2px solid #d9e5ed;
-  transform:rotate(45deg);
-}
-
-.bubble small{
-  display:block;
-  color:#84939d;
-  font-size:10px;
-  margin-bottom:3px;
-}
-
-@keyframes bubbleAppear{
-  from{
-    opacity:0;
-    transform:translateX(-50%) scale(.9) translateY(7px);
-  }
-
-  to{
-    opacity:1;
-    transform:translateX(-50%) scale(1) translateY(0);
-  }
-}
-
-/* スマホ */
-@media(max-width:700px){
-
-  .bell-character{
-    right:4px;
-    bottom:4px;
-    width:230px;
-  }
-
-  .bell{
-    width:230px;
-  }
-
-  .bubble{
-    bottom:226px;
-    width:185px;
-    font-size:12px;
-    padding:10px 12px;
-  }
-
-  .bubble:after{
-    bottom:-10px;
-    width:16px;
-    height:16px;
-    margin-left:-9px;
-  }
-}
+html,body{margin:0;width:100%;height:100%;background:transparent;overflow:hidden}
+.bell-area{position:relative;width:100%;height:100%;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
+.bell{position:absolute;right:8px;bottom:4px;width:175px;max-width:62%;height:auto;filter:drop-shadow(0 12px 10px rgba(40,55,65,.15));cursor:pointer;user-select:none;transition:transform .15s ease}
+.bell:active{transform:scale(.96)}
+.bubble{position:absolute;right:166px;bottom:108px;width:220px;max-width:76%;background:#fff;border:2px solid #d9e5ed;border-radius:18px;padding:12px 15px;box-shadow:0 10px 24px rgba(48,72,92,.12);font-size:14px;line-height:1.55;animation:bubbleAppear .55s cubic-bezier(.2,.9,.25,1.2) both}
+.bubble:after{content:"";position:absolute;right:-11px;bottom:24px;width:18px;height:18px;background:#fff;border-top:2px solid #d9e5ed;border-right:2px solid #d9e5ed;transform:rotate(45deg)}
+.bubble small{display:block;color:#84939d;font-size:10px;margin-bottom:3px}
+@keyframes bubbleAppear{from{opacity:0;transform:scale(.9) translateY(7px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@media(max-width:700px){.bell{width:140px;right:4px;bottom:4px}.bubble{right:128px;bottom:100px;width:185px;max-width:68%;font-size:12px;padding:10px 12px}.bubble:after{right:-10px;bottom:21px;width:16px;height:16px}}
 </style>
 </head>
-
 <body>
-
 <div class="bell-area">
-
-  <div class="bell-character">
-
-    <div class="bubble">
-      <small>ベルちゃん</small>
-      <span id="bellMessage">今日の部活は17:00〜19:00までだよ！</span>
-    </div>
-
-    <img
-      class="bell"
-      src="bell.png"
-      alt="ベルちゃん"
-      onclick="changeBellMessage()"
-    >
-
-  </div>
-
+  <div class="bubble"><small>ベルちゃん</small><span id="bellMessage">予定を確認してるよ！</span></div>
+  <img class="bell" src="bell.png" alt="ベルちゃん" onclick="changeBellMessage()">
 </div>
 
-<script>
-const bellMessages=[
-  "今月の活動回数は○回だね！",
-  "今月は定期試験があるね。頑張ってね！",
-  "今日の部活は○時〜○時までだよ！",
-  "もうすぐ○○演奏会があるね！",
-  "来週は文化祭だ〜♪",
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import{getDatabase,ref,get}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+
+const firebaseConfig={
+  apiKey:"AIzaSyAK9yRsSLSfYpLSyluzwRyI22Zp32KeMSA",
+  authDomain:"seikyo-handbell-club.firebaseapp.com",
+  databaseURL:"https://seikyo-handbell-club-default-rtdb.firebaseio.com",
+  projectId:"seikyo-handbell-club",
+  storageBucket:"seikyo-handbell-club.firebasestorage.app",
+  messagingSenderId:"55435007971",
+  appId:"1:55435007971:web:25f5c3b9dcd4324bc3f2d6"
+};
+
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
+
+let bellMessages=[
   "今日も部活頑張ろうね！",
   "予定を確認してみてね！"
 ];
 
-function changeBellMessage(){
-  const message=document.getElementById("bellMessage");
+const message=document.getElementById("bellMessage");
 
-  let next=Math.floor(Math.random()*bellMessages.length);
-
-  message.textContent=bellMessages[next];
+function pad(n){
+  return String(n).padStart(2,"0");
 }
-</script>
 
+function dateString(date=new Date()){
+  return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`;
+}
+
+function monthString(date=new Date()){
+  return `${date.getFullYear()}-${pad(date.getMonth()+1)}`;
+}
+
+function daysFromToday(date){
+  const today=new Date();
+  const a=new Date(today.getFullYear(),today.getMonth(),today.getDate());
+  const b=new Date(date.getFullYear(),date.getMonth(),date.getDate());
+  return Math.round((b-a)/86400000);
+}
+
+function formatDate(date){
+  return `${date.getMonth()+1}月${date.getDate()}日`;
+}
+
+function addNormalMessage(list,schedule){
+  if(schedule.time && schedule.time !== "終日"){
+    list.push(`今日の部活は${schedule.time}までだよ！`);
+  }else{
+    list.push("今日は部活があるよ！");
+  }
+}
+
+function buildMessages(schedules){
+  const now=new Date();
+  const today=dateString(now);
+  const thisMonth=monthString(now);
+  const list=[];
+  const values=Object.values(schedules || {}).filter(s=>s && typeof s === "object");
+
+  const todaySchedules=values.filter(s=>s.date===today);
+  const todayNormal=todaySchedules.find(s=>s.type==="normal");
+
+  if(todayNormal){
+    addNormalMessage(list,todayNormal);
+  }
+
+  const todayConcert=todaySchedules.find(s=>s.type==="concert");
+  if(todayConcert){
+    list.push(`今日は${todayConcert.title || "演奏会"}があるよ！`);
+  }
+
+  const todayEvent=todaySchedules.find(s=>s.type==="event");
+  if(todayEvent){
+    list.push(`今日は${todayEvent.title || "イベント"}があるよ！`);
+  }
+
+  const todayHoliday=todaySchedules.find(s=>s.type==="schoolHoliday" && s.title);
+  if(todayHoliday){
+    list.push(`今日は${todayHoliday.title}だよ！`);
+  }
+
+  const todayExam=values.find(s=>
+    s.type==="exam" &&
+    s.startDate &&
+    s.endDate &&
+    today>=s.startDate &&
+    today<=s.endDate
+  );
+  if(todayExam){
+    list.push(`今日は${todayExam.title || "定期試験"}の期間だね。頑張ってね！`);
+  }
+
+  const monthNormalCount=values.filter(s=>
+    s.type==="normal" &&
+    typeof s.date==="string" &&
+    s.date.startsWith(thisMonth)
+  ).length;
+
+  if(monthNormalCount>0){
+    list.push(`今月の活動回数は${monthNormalCount}回だね！`);
+  }
+
+  const upcomingConcert=values
+    .filter(s=>s.type==="concert" && s.date && s.date>=today)
+    .sort((a,b)=>a.date.localeCompare(b.date))[0];
+
+  if(upcomingConcert){
+    const d=new Date(`${upcomingConcert.date}T00:00:00`);
+    const diff=daysFromToday(d);
+    if(diff>=0 && diff<=31){
+      list.push(`もうすぐ${upcomingConcert.title || "演奏会"}があるね！`);
+    }
+  }
+
+  const upcomingEvent=values
+    .filter(s=>s.type==="event" && s.date && s.date>=today)
+    .sort((a,b)=>a.date.localeCompare(b.date))[0];
+
+  if(upcomingEvent){
+    const d=new Date(`${upcomingEvent.date}T00:00:00`);
+    const diff=daysFromToday(d);
+    if(diff>=0 && diff<=14){
+      list.push(`${formatDate(d)}は${upcomingEvent.title || "イベント"}があるよ！`);
+    }
+  }
+
+  if(list.length===0){
+    list.push("予定を確認してみてね！","今日も部活頑張ろうね！");
+  }
+
+  return [...new Set(list)];
+}
+
+function showMessage(text){
+  message.textContent=text;
+}
+
+function changeBellMessage(){
+  if(!bellMessages.length)return;
+  let next=Math.floor(Math.random()*bellMessages.length);
+  if(bellMessages.length>1 && bellMessages[next]===message.textContent){
+    next=(next+1)%bellMessages.length;
+  }
+  showMessage(bellMessages[next]);
+}
+
+async function loadBellMessages(){
+  try{
+    const snapshot=await get(ref(db,"schedules"));
+    const schedules=snapshot.exists()?snapshot.val():{};
+    bellMessages=buildMessages(schedules);
+    showMessage(bellMessages[0]);
+  }catch(error){
+    console.error("ベルちゃんの予定取得に失敗しました",error);
+    bellMessages=["予定を確認してみてね！","今日も部活頑張ろうね！"];
+    showMessage(bellMessages[0]);
+  }
+}
+
+loadBellMessages();
+</script>
 </body>
 </html>
