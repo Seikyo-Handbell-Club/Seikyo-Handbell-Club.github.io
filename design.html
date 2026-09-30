@@ -19,7 +19,7 @@ html,body{margin:0;width:100%;height:100%;background:transparent;overflow:hidden
 <body>
 <div class="bell-area">
   <div class="bubble"><small>ベルちゃん</small><span id="bellMessage">予定を確認してるよ！</span></div>
-  <img class="bell" src="bell.png" alt="ベルちゃん" onclick="changeBellMessage()">
+  <img class="bell" src="bell.png" alt="ベルちゃん" id="bellImage">
 </div>
 
 <script type="module">
@@ -38,13 +38,10 @@ const firebaseConfig={
 
 const app=initializeApp(firebaseConfig);
 const db=getDatabase(app);
-
-let bellMessages=[
-  "今日も部活頑張ろうね！",
-  "予定を確認してみてね！"
-];
-
 const message=document.getElementById("bellMessage");
+const bellImage=document.getElementById("bellImage");
+
+let bellMessages=[];
 
 function pad(n){
   return String(n).padStart(2,"0");
@@ -58,104 +55,201 @@ function monthString(date=new Date()){
   return `${date.getFullYear()}-${pad(date.getMonth()+1)}`;
 }
 
-function daysFromToday(date){
-  const today=new Date();
-  const a=new Date(today.getFullYear(),today.getMonth(),today.getDate());
-  const b=new Date(date.getFullYear(),date.getMonth(),date.getDate());
-  return Math.round((b-a)/86400000);
+function timeToMinutes(value){
+  const match=String(value || "").match(/^(\d{1,2}):(\d{2})$/);
+  if(!match)return null;
+  return Number(match[1])*60+Number(match[2]);
 }
 
-function formatDate(date){
-  return `${date.getMonth()+1}月${date.getDate()}日`;
+function getGreeting(date=new Date()){
+  const hour=date.getHours();
+  if(hour>=4 && hour<10)return "おはよう！";
+  if(hour>=10 && hour<17)return "こんにちは！";
+  return "こんばんは！";
 }
 
-function addNormalMessage(list,schedule){
-  if(schedule.time && schedule.time !== "終日"){
-    list.push(`今日の部活は${schedule.time}までだよ！`);
-  }else{
-    list.push("今日は部活があるよ！");
-  }
+function greetingMessage(text,date=new Date()){
+  return `${getGreeting(date)}${text}`;
 }
 
-function buildMessages(schedules){
-  const now=new Date();
-  const today=dateString(now);
-  const thisMonth=monthString(now);
-  const list=[];
-  const values=Object.values(schedules || {}).filter(s=>s && typeof s === "object");
+function formatJapaneseTime(value){
+  const match=String(value || "").match(/^(\d{1,2}):(\d{2})$/);
+  if(!match)return String(value || "");
+  return `${Number(match[1])}時${match[2]}分`;
+}
 
-  const todaySchedules=values.filter(s=>s.date===today);
-  const todayNormal=todaySchedules.find(s=>s.type==="normal");
+function formatTimeRange(time){
+  const value=String(time || "").trim();
+  if(!value || value === "終日")return "";
+  const match=value.match(/^(\d{1,2}:\d{2})\s*[〜~\-－]\s*(\d{1,2}:\d{2})$/);
+  if(!match)return value;
+  return `${formatJapaneseTime(match[1])}〜${formatJapaneseTime(match[2])}`;
+}
 
-  if(todayNormal){
-    addNormalMessage(list,todayNormal);
-  }
+function getStartTime(time){
+  const value=String(time || "").trim();
+  const match=value.match(/^(\d{1,2}:\d{2})\s*[〜~\-－]/);
+  return match ? timeToMinutes(match[1]) : null;
+}
 
-  const todayConcert=todaySchedules.find(s=>s.type==="concert");
-  if(todayConcert){
-    list.push(`今日は${todayConcert.title || "演奏会"}があるよ！`);
-  }
+function getTomorrowString(date=new Date()){
+  const tomorrow=new Date(date.getFullYear(),date.getMonth(),date.getDate()+1);
+  return dateString(tomorrow);
+}
 
-  const todayEvent=todaySchedules.find(s=>s.type==="event");
-  if(todayEvent){
-    list.push(`今日は${todayEvent.title || "イベント"}があるよ！`);
-  }
+function daysFromToday(dateStringValue,today=new Date()){
+  const target=new Date(`${dateStringValue}T00:00:00`);
+  const base=new Date(today.getFullYear(),today.getMonth(),today.getDate());
+  return Math.round((target-base)/86400000);
+}
 
-  const todayHoliday=todaySchedules.find(s=>s.type==="schoolHoliday" && s.title);
-  if(todayHoliday){
-    list.push(`今日は${todayHoliday.title}だよ！`);
-  }
+function isUpcomingWithinDays(dateValue,today,days){
+  if(!dateValue)return false;
+  const diff=daysFromToday(dateValue,today);
+  return diff>0 && diff<=days;
+}
 
-  const todayExam=values.find(s=>
-    s.type==="exam" &&
-    s.startDate &&
-    s.endDate &&
-    today>=s.startDate &&
-    today<=s.endDate
+function getNormalSchedulesForDate(values,date){
+  return values.filter(s=>s && s.type==="normal" && s.date===date);
+}
+
+function getEventSchedulesForDate(values,date){
+  return values.filter(s=>
+    s &&
+    (s.type==="concert" || s.type==="event") &&
+    s.date===date
   );
-  if(todayExam){
-    list.push(`今日は${todayExam.title || "定期試験"}の期間だね。頑張ってね！`);
-  }
+}
 
-  const monthNormalCount=values.filter(s=>
+function getUpcomingEvents(values,today){
+  return values
+    .filter(s=>
+      s &&
+      (s.type==="concert" || s.type==="event") &&
+      isUpcomingWithinDays(s.date,today,14)
+    )
+    .sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+}
+
+function getMonthlyClubCount(values,today){
+  const month=monthString(today);
+  return values.filter(s=>
+    s &&
     s.type==="normal" &&
     typeof s.date==="string" &&
-    s.date.startsWith(thisMonth)
+    s.date.startsWith(month)
   ).length;
+}
 
-  if(monthNormalCount>0){
-    list.push(`今月の活動回数は${monthNormalCount}回だね！`);
+function getClubBeforeStartMessages(values,today,dateNow){
+  const todayNormal=getNormalSchedulesForDate(values,today)[0];
+  if(!todayNormal)return [];
+
+  const start=getStartTime(todayNormal.time);
+  const nowMinutes=dateNow.getHours()*60+dateNow.getMinutes();
+  if(start===null || nowMinutes>=start)return [];
+
+  const range=formatTimeRange(todayNormal.time);
+  const result=[];
+
+  if(range){
+    result.push(greetingMessage(`今日の部活は${range}だよ`,dateNow));
   }
 
-  const upcomingConcert=values
-    .filter(s=>s.type==="concert" && s.date && s.date>=today)
-    .sort((a,b)=>a.date.localeCompare(b.date))[0];
+  result.push(
+    greetingMessage("今日の部活、頑張ろうね！",dateNow),
+    greetingMessage("今日もみんなでハンドベル頑張ろうね！",dateNow),
+    greetingMessage("今日の部活も楽しみだね！",dateNow),
+    greetingMessage("今日はどんな曲を練習するのかな？",dateNow),
+    greetingMessage("今日の部活も一緒に頑張ろうね！",dateNow)
+  );
 
-  if(upcomingConcert){
-    const d=new Date(`${upcomingConcert.date}T00:00:00`);
-    const diff=daysFromToday(d);
-    if(diff>=0 && diff<=31){
-      list.push(`もうすぐ${upcomingConcert.title || "演奏会"}があるね！`);
+  return result;
+}
+
+function buildRegularMessages(values,dateNow){
+  const result=[];
+  const hour=dateNow.getHours();
+  const greeting=getGreeting(dateNow);
+  const monthCount=getMonthlyClubCount(values,dateNow);
+
+  if(hour>=4 && hour<10){
+    result.push(
+      "おはよう！",
+      "おはよう！今日も一日頑張ろうね！",
+      "おはよう！無理せず頑張ろうね！",
+      "おはよう！今日も楽しく過ごそうね！",
+      "おはよう！予定を確認してみてね！",
+      "おはよう！今月の予定もチェックしてみてね！",
+      "おはよう！みんなで楽しく活動しようね！",
+      "おはよう！今日も素敵な一日にしようね！",
+      "おはよう！今日も予定を見にきてくれてありがとう",
+      `おはよう！今月の部活は${monthCount}回だよ`
+    );
+    if(hour>=4 && hour<6.5)result.push("おはよう〜まだ眠いよ〜");
+    if(hour>=5 && hour<7)result.push("おはよう！朝はやいね");
+  }else if(hour>=10 && hour<17){
+    result.push(
+      "こんにちは！",
+      "こんにちは！無理せず頑張ろうね！",
+      "こんにちは！今日も楽しく過ごそうね！",
+      "こんにちは！予定を確認してみてね！",
+      "こんにちは！今月の予定もチェックしてみてね！",
+      "こんにちは！みんなで楽しく活動しようね！",
+      "こんにちは！今日も素敵な一日にしようね！",
+      "こんにちは！今日も予定を見にきてくれてありがとう",
+      `こんにちは！今月の部活は${monthCount}回だよ`
+    );
+    if(hour>=12 && hour<13)result.push("こんにちは！お昼ご飯はもう食べたかな？");
+    if(hour>=12 && hour<15)result.push("こんにちは！今日のお昼ご飯なんだった？");
+  }else{
+    result.push(
+      "こんばんは！",
+      "こんばんは！予定を確認してみてね！",
+      "こんばんは！今月の予定もチェックしてみてね！",
+      "こんばんは！今日も予定を見にきてくれてありがとう",
+      "こんばんは！今日はどんな1日だったかな？",
+      "こんばんは！1日お疲れ様！",
+      "こんばんは！明日も1日頑張ろう！",
+      "こんばんは！自主練はもうやった？",
+      `こんばんは！今月の部活は${monthCount}回だよ`
+    );
+    if(hour>=22 && hour<24)result.push("こんばんは〜。そろそろ眠たくなっちゃった、、、");
+    if(getNormalSchedulesForDate(values,getTomorrowString(dateNow)).length>0){
+      result.push("こんばんは！明日も部活頑張ろう！");
     }
+    if(hour>=22 && hour<24)result.push("こんばんは！夜遅くまでお疲れ様");
   }
 
-  const upcomingEvent=values
-    .filter(s=>s.type==="event" && s.date && s.date>=today)
-    .sort((a,b)=>a.date.localeCompare(b.date))[0];
+  return result;
+}
 
-  if(upcomingEvent){
-    const d=new Date(`${upcomingEvent.date}T00:00:00`);
-    const diff=daysFromToday(d);
-    if(diff>=0 && diff<=14){
-      list.push(`${formatDate(d)}は${upcomingEvent.title || "イベント"}があるよ！`);
-    }
+function pickRandom(list){
+  if(!list.length)return "予定を確認してみてね！";
+  return list[Math.floor(Math.random()*list.length)];
+}
+
+function chooseBellMessage(schedules){
+  const now=new Date();
+  const today=dateString(now);
+  const values=Object.values(schedules || {}).filter(s=>s && typeof s === "object");
+  const regularMessages=buildRegularMessages(values,now);
+
+  const todayEvents=getEventSchedulesForDate(values,today);
+  if(todayEvents.length>0 && Math.random()<0.5){
+    const event=todayEvents[Math.floor(Math.random()*todayEvents.length)];
+    return `今日は${event.title || (event.type==="concert" ? "演奏会" : "イベント")}だね！`;
   }
 
-  if(list.length===0){
-    list.push("予定を確認してみてね！","今日も部活頑張ろうね！");
+  const upcomingEvents=getUpcomingEvents(values,today);
+  if(upcomingEvents.length>0 && Math.random()<0.2){
+    const event=upcomingEvents[0];
+    return `もうすぐ${event.title || (event.type==="concert" ? "演奏会" : "イベント")}だね！`;
   }
 
-  return [...new Set(list)];
+  const clubMessages=getClubBeforeStartMessages(values,today,now);
+  const combined=[...regularMessages,...clubMessages];
+  return pickRandom(combined);
 }
 
 function showMessage(text){
@@ -164,26 +258,39 @@ function showMessage(text){
 
 function changeBellMessage(){
   if(!bellMessages.length)return;
-  let next=Math.floor(Math.random()*bellMessages.length);
-  if(bellMessages.length>1 && bellMessages[next]===message.textContent){
-    next=(next+1)%bellMessages.length;
+  let next=pickRandom(bellMessages);
+  if(bellMessages.length>1 && next===message.textContent){
+    const other=bellMessages.filter(item=>item!==message.textContent);
+    next=pickRandom(other);
   }
-  showMessage(bellMessages[next]);
+  showMessage(next);
 }
 
 async function loadBellMessages(){
   try{
     const snapshot=await get(ref(db,"schedules"));
     const schedules=snapshot.exists()?snapshot.val():{};
-    bellMessages=buildMessages(schedules);
-    showMessage(bellMessages[0]);
+    const first=chooseBellMessage(schedules);
+    const values=Object.values(schedules || {}).filter(s=>s && typeof s === "object");
+    const now=new Date();
+    const today=dateString(now);
+    const regular=buildRegularMessages(values,now);
+    const club=getClubBeforeStartMessages(values,today,now);
+    const todayEvents=getEventSchedulesForDate(values,today);
+    const upcoming=getUpcomingEvents(values,today);
+    const all=[...regular,...club];
+    todayEvents.forEach(event=>all.push(`今日は${event.title || (event.type==="concert" ? "演奏会" : "イベント")}だね！`));
+    upcoming.forEach(event=>all.push(`もうすぐ${event.title || (event.type==="concert" ? "演奏会" : "イベント")}だね！`));
+    bellMessages=[...new Set(all)];
+    showMessage(first);
   }catch(error){
     console.error("ベルちゃんの予定取得に失敗しました",error);
-    bellMessages=["予定を確認してみてね！","今日も部活頑張ろうね！"];
-    showMessage(bellMessages[0]);
+    bellMessages=["予定を確認してみてね！","今日も一日頑張ろうね！"];
+    showMessage(pickRandom(bellMessages));
   }
 }
 
+bellImage.addEventListener("click",changeBellMessage);
 loadBellMessages();
 </script>
 </body>
