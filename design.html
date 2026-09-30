@@ -337,4 +337,131 @@ h1 {
 
     <h2>
       今月の予定
-    </
+    </h2>
+
+    <p>
+      ここに実際のカレンダーが入る想定。
+      ベルちゃんをタップすると、話す内容が変わります。
+    </p>
+
+
+    <!-- 仮カレンダー -->
+    <div class="dummy-calendar">
+
+      <div class="day">1</div>
+      <div class="day active">2</div>
+      <div class="day">3</div>
+      <div class="day event">4</div>
+      <div class="day">5</div>
+      <div class="day exam">6</div>
+      <div class="day">7</div>
+
+      <div class="day">8</div>
+      <div class="day active">9</div>
+      <div class="day">10</div>
+      <div class="day">11</div>
+      <div class="day event">12</div>
+      <div class="day">13</div>
+      <div class="day">14</div>
+
+    </div>
+
+
+    <!-- 色の説明 -->
+    <div class="legend">
+
+      <span>
+        <i class="dot blue"></i>
+        部活動
+      </span>
+
+      <span>
+        <i class="dot green"></i>
+        試験期間
+      </span>
+
+      <span>
+        <i class="dot purple"></i>
+        演奏会
+      </span>
+
+      <span>
+        <i class="dot red"></i>
+        学校が休み
+      </span>
+
+      <span>
+        <i class="dot orange"></i>
+        その他のイベント
+      </span>
+
+    </div>
+
+
+    <!-- ベルちゃんの吹き出し -->
+    <div class="bubble">
+
+      <small>
+        ベルちゃん
+      </small>
+
+      <span id="bellMessage">
+        今日の部活は17:00〜19:00までだよ！
+      </span>
+
+    </div>
+
+
+    <!-- ベルちゃん -->
+    <img
+      class="bell"
+      src="bell.png"
+      alt="ベルちゃん"
+      onclick="changeBellMessage()"
+    >
+
+  </main>
+
+</div>
+
+
+<script>
+
+const bellMessages = [
+
+  "今月の活動回数は○回だね！",
+
+  "今月は定期試験があるね。頑張ってね！",
+
+  "今日の部活は○時〜○時までだよ！",
+
+  "もうすぐ○○演奏会があるね！",
+
+  "来週は文化祭だ〜♪",
+
+  "今日も部活頑張ろうね！",
+
+  "予定を確認してみてね！"
+
+];
+
+
+function changeBellMessage(){
+
+  const message =
+    document.getElementById("bellMessage");
+
+  const randomIndex =
+    Math.floor(
+      Math.random() * bellMessages.length
+    );
+
+  message.textContent =
+    bellMessages[randomIndex];
+
+}
+
+</script>
+
+</body>
+</html>
