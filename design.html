@@ -13,7 +13,16 @@ html,body{margin:0;width:100%;height:100%;background:transparent;overflow:hidden
 .bubble:after{content:"";position:absolute;right:-11px;bottom:24px;width:18px;height:18px;background:#fff;border-top:2px solid #d9e5ed;border-right:2px solid #d9e5ed;transform:rotate(45deg)}
 .bubble small{display:block;color:#84939d;font-size:10px;margin-bottom:3px}
 @keyframes bubbleAppear{from{opacity:0;transform:scale(.9) translateY(7px)}to{opacity:1;transform:scale(1) translateY(0)}}
-@media(max-width:700px){.bell{width:82px;right:3px;bottom:3px}.bubble{right:3px;bottom:68px;width:125px;max-width:100%;font-size:10px;padding:7px 8px}.bubble:after{right:20px;bottom:-7px;width:12px;height:12px;background:#fff;border-top:0;border-right:2px solid #d9e5ed;border-bottom:2px solid #d9e5ed;transform:rotate(45deg)}.bubble small{font-size:8px;margin-bottom:2px}}
+@media(max-width:700px){
+  .bell{width:82px;right:3px;bottom:3px}
+  .bubble{right:3px;bottom:68px;width:160px;max-width:calc(100vw - 24px);font-size:10px;padding:7px 8px}
+  .bubble:after{right:20px;bottom:-7px;width:12px;height:12px;background:#fff;border-top:0;border-right:2px solid #d9e5ed;border-bottom:2px solid #d9e5ed;transform:rotate(45deg)}
+  .bubble small{font-size:8px;margin-bottom:2px}
+
+  /* ログイン後はヘッダーの縦の余白に合わせてベルちゃんを大きくする */
+  .logged-in .bell{width:120px}
+  .logged-in .bubble{width:175px;bottom:100px;max-width:calc(100vw - 20px)}
+}
 </style>
 </head>
 <body>
@@ -40,6 +49,27 @@ const app=initializeApp(firebaseConfig);
 const db=getDatabase(app);
 const message=document.getElementById("bellMessage");
 const bellImage=document.getElementById("bellImage");
+
+function updateLoginSize(){
+  try{
+    const parentDocument=window.parent.document;
+    const loggedInElement=parentDocument.getElementById("loggedInLeft");
+    const isLoggedIn=!!loggedInElement && !loggedInElement.classList.contains("hidden");
+    document.body.classList.toggle("logged-in",isLoggedIn);
+  }catch(error){
+    document.body.classList.remove("logged-in");
+  }
+}
+
+updateLoginSize();
+
+try{
+  const parentDocument=window.parent.document;
+  const loggedInElement=parentDocument.getElementById("loggedInLeft");
+  if(loggedInElement){
+    new MutationObserver(updateLoginSize).observe(loggedInElement,{attributes:true,attributeFilter:["class"]});
+  }
+}catch(error){}
 
 let bellMessages=[];
 
