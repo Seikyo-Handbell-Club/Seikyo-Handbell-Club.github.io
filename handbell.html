@@ -531,14 +531,14 @@ textarea{
 
 
 .bell-frame{
-  position:fixed;
-  right:10px;
-  bottom:10px;
+  position:absolute;
+  top:0;
+  right:0;
   width:290px;
   height:250px;
   border:0;
   background:transparent;
-  z-index:9999;
+  z-index:20;
   pointer-events:auto
 }
 
@@ -588,6 +588,16 @@ textarea{
 /* =========================
    全画面共通：スマホ版レイアウト
 ========================= */
+/* すべての画面をスマホ版と同じ幅に統一 */
+header,
+main{
+  width:390px;
+  max-width:100%;
+  margin-left:auto;
+  margin-right:auto;
+  box-sizing:border-box
+}
+
 header{
   padding:10px 10px 10px
 }
@@ -596,13 +606,16 @@ header{
   min-height:118px
 }
 .header-brand{
-  width:calc(100% - 190px);
+  position:absolute;
+  left:0;
+  top:0;
+  width:155px;
   text-align:left;
   padding-top:3px
 }
 .header-title{
   width:100%;
-  font-size:21px;
+  font-size:18px;
   line-height:1.3;
   text-align:left
 }
@@ -612,7 +625,7 @@ header{
   text-align:left
 }
 .header-user-row{
-  width:calc(100% - 230px);
+  width:155px;
   justify-content:flex-start;
   margin-bottom:8px
 }
@@ -630,7 +643,7 @@ header{
   font-size:21px
 }
 .header-action-row{
-  width:calc(100% - 230px);
+  width:155px;
   justify-content:flex-start
 }
 .header-actions{
@@ -646,7 +659,7 @@ header{
 }
 .header-login{
   justify-content:flex-start;
-  width:calc(100% - 230px)
+  width:155px
 }
 .header-login button{
   max-width:180px
@@ -656,8 +669,12 @@ header{
   right:0;
   top:0;
   bottom:auto;
-  width:225px;
-  height:155px
+  width:290px;
+  height:225px;
+  border:0;
+  background:transparent;
+  z-index:9999;
+  pointer-events:auto
 }
 main{
   padding:12px
