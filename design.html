@@ -21,13 +21,19 @@ html,body{
   font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
 }
 
-/* ベルちゃん */
-.bell{
+/* ベルちゃんと吹き出しをまとめる */
+.bell-character{
   position:absolute;
   right:8px;
   bottom:4px;
   width:175px;
-  max-width:62%;
+}
+
+/* ベルちゃん */
+.bell{
+  display:block;
+  width:175px;
+  max-width:100%;
   height:auto;
   filter:drop-shadow(0 12px 10px rgba(40,55,65,.15));
   cursor:pointer;
@@ -42,11 +48,9 @@ html,body{
 /* 吹き出し */
 .bubble{
   position:absolute;
-  left:calc(100% - 95.5px);
-  margin-left:-110px;
-  bottom:180px;
+  left:50%;
+  bottom:176px;
   width:220px;
-  max-width:76%;
   box-sizing:border-box;
   background:#fff;
   border:2px solid #d9e5ed;
@@ -55,6 +59,10 @@ html,body{
   box-shadow:0 10px 24px rgba(48,72,92,.12);
   font-size:14px;
   line-height:1.55;
+
+  /* ベルちゃんの中心に合わせる */
+  transform:translateX(-50%);
+
   animation:bubbleAppear .55s cubic-bezier(.2,.9,.25,1.2) both;
 }
 
@@ -63,10 +71,10 @@ html,body{
   content:"";
   position:absolute;
   left:50%;
-  margin-left:-10px;
   bottom:-11px;
   width:18px;
   height:18px;
+  margin-left:-10px;
   background:#fff;
   border-right:2px solid #d9e5ed;
   border-bottom:2px solid #d9e5ed;
@@ -83,39 +91,40 @@ html,body{
 @keyframes bubbleAppear{
   from{
     opacity:0;
-    transform:scale(.9) translateY(7px);
+    transform:translateX(-50%) scale(.9) translateY(7px);
   }
+
   to{
     opacity:1;
-    transform:scale(1) translateY(0);
+    transform:translateX(-50%) scale(1) translateY(0);
   }
 }
 
 /* スマホ */
 @media(max-width:700px){
 
-  .bell{
-    width:140px;
+  .bell-character{
     right:4px;
     bottom:4px;
+    width:140px;
+  }
+
+  .bell{
+    width:140px;
   }
 
   .bubble{
-    left:calc(100% - 74px);
-    margin-left:-92.5px;
-    bottom:145px;
+    bottom:141px;
     width:185px;
-    max-width:68%;
     font-size:12px;
     padding:10px 12px;
   }
 
   .bubble:after{
-    left:50%;
-    margin-left:-9px;
     bottom:-10px;
     width:16px;
     height:16px;
+    margin-left:-9px;
   }
 }
 </style>
@@ -125,17 +134,21 @@ html,body{
 
 <div class="bell-area">
 
-  <div class="bubble">
-    <small>ベルちゃん</small>
-    <span id="bellMessage">今日の部活は17:00〜19:00までだよ！</span>
-  </div>
+  <div class="bell-character">
 
-  <img
-    class="bell"
-    src="bell.png"
-    alt="ベルちゃん"
-    onclick="changeBellMessage()"
-  >
+    <div class="bubble">
+      <small>ベルちゃん</small>
+      <span id="bellMessage">今日の部活は17:00〜19:00までだよ！</span>
+    </div>
+
+    <img
+      class="bell"
+      src="bell.png"
+      alt="ベルちゃん"
+      onclick="changeBellMessage()"
+    >
+
+  </div>
 
 </div>
 
