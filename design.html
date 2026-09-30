@@ -13,16 +13,16 @@ html,body{margin:0;width:100%;height:100%;background:transparent;overflow:hidden
 .bubble:after{content:"";position:absolute;right:-11px;bottom:24px;width:18px;height:18px;background:#fff;border-top:2px solid #d9e5ed;border-right:2px solid #d9e5ed;transform:rotate(45deg)}
 .bubble small{display:block;color:#84939d;font-size:10px;margin-bottom:3px}
 @keyframes bubbleAppear{from{opacity:0;transform:scale(.9) translateY(7px)}to{opacity:1;transform:scale(1) translateY(0)}}
-@media(max-width:700px){
-  .bell{width:82px;right:3px;bottom:3px}
-  .bubble{right:3px;bottom:66px;width:170px;max-width:calc(100vw - 10px);font-size:10px;padding:7px 8px}
-  .bubble:after{right:20px;bottom:-7px;width:12px;height:12px;background:#fff;border-top:0;border-right:2px solid #d9e5ed;border-bottom:2px solid #d9e5ed;transform:rotate(45deg)}
-  .bubble small{font-size:8px;margin-bottom:2px}
 
-  /* ログイン後はヘッダー右上の空間に合わせてベルちゃんを大きくする */
-  .logged-in .bell{width:105px}
-  .logged-in .bubble{width:180px;bottom:82px;max-width:calc(100vw - 5px)}
-}
+
+/* 全画面共通：スマホ版サイズ */
+.bell{width:82px;right:3px;bottom:3px}
+.bubble{right:3px;bottom:66px;width:170px;max-width:calc(100vw - 10px);font-size:10px;padding:7px 8px}
+.bubble:after{right:20px;bottom:-7px;width:12px;height:12px;background:#fff;border-top:0;border-right:2px solid #d9e5ed;border-bottom:2px solid #d9e5ed;transform:rotate(45deg)}
+.bubble small{font-size:8px;margin-bottom:2px}
+.logged-in .bell{width:105px}
+.logged-in .bubble{width:180px;bottom:82px;max-width:calc(100vw - 5px)}
+
 </style>
 </head>
 <body>
