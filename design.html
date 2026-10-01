@@ -39,11 +39,17 @@ body{
   cursor:pointer;
   user-select:none;
   transition:transform .15s ease;
+  transform-origin:center bottom;
+  z-index:10;
 }
 
 .bell:active{
   transform:scale(.96);
 }
+
+/* =====================================================
+   吹き出し
+===================================================== */
 
 .bubble{
   position:absolute;
@@ -60,6 +66,7 @@ body{
     .55s
     cubic-bezier(.2,.9,.25,1.2)
     both;
+  z-index:20;
 }
 
 .bubble small{
@@ -74,27 +81,17 @@ body{
    ログイン前
 ===================================================== */
 
-/* ---------- ベルちゃん ---------- */
-
 body:not(.logged-in) .bell{
   width:100px;
   right:0px;
   bottom:0px;
 }
 
-
-/* ---------- 吹き出し ----------
-   ログイン後と完全に同じ設定
-*/
-
 body:not(.logged-in) .bubble{
   width:215px;
   right:3px;
   bottom:95px;
 }
-
-
-/* ---------- 吹き出しのしっぽ ---------- */
 
 body:not(.logged-in) .bubble:after{
   content:"";
@@ -120,28 +117,17 @@ body:not(.logged-in) .bubble:after{
    ログイン後
 ===================================================== */
 
-/* ---------- ベルちゃん ---------- */
-
 body.logged-in .bell{
   width:100px;
   right:0px;
   bottom:0px;
 }
 
-
-/* ---------- 吹き出し ----------
-   元の100px → 108px
-   少しだけ下へ
-*/
-
 body.logged-in .bubble{
   width:215px;
   right:3px;
   bottom:95px;
 }
-
-
-/* ---------- 吹き出しのしっぽ ---------- */
 
 body.logged-in .bubble:after{
   content:"";
@@ -185,350 +171,1713 @@ body.logged-in .bubble:after{
 
 }
 
+
+/* =====================================================
+   ベルちゃんお祝いアニメーション
+===================================================== */
+
+/* アニメーション中はクリック不可 */
+.bell.celebrating{
+  pointer-events:none;
+  cursor:default;
+
+  animation:
+    bellCelebration
+    1.8s
+    cubic-bezier(.25,.75,.25,1)
+    both;
+}
+
+
+/*
+   1.8秒の中で
+
+   0.00  通常
+   0.18  1回目ジャンプ開始
+   0.38  上へ
+   0.55  着地
+   0.72  2回目ジャンプ開始
+   0.92  上へ
+   1.10  着地
+   1.35  喜びの揺れ
+   1.80  通常に戻る
+
+   画像全体を回転・移動・拡大して、
+   手足がバタバタしているように見せる。
+*/
+
+@keyframes bellCelebration{
+
+  0%{
+    transform:
+      translateY(0)
+      rotate(0deg)
+      scale(1);
+  }
+
+  /* 1回目 */
+  10%{
+    transform:
+      translateY(0)
+      rotate(-5deg)
+      scale(1.03);
+  }
+
+  18%{
+    transform:
+      translateY(-18px)
+      rotate(7deg)
+      scale(1.04);
+  }
+
+  25%{
+    transform:
+      translateY(-28px)
+      rotate(-8deg)
+      scale(1.05);
+  }
+
+  32%{
+    transform:
+      translateY(-15px)
+      rotate(8deg)
+      scale(1.04);
+  }
+
+  39%{
+    transform:
+      translateY(0)
+      rotate(-6deg)
+      scale(1.02);
+  }
+
+  46%{
+    transform:
+      translateY(0)
+      rotate(3deg)
+      scale(1);
+  }
+
+
+  /* 2回目 */
+  52%{
+    transform:
+      translateY(-12px)
+      rotate(-8deg)
+      scale(1.04);
+  }
+
+  60%{
+    transform:
+      translateY(-32px)
+      rotate(9deg)
+      scale(1.06);
+  }
+
+  68%{
+    transform:
+      translateY(-17px)
+      rotate(-10deg)
+      scale(1.05);
+  }
+
+  76%{
+    transform:
+      translateY(0)
+      rotate(7deg)
+      scale(1.03);
+  }
+
+
+  /* 着地後にちょっとバタバタ */
+  82%{
+    transform:
+      translateY(-3px)
+      rotate(-7deg)
+      scale(1.02);
+  }
+
+  87%{
+    transform:
+      translateY(0)
+      rotate(7deg)
+      scale(1.01);
+  }
+
+  92%{
+    transform:
+      translateY(-2px)
+      rotate(-4deg)
+      scale(1.01);
+  }
+
+  96%{
+    transform:
+      translateY(0)
+      rotate(3deg)
+      scale(1);
+  }
+
+  100%{
+    transform:
+      translateY(0)
+      rotate(0deg)
+      scale(1);
+  }
+
+}
+
+
+/* =====================================================
+   吹き出しを一時的に隠す
+===================================================== */
+
+.bubble.hidden-for-celebration{
+  opacity:0 !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+
+
+/* =====================================================
+   吹き出し再表示
+===================================================== */
+
+.bubble.show-again{
+  animation:
+    bubbleAppear
+    .55s
+    cubic-bezier(.2,.9,.25,1.2)
+    both;
+}
+
+
+/* =====================================================
+   ハート
+===================================================== */
+
+.heart{
+  position:absolute;
+  left:0;
+  top:0;
+
+  width:10px;
+  height:10px;
+
+  color:#ff8fb3;
+
+  font-size:17px;
+  line-height:10px;
+
+  pointer-events:none;
+  user-select:none;
+
+  z-index:30;
+
+  animation:
+    heartFly
+    1.15s
+    cubic-bezier(.2,.75,.25,1)
+    forwards;
+}
+
+
+/* ハートが上へ飛んで、左右に散る */
+@keyframes heartFly{
+
+  0%{
+    opacity:0;
+    transform:
+      translate(0,0)
+      scale(.4)
+      rotate(-15deg);
+  }
+
+  12%{
+    opacity:1;
+    transform:
+      translate(
+        var(--start-x),
+        var(--start-y)
+      )
+      scale(1)
+      rotate(5deg);
+  }
+
+  45%{
+    opacity:1;
+    transform:
+      translate(
+        var(--mid-x),
+        var(--mid-y)
+      )
+      scale(1.15)
+      rotate(var(--rotate));
+  }
+
+  75%{
+    opacity:.9;
+    transform:
+      translate(
+        var(--end-x),
+        var(--end-y)
+      )
+      scale(.95)
+      rotate(var(--rotate));
+  }
+
+  100%{
+    opacity:0;
+    transform:
+      translate(
+        var(--final-x),
+        var(--final-y)
+      )
+      scale(.65)
+      rotate(var(--rotate));
+  }
+
+}
+
+
+/* =====================================================
+   アニメーション中の吹き出し再表示制御
+===================================================== */
+
+.bubble.hidden-for-celebration.show-again{
+  visibility:visible !important;
+  opacity:1 !important;
+}
+
 </style>
 </head>
+
 <body>
+
 <div class="bell-area">
-  <div class="bubble"><small>ベルちゃん</small><span id="bellMessage">予定を確認してるよ！</span></div>
-  <img class="bell" src="bell.png" alt="ベルちゃん" id="bellImage">
+
+  <div class="bubble">
+    <small>ベルちゃん</small>
+    <span id="bellMessage">予定を確認してるよ！</span>
+  </div>
+
+  <img
+    class="bell"
+    src="bell.png"
+    alt="ベルちゃん"
+    id="bellImage"
+  >
+
 </div>
 
+
 <script type="module">
+
 const message=document.getElementById("bellMessage");
 const bellImage=document.getElementById("bellImage");
+const bubble=document.querySelector(".bubble");
+const bellArea=document.querySelector(".bell-area");
+
+
+/* =====================================================
+   ログイン状態
+===================================================== */
 
 function updateLoginSize(){
+
   try{
+
     const parentDocument=window.parent.document;
-    const loggedInElement=parentDocument.getElementById("loggedInLeft");
-    const isLoggedIn=!!loggedInElement && !loggedInElement.classList.contains("hidden");
-    document.body.classList.toggle("logged-in",isLoggedIn);
+
+    const loggedInElement=
+      parentDocument.getElementById("loggedInLeft");
+
+    const isLoggedIn=
+      !!loggedInElement &&
+      !loggedInElement.classList.contains("hidden");
+
+    document.body.classList.toggle(
+      "logged-in",
+      isLoggedIn
+    );
+
   }catch(error){
+
     document.body.classList.remove("logged-in");
+
   }
+
 }
 
 updateLoginSize();
 
-/* 親ページのログイン状態が変わったら自動で反映する。
-   MutationObserverだけでなく定期確認も入れて、
-   ログイン後の位置・サイズが確実に切り替わるようにする。 */
+
+/* 親ページのログイン状態を監視 */
+
 try{
+
   const parentDocument=window.parent.document;
-  const loggedInElement=parentDocument.getElementById("loggedInLeft");
+
+  const loggedInElement=
+    parentDocument.getElementById("loggedInLeft");
+
   if(loggedInElement){
+
     new MutationObserver(updateLoginSize).observe(
       loggedInElement,
-      {attributes:true,attributeFilter:["class"]}
+      {
+        attributes:true,
+        attributeFilter:["class"]
+      }
     );
+
   }
+
 }catch(error){}
 
+
 setInterval(updateLoginSize,500);
+
+
+/* =====================================================
+   セリフ
+===================================================== */
 
 let bellMessages=[];
 
 const isEmbedded=window.parent !== window;
+
 let parentSchedules={};
 
+
 function setBellMessages(messages,preferred=null){
-  const cleaned=[...new Set((messages || []).filter(v=>typeof v === "string" && v.trim()))];
+
+  const cleaned=[
+    ...new Set(
+      (messages || [])
+        .filter(
+          v =>
+            typeof v === "string" &&
+            v.trim()
+        )
+    )
+  ];
+
   if(!cleaned.length)return;
+
   bellMessages=cleaned;
-  showMessage(preferred && cleaned.includes(preferred) ? preferred : pickRandom(cleaned));
+
+  showMessage(
+    preferred && cleaned.includes(preferred)
+      ? preferred
+      : pickRandom(cleaned)
+  );
+
 }
+
 
 function buildBellMessages(schedules){
+
   const now=new Date();
-  const values=Object.entries(schedules || {})
-    .filter(([,s])=>s && typeof s === "object")
-    .map(([key,s])=>{
-      /*
-        カレンダーの通常予定は「2026-10-06」のような日付をキーにして
-        保存されているため、ベルちゃん側でもそのキーをdateとして使う。
-        既にdateを持っている予定は元の値をそのまま使う。
-      */
-      if((s.type==="normal" || !s.type) && typeof s.date !== "string"){
-        return {...s,date:key};
+
+  const values=
+    Object.entries(schedules || {})
+      .filter(
+        ([,s]) =>
+          s &&
+          typeof s === "object"
+      )
+      .map(
+        ([key,s]) => {
+
+          /*
+            カレンダーの通常予定は
+            「2026-10-06」のような日付をキーにして
+            保存されているため、
+            ベルちゃん側でもそのキーをdateとして使う。
+
+            既にdateを持っている予定は
+            元の値をそのまま使う。
+          */
+
+          if(
+            (s.type==="normal" || !s.type) &&
+            typeof s.date !== "string"
+          ){
+
+            return {
+              ...s,
+              date:key
+            };
+
+          }
+
+          return s;
+
+        }
+      );
+
+
+  const all=[
+    ...buildRegularMessages(values,now)
+  ];
+
+
+  try{
+
+    const today=dateString(now);
+
+    all.push(
+      ...getClubBeforeStartMessages(
+        values,
+        today,
+        now
+      )
+    );
+
+  }catch(error){
+
+    console.warn(
+      "ベルちゃんの部活前メッセージを作成できませんでした",
+      error
+    );
+
+  }
+
+
+  try{
+
+    const today=dateString(now);
+
+    getEventSchedulesForDate(
+      values,
+      today
+    ).forEach(
+      event=>{
+
+        all.push(
+          `今日は${
+            event.title ||
+            (
+              event.type==="concert"
+                ? "演奏会"
+                : "イベント"
+            )
+          }だね！`
+        );
+
       }
-      return s;
-    });
+    );
 
-  /* 通常セリフは必ず先に作る。予定データがなくても2種類にはならない。 */
-  const all=[...buildRegularMessages(values,now)];
-
-  try{
-    const today=dateString(now);
-    all.push(...getClubBeforeStartMessages(values,today,now));
   }catch(error){
-    console.warn("ベルちゃんの部活前メッセージを作成できませんでした",error);
+
+    console.warn(
+      "ベルちゃんの当日イベントメッセージを作成できませんでした",
+      error
+    );
+
   }
 
-  try{
-    const today=dateString(now);
-    getEventSchedulesForDate(values,today).forEach(event=>{
-      all.push(`今日は${event.title || (event.type==="concert" ? "演奏会" : "イベント")}だね！`);
-    });
-  }catch(error){
-    console.warn("ベルちゃんの当日イベントメッセージを作成できませんでした",error);
-  }
 
   try{
+
     const today=dateString(now);
-    getUpcomingEvents(values,today).forEach(event=>{
-      all.push(`もうすぐ${event.title || (event.type==="concert" ? "演奏会" : "イベント")}だね！`);
-    });
+
+    getUpcomingEvents(
+      values,
+      today
+    ).forEach(
+      event=>{
+
+        all.push(
+          `もうすぐ${
+            event.title ||
+            (
+              event.type==="concert"
+                ? "演奏会"
+                : "イベント"
+            )
+          }だね！`
+        );
+
+      }
+    );
+
   }catch(error){
-    console.warn("ベルちゃんの予定メッセージを作成できませんでした",error);
+
+    console.warn(
+      "ベルちゃんの予定メッセージを作成できませんでした",
+      error
+    );
+
   }
 
-  return [...new Set(all)];
+
+  return [
+    ...new Set(all)
+  ];
+
 }
+
 
 function receiveParentSchedules(schedules){
-  parentSchedules=schedules && typeof schedules === "object" ? schedules : {};
-  setBellMessages(buildBellMessages(parentSchedules));
+
+  parentSchedules=
+    schedules &&
+    typeof schedules === "object"
+      ? schedules
+      : {};
+
+  setBellMessages(
+    buildBellMessages(parentSchedules)
+  );
+
 }
 
-window.addEventListener("message",event=>{
-  if(!event.data || event.data.type !== "handbell-schedules")return;
-  receiveParentSchedules(event.data.schedules);
-});
+
+window.addEventListener(
+  "message",
+  event=>{
+
+    if(
+      !event.data ||
+      event.data.type !== "handbell-schedules"
+    )return;
+
+    receiveParentSchedules(
+      event.data.schedules
+    );
+
+  }
+);
+
+
+/* =====================================================
+   日付・時間関連
+===================================================== */
 
 function pad(n){
+
   return String(n).padStart(2,"0");
+
 }
+
 
 function dateString(date=new Date()){
-  return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`;
+
+  return `${
+    date.getFullYear()
+  }-${
+    pad(date.getMonth()+1)
+  }-${
+    pad(date.getDate())
+  }`;
+
 }
+
 
 function monthString(date=new Date()){
-  return `${date.getFullYear()}-${pad(date.getMonth()+1)}`;
+
+  return `${
+    date.getFullYear()
+  }-${
+    pad(date.getMonth()+1)
+  }`;
+
 }
+
 
 function timeToMinutes(value){
-  const match=String(value || "").match(/^(\d{1,2}):(\d{2})$/);
+
+  const match=
+    String(value || "")
+      .match(/^(\d{1,2}):(\d{2})$/);
+
   if(!match)return null;
-  return Number(match[1])*60+Number(match[2]);
+
+  return Number(match[1])*60+
+         Number(match[2]);
+
 }
+
 
 function getGreeting(date=new Date()){
+
   const hour=date.getHours();
-  if(hour>=4 && hour<10)return "おはよう！";
-  if(hour>=10 && hour<17)return "こんにちは！";
-  return "こんばんは！";
+
+  if(hour>=4 && hour<10)
+    return "おはよう！";
+
+  if(hour>=10 && hour<17)
+    return "こんにちは！";
+
+  return "こんばんは!";
+
 }
 
-function greetingMessage(text,date=new Date()){
+
+function greetingMessage(
+  text,
+  date=new Date()
+){
+
   return `${getGreeting(date)}${text}`;
+
 }
+
 
 function formatJapaneseTime(value){
-  const match=String(value || "").match(/^(\d{1,2}):(\d{2})$/);
-  if(!match)return String(value || "");
-  return `${Number(match[1])}時${match[2]}分`;
+
+  const match=
+    String(value || "")
+      .match(/^(\d{1,2}):(\d{2})$/);
+
+  if(!match)
+    return String(value || "");
+
+  return `${
+    Number(match[1])
+  }時${
+    match[2]
+  }分`;
+
 }
+
 
 function formatTimeRange(time){
-  const value=String(time || "").trim();
-  if(!value || value === "終日")return "";
-  const match=value.match(/^(\d{1,2}:\d{2})\s*[〜~\-－]\s*(\d{1,2}:\d{2})$/);
-  if(!match)return value;
-  return `${formatJapaneseTime(match[1])}〜${formatJapaneseTime(match[2])}`;
+
+  const value=
+    String(time || "").trim();
+
+  if(
+    !value ||
+    value === "終日"
+  )
+    return "";
+
+  const match=
+    value.match(
+      /^(\d{1,2}:\d{2})\s*[〜~\-－]\s*(\d{1,2}:\d{2})$/
+    );
+
+  if(!match)
+    return value;
+
+  return `${
+    formatJapaneseTime(match[1])
+  }〜${
+    formatJapaneseTime(match[2])
+  }`;
+
 }
+
 
 function getStartTime(time){
-  const value=String(time || "").trim();
-  const match=value.match(/^(\d{1,2}:\d{2})\s*[〜~\-－]/);
-  return match ? timeToMinutes(match[1]) : null;
+
+  const value=
+    String(time || "").trim();
+
+  const match=
+    value.match(
+      /^(\d{1,2}:\d{2})\s*[〜~\-－]/
+    );
+
+  return match
+    ? timeToMinutes(match[1])
+    : null;
+
 }
+
 
 function getTomorrowString(date=new Date()){
-  const tomorrow=new Date(date.getFullYear(),date.getMonth(),date.getDate()+1);
+
+  const tomorrow=
+    new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate()+1
+    );
+
   return dateString(tomorrow);
+
 }
 
-function daysFromToday(dateStringValue,today=new Date()){
-  const target=new Date(`${dateStringValue}T00:00:00`);
-  const base=new Date(today.getFullYear(),today.getMonth(),today.getDate());
-  return Math.round((target-base)/86400000);
-}
 
-function isUpcomingWithinDays(dateValue,today,days){
-  if(!dateValue)return false;
-  const diff=daysFromToday(dateValue,today);
-  return diff>0 && diff<=days;
-}
+function daysFromToday(
+  dateStringValue,
+  today=new Date()
+){
 
-function getNormalSchedulesForDate(values,date){
-  return values.filter(s=>s && s.type==="normal" && s.date===date);
-}
+  const target=
+    new Date(
+      `${dateStringValue}T00:00:00`
+    );
 
-function getEventSchedulesForDate(values,date){
-  return values.filter(s=>
-    s &&
-    (s.type==="concert" || s.type==="event") &&
-    s.date===date
+  const base=
+    new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+
+  return Math.round(
+    (target-base)/86400000
   );
+
 }
 
-function getUpcomingEvents(values,today){
-  return values
-    .filter(s=>
+
+function isUpcomingWithinDays(
+  dateValue,
+  today,
+  days
+){
+
+  if(!dateValue)return false;
+
+  const diff=
+    daysFromToday(
+      dateValue,
+      today
+    );
+
+  return diff>0 && diff<=days;
+
+}
+
+
+/* =====================================================
+   予定取得
+===================================================== */
+
+function getNormalSchedulesForDate(
+  values,
+  date
+){
+
+  return values.filter(
+    s =>
       s &&
-      (s.type==="concert" || s.type==="event") &&
-      isUpcomingWithinDays(s.date,today,7)
+      s.type==="normal" &&
+      s.date===date
+  );
+
+}
+
+
+function getEventSchedulesForDate(
+  values,
+  date
+){
+
+  return values.filter(
+    s =>
+      s &&
+      (
+        s.type==="concert" ||
+        s.type==="event"
+      ) &&
+      s.date===date
+  );
+
+}
+
+
+function getUpcomingEvents(
+  values,
+  today
+){
+
+  return values
+    .filter(
+      s =>
+        s &&
+        (
+          s.type==="concert" ||
+          s.type==="event"
+        ) &&
+        isUpcomingWithinDays(
+          s.date,
+          today,
+          7
+        )
     )
-    .sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+    .sort(
+      (a,b)=>
+        String(a.date)
+          .localeCompare(
+            String(b.date)
+          )
+    );
+
 }
 
-function getMonthlyClubCount(values,today){
-  const month=monthString(today);
-  return values.filter(s=>
-    s &&
-    (s.type==="normal" || !s.type) &&
-    typeof s.date==="string" &&
-    s.date.startsWith(month)
+
+function getMonthlyClubCount(
+  values,
+  today
+){
+
+  const month=
+    monthString(today);
+
+  return values.filter(
+    s =>
+      s &&
+      (
+        s.type==="normal" ||
+        !s.type
+      ) &&
+      typeof s.date==="string" &&
+      s.date.startsWith(month)
   ).length;
+
 }
 
-function getClubBeforeStartMessages(values,today,dateNow){
-  const todayNormal=getNormalSchedulesForDate(values,today)[0];
+
+function getClubBeforeStartMessages(
+  values,
+  today,
+  dateNow
+){
+
+  const todayNormal=
+    getNormalSchedulesForDate(
+      values,
+      today
+    )[0];
+
   if(!todayNormal)return [];
 
-  const start=getStartTime(todayNormal.time);
-  const nowMinutes=dateNow.getHours()*60+dateNow.getMinutes();
-  if(start===null || nowMinutes>=start)return [];
+  const start=
+    getStartTime(
+      todayNormal.time
+    );
 
-  const range=formatTimeRange(todayNormal.time);
+  const nowMinutes=
+    dateNow.getHours()*60+
+    dateNow.getMinutes();
+
+  if(
+    start===null ||
+    nowMinutes>=start
+  )
+    return [];
+
+
+  const range=
+    formatTimeRange(
+      todayNormal.time
+    );
+
   const result=[];
+
 
   if(range){
-    result.push(greetingMessage(`今日の部活は${range}だよ`,dateNow));
+
+    result.push(
+      greetingMessage(
+        `今日の部活は${range}だよ`,
+        dateNow
+      )
+    );
+
   }
+
 
   result.push(
-    greetingMessage("今日の部活、頑張ろうね！",dateNow),
-    greetingMessage("今日もみんなでハンドベル頑張ろうね！",dateNow),
-    greetingMessage("今日の部活も楽しみだね！",dateNow),
-    greetingMessage("今日はどんな曲を練習するのかな？",dateNow),
-    greetingMessage("今日の部活も一緒に頑張ろうね！",dateNow)
+
+    greetingMessage(
+      "今日の部活、頑張ろうね！",
+      dateNow
+    ),
+
+    greetingMessage(
+      "今日もみんなでハンドベル頑張ろうね！",
+      dateNow
+    ),
+
+    greetingMessage(
+      "今日の部活も楽しみだね！",
+      dateNow
+    ),
+
+    greetingMessage(
+      "今日はどんな曲を練習するのかな？",
+      dateNow
+    ),
+
+    greetingMessage(
+      "今日の部活も一緒に頑張ろうね！",
+      dateNow
+    )
+
   );
 
+
   return result;
+
 }
 
-function buildRegularMessages(values,dateNow){
+
+/* =====================================================
+   通常メッセージ
+===================================================== */
+
+function buildRegularMessages(
+  values,
+  dateNow
+){
+
   const result=[];
+
   const hour=dateNow.getHours();
-  const greeting=getGreeting(dateNow);
-  const monthCount=getMonthlyClubCount(values,dateNow);
+
+  const greeting=
+    getGreeting(dateNow);
+
+  const monthCount=
+    getMonthlyClubCount(
+      values,
+      dateNow
+    );
+
 
   if(hour>=4 && hour<10){
+
     result.push(
+
       "おはよう！",
+
       "おはよう！今日も一日頑張ろうね！",
+
       "おはよう！無理せず頑張ろうね！",
+
       "おはよう！今日も楽しく過ごそうね！",
+
       "おはよう！予定を確認してみてね！",
+
       "おはよう！今月の予定もチェックしてみてね！",
+
       "おはよう！みんなで楽しく活動しようね！",
+
       "おはよう！今日も素敵な一日にしようね！",
+
       "おはよう！今日も予定を見にきてくれてありがとう",
+
       `おはよう！今月の部活は${monthCount}回だよ`
+
     );
-    if(hour>=4 && hour<6.5)result.push("おはよう〜まだ眠いよ〜");
-    if(hour>=5 && hour<7)result.push("おはよう！朝はやいね");
-  }else if(hour>=10 && hour<17){
-    result.push(
-      "こんにちは！",
-      "こんにちは！無理せず頑張ろうね！",
-      "こんにちは！今日も楽しく過ごそうね！",
-      "こんにちは！予定を確認してみてね！",
-      "こんにちは！今月の予定もチェックしてみてね！",
-      "こんにちは！みんなで楽しく活動しようね！",
-      "こんにちは！今日も素敵な一日にしようね！",
-      "こんにちは！今日も予定を見にきてくれてありがとう",
-      `こんにちは！今月の部活は${monthCount}回だよ`
-    );
-    if(hour>=12 && hour<13)result.push("こんにちは！お昼ご飯はもう食べたかな？");
-    if(hour>=12 && hour<15)result.push("こんにちは！今日のお昼ご飯なんだった？");
-  }else{
-    result.push(
-      "こんばんは！",
-      "こんばんは！予定を確認してみてね！",
-      "こんばんは！今月の予定もチェックしてみてね！",
-      "こんばんは！今日も予定を見にきてくれてありがとう",
-      "こんばんは！今日はどんな1日だったかな？",
-      "こんばんは！1日お疲れ様！",
-      "こんばんは！明日も1日頑張ろう！",
-      "こんばんは！自主練はもうやった？",
-      `こんばんは！今月の部活は${monthCount}回だよ`
-    );
-    if(hour>=22 && hour<24)result.push("こんばんは〜。そろそろ眠たくなっちゃった、、、");
-    if(getNormalSchedulesForDate(values,getTomorrowString(dateNow)).length>0){
-      result.push("こんばんは！明日も部活頑張ろう！");
+
+
+    if(
+      hour>=4 &&
+      hour<6.5
+    ){
+
+      result.push(
+        "おはよう〜まだ眠いよ〜"
+      );
+
     }
-    if(hour>=22 && hour<24)result.push("こんばんは！夜遅くまでお疲れ様");
+
+
+    if(
+      hour>=5 &&
+      hour<7
+    ){
+
+      result.push(
+        "おはよう！朝はやいね"
+      );
+
+    }
+
+  }else if(
+    hour>=10 &&
+    hour<17
+  ){
+
+    result.push(
+
+      "こんにちは！",
+
+      "こんにちは！無理せず頑張ろうね！",
+
+      "こんにちは！今日も楽しく過ごそうね！",
+
+      "こんにちは！予定を確認してみてね！",
+
+      "こんにちは！今月の予定もチェックしてみてね！",
+
+      "こんにちは！みんなで楽しく活動しようね！",
+
+      "こんにちは！今日も素敵な一日にしようね！",
+
+      "こんにちは！今日も予定を見にきてくれてありがとう",
+
+      `こんにちは！今月の部活は${monthCount}回だよ`
+
+    );
+
+
+    if(
+      hour>=12 &&
+      hour<13
+    ){
+
+      result.push(
+        "こんにちは！お昼ご飯はもう食べたかな？"
+      );
+
+    }
+
+
+    if(
+      hour>=12 &&
+      hour<15
+    ){
+
+      result.push(
+        "こんにちは！今日のお昼ご飯なんだった？"
+      );
+
+    }
+
+  }else{
+
+    result.push(
+
+      "こんばんは！",
+
+      "こんばんは！予定を確認してみてね！",
+
+      "こんばんは！今月の予定もチェックしてみてね！",
+
+      "こんばんは！今日も予定を見にきてくれてありがとう",
+
+      "こんばんは！今日はどんな1日だったかな？",
+
+      "こんばんは！1日お疲れ様！",
+
+      "こんばんは！明日も1日頑張ろう！",
+
+      "こんばんは！自主練はもうやった？",
+
+      `こんばんは！今月の部活は${monthCount}回だよ`
+
+    );
+
+
+    if(
+      hour>=22 &&
+      hour<24
+    ){
+
+      result.push(
+        "こんばんは〜。そろそろ眠たくなっちゃった、、、"
+      );
+
+    }
+
+
+    if(
+      getNormalSchedulesForDate(
+        values,
+        getTomorrowString(dateNow)
+      ).length>0
+    ){
+
+      result.push(
+        "こんばんは！明日も部活頑張ろう！"
+      );
+
+    }
+
+
+    if(
+      hour>=22 &&
+      hour<24
+    ){
+
+      result.push(
+        "こんばんは！夜遅くまでお疲れ様"
+      );
+
+    }
+
   }
+
 
   return result;
+
 }
+
+
+/* =====================================================
+   セリフ選択
+===================================================== */
 
 function pickRandom(list){
-  if(!list.length)return "予定を確認してみてね！";
-  return list[Math.floor(Math.random()*list.length)];
+
+  if(!list.length)
+    return "予定を確認してみてね！";
+
+  return list[
+    Math.floor(
+      Math.random()*list.length
+    )
+  ];
+
 }
 
-function chooseBellMessage(schedules){
+
+function chooseBellMessage(
+  schedules
+){
+
   const now=new Date();
-  const today=dateString(now);
-  const values=Object.values(schedules || {}).filter(s=>s && typeof s === "object");
-  const regularMessages=buildRegularMessages(values,now);
 
-  const todayEvents=getEventSchedulesForDate(values,today);
-  if(todayEvents.length>0 && Math.random()<0.5){
-    const event=todayEvents[Math.floor(Math.random()*todayEvents.length)];
-    return `今日は${event.title || (event.type==="concert" ? "演奏会" : "イベント")}だね！`;
+  const today=
+    dateString(now);
+
+  const values=
+    Object.values(
+      schedules || {}
+    ).filter(
+      s =>
+        s &&
+        typeof s === "object"
+    );
+
+
+  const regularMessages=
+    buildRegularMessages(
+      values,
+      now
+    );
+
+
+  const todayEvents=
+    getEventSchedulesForDate(
+      values,
+      today
+    );
+
+
+  if(
+    todayEvents.length>0 &&
+    Math.random()<0.5
+  ){
+
+    const event=
+      todayEvents[
+        Math.floor(
+          Math.random()*
+          todayEvents.length
+        )
+      ];
+
+    return `今日は${
+      event.title ||
+      (
+        event.type==="concert"
+          ? "演奏会"
+          : "イベント"
+      )
+    }だね！`;
+
   }
 
-  const upcomingEvents=getUpcomingEvents(values,today);
-  if(upcomingEvents.length>0 && Math.random()<0.2){
-    const event=upcomingEvents[0];
-    return `もうすぐ${event.title || (event.type==="concert" ? "演奏会" : "イベント")}だね！`;
+
+  const upcomingEvents=
+    getUpcomingEvents(
+      values,
+      today
+    );
+
+
+  if(
+    upcomingEvents.length>0 &&
+    Math.random()<0.2
+  ){
+
+    const event=
+      upcomingEvents[0];
+
+    return `もうすぐ${
+      event.title ||
+      (
+        event.type==="concert"
+          ? "演奏会"
+          : "イベント"
+      )
+    }だね！`;
+
   }
 
-  const clubMessages=getClubBeforeStartMessages(values,today,now);
-  const combined=[...regularMessages,...clubMessages];
-  return pickRandom(combined);
+
+  const clubMessages=
+    getClubBeforeStartMessages(
+      values,
+      today,
+      now
+    );
+
+
+  const combined=[
+    ...regularMessages,
+    ...clubMessages
+  ];
+
+
+  return pickRandom(
+    combined
+  );
+
 }
+
 
 function showMessage(text){
+
   message.textContent=text;
+
 }
+
 
 function changeBellMessage(){
+
   if(!bellMessages.length)return;
-  let next=pickRandom(bellMessages);
-  if(bellMessages.length>1 && next===message.textContent){
-    const other=bellMessages.filter(item=>item!==message.textContent);
-    next=pickRandom(other);
+
+  let next=
+    pickRandom(
+      bellMessages
+    );
+
+
+  if(
+    bellMessages.length>1 &&
+    next===message.textContent
+  ){
+
+    const other=
+      bellMessages.filter(
+        item =>
+          item!==message.textContent
+      );
+
+    next=
+      pickRandom(other);
+
   }
+
+
   showMessage(next);
+
 }
 
 
+/* =====================================================
+   ベルちゃん お祝いアニメーション
+===================================================== */
 
-/* 最初から現在の時間帯の複数セリフを使えるようにする。 */
-setBellMessages(buildBellMessages({}));
+let isCelebrating=false;
 
-/* 親ページに準備完了を知らせる。予定データは親から受け取る。 */
+
+/*
+   ハートを1個生成
+*/
+function createHeart(
+  startX,
+  startY,
+  delay=0
+){
+
+  const heart=
+    document.createElement("span");
+
+  heart.className="heart";
+
+  heart.textContent="♥";
+
+
+  /*
+     出発位置
+  */
+  heart.style.left=
+    `${startX}px`;
+
+  heart.style.top=
+    `${startY}px`;
+
+
+  /*
+     ハートごとに違う方向へ飛ばす
+  */
+
+  const randomX=
+    -55+
+    Math.random()*110;
+
+  const randomMidX=
+    -75+
+    Math.random()*150;
+
+  const randomEndX=
+    -100+
+    Math.random()*200;
+
+
+  heart.style.setProperty(
+    "--start-x",
+    "0px"
+  );
+
+  heart.style.setProperty(
+    "--start-y",
+    "0px"
+  );
+
+  heart.style.setProperty(
+    "--mid-x",
+    `${randomX}px`
+  );
+
+  heart.style.setProperty(
+    "--mid-y",
+    `${-35-Math.random()*25}px`
+  );
+
+  heart.style.setProperty(
+    "--end-x",
+    `${randomMidX}px`
+  );
+
+  heart.style.setProperty(
+    "--end-y",
+    `${-65-Math.random()*25}px`
+  );
+
+  heart.style.setProperty(
+    "--final-x",
+    `${randomEndX}px`
+  );
+
+  heart.style.setProperty(
+    "--final-y",
+    `${-90-Math.random()*40}px`
+  );
+
+  heart.style.setProperty(
+    "--rotate",
+    `${-35+Math.random()*70}deg`
+  );
+
+
+  heart.style.animationDelay=
+    `${delay}s`;
+
+
+  bellArea.appendChild(
+    heart
+  );
+
+
+  /*
+     アニメーション終了後に削除
+  */
+
+  heart.addEventListener(
+    "animationend",
+    ()=>{
+      heart.remove();
+    },
+    {once:true}
+  );
+
+}
+
+
+/*
+   ハートをまとめて発生
+*/
+function createHeartBurst(){
+
+  const bellRect=
+    bellImage.getBoundingClientRect();
+
+  const areaRect=
+    bellArea.getBoundingClientRect();
+
+
+  const centerX=
+    bellRect.left-
+    areaRect.left+
+    bellRect.width/2;
+
+
+  const topY=
+    bellRect.top-
+    areaRect.top+
+    bellRect.height*0.28;
+
+
+  /*
+     1回目のジャンプ
+  */
+
+  for(
+    let i=0;
+    i<5;
+    i++
+  ){
+
+    createHeart(
+      centerX+
+      (-18+Math.random()*36),
+      topY+
+      (-5+Math.random()*20),
+      i*0.035
+    );
+
+  }
+
+
+  /*
+     2回目のジャンプ
+  */
+
+  setTimeout(
+    ()=>{
+
+      if(!isCelebrating)return;
+
+      const rect=
+        bellImage.getBoundingClientRect();
+
+      const area=
+        bellArea.getBoundingClientRect();
+
+      const x=
+        rect.left-
+        area.left+
+        rect.width/2;
+
+      const y=
+        rect.top-
+        area.top+
+        rect.height*0.22;
+
+
+      for(
+        let i=0;
+        i<6;
+        i++
+      ){
+
+        createHeart(
+          x+
+          (-22+Math.random()*44),
+          y+
+          (-5+Math.random()*18),
+          i*0.04
+        );
+
+      }
+
+    },
+    650
+  );
+
+}
+
+
+/*
+   吹き出しを隠す
+*/
+function hideBubble(){
+
+  bubble.classList.remove(
+    "show-again"
+  );
+
+  bubble.classList.add(
+    "hidden-for-celebration"
+  );
+
+}
+
+
+/*
+   吹き出しを再表示する
+*/
+function showBubbleAgain(){
+
+  /*
+     一度アニメーションを外してから
+     強制的に再描画して、
+     毎回ちゃんと最初から再生する。
+  */
+
+  bubble.classList.remove(
+    "hidden-for-celebration"
+  );
+
+  bubble.classList.remove(
+    "show-again"
+  );
+
+
+  void bubble.offsetWidth;
+
+
+  bubble.classList.add(
+    "show-again"
+  );
+
+}
+
+
+/*
+   お祝いアニメーション終了
+*/
+function finishCelebration(){
+
+  /*
+     先にセリフを変更
+  */
+  changeBellMessage();
+
+
+  /*
+     吹き出しを再表示
+  */
+  showBubbleAgain();
+
+
+  /*
+     ベルちゃんのアニメーションを解除
+  */
+  bellImage.classList.remove(
+    "celebrating"
+  );
+
+
+  /*
+     念のため少し待ってから
+     クリック可能状態へ戻す
+  */
+
+  setTimeout(
+    ()=>{
+      isCelebrating=false;
+    },
+    50
+  );
+
+}
+
+
+/*
+   ベルちゃんをクリックした時
+*/
+function startCelebration(){
+
+  /*
+     連打対策
+  */
+  if(isCelebrating)return;
+
+
+  isCelebrating=true;
+
+
+  /*
+     吹き出しを即座に消す
+  */
+  hideBubble();
+
+
+  /*
+     以前のアニメーションを完全にリセット
+  */
+  bellImage.classList.remove(
+    "celebrating"
+  );
+
+
+  /*
+     同じクラスを連続で付けても
+     アニメーションが再生されるようにする。
+  */
+  void bellImage.offsetWidth;
+
+
+  /*
+     お祝い開始
+  */
+  bellImage.classList.add(
+    "celebrating"
+  );
+
+
+  /*
+     ハートを発生
+  */
+  createHeartBurst();
+
+
+  /*
+     アニメーション終了を検知
+  */
+  bellImage.addEventListener(
+    "animationend",
+    finishCelebration,
+    {once:true}
+  );
+
+}
+
+
+/* =====================================================
+   初期化
+===================================================== */
+
+/*
+   最初から現在の時間帯の複数セリフを使えるようにする。
+*/
+
+setBellMessages(
+  buildBellMessages({})
+);
+
+
+/*
+   親ページに準備完了を知らせる。
+   予定データは親から受け取る。
+*/
+
 if(isEmbedded){
-  window.parent.postMessage({type:"handbell-ready"},"*");
+
+  window.parent.postMessage(
+    {
+      type:"handbell-ready"
+    },
+    "*"
+  );
+
 }
 
-bellImage.addEventListener("click",changeBellMessage);
+
+/*
+   ベルちゃんをクリック
+*/
+bellImage.addEventListener(
+  "click",
+  startCelebration
+);
+
 </script>
+
 </body>
 </html>
