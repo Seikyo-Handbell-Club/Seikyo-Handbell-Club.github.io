@@ -32,23 +32,6 @@ html,body{margin:0;width:100%;height:100%;background:transparent;overflow:hidden
 </div>
 
 <script type="module">
-import{initializeApp}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-import{getDatabase,ref,get}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
-import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-
-const firebaseConfig={
-  apiKey:"AIzaSyAK9yRsSLSfYpLSyluzwRyI22Zp32KeMSA",
-  authDomain:"seikyo-handbell-club.firebaseapp.com",
-  databaseURL:"https://seikyo-handbell-club-default-rtdb.firebaseio.com",
-  projectId:"seikyo-handbell-club",
-  storageBucket:"seikyo-handbell-club.firebasestorage.app",
-  messagingSenderId:"55435007971",
-  appId:"1:55435007971:web:25f5c3b9dcd4324bc3f2d6"
-};
-
-const app=initializeApp(firebaseConfig);
-const db=getDatabase(app);
-const auth=getAuth(app);
 const message=document.getElementById("bellMessage");
 const bellImage=document.getElementById("bellImage");
 
@@ -76,23 +59,59 @@ try{
 let bellMessages=[];
 
 const isEmbedded=window.parent !== window;
-let parentSchedules=null;
+let parentSchedules={};
+
+function setBellMessages(messages,preferred=null){
+  const cleaned=[...new Set((messages || []).filter(v=>typeof v === "string" && v.trim()))];
+  if(!cleaned.length)return;
+  bellMessages=cleaned;
+  showMessage(preferred && cleaned.includes(preferred) ? preferred : pickRandom(cleaned));
+}
+
+function buildBellMessages(schedules){
+  const now=new Date();
+  const values=Object.values(schedules || {}).filter(s=>s && typeof s === "object");
+
+  /* 通常セリフは必ず先に作る。予定データがなくても2種類にはならない。 */
+  const all=[...buildRegularMessages(values,now)];
+
+  try{
+    const today=dateString(now);
+    all.push(...getClubBeforeStartMessages(values,today,now));
+  }catch(error){
+    console.warn("ベルちゃんの部活前メッセージを作成できませんでした",error);
+  }
+
+  try{
+    const today=dateString(now);
+    getEventSchedulesForDate(values,today).forEach(event=>{
+      all.push(`今日は${event.title || (event.type==="concert" ? "演奏会" : "イベント")}だね！`);
+    });
+  }catch(error){
+    console.warn("ベルちゃんの当日イベントメッセージを作成できませんでした",error);
+  }
+
+  try{
+    const today=dateString(now);
+    getUpcomingEvents(values,today).forEach(event=>{
+      all.push(`もうすぐ${event.title || (event.type==="concert" ? "演奏会" : "イベント")}だね！`);
+    });
+  }catch(error){
+    console.warn("ベルちゃんの予定メッセージを作成できませんでした",error);
+  }
+
+  return [...new Set(all)];
+}
 
 function receiveParentSchedules(schedules){
   parentSchedules=schedules && typeof schedules === "object" ? schedules : {};
-  loadBellMessages(parentSchedules);
+  setBellMessages(buildBellMessages(parentSchedules));
 }
 
 window.addEventListener("message",event=>{
-  if(!event.data || event.data.type !== "handbell-schedules") return;
+  if(!event.data || event.data.type !== "handbell-schedules")return;
   receiveParentSchedules(event.data.schedules);
 });
-
-/* 親ページに「ベルちゃんの準備完了」を知らせる。
-   これで iframe の読み込み順に関係なく予定データを受け取れる。 */
-if(isEmbedded){
-  window.parent.postMessage({type:"handbell-ready"},"*");
-}
 
 function pad(n){
   return String(n).padStart(2,"0");
@@ -317,68 +336,17 @@ function changeBellMessage(){
   showMessage(next);
 }
 
-async function loadBellMessages(suppliedSchedules=null){
-  try{
-    let schedules;
 
-    if(suppliedSchedules !== null){
-      schedules=suppliedSchedules || {};
-    }else{
-      const currentUser=auth.currentUser;
-      if(!currentUser){
-        throw new Error("Firebase Auth のログイン状態を確認できませんでした");
-      }
-      const snapshot=await get(ref(db,"schedules"));
-      schedules=snapshot.exists()?snapshot.val():{};
-    }
-    const first=chooseBellMessage(schedules);
-    const values=Object.values(schedules || {}).filter(s=>s && typeof s === "object");
-    const now=new Date();
-    const today=dateString(now);
-    const regular=buildRegularMessages(values,now);
-    const club=getClubBeforeStartMessages(values,today,now);
-    const todayEvents=getEventSchedulesForDate(values,today);
-    const upcoming=getUpcomingEvents(values,today);
-    const all=[...regular,...club];
-    todayEvents.forEach(event=>all.push(`今日は${event.title || (event.type==="concert" ? "演奏会" : "イベント")}だね！`));
-    upcoming.forEach(event=>all.push(`もうすぐ${event.title || (event.type==="concert" ? "演奏会" : "イベント")}だね！`));
-    bellMessages=[...new Set(all)];
-    showMessage(first);
-  }catch(error){
-    console.error("ベルちゃんの予定取得に失敗しました",error);
 
-    /*
-      予定データを取得できない場合でも、2種類だけの予備セリフにはしない。
-      時間帯に応じた通常セリフをそのまま使うことで、ベルちゃんが
-      いつもの複数のセリフから喋れる状態を維持する。
-    */
-    const now=new Date();
-    bellMessages=[...new Set(buildRegularMessages([],now))];
-    showMessage(pickRandom(bellMessages));
-  }
+/* 最初から現在の時間帯の複数セリフを使えるようにする。 */
+setBellMessages(buildBellMessages({}));
+
+/* 親ページに準備完了を知らせる。予定データは親から受け取る。 */
+if(isEmbedded){
+  window.parent.postMessage({type:"handbell-ready"},"*");
 }
 
 bellImage.addEventListener("click",changeBellMessage);
-
-/*
-  iframe 内でも Firebase Auth のログイン状態を確認する。
-  親ページから予定が届けばそちらを優先し、届かない場合は
-  iframe 自身が認証済みユーザーとして schedules を取得する。
-*/
-let authReady=false;
-let authUser=null;
-
-onAuthStateChanged(auth,user=>{
-  authReady=true;
-  authUser=user;
-  if(!isEmbedded && user){
-    loadBellMessages();
-  }
-});
-
-if(!isEmbedded){
-  loadBellMessages();
-}
 </script>
 </body>
 </html>
