@@ -5,24 +5,126 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ベルちゃん</title>
 <style>
-html,body{margin:0;width:100%;height:100%;background:transparent;overflow:hidden}
-.bell-area{position:relative;width:100%;height:100%;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
-.bell{position:absolute;right:0px;bottom:50px;width:10px;max-width:62%;height:auto;filter:none;cursor:pointer;user-select:none;transition:transform .15s ease}
-.bell:active{transform:scale(.96)}
-.bubble{position:absolute;right:166px;bottom:150px;width:220px;max-width:76%;background:#fff;border:2px solid #d9e5ed;border-radius:18px;padding:12px 15px;box-shadow:none;font-size:14px;line-height:1.55;animation:bubbleAppear .55s cubic-bezier(.2,.9,.25,1.2) both}
-.bubble:after{content:"";position:absolute;right:-11px;bottom:70px;width:18px;height:18px;background:#fff;border-top:2px solid #d9e5ed;border-right:2px solid #d9e5ed;transform:rotate(45deg)}
-.bubble small{display:block;color:#84939d;font-size:10px;margin-bottom:3px}
-@keyframes bubbleAppear{from{opacity:0;transform:scale(.9) translateY(7px)}to{opacity:1;transform:scale(1) translateY(0)}}
+/* =====================================================
+   ベルちゃん位置・サイズ調整
+   ここだけ見れば位置を変更できます
+===================================================== */
 
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  background:transparent;
+  overflow:hidden;
+}
 
-/* 全画面共通：スマホ版サイズ */
-.bell{width:150px;right:0px;bottom:10px}
-.bubble{right:3px;bottom:30px;width:205px;max-width:calc(100vw - 8px);font-size:10px;padding:7px 8px}
-.bubble:after{right:20px;bottom:-7px;width:12px;height:12px;background:#fff;border-top:0;border-right:2px solid #d9e5ed;border-bottom:2px solid #d9e5ed;transform:rotate(45deg)}
-.bubble small{font-size:8px;margin-bottom:2px}
-.logged-in .bell{width:100px}
-.logged-in .bubble{width:215px;bottom:100px;max-width:calc(100vw - 8px)}
+.bell-area{
+  position:relative;
+  width:100%;
+  height:100%;
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
+}
 
+/* -----------------------------
+   ログイン前
+   ベルちゃん本体
+----------------------------- */
+.bell{
+  position:absolute;
+  width:150px;   /* 大きさ */
+  right:0px;     /* 左右：大きくすると左へ */
+  bottom:10px;   /* 上下：大きくすると上へ */
+  max-width:62%;
+  height:auto;
+  filter:none;
+  cursor:pointer;
+  user-select:none;
+  transition:transform .15s ease;
+}
+
+.bell:active{
+  transform:scale(.96);
+}
+
+/* -----------------------------
+   ログイン前
+   吹き出し本体
+----------------------------- */
+.bubble{
+  position:absolute;
+  width:205px;   /* 横幅 */
+  right:3px;     /* 左右：大きくすると左へ */
+  bottom:30px;   /* 上下：大きくすると上へ */
+  max-width:calc(100vw - 8px);
+  background:#fff;
+  border:2px solid #d9e5ed;
+  border-radius:18px;
+  padding:7px 8px;
+  box-shadow:none;
+  font-size:10px;
+  line-height:1.55;
+  animation:bubbleAppear .55s cubic-bezier(.2,.9,.25,1.2) both;
+}
+
+/* 吹き出しのしっぽ（ログイン前） */
+.bubble:after{
+  content:"";
+  position:absolute;
+  width:12px;
+  height:12px;
+  right:20px;
+  bottom:-7px;
+  background:#fff;
+  border-top:0;
+  border-right:2px solid #d9e5ed;
+  border-bottom:2px solid #d9e5ed;
+  transform:rotate(45deg);
+}
+
+.bubble small{
+  display:block;
+  color:#84939d;
+  font-size:8px;
+  margin-bottom:2px;
+}
+
+/* =====================================================
+   ログイン後
+   ↓ この3か所だけ変えればOK
+===================================================== */
+
+/* ベルちゃん本体 */
+body.logged-in .bell{
+  width:100px;   /* ★ ログイン後の大きさ */
+  right:0px;     /* ★ ログイン後の左右 */
+  bottom:10px;   /* ★ ログイン後の上下 */
+}
+
+/* 吹き出し本体 */
+body.logged-in .bubble{
+  width:215px;   /* ★ ログイン後の横幅 */
+  right:3px;     /* ★ ログイン後の左右 */
+  bottom:100px;  /* ★ ログイン後の上下 */
+  max-width:calc(100vw - 8px);
+}
+
+/* 吹き出しのしっぽ */
+body.logged-in .bubble:after{
+  right:20px;    /* ★ ログイン後の左右 */
+  bottom:-7px;   /* ★ ログイン後の上下 */
+}
+
+/* アニメーション */
+@keyframes bubbleAppear{
+  from{
+    opacity:0;
+    transform:scale(.9) translateY(7px);
+  }
+  to{
+    opacity:1;
+    transform:scale(1) translateY(0);
+  }
+}
 </style>
 </head>
 <body>
@@ -48,13 +150,21 @@ function updateLoginSize(){
 
 updateLoginSize();
 
+/* 親ページのログイン状態が変わったら自動で反映する。
+   MutationObserverだけでなく定期確認も入れて、
+   ログイン後の位置・サイズが確実に切り替わるようにする。 */
 try{
   const parentDocument=window.parent.document;
   const loggedInElement=parentDocument.getElementById("loggedInLeft");
   if(loggedInElement){
-    new MutationObserver(updateLoginSize).observe(loggedInElement,{attributes:true,attributeFilter:["class"]});
+    new MutationObserver(updateLoginSize).observe(
+      loggedInElement,
+      {attributes:true,attributeFilter:["class"]}
+    );
   }
 }catch(error){}
+
+setInterval(updateLoginSize,500);
 
 let bellMessages=[];
 
