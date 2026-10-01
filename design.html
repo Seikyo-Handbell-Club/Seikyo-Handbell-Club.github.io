@@ -8,7 +8,6 @@
 
 /* =====================================================
    ベルちゃん共通設定
-   ※位置・大きさはここでは指定しない
 ===================================================== */
 
 html,
@@ -56,7 +55,6 @@ body{
   box-shadow:none;
   font-size:10px;
   line-height:1.55;
-
   animation:
     bubbleAppear
     .55s
@@ -79,20 +77,20 @@ body{
 /* ---------- ベルちゃん ---------- */
 
 body:not(.logged-in) .bell{
-  width:150px !important;
-  right:0px !important;
-  bottom:0px !important;
+  width:150px;
+  right:0px;
+  bottom:0px;
 }
 
 
-/* ---------- 吹き出し ---------- */
-/* ログイン後と同じ位置・大きさ */
+/* ---------- 吹き出し ----------
+   ログイン後と完全に同じ設定
+*/
 
 body:not(.logged-in) .bubble{
-  width:215px !important;
-  right:3px !important;
-  bottom:70px !important;
-  max-width:calc(100vw - 8px);
+  width:215px;
+  right:3px;
+  bottom:108px;
 }
 
 
@@ -125,20 +123,21 @@ body:not(.logged-in) .bubble:after{
 /* ---------- ベルちゃん ---------- */
 
 body.logged-in .bell{
-  width:100px !important;
-  right:0px !important;
-  bottom:0px !important;
+  width:100px;
+  right:0px;
+  bottom:0px;
 }
 
 
-/* ---------- 吹き出し ---------- */
-/* 100px → 70px にして少し下へ */
+/* ---------- 吹き出し ----------
+   元の100px → 108px
+   少しだけ下へ
+*/
 
 body.logged-in .bubble{
-  width:215px !important;
-  right:3px !important;
-  bottom:70px !important;
-  max-width:calc(100vw - 8px);
+  width:215px;
+  right:3px;
+  bottom:108px;
 }
 
 
