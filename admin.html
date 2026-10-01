@@ -1818,6 +1818,7 @@ async function deleteMember(id){
 
 let pdfjsLib=null;
 
+
 async function getPdfJs(){
 
   if(pdfjsLib){
@@ -1833,6 +1834,39 @@ async function getPdfJs(){
     "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
 
   return pdfjsLib=m;
+}
+
+
+/*
+  PDFから読み取らない項目。
+
+  「備考」「練習曲の目安」など、
+  予定そのものではない項目を除外する。
+*/
+
+function isPdfIgnoredText(text){
+
+  const v=
+    String(text||"")
+      .replace(/\s+/g,"")
+      .trim();
+
+  if(!v){
+    return true;
+  }
+
+  return(
+    v==="備考"||
+    v==="練習曲の目安"||
+    v==="練習曲"||
+    v==="持ち物"||
+    v==="連絡事項"||
+    v==="注意事項"||
+    v==="注意"||
+    v==="メモ"||
+    v==="参考"||
+    v==="その他"
+  );
 }
 
 
@@ -1921,7 +1955,10 @@ async function extractPdfLines(file){
         .replace(/\s+/g," ")
         .trim();
 
-      if(text){
+      if(
+        text&&
+        !isPdfIgnoredText(text)
+      ){
 
         all.push({
           page:p,
@@ -1940,14 +1977,42 @@ async function extractPdfLines(file){
 /*
   PDFの1行から部活予定を作る。
 
-  備考は一切作らない。
+  重要：
+  ・備考は作らない
+  ・練習曲の目安は作らない
+  ・PDFから読み込んだタイトルは空欄
 */
 
 function makeCandidate(dateObj,text){
 
   if(!text)return null;
 
-  if(text.includes("練習曲")){
+
+  /*
+    「備考」「練習曲の目安」などは
+    予定として一切読み込まない。
+  */
+
+  if(isPdfIgnoredText(text)){
+    return null;
+  }
+
+
+  /*
+    行の中に「備考」や「練習曲の目安」が
+    含まれている場合も読み込まない。
+  */
+
+  const compact=
+    String(text)
+      .replace(/\s+/g,"")
+      .trim();
+
+  if(
+    compact.includes("備考")||
+    compact.includes("練習曲の目安")||
+    compact.includes("練習曲")
+  ){
     return null;
   }
 
@@ -1972,19 +2037,26 @@ function makeCandidate(dateObj,text){
     :"";
 
 
-  let title=
-    text
-    .replace(tm,"")
-    .replace(place,"")
-    .replace(/練習曲の目安/g,"")
-    .replace(/\s+/g," ")
-    .trim();
+  /*
+    PDF読み込み時はタイトルを自動生成しない。
+    ここでは必ず空欄にする。
+  */
 
+  const title="";
+
+
+  /*
+    時間も場所もなく、
+    部活予定と判断できない普通の文章は除外。
+
+    「不在」「文化祭」「リハーサル」
+    「準備」「休み」は従来どおり候補として扱う。
+  */
 
   if(
     !tm&&
     !place&&
-    !/不在|文化祭|リハーサル|準備|休み/.test(title)
+    !/不在|文化祭|リハーサル|準備|休み/.test(text)
   ){
     return null;
   }
@@ -1994,7 +2066,7 @@ function makeCandidate(dateObj,text){
     date,
     time:tm||"終日",
     place,
-    title:title||"通常練習"
+    title
   };
 }
 
@@ -2004,6 +2076,10 @@ function parseScheduleLines(lines){
   let month=null;
 
   for(const l of lines){
+
+    if(isPdfIgnoredText(l.text)){
+      continue;
+    }
 
     const m=
       l.text.match(/(\d{1,2})月/);
@@ -2040,7 +2116,27 @@ function parseScheduleLines(lines){
 
     const raw=l.text;
 
-    if(raw.includes("練習曲")){
+
+    /*
+      備考・練習曲関係は完全に無視。
+    */
+
+    if(isPdfIgnoredText(raw)){
+      continue;
+    }
+
+
+    const compact=
+      String(raw)
+        .replace(/\s+/g,"")
+        .trim();
+
+
+    if(
+      compact.includes("備考")||
+      compact.includes("練習曲の目安")||
+      compact.includes("練習曲")
+    ){
       continue;
     }
 
@@ -2076,7 +2172,10 @@ function parseScheduleLines(lines){
         .trim();
 
 
-      if(rest){
+      if(
+        rest&&
+        !isPdfIgnoredText(rest)
+      ){
 
         const c=
           makeCandidate(
@@ -2100,6 +2199,7 @@ function parseScheduleLines(lines){
           cur,
           raw
         );
+
 
       if(
         c&&
@@ -2135,7 +2235,10 @@ function parseScheduleLines(lines){
 
 
   /*
-    同一内容の重複を除去
+    同一内容の重複を除去。
+
+    タイトルは常に空欄なので、
+    日付・時間・場所で重複を判定する。
   */
 
   return[
@@ -2145,8 +2248,7 @@ function parseScheduleLines(lines){
           [
             x.date,
             x.time,
-            x.place,
-            x.title
+            x.place
           ].join("|"),
           x
         ]
@@ -2615,7 +2717,7 @@ function deletePdfCandidate(index){
 
   if(
     !confirm(
-      `${formatJapaneseDate(pdfSelectedDate)}の部活予定「${target.title||"通常練習"}」を削除しますか？`
+      `${formatJapaneseDate(pdfSelectedDate)}の部活予定を削除しますか？`
     )
   ){
 
