@@ -70,13 +70,6 @@ textarea{
   resize:vertical
 }
 
-input:disabled,
-select:disabled{
-  background:#f1f3f6;
-  color:#68717d;
-  cursor:not-allowed
-}
-
 button{
   border:0;
   border-radius:10px;
@@ -84,6 +77,11 @@ button{
   font-weight:700;
   cursor:pointer;
   font-size:14px
+}
+
+button:disabled{
+  opacity:.55;
+  cursor:not-allowed
 }
 
 .primary{
@@ -96,14 +94,6 @@ button{
 .secondary{
   background:#eef3fb;
   color:#20242a
-}
-
-.cancel-button{
-  width:100%;
-  margin-top:8px;
-  background:#f5f7fa;
-  color:#68717d;
-  border:1px solid #dfe4eb
 }
 
 .msg{
@@ -261,7 +251,225 @@ button{
   color:#6f7882
 }
 
+
+/* =====================================================
+   カレンダー
+===================================================== */
+
+.calendar-wrap{
+  margin-top:14px
+}
+
+.calendar-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:12px
+}
+
+.calendar-title{
+  flex:1;
+  text-align:center;
+  font-size:18px;
+  font-weight:800
+}
+
+.calendar-nav{
+  width:42px;
+  height:42px;
+  padding:0;
+  background:#eef3fb;
+  color:#20242a;
+  font-size:22px;
+  line-height:1
+}
+
+.calendar-week{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:4px;
+  margin-bottom:4px
+}
+
+.calendar-week div{
+  text-align:center;
+  font-size:11px;
+  color:#68717d;
+  padding:5px 0
+}
+
+.calendar-grid{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:4px
+}
+
+.calendar-day{
+  min-height:72px;
+  border:1px solid #e1e5ea;
+  border-radius:9px;
+  background:#fff;
+  padding:6px;
+  cursor:pointer;
+  overflow:hidden
+}
+
+.calendar-day:hover{
+  background:#f7faff
+}
+
+.calendar-day.empty{
+  background:#f7f8fa;
+  cursor:default;
+  border-color:#f0f1f3
+}
+
+.calendar-day.today{
+  border:2px solid #1f6feb;
+  padding:5px
+}
+
+.calendar-day.selected{
+  background:#eef5ff;
+  border-color:#8db8f4
+}
+
+.calendar-date{
+  font-size:12px;
+  font-weight:800;
+  margin-bottom:4px
+}
+
+.calendar-summary{
+  display:flex;
+  flex-direction:column;
+  gap:2px
+}
+
+.calendar-tag{
+  font-size:10px;
+  line-height:1.25;
+  padding:2px 4px;
+  border-radius:4px;
+  background:#eef3fb;
+  color:#394553;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis
+}
+
+.calendar-tag.normal{
+  background:#eaf3ff;
+  color:#1f5ea8
+}
+
+.calendar-tag.exam{
+  background:#fff1dc;
+  color:#8a5b16
+}
+
+.calendar-tag.concert{
+  background:#f3eaff;
+  color:#6c42a4
+}
+
+.calendar-tag.holiday{
+  background:#edf8ed;
+  color:#34703a
+}
+
+.calendar-tag.event{
+  background:#ffecec;
+  color:#9b4444
+}
+
+.calendar-tag.pdf{
+  background:#e8f8f4;
+  color:#25705f
+}
+
+.day-detail{
+  margin-top:16px;
+  border-top:1px solid #e5e8ed;
+  padding-top:16px
+}
+
+.day-detail-title{
+  font-size:17px;
+  font-weight:800;
+  margin-bottom:10px
+}
+
+.calendar-legend{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:10px
+}
+
+.calendar-legend span{
+  font-size:11px;
+  padding:4px 7px;
+  border-radius:6px;
+  background:#f3f5f7
+}
+
+.pdf-calendar{
+  margin-top:16px;
+  padding-top:16px;
+  border-top:1px solid #e5e8ed
+}
+
+.pdf-month-note{
+  text-align:center;
+  font-size:16px;
+  font-weight:800;
+  margin-bottom:10px
+}
+
+.pdf-calendar .calendar-day{
+  min-height:82px
+}
+
+.temp-item{
+  border:1px solid #b8dcd2;
+  background:#f5fffc;
+  border-radius:12px;
+  padding:11px;
+  margin:8px 0
+}
+
+.temp-item .item-actions button{
+  background:#fff
+}
+
+.registered-item{
+  border:1px solid #e3e7ed;
+  border-radius:12px;
+  padding:11px;
+  margin:8px 0;
+  background:#fff
+}
+
+.editing-note{
+  padding:10px;
+  border-radius:10px;
+  background:#eef5ff;
+  color:#315c8f;
+  font-size:13px;
+  margin-top:10px
+}
+
+.cancel-edit{
+  width:100%;
+  margin-top:8px;
+  background:#f1f3f5;
+  color:#555
+}
+
 @media(max-width:600px){
+
   .candidate-grid{
     grid-template-columns:1fr
   }
@@ -273,6 +481,28 @@ button{
   .item-actions{
     margin-left:auto
   }
+
+  .calendar-day{
+    min-height:64px;
+    padding:5px
+  }
+
+  .calendar-day.today{
+    padding:4px
+  }
+
+  .calendar-date{
+    font-size:11px
+  }
+
+  .calendar-tag{
+    font-size:9px
+  }
+
+  .calendar-week div{
+    font-size:10px
+  }
+
 }
 </style>
 </head>
@@ -294,6 +524,7 @@ button{
   </p>
 
   <label for="password">パスワード</label>
+
   <input
     id="password"
     type="password"
@@ -384,12 +615,52 @@ button{
 
     <div id="candidateList"></div>
 
+
+    <!-- =================================================
+         PDF一時カレンダー
+    ================================================= -->
+
+    <div
+      id="pdfCalendar"
+      class="pdf-calendar hidden"
+    >
+
+      <div class="pdf-month-note" id="pdfCalendarTitle"></div>
+
+      <p class="small">
+        PDFから読み取った予定を一時的に確認するカレンダーです。
+        ここで削除しても、登録済みの予定は変更されません。
+      </p>
+
+      <div class="calendar-week">
+        <div>日</div>
+        <div>月</div>
+        <div>火</div>
+        <div>水</div>
+        <div>木</div>
+        <div>金</div>
+        <div>土</div>
+      </div>
+
+      <div
+        id="pdfCalendarGrid"
+        class="calendar-grid"
+      ></div>
+
+      <div
+        id="pdfDayDetail"
+        class="day-detail hidden"
+      ></div>
+
+    </div>
+
+
     <button
       id="registerCandidatesButton"
       class="primary"
       type="button"
     >
-      選択した予定を登録
+      予定を登録
     </button>
 
     <div id="candidateMsg"></div>
@@ -795,6 +1066,16 @@ button{
     予定を保存
   </button>
 
+  <button
+    id="cancelScheduleEditButton"
+    class="cancel-edit hidden"
+    type="button"
+  >
+    変更をキャンセル
+  </button>
+
+  <div id="scheduleEditingMsg"></div>
+
   <div id="scheduleMsg"></div>
 
 </div>
@@ -804,7 +1085,7 @@ button{
      部員登録
 ===================================================== -->
 
-<div class="card" id="memberRegistrationCard">
+<div class="card">
 
   <h2 class="section-title">
     部員登録
@@ -897,10 +1178,10 @@ button{
 
   <button
     id="cancelMemberEditButton"
-    class="cancel-button hidden"
+    class="cancel-edit hidden"
     type="button"
   >
-    変更をやめる
+    変更をキャンセル
   </button>
 
   <div id="memberMsg"></div>
@@ -936,6 +1217,85 @@ button{
   <h2 class="section-title">
     登録済みの予定
   </h2>
+
+  <p class="sub-title">
+    カレンダーから日付を選択すると、その日の予定を確認できます。
+  </p>
+
+
+  <div class="calendar-wrap">
+
+    <div class="calendar-header">
+
+      <button
+        id="registeredPrevMonth"
+        class="calendar-nav"
+        type="button"
+      >
+        ‹
+      </button>
+
+      <div
+        id="registeredCalendarTitle"
+        class="calendar-title"
+      ></div>
+
+      <button
+        id="registeredNextMonth"
+        class="calendar-nav"
+        type="button"
+      >
+        ›
+      </button>
+
+    </div>
+
+
+    <div class="calendar-week">
+
+      <div>日</div>
+      <div>月</div>
+      <div>火</div>
+      <div>水</div>
+      <div>木</div>
+      <div>金</div>
+      <div>土</div>
+
+    </div>
+
+
+    <div
+      id="registeredCalendarGrid"
+      class="calendar-grid"
+    ></div>
+
+
+    <div class="calendar-legend">
+
+      <span>通常練習</span>
+      <span>試験期間</span>
+      <span>演奏会</span>
+      <span>学校休日</span>
+      <span>イベント</span>
+
+    </div>
+
+
+    <div
+      id="registeredDayDetail"
+      class="day-detail hidden"
+    ></div>
+
+  </div>
+
+
+  <!-- 元の一覧も残す -->
+
+  <div class="divider"></div>
+
+  <h3>
+    予定一覧
+  </h3>
 
   <div id="schedules">
     <p class="small">
@@ -1081,6 +1441,143 @@ function splitTimeRange(time){
       start:"",
       end:""
     };
+}
+
+
+/* =====================================================
+   カレンダー用共通
+===================================================== */
+
+const monthNames=[
+  "1月",
+  "2月",
+  "3月",
+  "4月",
+  "5月",
+  "6月",
+  "7月",
+  "8月",
+  "9月",
+  "10月",
+  "11月",
+  "12月"
+];
+
+
+function dateKey(year,month,day){
+
+  return `${year}-`+
+    `${String(month).padStart(2,"0")}-`+
+    `${String(day).padStart(2,"0")}`;
+
+}
+
+
+function parseDateKey(key){
+
+  const m=
+    String(key||"").match(
+      /^(\d{4})-(\d{2})-(\d{2})$/
+    );
+
+  if(!m){
+    return null;
+  }
+
+  return{
+    year:+m[1],
+    month:+m[2],
+    day:+m[3]
+  };
+
+}
+
+
+function formatDateJP(key){
+
+  const d=parseDateKey(key);
+
+  if(!d){
+    return key;
+  }
+
+  return `${d.year}年${d.month}月${d.day}日`;
+
+}
+
+
+function getScheduleDate(x,key){
+
+  if(!x){
+    return null;
+  }
+
+  if(x.type==="exam"){
+
+    return x.startDate||null;
+
+  }
+
+  return x.date||(
+    /^\d{4}-\d{2}-\d{2}$/.test(key||"")
+      ?key
+      :null
+  );
+
+}
+
+
+function scheduleLabel(x){
+
+  const t=x?.type||"normal";
+
+  return{
+    normal:"通常練習",
+    exam:"試験期間",
+    concert:"演奏会",
+    schoolHoliday:"学校休日",
+    event:"イベント"
+  }[t]||"予定";
+
+}
+
+
+function scheduleClass(x){
+
+  const t=x?.type||"normal";
+
+  return{
+    normal:"normal",
+    exam:"exam",
+    concert:"concert",
+    schoolHoliday:"holiday",
+    event:"event"
+  }[t]||"normal";
+
+}
+
+
+function scheduleDisplayTitle(x){
+
+  if(x?.title){
+    return x.title;
+  }
+
+  return scheduleLabel(x);
+
+}
+
+
+function getTodayKey(){
+
+  const d=new Date();
+
+  return dateKey(
+    d.getFullYear(),
+    d.getMonth()+1,
+    d.getDate()
+  );
+
 }
 
 
@@ -1268,31 +1765,19 @@ const classOrder={
 };
 
 
-/*
-  null
-  = 通常の新規登録モード
-
-  学校ID
-  = 変更中の部員ID
-*/
-
 let editingMemberId=null;
 
-
-/* =====================================================
-   部員登録・変更モード解除
-===================================================== */
 
 function resetMemberForm(){
 
   editingMemberId=null;
 
+  $("mid").disabled=false;
+
   $("mid").value="";
   $("mname").value="";
   $("mgrade").value="";
   $("mclass").value="";
-
-  $("mid").disabled=false;
 
   $("addMemberButton").textContent="登録する";
 
@@ -1300,16 +1785,10 @@ function resetMemberForm(){
     .classList
     .add("hidden");
 
-  message(
-    "memberMsg",
-    ""
-  );
+  message("memberMsg","");
+
 }
 
-
-/* =====================================================
-   部員登録
-===================================================== */
 
 async function addMember(){
 
@@ -1321,89 +1800,6 @@ async function addMember(){
   const name=$("mname").value.trim();
   const grade=$("mgrade").value;
   const className=$("mclass").value;
-
-
-  /* ===================================================
-     変更モード
-  =================================================== */
-
-  if(editingMemberId){
-
-    const originalId=editingMemberId;
-
-
-    if(
-      !name||
-      !grade||
-      !className
-    ){
-
-      message(
-        "memberMsg",
-        "名前・学年・クラスをすべて入力してください。",
-        "error"
-      );
-
-      return;
-    }
-
-
-    if(
-      !Object.hasOwn(gradeOrder,grade)||
-      !Object.hasOwn(classOrder,className)
-    ){
-
-      message(
-        "memberMsg",
-        "学年・クラスを確認してください。",
-        "error"
-      );
-
-      return;
-    }
-
-
-    try{
-
-      await update(
-        ref(db,"memberRegistrations/"+originalId),
-        {
-          name,
-          grade,
-          className
-        }
-      );
-
-
-      message(
-        "memberMsg",
-        "部員情報を変更しました。",
-        "success"
-      );
-
-
-      resetMemberForm();
-
-      await loadMembers();
-
-    }catch(e){
-
-      message(
-        "memberMsg",
-        "部員情報の変更に失敗しました。\n\n"+
-        (e.message||"不明"),
-        "error"
-      );
-
-    }
-
-    return;
-  }
-
-
-  /* ===================================================
-     新規登録
-  =================================================== */
 
   if(
     !id||
@@ -1420,6 +1816,45 @@ async function addMember(){
 
     return;
   }
+
+
+  /* ===================================================
+     変更保存
+  =================================================== */
+
+  if(editingMemberId){
+
+    await update(
+      ref(
+        db,
+        "memberRegistrations/"+editingMemberId
+      ),
+      {
+        name,
+        grade,
+        className
+      }
+    );
+
+
+    message(
+      "memberMsg",
+      "部員情報を変更しました。",
+      "success"
+    );
+
+
+    resetMemberForm();
+
+    await loadMembers();
+
+    return;
+  }
+
+
+  /* ===================================================
+     新規登録
+  =================================================== */
 
   if(
     (await get(
@@ -1454,10 +1889,7 @@ async function addMember(){
     }
   );
 
-  $("mid").value="";
-  $("mname").value="";
-  $("mgrade").value="";
-  $("mclass").value="";
+  resetMemberForm();
 
   message(
     "memberMsg",
@@ -1552,86 +1984,48 @@ async function loadMembers(){
 }
 
 
-/* =====================================================
-   部員変更
-===================================================== */
-
 async function editMember(id){
 
   if(!(await isAdmin())){
     return;
   }
 
-
   const s=
     await get(
       ref(db,"memberRegistrations/"+id)
     );
 
-
   if(!s.exists()){
     return;
   }
 
-
   const d=s.val();
-
-
-  /*
-    変更モードにする
-  */
 
   editingMemberId=id;
 
-
-  /*
-    学校IDは変更不可
-  */
-
   $("mid").value=id;
   $("mid").disabled=true;
-
-
-  /*
-    名前・学年・クラスを入力欄へ入れる
-  */
 
   $("mname").value=d.name||"";
   $("mgrade").value=d.grade||"";
   $("mclass").value=d.className||"";
 
-
-  /*
-    ボタンを変更保存にする
-  */
-
-  $("addMemberButton").textContent="変更を保存";
-
-
-  /*
-    変更をやめるボタンを表示
-  */
+  $("addMemberButton").textContent=
+    "変更を保存";
 
   $("cancelMemberEditButton")
     .classList
     .remove("hidden");
-
 
   message(
     "memberMsg",
     "部員情報を変更できます。学校IDは変更できません。"
   );
 
-
-  /*
-    部員登録欄まで移動
-  */
-
-  $("memberRegistrationCard")
-    .scrollIntoView({
-      behavior:"smooth",
-      block:"center"
-    });
+  $("mid").scrollIntoView({
+    behavior:"smooth",
+    block:"center"
+  });
 
 }
 
@@ -1645,7 +2039,6 @@ async function deleteMember(id){
     return;
   }
 
-
   await remove(
     ref(db,"memberRegistrations/"+id)
   );
@@ -1654,18 +2047,9 @@ async function deleteMember(id){
     ref(db,"memberIds/"+id)
   );
 
-
-  /*
-    削除中の部員を編集していた場合は
-    変更モードを解除する
-  */
-
   if(editingMemberId===id){
-
     resetMemberForm();
-
   }
-
 
   await loadMembers();
 }
@@ -1861,12 +2245,6 @@ function isPdfMetaText(text){
 
 /* =====================================================
    PDF用：予定候補作成
-
-   重要：
-   PDFでは「時間が書いてあるもの」だけを
-   予定として扱う。
-
-   時間がない場合は必ずnull。
 ===================================================== */
 
 function makeCandidate(dateObj,text){
@@ -1875,10 +2253,6 @@ function makeCandidate(dateObj,text){
     return null;
   }
 
-
-  /*
-    備考・練習曲などは予定として扱わない
-  */
 
   if(isPdfMetaText(text)){
     return null;
@@ -1891,16 +2265,6 @@ function makeCandidate(dateObj,text){
     `${String(dateObj.day).padStart(2,"0")}`;
 
 
-  /*
-    時間範囲を探す。
-
-    例：
-    9:00〜12:00
-    9:00~12:00
-    9:00-12:00
-    9:00－12:00
-  */
-
   const timeMatch=
     text.match(
       /\d{1,2}:\d{2}\s*[〜~\-－]\s*\d{1,2}:\d{2}/
@@ -1908,7 +2272,7 @@ function makeCandidate(dateObj,text){
 
 
   /*
-    時間がない予定は絶対に登録しない
+    PDFでは時間がない予定は登録しない
   */
 
   if(!timeMatch){
@@ -1921,21 +2285,11 @@ function makeCandidate(dateObj,text){
       .replace(/\s+/g,"");
 
 
-  /*
-    場所
-  */
-
   const place=
     text.includes("音楽練習室")
       ?"音楽練習室"
       :"";
 
-
-  /*
-    タイトルを作る。
-
-    時間・場所・PDFの補助情報を取り除く。
-  */
 
   let title=
     text
@@ -1988,11 +2342,6 @@ function makeCandidate(dateObj,text){
       .trim();
 
 
-  /*
-    タイトルが補助情報だけだった場合は
-    通常練習にする。
-  */
-
   if(
     !title||
     isPdfMetaText(title)
@@ -2002,10 +2351,6 @@ function makeCandidate(dateObj,text){
 
   }
 
-
-  /*
-    PDFからは備考を作らない。
-  */
 
   return{
     date,
@@ -2053,11 +2398,6 @@ function parseScheduleLines(lines){
   }
 
 
-  /*
-    月が読めなかった場合は
-    現在の月を勝手に使わない。
-  */
-
   if(!month){
 
     throw new Error(
@@ -2075,29 +2415,23 @@ function parseScheduleLines(lines){
   let cur=null;
 
 
+  /*
+    PDF内で確認した月を記録する。
+    1回のPDFで複数月を扱わない。
+  */
+
+  const detectedMonths=new Set();
+
+
   for(const l of lines){
 
     const raw=l.text;
 
 
-    /*
-      練習曲などの行は完全に無視
-    */
-
     if(isPdfMetaText(raw)){
       continue;
     }
 
-
-    /*
-      日付を探す
-
-      例：
-      10月1日
-      10月1
-      10/1
-      10／1
-    */
 
     const m=
       raw.match(
@@ -2109,10 +2443,6 @@ function parseScheduleLines(lines){
       );
 
 
-    /*
-      日付行
-    */
-
     if(
       m&&
       +m[1]>=1&&
@@ -2121,18 +2451,34 @@ function parseScheduleLines(lines){
       +m[2]<=31
     ){
 
+      const rowMonth=+m[1];
+
+      detectedMonths.add(rowMonth);
+
+      if(detectedMonths.size>1){
+
+        throw new Error(
+          "1回の読み込みで扱えるのは1か月分だけです。"
+        );
+
+      }
+
+
+      if(rowMonth!==month){
+
+        throw new Error(
+          "PDF内の日付と月の情報が一致していません。"
+        );
+
+      }
+
+
       cur={
         year,
-        month:+m[1],
+        month:rowMonth,
         day:+m[2]
       };
 
-
-      /*
-        日付と同じ行に
-        時間が書かれている場合だけ
-        予定にする。
-      */
 
       const rest=
         raw
@@ -2162,15 +2508,6 @@ function parseScheduleLines(lines){
     }
 
 
-    /*
-      日付の次の行。
-
-      makeCandidate側で
-      「時間がなければnull」にしているため、
-      時間なしの備考・説明・予定名だけの行は
-      ここでは登録されない。
-    */
-
     if(cur){
 
       const c=
@@ -2189,7 +2526,7 @@ function parseScheduleLines(lines){
 
 
   /*
-    PDFに複数月が含まれていないか確認
+    候補になった予定も1か月だけか最終確認
   */
 
   const months=[
@@ -2209,10 +2546,6 @@ function parseScheduleLines(lines){
 
   }
 
-
-  /*
-    同じ予定の重複を削除
-  */
 
   return[
     ...new Map(
@@ -2306,6 +2639,9 @@ async function readSchedulePDF(){
       .classList.remove("hidden");
 
 
+    renderPdfTemporaryCalendar();
+
+
   }catch(e){
 
     message(
@@ -2336,14 +2672,23 @@ let pdfCandidatesData=[];
 
 function renderCandidates(c){
 
-  pdfCandidatesData=c;
+  pdfCandidatesData=
+    c.map(
+      x=>({
+        ...x,
+        selected:true
+      })
+    );
 
 
   $("candidateList").innerHTML=
-    c.map(
+    pdfCandidatesData.map(
       (x,i)=>`
 
-<div class="candidate">
+<div
+  class="candidate"
+  data-candidate-index="${i}"
+>
 
   <div class="candidate-head">
 
@@ -2425,6 +2770,648 @@ function renderCandidates(c){
 `
     ).join("");
 
+
+  document
+    .querySelectorAll(".candidate")
+    .forEach(
+      box=>{
+
+        box
+          .querySelector(".candidate-check")
+          .addEventListener(
+            "change",
+            ()=>{
+              syncPdfCandidateFromDOM();
+              renderPdfTemporaryCalendar();
+            }
+          );
+
+
+        [
+          ".candidate-date",
+          ".candidate-time",
+          ".candidate-place",
+          ".candidate-title"
+        ]
+        .forEach(
+          selector=>{
+            box
+              .querySelector(selector)
+              .addEventListener(
+                "input",
+                ()=>{
+                  syncPdfCandidateFromDOM();
+                  renderPdfTemporaryCalendar();
+                }
+              );
+          }
+        );
+
+      }
+    );
+
+}
+
+
+function syncPdfCandidateFromDOM(){
+
+  const boxes=
+    document.querySelectorAll(
+      ".candidate"
+    );
+
+
+  boxes.forEach(
+    (box,i)=>{
+
+      if(!pdfCandidatesData[i]){
+        return;
+      }
+
+      pdfCandidatesData[i].selected=
+        box.querySelector(
+          ".candidate-check"
+        ).checked;
+
+      pdfCandidatesData[i].date=
+        box.querySelector(
+          ".candidate-date"
+        ).value;
+
+      pdfCandidatesData[i].time=
+        box.querySelector(
+          ".candidate-time"
+        ).value.trim();
+
+      pdfCandidatesData[i].place=
+        box.querySelector(
+          ".candidate-place"
+        ).value.trim();
+
+      pdfCandidatesData[i].title=
+        box.querySelector(
+          ".candidate-title"
+        ).value.trim();
+
+    }
+  );
+
+}
+
+
+/* =====================================================
+   PDF一時カレンダー
+===================================================== */
+
+let pdfCalendarMonth=null;
+
+let pdfSelectedDate=null;
+
+
+async function getExistingSchedules(){
+
+  const s=
+    await get(
+      ref(db,"schedules")
+    );
+
+  return s.exists()
+    ?s.val()
+    :{};
+
+}
+
+
+function getPdfMonth(){
+
+  const first=
+    pdfCandidatesData.find(
+      x=>x.date
+    );
+
+  if(!first){
+    return null;
+  }
+
+  const d=parseDateKey(first.date);
+
+  if(!d){
+    return null;
+  }
+
+  return{
+    year:d.year,
+    month:d.month
+  };
+
+}
+
+
+function renderPdfTemporaryCalendar(){
+
+  syncPdfCandidateFromDOM();
+
+  const firstMonth=
+    getPdfMonth();
+
+  if(!firstMonth){
+
+    $("pdfCalendar")
+      .classList
+      .add("hidden");
+
+    return;
+  }
+
+
+  pdfCalendarMonth=firstMonth;
+
+
+  $("pdfCalendar")
+    .classList
+    .remove("hidden");
+
+
+  $("pdfCalendarTitle").textContent=
+    `${firstMonth.year}年${firstMonth.month}月`;
+
+
+  renderPdfCalendarGrid();
+
+}
+
+
+async function renderPdfCalendarGrid(){
+
+  if(!pdfCalendarMonth){
+    return;
+  }
+
+
+  const year=
+    pdfCalendarMonth.year;
+
+  const month=
+    pdfCalendarMonth.month;
+
+
+  const existing=
+    await getExistingSchedules();
+
+
+  const firstDay=
+    new Date(
+      year,
+      month-1,
+      1
+    ).getDay();
+
+
+  const lastDate=
+    new Date(
+      year,
+      month,
+      0
+    ).getDate();
+
+
+  let html="";
+
+
+  for(
+    let i=0;
+    i<firstDay;
+    i++
+  ){
+
+    html+=`
+      <div class="calendar-day empty"></div>
+    `;
+
+  }
+
+
+  for(
+    let day=1;
+    day<=lastDate;
+    day++
+  ){
+
+    const key=
+      dateKey(
+        year,
+        month,
+        day
+      );
+
+
+    const registered=
+      getSchedulesForDate(
+        existing,
+        key
+      );
+
+
+    const temporary=
+      pdfCandidatesData.filter(
+        x=>
+          x.selected!==false&&
+          x.date===key&&
+          x.time&&
+          x.time!=="終日"
+      );
+
+
+    const today=
+      key===getTodayKey()
+        ?"today"
+        :"";
+
+
+    const selected=
+      key===pdfSelectedDate
+        ?"selected"
+        :"";
+
+
+    const tags=[];
+
+
+    registered
+      .slice(0,4)
+      .forEach(
+        x=>{
+          tags.push(`
+            <div class="calendar-tag ${scheduleClass(x)}">
+              ${esc(scheduleDisplayTitle(x))}
+            </div>
+          `);
+        }
+      );
+
+
+    temporary
+      .slice(0,4)
+      .forEach(
+        x=>{
+          tags.push(`
+            <div class="calendar-tag pdf">
+              PDF：${esc(x.title||"通常練習")}
+            </div>
+          `);
+        }
+      );
+
+
+    html+=`
+
+<div
+  class="calendar-day ${today} ${selected}"
+  data-pdf-date="${key}"
+>
+
+  <div class="calendar-date">
+    ${day}
+  </div>
+
+  <div class="calendar-summary">
+    ${tags.join("")}
+  </div>
+
+</div>
+
+`;
+
+  }
+
+
+  $("pdfCalendarGrid").innerHTML=html;
+
+
+  $("pdfCalendarGrid")
+    .querySelectorAll(
+      "[data-pdf-date]"
+    )
+    .forEach(
+      cell=>{
+        cell.addEventListener(
+          "click",
+          ()=>{
+            showPdfDayDetail(
+              cell.dataset.pdfDate
+            );
+          }
+        );
+      }
+    );
+
+
+  if(pdfSelectedDate){
+
+    showPdfDayDetail(
+      pdfSelectedDate
+    );
+
+  }
+
+}
+
+
+function getSchedulesForDate(data,key){
+
+  return Object.entries(data)
+    .filter(
+      ([scheduleKey,x])=>{
+
+        const t=
+          x?.type||"normal";
+
+
+        if(t==="exam"){
+
+          return(
+            x.startDate&&
+            x.endDate&&
+            key>=x.startDate&&
+            key<=x.endDate
+          );
+
+        }
+
+
+        return getScheduleDate(
+          x,
+          scheduleKey
+        )===key;
+
+      }
+    )
+    .map(
+      ([scheduleKey,x])=>({
+        ...x,
+        _key:scheduleKey
+      })
+    );
+
+}
+
+
+async function showPdfDayDetail(key){
+
+  syncPdfCandidateFromDOM();
+
+  pdfSelectedDate=key;
+
+
+  const existing=
+    await getExistingSchedules();
+
+
+  const registered=
+    getSchedulesForDate(
+      existing,
+      key
+    );
+
+
+  const temporary=
+    pdfCandidatesData
+      .map(
+        (x,i)=>({
+          ...x,
+          _index:i
+        })
+      )
+      .filter(
+        x=>
+          x.selected!==false&&
+          x.date===key
+      );
+
+
+  const detail=
+    $("pdfDayDetail");
+
+
+  detail.classList.remove("hidden");
+
+
+  let html=`
+
+<div class="day-detail-title">
+  ${esc(formatDateJP(key))}
+</div>
+
+`;
+
+
+  if(!registered.length){
+
+    html+=`
+      <p class="small">
+        登録済みの予定はありません。
+      </p>
+    `;
+
+  }else{
+
+    html+=`
+      <h4>登録済みの予定</h4>
+    `;
+
+
+    registered.forEach(
+      x=>{
+
+        html+=`
+
+<div class="registered-item">
+
+  <strong>
+    ${esc(scheduleDisplayTitle(x))}
+  </strong>
+
+  <div class="small">
+    ${esc(scheduleLabel(x))}
+  </div>
+
+  ${
+    x.time
+      ?`<div>${esc(x.time)}</div>`
+      :""
+  }
+
+  ${
+    x.place
+      ?`<div>${esc(x.place)}</div>`
+      :""
+  }
+
+  ${
+    x.note
+      ?`<div class="small">備考：${esc(x.note)}</div>`
+      :""
+  }
+
+</div>
+
+`;
+
+      }
+    );
+
+  }
+
+
+  html+=`
+    <h4>今回のPDF</h4>
+  `;
+
+
+  if(!temporary.length){
+
+    html+=`
+      <p class="small">
+        この日のPDF予定はありません。
+      </p>
+    `;
+
+  }else{
+
+    temporary.forEach(
+      x=>{
+
+        html+=`
+
+<div class="temp-item">
+
+  <div class="item-main">
+
+    <div>
+
+      <strong>
+        ${esc(x.title||"通常練習")}
+      </strong>
+
+      <div class="small">
+        ${esc(x.time||"")}
+        ${
+          x.place
+            ?"・"+esc(x.place)
+            :""
+        }
+      </div>
+
+    </div>
+
+    <div class="item-actions">
+
+      <button
+        class="delete-button"
+        data-pdf-delete="${x._index}"
+      >
+        削除
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+`;
+
+      }
+    );
+
+  }
+
+
+  detail.innerHTML=html;
+
+
+  detail
+    .querySelectorAll(
+      "[data-pdf-delete]"
+    )
+    .forEach(
+      button=>{
+
+        button.addEventListener(
+          "click",
+          ()=>{
+            deleteTemporaryPdfCandidate(
+              Number(
+                button.dataset.pdfDelete
+              )
+            );
+          }
+        );
+
+      }
+    );
+
+
+  $("pdfCalendarGrid")
+    .querySelectorAll(
+      "[data-pdf-date]"
+    )
+    .forEach(
+      cell=>{
+        cell.classList.toggle(
+          "selected",
+          cell.dataset.pdfDate===key
+        );
+      }
+    );
+
+}
+
+
+function deleteTemporaryPdfCandidate(index){
+
+  syncPdfCandidateFromDOM();
+
+  const x=
+    pdfCandidatesData[index];
+
+
+  if(!x){
+    return;
+  }
+
+
+  if(
+    !confirm(
+      `${formatDateJP(x.date)}のPDF予定「${x.title||"通常練習"}」を削除しますか？\n\n登録済みの予定は削除されません。`
+    )
+  ){
+    return;
+  }
+
+
+  pdfCandidatesData.splice(
+    index,
+    1
+  );
+
+
+  renderCandidates(
+    pdfCandidatesData
+  );
+
+
+  renderPdfTemporaryCalendar();
+
+
+  if(pdfSelectedDate){
+
+    showPdfDayDetail(
+      pdfSelectedDate
+    );
+
+  }
+
 }
 
 
@@ -2439,79 +3426,48 @@ async function registerCandidates(){
   }
 
 
-  const boxes=
-    document.querySelectorAll(
-      ".candidate"
+  syncPdfCandidateFromDOM();
+
+
+  const selected=
+    pdfCandidatesData.filter(
+      x=>
+        x.selected!==false
     );
 
-  const selected=[];
+
+  const valid=[];
 
 
-  boxes.forEach(
-    b=>{
+  for(const x of selected){
 
-      if(
-        !b.querySelector(
-          ".candidate-check"
-        ).checked
-      ){
-        return;
-      }
-
-
-      const date=
-        b.querySelector(
-          ".candidate-date"
-        ).value;
-
-
-      const time=
-        b.querySelector(
-          ".candidate-time"
-        ).value.trim();
-
-
-      /*
-        PDF登録時も時間必須。
-
-        手動登録とは違い、
-        PDFでは終日は認めない。
-      */
-
-      if(
-        !date||
-        !time||
-        time==="終日"
-      ){
-        return;
-      }
-
-
-      selected.push({
-
-        date,
-
-        time,
-
-        place:
-          b.querySelector(
-            ".candidate-place"
-          ).value.trim(),
-
-        title:
-          b.querySelector(
-            ".candidate-title"
-          ).value.trim(),
-
-        note:""
-
-      });
-
+    if(
+      !x.date||
+      !x.time||
+      x.time==="終日"
+    ){
+      continue;
     }
-  );
 
 
-  if(!selected.length){
+    valid.push({
+
+      date:x.date,
+
+      time:x.time,
+
+      place:x.place||"",
+
+      title:x.title||"通常練習",
+
+      note:""
+
+    });
+
+  }
+
+
+  if(!valid.length){
 
     message(
       "candidateMsg",
@@ -2519,6 +3475,15 @@ async function registerCandidates(){
       "error"
     );
 
+    return;
+  }
+
+
+  if(
+    !confirm(
+      `${valid.length}件のPDF予定を登録しますか？\n\nこの操作を行うとFirebaseの登録済み予定に追加されます。`
+    )
+  ){
     return;
   }
 
@@ -2531,7 +3496,7 @@ async function registerCandidates(){
 
   try{
 
-    for(const x of selected){
+    for(const x of valid){
 
       await set(
         ref(db,"schedules/"+x.date),
@@ -2551,9 +3516,23 @@ async function registerCandidates(){
 
     message(
       "candidateMsg",
-      `${selected.length}件の予定を登録しました。`,
+      `${valid.length}件の予定を登録しました。`,
       "success"
     );
+
+
+    pdfCandidatesData=[];
+
+    pdfSelectedDate=null;
+
+    pdfCalendarMonth=null;
+
+
+    $("candidateList").innerHTML="";
+
+    $("pdfCalendar")
+      .classList
+      .add("hidden");
 
 
     await loadSchedules();
@@ -2605,6 +3584,80 @@ function updateScheduleFields(){
       );
 
   }
+
+}
+
+
+/* =====================================================
+   手動予定編集状態
+===================================================== */
+
+let editingScheduleKey=null;
+
+
+function resetScheduleForm(){
+
+  editingScheduleKey=null;
+
+  $("stype").value="normal";
+
+  $("sdate").value="";
+  $("stimeStart").value="";
+  $("stimeEnd").value="";
+  $("splace").value="";
+  $("sTitle").value="";
+  $("snote").value="";
+
+  $("examStartDate").value="";
+  $("examEndDate").value="";
+  $("examTitle").value="";
+  $("examNote").value="";
+
+  $("concertDate").value="";
+  $("concertTimeStart").value="";
+  $("concertTimeEnd").value="";
+  $("concertTitle").value="";
+  $("concertPlace").value="";
+  $("concertNote").value="";
+
+  $("schoolHolidayDate").value="";
+  $("schoolHolidayTitle").value="";
+  $("schoolHolidayNote").value="";
+
+  $("eventDate").value="";
+  $("eventTimeStart").value="";
+  $("eventTimeEnd").value="";
+  $("eventTitle").value="";
+  $("eventPlace").value="";
+  $("eventNote").value="";
+
+  $("saveScheduleButton").textContent=
+    "予定を保存";
+
+  $("cancelScheduleEditButton")
+    .classList
+    .add("hidden");
+
+  message(
+    "scheduleEditingMsg",
+    ""
+  );
+
+  updateScheduleFields();
+
+}
+
+
+function beginScheduleEdit(key){
+
+  editingScheduleKey=key;
+
+  $("saveScheduleButton").textContent=
+    "変更を保存";
+
+  $("cancelScheduleEditButton")
+    .classList
+    .remove("hidden");
 
 }
 
@@ -2662,8 +3715,11 @@ async function saveSchedule(){
     }
 
 
+    const newKey=date;
+
+
     await set(
-      ref(db,"schedules/"+date),
+      ref(db,"schedules/"+newKey),
       {
         type:"normal",
         date,
@@ -2676,12 +3732,22 @@ async function saveSchedule(){
     );
 
 
-    $("sdate").value="";
-    $("stimeStart").value="";
-    $("stimeEnd").value="";
-    $("splace").value="";
-    $("sTitle").value="";
-    $("snote").value="";
+    if(
+      editingScheduleKey&&
+      editingScheduleKey!==newKey
+    ){
+
+      await remove(
+        ref(
+          db,
+          "schedules/"+editingScheduleKey
+        )
+      );
+
+    }
+
+
+    resetScheduleForm();
 
 
     message(
@@ -2689,6 +3755,9 @@ async function saveSchedule(){
       "予定を保存しました。",
       "success"
     );
+
+
+    await loadSchedules();
 
     return;
 
@@ -2729,10 +3798,17 @@ async function saveSchedule(){
     }
 
 
+    const key=
+      editingScheduleKey&&
+      editingScheduleKey.startsWith("special_")
+        ?editingScheduleKey
+        :"special_"+Date.now();
+
+
     await set(
       ref(
         db,
-        "schedules/special_"+Date.now()
+        "schedules/"+key
       ),
       {
         type:"exam",
@@ -2745,10 +3821,7 @@ async function saveSchedule(){
     );
 
 
-    $("examStartDate").value="";
-    $("examEndDate").value="";
-    $("examTitle").value="";
-    $("examNote").value="";
+    resetScheduleForm();
 
 
     message(
@@ -2756,6 +3829,9 @@ async function saveSchedule(){
       "試験期間を保存しました。",
       "success"
     );
+
+
+    await loadSchedules();
 
     return;
 
@@ -2801,10 +3877,17 @@ async function saveSchedule(){
     }
 
 
+    const key=
+      editingScheduleKey&&
+      editingScheduleKey.startsWith("special_")
+        ?editingScheduleKey
+        :"special_"+Date.now();
+
+
     await set(
       ref(
         db,
-        "schedules/special_"+Date.now()
+        "schedules/"+key
       ),
       {
         type:"concert",
@@ -2818,17 +3901,7 @@ async function saveSchedule(){
     );
 
 
-    [
-      "concertDate",
-      "concertTimeStart",
-      "concertTimeEnd",
-      "concertTitle",
-      "concertPlace",
-      "concertNote"
-    ]
-    .forEach(
-      id=>$(id).value=""
-    );
+    resetScheduleForm();
 
 
     message(
@@ -2836,6 +3909,9 @@ async function saveSchedule(){
       "演奏会を保存しました。",
       "success"
     );
+
+
+    await loadSchedules();
 
     return;
 
@@ -2868,10 +3944,17 @@ async function saveSchedule(){
     }
 
 
+    const key=
+      editingScheduleKey&&
+      editingScheduleKey.startsWith("special_")
+        ?editingScheduleKey
+        :"special_"+Date.now();
+
+
     await set(
       ref(
         db,
-        "schedules/special_"+Date.now()
+        "schedules/"+key
       ),
       {
         type:"schoolHoliday",
@@ -2883,9 +3966,7 @@ async function saveSchedule(){
     );
 
 
-    $("schoolHolidayDate").value="";
-    $("schoolHolidayTitle").value="";
-    $("schoolHolidayNote").value="";
+    resetScheduleForm();
 
 
     message(
@@ -2893,6 +3974,9 @@ async function saveSchedule(){
       "学校が休みの日を保存しました。",
       "success"
     );
+
+
+    await loadSchedules();
 
     return;
 
@@ -2938,10 +4022,17 @@ async function saveSchedule(){
     }
 
 
+    const key=
+      editingScheduleKey&&
+      editingScheduleKey.startsWith("special_")
+        ?editingScheduleKey
+        :"special_"+Date.now();
+
+
     await set(
       ref(
         db,
-        "schedules/special_"+Date.now()
+        "schedules/"+key
       ),
       {
         type:"event",
@@ -2955,17 +4046,7 @@ async function saveSchedule(){
     );
 
 
-    [
-      "eventDate",
-      "eventTimeStart",
-      "eventTimeEnd",
-      "eventTitle",
-      "eventPlace",
-      "eventNote"
-    ]
-    .forEach(
-      id=>$(id).value=""
-    );
+    resetScheduleForm();
 
 
     message(
@@ -2974,13 +4055,28 @@ async function saveSchedule(){
       "success"
     );
 
+
+    await loadSchedules();
+
   }
 
 }
 
 
 /* =====================================================
-   登録済み予定
+   登録済み予定データ
+===================================================== */
+
+let registeredSchedulesData={};
+
+let registeredCalendarDate=
+  new Date();
+
+let registeredSelectedDate=null;
+
+
+/* =====================================================
+   登録済み予定読み込み
 ===================================================== */
 
 async function loadSchedules(){
@@ -2990,13 +4086,363 @@ async function loadSchedules(){
       ref(db,"schedules")
     );
 
-  const data=
+  registeredSchedulesData=
     s.exists()
       ?s.val()
       :{};
 
+
+  renderRegisteredCalendar();
+
+  renderScheduleList();
+
+
+  if(registeredSelectedDate){
+
+    showRegisteredDayDetail(
+      registeredSelectedDate
+    );
+
+  }
+
+}
+
+
+/* =====================================================
+   登録済み予定カレンダー
+===================================================== */
+
+function renderRegisteredCalendar(){
+
+  const year=
+    registeredCalendarDate
+      .getFullYear();
+
+  const month=
+    registeredCalendarDate
+      .getMonth()+1;
+
+
+  $("registeredCalendarTitle").textContent=
+    `${year}年${month}月`;
+
+
+  const firstDay=
+    new Date(
+      year,
+      month-1,
+      1
+    ).getDay();
+
+
+  const lastDate=
+    new Date(
+      year,
+      month,
+      0
+    ).getDate();
+
+
+  let html="";
+
+
+  for(
+    let i=0;
+    i<firstDay;
+    i++
+  ){
+
+    html+=`
+      <div class="calendar-day empty"></div>
+    `;
+
+  }
+
+
+  for(
+    let day=1;
+    day<=lastDate;
+    day++
+  ){
+
+    const key=
+      dateKey(
+        year,
+        month,
+        day
+      );
+
+
+    const schedules=
+      getSchedulesForDate(
+        registeredSchedulesData,
+        key
+      );
+
+
+    const today=
+      key===getTodayKey()
+        ?"today"
+        :"";
+
+
+    const selected=
+      key===registeredSelectedDate
+        ?"selected"
+        :"";
+
+
+    let tags="";
+
+
+    schedules
+      .slice(0,4)
+      .forEach(
+        x=>{
+
+          tags+=`
+
+<div class="calendar-tag ${scheduleClass(x)}">
+  ${esc(scheduleDisplayTitle(x))}
+</div>
+
+`;
+
+        }
+      );
+
+
+    html+=`
+
+<div
+  class="calendar-day ${today} ${selected}"
+  data-registered-date="${key}"
+>
+
+  <div class="calendar-date">
+    ${day}
+  </div>
+
+  <div class="calendar-summary">
+    ${tags}
+  </div>
+
+</div>
+
+`;
+
+  }
+
+
+  $("registeredCalendarGrid").innerHTML=
+    html;
+
+
+  $("registeredCalendarGrid")
+    .querySelectorAll(
+      "[data-registered-date]"
+    )
+    .forEach(
+      cell=>{
+
+        cell.addEventListener(
+          "click",
+          ()=>{
+            showRegisteredDayDetail(
+              cell.dataset.registeredDate
+            );
+          }
+        );
+
+      }
+    );
+
+}
+
+
+/* =====================================================
+   登録済み予定：日付詳細
+===================================================== */
+
+function showRegisteredDayDetail(key){
+
+  registeredSelectedDate=key;
+
+  const schedules=
+    getSchedulesForDate(
+      registeredSchedulesData,
+      key
+    );
+
+
+  const detail=
+    $("registeredDayDetail");
+
+
+  detail.classList.remove("hidden");
+
+
+  let html=`
+
+<div class="day-detail-title">
+  ${esc(formatDateJP(key))}
+</div>
+
+`;
+
+
+  if(!schedules.length){
+
+    html+=`
+      <p class="small">
+        この日の予定はありません。
+      </p>
+    `;
+
+  }else{
+
+    schedules.forEach(
+      x=>{
+
+        html+=`
+
+<div class="item">
+
+  <div class="item-main">
+
+    <div>
+
+      <strong>
+        ${esc(scheduleDisplayTitle(x))}
+      </strong>
+
+      <div class="small">
+        ${esc(scheduleLabel(x))}
+      </div>
+
+    </div>
+
+    <div class="item-actions">
+
+      <button
+        data-day-edit="${esc(x._key)}"
+      >
+        変更
+      </button>
+
+      <button
+        class="delete-button"
+        data-day-delete="${esc(x._key)}"
+      >
+        削除
+      </button>
+
+    </div>
+
+  </div>
+
+
+  ${
+    x.type==="exam"
+      ?`
+        <div>
+          ${esc(x.startDate||"")}
+          〜
+          ${esc(x.endDate||"")}
+        </div>
+      `
+      :""
+  }
+
+
+  ${
+    x.time
+      ?`<div>${esc(x.time)}</div>`
+      :""
+  }
+
+
+  ${
+    x.place
+      ?`<div>${esc(x.place)}</div>`
+      :""
+  }
+
+
+  ${
+    x.note
+      ?`<div class="small">備考：${esc(x.note)}</div>`
+      :""
+  }
+
+</div>
+
+`;
+
+      }
+    );
+
+  }
+
+
+  detail.innerHTML=html;
+
+
+  detail
+    .querySelectorAll(
+      "[data-day-edit]"
+    )
+    .forEach(
+      button=>{
+
+        button.addEventListener(
+          "click",
+          ()=>{
+            editSchedule(
+              button.dataset.dayEdit
+            );
+          }
+        );
+
+      }
+    );
+
+
+  detail
+    .querySelectorAll(
+      "[data-day-delete]"
+    )
+    .forEach(
+      button=>{
+
+        button.addEventListener(
+          "click",
+          ()=>{
+            deleteSchedule(
+              button.dataset.dayDelete
+            );
+          }
+        );
+
+      }
+    );
+
+
+  renderRegisteredCalendar();
+
+}
+
+
+/* =====================================================
+   予定一覧
+===================================================== */
+
+function renderScheduleList(){
+
   const list=
-    Object.entries(data)
+    Object.entries(
+      registeredSchedulesData
+    )
       .sort(
         ([a],[b])=>
           a.localeCompare(b)
@@ -3137,6 +4583,9 @@ async function editSchedule(key){
     d.type||"normal";
 
 
+  beginScheduleEdit(key);
+
+
   $("stype").value=t;
 
   updateScheduleFields();
@@ -3261,6 +4710,12 @@ async function editSchedule(key){
   }
 
 
+  message(
+    "scheduleEditingMsg",
+    "この予定を変更中です。保存すると変更内容が反映されます。"
+  );
+
+
   $("stype").scrollIntoView({
     behavior:"smooth",
     block:"center"
@@ -3299,6 +4754,29 @@ async function deleteSchedule(key){
   await remove(
     ref(db,"schedules/"+key)
   );
+
+
+  if(
+    registeredSelectedDate
+  ){
+
+    const stillExists=
+      await get(
+        ref(
+          db,
+          "schedules/"+key
+        )
+      );
+
+    if(!stillExists.exists()){
+
+      showRegisteredDayDetail(
+        registeredSelectedDate
+      );
+
+    }
+
+  }
 
 
   await loadSchedules();
@@ -3380,10 +4858,43 @@ $("saveScheduleButton")
   );
 
 
+$("cancelScheduleEditButton")
+  .addEventListener(
+    "click",
+    resetScheduleForm
+  );
+
+
 $("stype")
   .addEventListener(
     "change",
     updateScheduleFields
+  );
+
+
+$("registeredPrevMonth")
+  .addEventListener(
+    "click",
+    ()=>{
+      registeredCalendarDate.setMonth(
+        registeredCalendarDate.getMonth()-1
+      );
+
+      renderRegisteredCalendar();
+    }
+  );
+
+
+$("registeredNextMonth")
+  .addEventListener(
+    "click",
+    ()=>{
+      registeredCalendarDate.setMonth(
+        registeredCalendarDate.getMonth()+1
+      );
+
+      renderRegisteredCalendar();
+    }
   );
 
 
@@ -3399,6 +4910,8 @@ $("password")
 
 
 updateScheduleFields();
+
+renderRegisteredCalendar();
 
 </script>
 
