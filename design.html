@@ -202,13 +202,7 @@ body.logged-in .bubble:after{
 ===================================================== */
 
 /*
-   ここがクリック時のメインアニメーション。
-
-   2回ジャンプ
-   ↓
-   左右に大きく揺れる
-   ↓
-   最後に着地
+   ゆっくり1回だけ真上にジャンプ
 */
 
 .bell.celebrating{
@@ -217,7 +211,7 @@ body.logged-in .bubble:after{
 
   animation:
     bellCelebrate
-    1.8s
+    2.8s
     ease-in-out
     forwards;
 }
@@ -225,7 +219,10 @@ body.logged-in .bubble:after{
 
 @keyframes bellCelebrate{
 
-  /* スタート */
+  /* -------------------------
+     スタート
+  ------------------------- */
+
   0%{
     transform:
       translate3d(0,0,0)
@@ -235,123 +232,56 @@ body.logged-in .bubble:after{
 
 
   /* -------------------------
-     1回目ジャンプ
+     少し力をためる
   ------------------------- */
 
-  8%{
+  20%{
     transform:
-      translate3d(-8px,-8px,0)
-      rotate(-8deg)
+      translate3d(0,0,0)
+      rotate(0deg)
       scale(1.04);
   }
 
-  16%{
+
+  /* -------------------------
+     真上にジャンプ
+  ------------------------- */
+
+  42%{
     transform:
-      translate3d(10px,-45px,0)
-      rotate(10deg)
+      translate3d(0,-90px,0)
+      rotate(0deg)
       scale(1.08);
   }
 
-  23%{
-    transform:
-      translate3d(-9px,-65px,0)
-      rotate(-12deg)
-      scale(1.1);
-  }
 
-  30%{
-    transform:
-      translate3d(8px,-32px,0)
-      rotate(9deg)
-      scale(1.06);
-  }
+  /* -------------------------
+     空中で少し止まる
+  ------------------------- */
 
-  36%{
+  58%{
     transform:
-      translate3d(0,0,0)
-      rotate(-5deg)
-      scale(1.02);
+      translate3d(0,-90px,0)
+      rotate(0deg)
+      scale(1.08);
   }
 
 
   /* -------------------------
-     2回目ジャンプ
+     ゆっくり着地
   ------------------------- */
 
-  43%{
-    transform:
-      translate3d(-10px,-10px,0)
-      rotate(-9deg)
-      scale(1.05);
-  }
-
-  51%{
-    transform:
-      translate3d(12px,-55px,0)
-      rotate(12deg)
-      scale(1.1);
-  }
-
-  59%{
-    transform:
-      translate3d(-10px,-82px,0)
-      rotate(-14deg)
-      scale(1.13);
-  }
-
-  67%{
-    transform:
-      translate3d(10px,-38px,0)
-      rotate(11deg)
-      scale(1.07);
-  }
-
-  73%{
+  88%{
     transform:
       translate3d(0,0,0)
-      rotate(-7deg)
-      scale(1.03);
-  }
-
-
-  /* -------------------------
-     着地後のバタバタ
-  ------------------------- */
-
-  78%{
-    transform:
-      translate3d(-8px,-3px,0)
-      rotate(-10deg)
-      scale(1.02);
-  }
-
-  82%{
-    transform:
-      translate3d(8px,0,0)
-      rotate(10deg)
-      scale(1.02);
-  }
-
-  86%{
-    transform:
-      translate3d(-7px,-2px,0)
-      rotate(-8deg)
-      scale(1.01);
-  }
-
-  90%{
-    transform:
-      translate3d(6px,0,0)
-      rotate(7deg)
-      scale(1.01);
-  }
-
-  94%{
-    transform:
-      translate3d(-3px,0,0)
-      rotate(-3deg)
+      rotate(0deg)
       scale(1);
   }
+
+
+  /* -------------------------
+     完全に停止
+  ------------------------- */
 
   100%{
     transform:
@@ -389,7 +319,7 @@ body.logged-in .bubble:after{
 
   animation:
     heartFly
-    1.2s
+    3.2s
     ease-out
     forwards;
 }
@@ -397,6 +327,7 @@ body.logged-in .bubble:after{
 
 @keyframes heartFly{
 
+  /* 出現 */
   0%{
     opacity:0;
     transform:
@@ -405,6 +336,8 @@ body.logged-in .bubble:after{
       rotate(0deg);
   }
 
+
+  /* ゆっくり現れる */
   15%{
     opacity:1;
     transform:
@@ -417,6 +350,8 @@ body.logged-in .bubble:after{
       rotate(var(--r1));
   }
 
+
+  /* 上昇 */
   45%{
     opacity:1;
     transform:
@@ -429,8 +364,10 @@ body.logged-in .bubble:after{
       rotate(var(--r2));
   }
 
+
+  /* まだしっかり見える */
   75%{
-    opacity:.8;
+    opacity:.85;
     transform:
       translate3d(
         var(--x3),
@@ -441,12 +378,14 @@ body.logged-in .bubble:after{
       rotate(var(--r3));
   }
 
+
+  /* ゆっくり消える */
   100%{
     opacity:0;
     transform:
       translate3d(
         var(--x4),
-        -125px,
+        -145px,
         0
       )
       scale(.55)
