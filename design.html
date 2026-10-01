@@ -21,9 +21,18 @@ body{
 }
 
 .bell-area{
-  position:relative;
-  width:100%;
-  height:100%;
+  position:absolute;
+
+  /*
+   * ベルちゃん本体が表示されるエリア
+   * iframe自体にはこの外側にも透明な余白がある
+   */
+  width:220px;
+  height:140px;
+
+  right:0;
+  bottom:0;
+
   font-family:
     -apple-system,
     BlinkMacSystemFont,
@@ -212,6 +221,9 @@ body.logged-in .bubble:after{
 .heart-container{
   position:absolute;
 
+  /*
+   * ベルちゃんエリアの中央からハートを飛ばす
+   */
   left:50%;
   top:50%;
 
@@ -222,6 +234,9 @@ body.logged-in .bubble:after{
 
   z-index:20;
 
+  /*
+   * ハート自体をこの要素で切らない
+   */
   overflow:visible;
 }
 
@@ -831,7 +846,7 @@ function getGreeting(
 
   }
 
-  return "こんばんは！";
+  return "こんばんは!";
 
 }
 
