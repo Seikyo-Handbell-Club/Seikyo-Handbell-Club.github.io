@@ -39,8 +39,12 @@ body{
   filter:none;
   cursor:pointer;
   user-select:none;
-  z-index:10;
+  -webkit-user-drag:none;
+
+  transition:transform .15s ease;
+
   transform-origin:center bottom;
+  z-index:5;
 }
 
 .bell:active{
@@ -62,12 +66,14 @@ body{
   box-shadow:none;
   font-size:10px;
   line-height:1.55;
+
   animation:
     bubbleAppear
     .55s
     cubic-bezier(.2,.9,.25,1.2)
     both;
-  z-index:20;
+
+  z-index:10;
 }
 
 .bubble small{
@@ -75,6 +81,44 @@ body{
   color:#84939d;
   font-size:8px;
   margin-bottom:2px;
+}
+
+
+/* =====================================================
+   ハート
+===================================================== */
+
+.heart-container{
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  overflow:visible;
+  z-index:4;
+}
+
+.heart{
+  position:absolute;
+
+  /*
+    ベルちゃんの上あたりから出す。
+    leftはJS側でランダムに決定。
+  */
+  left:50%;
+  top:35%;
+
+  font-size:15px;
+  line-height:1;
+
+  opacity:0;
+
+  animation:
+    heartFly
+    1.15s
+    ease-out
+    forwards;
 }
 
 
@@ -91,7 +135,7 @@ body:not(.logged-in) .bell{
 body:not(.logged-in) .bubble{
   width:215px;
   right:3px;
-  bottom:90px;
+  bottom:95px;
 }
 
 body:not(.logged-in) .bubble:after{
@@ -127,7 +171,7 @@ body.logged-in .bell{
 body.logged-in .bubble{
   width:215px;
   right:3px;
-  bottom:90px;
+  bottom:95px;
 }
 
 body.logged-in .bubble:after{
@@ -151,7 +195,7 @@ body.logged-in .bubble:after{
 
 
 /* =====================================================
-   吹き出し表示アニメーション
+   吹き出しアニメーション
 ===================================================== */
 
 @keyframes bubbleAppear{
@@ -174,118 +218,257 @@ body.logged-in .bubble:after{
 
 
 /* =====================================================
-   吹き出しを消す
-===================================================== */
-
-.bubble.celebration-hidden{
-  opacity:0 !important;
-  visibility:hidden !important;
-  pointer-events:none !important;
-}
-
-
-/* =====================================================
-   吹き出しを再表示
-===================================================== */
-
-.bubble.celebration-show{
-  animation:
-    bubbleAppear
-    .55s
-    cubic-bezier(.2,.9,.25,1.2)
-    both;
-}
-
-
-/* =====================================================
-   ベルちゃん お祝いアニメーション
+   喜びアニメーション
 ===================================================== */
 
 /*
-   ゆっくり1回だけ真上にジャンプ
+  全体の流れ
+
+  0.00〜0.20
+  ↓
+  ジャンプ前に少し沈む
+
+  0.20〜0.55
+  ↓
+  1回目ジャンプ＋バタバタ
+
+  0.55〜0.80
+  ↓
+  着地＋ぽよん
+
+  0.80〜1.00
+  ↓
+  2回目のタメ
+
+  1.00〜1.35
+  ↓
+  2回目ジャンプ＋バタバタ
+
+  1.35〜1.60
+  ↓
+  着地＋ぽよん
+
+  1.60〜1.80
+  ↓
+  通常に戻る
 */
 
 .bell.celebrating{
-  pointer-events:none;
-  cursor:default;
 
   animation:
     bellCelebrate
-    2.8s
-    ease-in-out
-    forwards;
+    1.8s
+    cubic-bezier(.25,.8,.25,1)
+    both;
+
 }
 
+
+/* =====================================================
+   ベルちゃん本体の動き
+===================================================== */
 
 @keyframes bellCelebrate{
 
   /* -------------------------
-     スタート
+     通常
   ------------------------- */
 
   0%{
     transform:
-      translate3d(0,0,0)
+      translateY(0)
       rotate(0deg)
       scale(1);
   }
 
 
   /* -------------------------
-     少し力をためる
+     1回目ジャンプ前のタメ
   ------------------------- */
 
-  20%{
+  10%{
     transform:
-      translate3d(0,0,0)
+      translateY(4px)
       rotate(0deg)
+      scale(.94,1.06);
+  }
+
+
+  /* -------------------------
+     1回目ジャンプ
+  ------------------------- */
+
+  22%{
+    transform:
+      translateY(-22px)
+      rotate(-5deg)
+      scale(1.03);
+  }
+
+
+  /* -------------------------
+     1回目バタバタ①
+  ------------------------- */
+
+  28%{
+    transform:
+      translateY(-27px)
+      rotate(6deg)
+      scale(1.03);
+  }
+
+
+  /* -------------------------
+     1回目バタバタ②
+  ------------------------- */
+
+  34%{
+    transform:
+      translateY(-29px)
+      rotate(-7deg)
+      scale(1.02);
+  }
+
+
+  /* -------------------------
+     1回目バタバタ③
+  ------------------------- */
+
+  40%{
+    transform:
+      translateY(-25px)
+      rotate(7deg)
+      scale(1.03);
+  }
+
+
+  /* -------------------------
+     1回目バタバタ④
+  ------------------------- */
+
+  46%{
+    transform:
+      translateY(-16px)
+      rotate(-5deg)
+      scale(1.02);
+  }
+
+
+  /* -------------------------
+     1回目着地
+  ------------------------- */
+
+  52%{
+    transform:
+      translateY(2px)
+      rotate(2deg)
+      scale(1.08,.92);
+  }
+
+
+  /* -------------------------
+     着地のぽよん
+  ------------------------- */
+
+  58%{
+    transform:
+      translateY(-2px)
+      rotate(-2deg)
+      scale(.97,1.04);
+  }
+
+
+  /* -------------------------
+     2回目ジャンプ前のタメ
+  ------------------------- */
+
+  64%{
+    transform:
+      translateY(4px)
+      rotate(0deg)
+      scale(.94,1.06);
+  }
+
+
+  /* -------------------------
+     2回目ジャンプ
+  ------------------------- */
+
+  72%{
+    transform:
+      translateY(-27px)
+      rotate(5deg)
       scale(1.04);
   }
 
 
   /* -------------------------
-     真上にジャンプ
+     2回目バタバタ①
   ------------------------- */
 
-  42%{
+  77%{
     transform:
-      translate3d(0,-90px,0)
-      rotate(0deg)
-      scale(1.08);
+      translateY(-32px)
+      rotate(-7deg)
+      scale(1.04);
   }
 
 
   /* -------------------------
-     空中で少し止まる
+     2回目バタバタ②
   ------------------------- */
 
-  58%{
+  82%{
     transform:
-      translate3d(0,-90px,0)
-      rotate(0deg)
-      scale(1.08);
+      translateY(-34px)
+      rotate(8deg)
+      scale(1.03);
   }
 
 
   /* -------------------------
-     ゆっくり着地
+     2回目バタバタ③
   ------------------------- */
 
-  88%{
+  87%{
     transform:
-      translate3d(0,0,0)
-      rotate(0deg)
-      scale(1);
+      translateY(-29px)
+      rotate(-7deg)
+      scale(1.04);
   }
 
 
   /* -------------------------
-     完全に停止
+     2回目着地
+  ------------------------- */
+
+  92%{
+    transform:
+      translateY(2px)
+      rotate(2deg)
+      scale(1.08,.92);
+  }
+
+
+  /* -------------------------
+     最後のぽよん
+  ------------------------- */
+
+  96%{
+    transform:
+      translateY(-2px)
+      rotate(-1deg)
+      scale(.98,1.03);
+  }
+
+
+  /* -------------------------
+     通常へ
   ------------------------- */
 
   100%{
     transform:
-      translate3d(0,0,0)
+      translateY(0)
       rotate(0deg)
       scale(1);
   }
@@ -294,104 +477,60 @@ body.logged-in .bubble:after{
 
 
 /* =====================================================
-   ハート
+   ハートが上に飛んでいく
 ===================================================== */
-
-.heart{
-  position:absolute;
-
-  width:20px;
-  height:20px;
-
-  margin-left:-10px;
-  margin-top:-10px;
-
-  color:#ff8fb3;
-
-  font-size:20px;
-  line-height:20px;
-  text-align:center;
-
-  pointer-events:none;
-  user-select:none;
-
-  z-index:30;
-
-  animation:
-    heartFly
-    3.2s
-    ease-out
-    forwards;
-}
-
 
 @keyframes heartFly{
 
-  /* 出現 */
   0%{
     opacity:0;
     transform:
-      translate3d(0,0,0)
-      scale(.3)
+      translate(0,12px)
+      scale(.35)
+      rotate(-10deg);
+  }
+
+  12%{
+    opacity:1;
+    transform:
+      translate(0,0)
+      scale(1)
       rotate(0deg);
   }
 
-
-  /* ゆっくり現れる */
-  15%{
-    opacity:1;
-    transform:
-      translate3d(
-        var(--x1),
-        -20px,
-        0
-      )
-      scale(1.15)
-      rotate(var(--r1));
-  }
-
-
-  /* 上昇 */
   45%{
     opacity:1;
     transform:
-      translate3d(
-        var(--x2),
-        -55px,
-        0
-      )
-      scale(1)
-      rotate(var(--r2));
+      translate(-8px,-28px)
+      scale(.9)
+      rotate(-10deg);
   }
 
-
-  /* まだしっかり見える */
   75%{
-    opacity:.85;
+    opacity:.8;
     transform:
-      translate3d(
-        var(--x3),
-        -90px,
-        0
-      )
-      scale(.85)
-      rotate(var(--r3));
+      translate(10px,-60px)
+      scale(.75)
+      rotate(12deg);
   }
 
-
-  /* ゆっくり消える */
   100%{
     opacity:0;
     transform:
-      translate3d(
-        var(--x4),
-        -145px,
-        0
-      )
-      scale(.55)
-      rotate(var(--r4));
+      translate(-5px,-88px)
+      scale(.45)
+      rotate(-15deg);
   }
 
+}
+
+
+/* =====================================================
+   アニメーション中のクリックを無効化
+===================================================== */
+
+.bell.animating{
+  pointer-events:none;
 }
 
 </style>
@@ -404,10 +543,11 @@ body.logged-in .bubble:after{
 
   <div class="bubble">
     <small>ベルちゃん</small>
-    <span id="bellMessage">
-      予定を確認してるよ！
-    </span>
+    <span id="bellMessage">予定を確認してるよ！</span>
   </div>
+
+  <!-- ハートをここに生成 -->
+  <div class="heart-container" id="heartContainer"></div>
 
   <img
     class="bell"
@@ -421,17 +561,13 @@ body.logged-in .bubble:after{
 
 <script type="module">
 
-const message =
-  document.getElementById("bellMessage");
+/* =====================================================
+   基本要素
+===================================================== */
 
-const bellImage =
-  document.getElementById("bellImage");
-
-const bubble =
-  document.querySelector(".bubble");
-
-const bellArea =
-  document.querySelector(".bell-area");
+const message=document.getElementById("bellMessage");
+const bellImage=document.getElementById("bellImage");
+const heartContainer=document.getElementById("heartContainer");
 
 
 /* =====================================================
@@ -442,19 +578,14 @@ function updateLoginSize(){
 
   try{
 
-    const parentDocument =
-      window.parent.document;
+    const parentDocument=window.parent.document;
 
-    const loggedInElement =
-      parentDocument.getElementById(
-        "loggedInLeft"
-      );
+    const loggedInElement=
+      parentDocument.getElementById("loggedInLeft");
 
-    const isLoggedIn =
+    const isLoggedIn=
       !!loggedInElement &&
-      !loggedInElement.classList.contains(
-        "hidden"
-      );
+      !loggedInElement.classList.contains("hidden");
 
     document.body.classList.toggle(
       "logged-in",
@@ -471,19 +602,19 @@ function updateLoginSize(){
 
 }
 
-
 updateLoginSize();
 
 
+/* =====================================================
+   親ページのログイン状態監視
+===================================================== */
+
 try{
 
-  const parentDocument =
-    window.parent.document;
+  const parentDocument=window.parent.document;
 
-  const loggedInElement =
-    parentDocument.getElementById(
-      "loggedInLeft"
-    );
+  const loggedInElement=
+    parentDocument.getElementById("loggedInLeft");
 
   if(loggedInElement){
 
@@ -509,12 +640,12 @@ setInterval(
 
 
 /* =====================================================
-   セリフ
+   ベルちゃんメッセージ
 ===================================================== */
 
 let bellMessages=[];
 
-const isEmbedded =
+const isEmbedded=
   window.parent !== window;
 
 let parentSchedules={};
@@ -538,8 +669,7 @@ function setBellMessages(
 
   if(!cleaned.length)return;
 
-  bellMessages =
-    cleaned;
+  bellMessages=cleaned;
 
   showMessage(
     preferred &&
@@ -551,41 +681,36 @@ function setBellMessages(
 }
 
 
-function buildBellMessages(
-  schedules
-){
+function buildBellMessages(schedules){
 
-  const now =
-    new Date();
+  const now=new Date();
 
-  const values =
-    Object.entries(
-      schedules || {}
-    )
-    .filter(
-      ([,s]) =>
-        s &&
-        typeof s === "object"
-    )
-    .map(
-      ([key,s]) => {
+  const values=
+    Object.entries(schedules || {})
+      .filter(
+        ([,s]) =>
+          s &&
+          typeof s === "object"
+      )
+      .map(
+        ([key,s]) => {
 
-        if(
-          (s.type==="normal" || !s.type) &&
-          typeof s.date !== "string"
-        ){
+          if(
+            (s.type==="normal" || !s.type) &&
+            typeof s.date !== "string"
+          ){
 
-          return {
-            ...s,
-            date:key
-          };
+            return {
+              ...s,
+              date:key
+            };
+
+          }
+
+          return s;
 
         }
-
-        return s;
-
-      }
-    );
+      );
 
 
   const all=[
@@ -598,7 +723,7 @@ function buildBellMessages(
 
   try{
 
-    const today =
+    const today=
       dateString(now);
 
     all.push(
@@ -621,14 +746,14 @@ function buildBellMessages(
 
   try{
 
-    const today =
+    const today=
       dateString(now);
 
     getEventSchedulesForDate(
       values,
       today
     ).forEach(
-      event => {
+      event=>{
 
         all.push(
           `今日は${
@@ -656,14 +781,14 @@ function buildBellMessages(
 
   try{
 
-    const today =
+    const today=
       dateString(now);
 
     getUpcomingEvents(
       values,
       today
     ).forEach(
-      event => {
+      event=>{
 
         all.push(
           `もうすぐ${
@@ -700,7 +825,7 @@ function receiveParentSchedules(
   schedules
 ){
 
-  parentSchedules =
+  parentSchedules=
     schedules &&
     typeof schedules === "object"
       ? schedules
@@ -717,7 +842,7 @@ function receiveParentSchedules(
 
 window.addEventListener(
   "message",
-  event => {
+  event=>{
 
     if(
       !event.data ||
@@ -734,13 +859,15 @@ window.addEventListener(
 
 
 /* =====================================================
-   日付・時間
+   日付・時間関連
 ===================================================== */
 
 function pad(n){
 
-  return String(n)
-    .padStart(2,"0");
+  return String(n).padStart(
+    2,
+    "0"
+  );
 
 }
 
@@ -749,9 +876,7 @@ function dateString(
   date=new Date()
 ){
 
-  return `${
-    date.getFullYear()
-  }-${
+  return `${date.getFullYear()}-${
     pad(date.getMonth()+1)
   }-${
     pad(date.getDate())
@@ -764,20 +889,16 @@ function monthString(
   date=new Date()
 ){
 
-  return `${
-    date.getFullYear()
-  }-${
+  return `${date.getFullYear()}-${
     pad(date.getMonth()+1)
   }`;
 
 }
 
 
-function timeToMinutes(
-  value
-){
+function timeToMinutes(value){
 
-  const match =
+  const match=
     String(value || "")
       .match(
         /^(\d{1,2}):(\d{2})$/
@@ -786,7 +907,7 @@ function timeToMinutes(
   if(!match)return null;
 
   return (
-    Number(match[1])*60 +
+    Number(match[1])*60+
     Number(match[2])
   );
 
@@ -797,22 +918,19 @@ function getGreeting(
   date=new Date()
 ){
 
-  const hour =
-    date.getHours();
+  const hour=date.getHours();
 
   if(
     hour>=4 &&
     hour<10
-  )
-    return "おはよう！";
+  )return "おはよう！";
 
   if(
     hour>=10 &&
     hour<17
-  )
-    return "こんにちは！";
+  )return "こんにちは！";
 
-  return "こんばんは！";
+  return "こんばんは!";
 
 }
 
@@ -833,7 +951,7 @@ function formatJapaneseTime(
   value
 ){
 
-  const match =
+  const match=
     String(value || "")
       .match(
         /^(\d{1,2}):(\d{2})$/
@@ -844,33 +962,27 @@ function formatJapaneseTime(
 
   return `${
     Number(match[1])
-  }時${
-    match[2]
-  }分`;
+  }時${match[2]}分`;
 
 }
 
 
-function formatTimeRange(
-  time
-){
+function formatTimeRange(time){
 
-  const value =
+  const value=
     String(time || "").trim();
 
   if(
     !value ||
-    value === "終日"
-  )
-    return "";
+    value==="終日"
+  )return "";
 
-  const match =
+  const match=
     value.match(
       /^(\d{1,2}:\d{2})\s*[〜~\-－]\s*(\d{1,2}:\d{2})$/
     );
 
-  if(!match)
-    return value;
+  if(!match)return value;
 
   return `${
     formatJapaneseTime(match[1])
@@ -881,14 +993,12 @@ function formatTimeRange(
 }
 
 
-function getStartTime(
-  time
-){
+function getStartTime(time){
 
-  const value =
+  const value=
     String(time || "").trim();
 
-  const match =
+  const match=
     value.match(
       /^(\d{1,2}:\d{2})\s*[〜~\-－]/
     );
@@ -904,7 +1014,7 @@ function getTomorrowString(
   date=new Date()
 ){
 
-  const tomorrow =
+  const tomorrow=
     new Date(
       date.getFullYear(),
       date.getMonth(),
@@ -923,12 +1033,12 @@ function daysFromToday(
   today=new Date()
 ){
 
-  const target =
+  const target=
     new Date(
       `${dateStringValue}T00:00:00`
     );
 
-  const base =
+  const base=
     new Date(
       today.getFullYear(),
       today.getMonth(),
@@ -950,7 +1060,7 @@ function isUpcomingWithinDays(
 
   if(!dateValue)return false;
 
-  const diff =
+  const diff=
     daysFromToday(
       dateValue,
       today
@@ -965,7 +1075,7 @@ function isUpcomingWithinDays(
 
 
 /* =====================================================
-   予定
+   予定関連
 ===================================================== */
 
 function getNormalSchedulesForDate(
@@ -1021,7 +1131,7 @@ function getUpcomingEvents(
         )
     )
     .sort(
-      (a,b) =>
+      (a,b)=>
         String(a.date)
           .localeCompare(
             String(b.date)
@@ -1036,7 +1146,7 @@ function getMonthlyClubCount(
   today
 ){
 
-  const month =
+  const month=
     monthString(today);
 
   return values.filter(
@@ -1059,7 +1169,7 @@ function getClubBeforeStartMessages(
   dateNow
 ){
 
-  const todayNormal =
+  const todayNormal=
     getNormalSchedulesForDate(
       values,
       today
@@ -1067,29 +1177,26 @@ function getClubBeforeStartMessages(
 
   if(!todayNormal)return [];
 
-  const start =
+  const start=
     getStartTime(
       todayNormal.time
     );
 
-  const nowMinutes =
-    dateNow.getHours()*60 +
+  const nowMinutes=
+    dateNow.getHours()*60+
     dateNow.getMinutes();
 
   if(
     start===null ||
     nowMinutes>=start
-  )
-    return [];
+  )return [];
 
-
-  const range =
+  const range=
     formatTimeRange(
       todayNormal.time
     );
 
   const result=[];
-
 
   if(range){
 
@@ -1101,7 +1208,6 @@ function getClubBeforeStartMessages(
     );
 
   }
-
 
   result.push(
 
@@ -1132,7 +1238,6 @@ function getClubBeforeStartMessages(
 
   );
 
-
   return result;
 
 }
@@ -1149,10 +1254,10 @@ function buildRegularMessages(
 
   const result=[];
 
-  const hour =
+  const hour=
     dateNow.getHours();
 
-  const monthCount =
+  const monthCount=
     getMonthlyClubCount(
       values,
       dateNow
@@ -1188,7 +1293,6 @@ function buildRegularMessages(
 
     );
 
-
     if(
       hour>=4 &&
       hour<6.5
@@ -1199,7 +1303,6 @@ function buildRegularMessages(
       );
 
     }
-
 
     if(
       hour>=5 &&
@@ -1239,7 +1342,6 @@ function buildRegularMessages(
 
     );
 
-
     if(
       hour>=12 &&
       hour<13
@@ -1250,7 +1352,6 @@ function buildRegularMessages(
       );
 
     }
-
 
     if(
       hour>=12 &&
@@ -1287,7 +1388,6 @@ function buildRegularMessages(
 
     );
 
-
     if(
       hour>=22 &&
       hour<24
@@ -1298,7 +1398,6 @@ function buildRegularMessages(
       );
 
     }
-
 
     if(
       getNormalSchedulesForDate(
@@ -1313,7 +1412,6 @@ function buildRegularMessages(
 
     }
 
-
     if(
       hour>=22 &&
       hour<24
@@ -1327,14 +1425,13 @@ function buildRegularMessages(
 
   }
 
-
   return result;
 
 }
 
 
 /* =====================================================
-   セリフ選択
+   メッセージ選択
 ===================================================== */
 
 function pickRandom(list){
@@ -1355,42 +1452,39 @@ function chooseBellMessage(
   schedules
 ){
 
-  const now =
-    new Date();
+  const now=new Date();
 
-  const today =
+  const today=
     dateString(now);
 
-  const values =
+  const values=
     Object.values(
       schedules || {}
     ).filter(
       s =>
         s &&
-        typeof s === "object"
+        typeof s==="object"
     );
 
-
-  const regularMessages =
+  const regularMessages=
     buildRegularMessages(
       values,
       now
     );
 
 
-  const todayEvents =
+  const todayEvents=
     getEventSchedulesForDate(
       values,
       today
     );
-
 
   if(
     todayEvents.length>0 &&
     Math.random()<0.5
   ){
 
-    const event =
+    const event=
       todayEvents[
         Math.floor(
           Math.random()*
@@ -1410,19 +1504,18 @@ function chooseBellMessage(
   }
 
 
-  const upcomingEvents =
+  const upcomingEvents=
     getUpcomingEvents(
       values,
       today
     );
-
 
   if(
     upcomingEvents.length>0 &&
     Math.random()<0.2
   ){
 
-    const event =
+    const event=
       upcomingEvents[0];
 
     return `もうすぐ${
@@ -1437,19 +1530,17 @@ function chooseBellMessage(
   }
 
 
-  const clubMessages =
+  const clubMessages=
     getClubBeforeStartMessages(
       values,
       today,
       now
     );
 
-
   const combined=[
     ...regularMessages,
     ...clubMessages
   ];
-
 
   return pickRandom(
     combined
@@ -1458,42 +1549,42 @@ function chooseBellMessage(
 }
 
 
+/* =====================================================
+   吹き出し
+===================================================== */
+
 function showMessage(text){
 
-  message.textContent =
-    text;
+  message.textContent=text;
 
 }
 
 
 function changeBellMessage(){
 
-  if(!bellMessages.length)return;
+  if(!bellMessages.length)
+    return;
 
-  let next =
+  let next=
     pickRandom(
       bellMessages
     );
-
 
   if(
     bellMessages.length>1 &&
     next===message.textContent
   ){
 
-    const other =
+    const other=
       bellMessages.filter(
         item =>
           item!==message.textContent
       );
 
-    next =
-      pickRandom(
-        other
-      );
+    next=
+      pickRandom(other);
 
   }
-
 
   showMessage(next);
 
@@ -1506,99 +1597,69 @@ function changeBellMessage(){
 
 function createHeart(){
 
-  const rect =
-    bellImage.getBoundingClientRect();
-
-  const areaRect =
-    bellArea.getBoundingClientRect();
-
-
-  const heart =
+  const heart=
     document.createElement("span");
 
-  heart.className =
-    "heart";
+  heart.className="heart";
 
-  heart.textContent =
-    "♥";
+  /*
+    ハートの種類を少しランダムにする
+  */
+  const hearts=[
+    "♥",
+    "♡",
+    "♥",
+    "♡"
+  ];
+
+  heart.textContent=
+    hearts[
+      Math.floor(
+        Math.random()*hearts.length
+      )
+    ];
 
 
   /*
-     ベルちゃんの上あたりから出す
+    ベルちゃんの上から
+    少し左右にずらして出す
   */
 
-  const x =
-    rect.left -
-    areaRect.left +
-    rect.width/2 +
-    (-25 + Math.random()*50);
+  const randomX=
+    (Math.random()-0.5)*70;
 
-  const y =
-    rect.top -
-    areaRect.top +
-    rect.height*0.2;
+  const randomDelay=
+    Math.random()*0.18;
 
+  const randomSize=
+    12+
+    Math.random()*9;
 
-  heart.style.left =
-    `${x}px`;
+  heart.style.left=
+    `calc(50% + ${randomX}px)`;
 
-  heart.style.top =
-    `${y}px`;
+  heart.style.top=
+    "31%";
 
+  heart.style.fontSize=
+    `${randomSize}px`;
 
-  /*
-     ハートごとに飛ぶ方向を変える
-  */
-
-  heart.style.setProperty(
-    "--x1",
-    `${-15 + Math.random()*30}px`
-  );
-
-  heart.style.setProperty(
-    "--x2",
-    `${-45 + Math.random()*90}px`
-  );
-
-  heart.style.setProperty(
-    "--x3",
-    `${-70 + Math.random()*140}px`
-  );
-
-  heart.style.setProperty(
-    "--x4",
-    `${-100 + Math.random()*200}px`
-  );
-
-  heart.style.setProperty(
-    "--r1",
-    `${-20 + Math.random()*40}deg`
-  );
-
-  heart.style.setProperty(
-    "--r2",
-    `${-40 + Math.random()*80}deg`
-  );
-
-  heart.style.setProperty(
-    "--r3",
-    `${-60 + Math.random()*120}deg`
-  );
-
-  heart.style.setProperty(
-    "--r4",
-    `${-80 + Math.random()*160}deg`
-  );
+  heart.style.animationDelay=
+    `${randomDelay}s`;
 
 
-  bellArea.appendChild(
+  heartContainer.appendChild(
     heart
   );
 
 
+  /*
+    ハートが飛び終わったら削除
+  */
+
   heart.addEventListener(
     "animationend",
-    () => {
+    ()=>{
       heart.remove();
     },
     {once:true}
@@ -1607,136 +1668,80 @@ function createHeart(){
 }
 
 
-/*
-   ハートを一気に出す
-*/
+/* =====================================================
+   ハートを連続発生
+===================================================== */
 
-function createHeartBurst(){
-
-  /*
-     1回目
-  */
-
-  for(
-    let i=0;
-    i<7;
-    i++
-  ){
-
-    setTimeout(
-      createHeart,
-      i*45
-    );
-
-  }
-
+function startHearts(){
 
   /*
-     2回目
+    1回の喜びで
+    合計7個くらい飛ばす
   */
 
-  setTimeout(
-    () => {
+  const timings=[
+    0,
+    180,
+    360,
+    560,
+    760,
+    980,
+    1180
+  ];
 
-      if(!isCelebrating)return;
 
-      for(
-        let i=0;
-        i<9;
-        i++
-      ){
+  timings.forEach(
+    delay=>{
 
-        setTimeout(
-          createHeart,
-          i*40
-        );
+      setTimeout(
+        ()=>{
+          createHeart();
+        },
+        delay
+      );
 
-      }
-
-    },
-    650
+    }
   );
 
 }
 
 
 /* =====================================================
-   お祝いアニメーション
+   喜びアニメーション
 ===================================================== */
 
-let isCelebrating =
-  false;
+let isAnimating=false;
 
 
-function hideBubble(){
-
-  bubble.classList.remove(
-    "celebration-show"
-  );
-
-  bubble.classList.add(
-    "celebration-hidden"
-  );
-
-}
-
-
-function showBubbleAgain(){
-
-  bubble.classList.remove(
-    "celebration-hidden"
-  );
-
-  bubble.classList.remove(
-    "celebration-show"
-  );
+function celebrate(){
 
   /*
-     アニメーションを確実に最初から再生
+    アニメーション中の連続クリック防止
   */
 
-  void bubble.offsetWidth;
+  if(isAnimating)
+    return;
 
-  bubble.classList.add(
-    "celebration-show"
+  isAnimating=true;
+
+  bellImage.classList.add(
+    "animating"
   );
-
-}
-
-
-function startCelebration(){
-
-  /*
-     連打防止
-  */
-
-  if(isCelebrating)return;
-
-  isCelebrating =
-    true;
-
-
-  /*
-     ① 吹き出しを即消す
-  */
-
-  hideBubble();
-
-
-  /*
-     ② ベルちゃんのアニメーションをリセット
-  */
 
   bellImage.classList.remove(
     "celebrating"
   );
 
-  void bellImage.offsetWidth;
-
 
   /*
-     ③ アニメーション開始
+    ブラウザに一度通常状態を認識させてから
+    アニメーションを開始する。
+    これによって連続クリックでも
+    毎回最初から再生される。
   */
+
+  void bellImage.offsetWidth;
+
 
   bellImage.classList.add(
     "celebrating"
@@ -1744,47 +1749,51 @@ function startCelebration(){
 
 
   /*
-     ④ ハート
+    ベルちゃんが喜んでいる間
+    ハートを飛ばす
   */
 
-  createHeartBurst();
+  startHearts();
 
 
   /*
-     ⑤ アニメーション終了後
+    アニメーションが終わったら
+    まず吹き出しを変更。
   */
+
+  const finishAnimation=()=>{
+
+    changeBellMessage();
+
+
+    /*
+      少しだけセリフ変更を見せてから
+      通常状態へ戻す。
+    */
+
+    setTimeout(
+      ()=>{
+
+        bellImage.classList.remove(
+          "celebrating"
+        );
+
+        bellImage.classList.remove(
+          "animating"
+        );
+
+        isAnimating=false;
+
+      },
+      120
+    );
+
+  };
+
 
   bellImage.addEventListener(
     "animationend",
-    () => {
-
-      /*
-         新しいセリフ
-      */
-
-      changeBellMessage();
-
-
-      /*
-         吹き出しを再表示
-      */
-
-      showBubbleAgain();
-
-
-      /*
-         アニメーション終了
-      */
-
-      bellImage.classList.remove(
-        "celebrating"
-      );
-
-
-      isCelebrating =
-        false;
-
-    },
+    finishAnimation,
     {once:true}
   );
 
@@ -1792,7 +1801,7 @@ function startCelebration(){
 
 
 /* =====================================================
-   初期化
+   初期メッセージ
 ===================================================== */
 
 setBellMessages(
@@ -1801,7 +1810,7 @@ setBellMessages(
 
 
 /* =====================================================
-   親ページへ準備完了通知
+   親ページに準備完了を知らせる
 ===================================================== */
 
 if(isEmbedded){
@@ -1822,7 +1831,7 @@ if(isEmbedded){
 
 bellImage.addEventListener(
   "click",
-  startCelebration
+  celebrate
 );
 
 </script>
