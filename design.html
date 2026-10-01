@@ -70,7 +70,19 @@ function setBellMessages(messages,preferred=null){
 
 function buildBellMessages(schedules){
   const now=new Date();
-  const values=Object.values(schedules || {}).filter(s=>s && typeof s === "object");
+  const values=Object.entries(schedules || {})
+    .filter(([,s])=>s && typeof s === "object")
+    .map(([key,s])=>{
+      /*
+        カレンダーの通常予定は「2026-10-06」のような日付をキーにして
+        保存されているため、ベルちゃん側でもそのキーをdateとして使う。
+        既にdateを持っている予定は元の値をそのまま使う。
+      */
+      if((s.type==="normal" || !s.type) && typeof s.date !== "string"){
+        return {...s,date:key};
+      }
+      return s;
+    });
 
   /* 通常セリフは必ず先に作る。予定データがなくても2種類にはならない。 */
   const all=[...buildRegularMessages(values,now)];
