@@ -205,7 +205,7 @@ function getMonthlyClubCount(values,today){
   const month=monthString(today);
   return values.filter(s=>
     s &&
-    s.type==="normal" &&
+    (s.type==="normal" || !s.type) &&
     typeof s.date==="string" &&
     s.date.startsWith(month)
   ).length;
