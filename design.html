@@ -32,6 +32,7 @@ body{
     sans-serif;
 }
 
+
 /* =====================================================
    ベルちゃん
 ===================================================== */
@@ -41,11 +42,12 @@ body{
   max-width:62%;
   height:auto;
 
-  /* 黒い枠を消す */
   border:none;
   outline:none;
+  box-shadow:none;
 
   filter:none;
+
   cursor:pointer;
   user-select:none;
 
@@ -58,15 +60,18 @@ body{
   transform:scale(.96);
 }
 
+
 /* =====================================================
    吹き出し
 ===================================================== */
 
 .bubble{
   position:absolute;
+
   max-width:calc(100vw - 8px);
 
   background:#fff;
+
   border:2px solid #d9e5ed;
   border-radius:18px;
 
@@ -88,13 +93,17 @@ body{
 
 .bubble small{
   display:block;
+
   color:#84939d;
+
   font-size:8px;
+
   margin-bottom:2px;
 }
 
+
 /* =====================================================
-   吹き出しを一時的に消す
+   アニメーション中は吹き出しを消す
 ===================================================== */
 
 .bubble.bubble-hidden{
@@ -102,6 +111,7 @@ body{
   opacity:0;
   pointer-events:none;
 }
+
 
 /* =====================================================
    ログイン前
@@ -139,6 +149,7 @@ body:not(.logged-in) .bubble:after{
   transform:rotate(45deg);
 }
 
+
 /* =====================================================
    ログイン後
 ===================================================== */
@@ -175,6 +186,7 @@ body.logged-in .bubble:after{
   transform:rotate(45deg);
 }
 
+
 /* =====================================================
    吹き出し登場
 ===================================================== */
@@ -183,6 +195,7 @@ body.logged-in .bubble:after{
 
   from{
     opacity:0;
+
     transform:
       scale(.9)
       translateY(7px);
@@ -190,12 +203,14 @@ body.logged-in .bubble:after{
 
   to{
     opacity:1;
+
     transform:
       scale(1)
       translateY(0);
   }
 
 }
+
 
 /* =====================================================
    ハートを出す場所
@@ -216,6 +231,7 @@ body.logged-in .bubble:after{
 
   overflow:visible;
 }
+
 
 /* =====================================================
    ハート
@@ -248,6 +264,7 @@ body.logged-in .bubble:after{
     cubic-bezier(.2,.75,.25,1)
     forwards;
 }
+
 
 /* =====================================================
    ハートが飛び散る
@@ -289,6 +306,7 @@ body.logged-in .bubble:after{
 
 }
 
+
 /* =====================================================
    ベルちゃん喜びアニメーション
 ===================================================== */
@@ -302,6 +320,7 @@ body.logged-in .bubble:after{
     both;
 
 }
+
 
 /* =====================================================
    2回ジャンプ
@@ -317,7 +336,7 @@ body.logged-in .bubble:after{
       scale(1);
   }
 
-  /* 1回目：勢いよくジャンプ */
+  /* 1回目：ジャンプ */
   12%{
     transform:
       translateY(-18px)
@@ -333,7 +352,7 @@ body.logged-in .bubble:after{
       scale(1.05);
   }
 
-  /* 着地 */
+  /* 1回目着地 */
   38%{
     transform:
       translateY(0)
@@ -365,7 +384,7 @@ body.logged-in .bubble:after{
       scale(1.06);
   }
 
-  /* 着地 */
+  /* 2回目着地 */
   83%{
     transform:
       translateY(0)
@@ -393,18 +412,29 @@ body.logged-in .bubble:after{
 </style>
 </head>
 
+
 <body>
 
 <div class="bell-area">
 
   <!-- 吹き出し -->
   <div class="bubble">
+
     <small>ベルちゃん</small>
-    <span id="bellMessage">予定を確認してるよ！</span>
+
+    <span id="bellMessage">
+      予定を確認してるよ！
+    </span>
+
   </div>
 
-  <!-- 大量のハート -->
-  <div class="heart-container" id="heartContainer"></div>
+
+  <!-- ハート -->
+  <div
+    class="heart-container"
+    id="heartContainer">
+  </div>
+
 
   <!-- ベルちゃん -->
   <img
@@ -419,21 +449,30 @@ body.logged-in .bubble:after{
 
 <script type="module">
 
+
 /* =====================================================
    基本
 ===================================================== */
 
 const message =
-  document.getElementById("bellMessage");
+  document.getElementById(
+    "bellMessage"
+  );
 
 const bellImage =
-  document.getElementById("bellImage");
+  document.getElementById(
+    "bellImage"
+  );
 
 const bubble =
-  document.querySelector(".bubble");
+  document.querySelector(
+    ".bubble"
+  );
 
 const heartContainer =
-  document.getElementById("heartContainer");
+  document.getElementById(
+    "heartContainer"
+  );
 
 
 /* =====================================================
@@ -448,11 +487,15 @@ function updateLoginSize(){
       window.parent.document;
 
     const loggedInElement =
-      parentDocument.getElementById("loggedInLeft");
+      parentDocument.getElementById(
+        "loggedInLeft"
+      );
 
     const isLoggedIn =
       !!loggedInElement &&
-      !loggedInElement.classList.contains("hidden");
+      !loggedInElement.classList.contains(
+        "hidden"
+      );
 
     document.body.classList.toggle(
       "logged-in",
@@ -468,6 +511,7 @@ function updateLoginSize(){
   }
 
 }
+
 
 updateLoginSize();
 
@@ -551,9 +595,10 @@ function buildBellMessages(
   schedules
 ){
 
-  const now=new Date();
+  const now =
+    new Date();
 
-  const values=
+  const values =
     Object.entries(
       schedules || {}
     )
@@ -581,6 +626,7 @@ function buildBellMessages(
 
       }
     );
+
 
   const all=[
     ...buildRegularMessages(
@@ -621,20 +667,22 @@ function buildBellMessages(
     getEventSchedulesForDate(
       values,
       today
-    ).forEach(event=>{
+    ).forEach(
+      event=>{
 
-      all.push(
-        `今日は${
-          event.title ||
-          (
-            event.type==="concert"
-              ? "演奏会"
-              : "イベント"
-          )
-        }だね！`
-      );
+        all.push(
+          `今日は${
+            event.title ||
+            (
+              event.type==="concert"
+                ? "演奏会"
+                : "イベント"
+            )
+          }だね！`
+        );
 
-    });
+      }
+    );
 
   }catch(error){
 
@@ -654,20 +702,22 @@ function buildBellMessages(
     getUpcomingEvents(
       values,
       today
-    ).forEach(event=>{
+    ).forEach(
+      event=>{
 
-      all.push(
-        `もうすぐ${
-          event.title ||
-          (
-            event.type==="concert"
-              ? "演奏会"
-              : "イベント"
-          )
-        }だね！`
-      );
+        all.push(
+          `もうすぐ${
+            event.title ||
+            (
+              event.type==="concert"
+                ? "演奏会"
+                : "イベント"
+            )
+          }だね！`
+        );
 
-    });
+      }
+    );
 
   }catch(error){
 
@@ -780,7 +830,7 @@ function timeToMinutes(
   if(!match)return null;
 
   return (
-    Number(match[1]) * 60 +
+    Number(match[1])*60 +
     Number(match[2])
   );
 
@@ -874,7 +924,7 @@ function formatTimeRange(
 
   if(
     !value ||
-    value === "終日"
+    value==="終日"
   ){
 
     return "";
@@ -963,8 +1013,7 @@ function daysFromToday(
   return Math.round(
     (
       target-base
-    ) /
-    86400000
+    ) / 86400000
   );
 
 }
@@ -993,7 +1042,7 @@ function isUpcomingWithinDays(
 
 
 /* =====================================================
-   スケジュール取得
+   スケジュール
 ===================================================== */
 
 function getNormalSchedulesForDate(
@@ -1124,6 +1173,7 @@ function getClubBeforeStartMessages(
 
   const result=[];
 
+
   if(range){
 
     result.push(
@@ -1134,6 +1184,7 @@ function getClubBeforeStartMessages(
     );
 
   }
+
 
   result.push(
 
@@ -1163,6 +1214,7 @@ function getClubBeforeStartMessages(
     )
 
   );
+
 
   return result;
 
@@ -1444,29 +1496,13 @@ function startHearts(){
 
   if(!heartContainer)return;
 
-  heartContainer.innerHTML="";
-
-
-  /*
-   * ベルちゃんを中心に
-   *
-   * 上
-   * 左上
-   * 右上
-   * 左
-   * 右
-   * 左下
-   * 右下
-   *
-   * 全方向へ大量に飛ばす
-   */
 
   const hearts=[];
 
 
-  /* ---------------------------------------------
+  /* =================================================
      上方向
-  --------------------------------------------- */
+  ================================================= */
 
   for(let i=0;i<14;i++){
 
@@ -1493,9 +1529,9 @@ function startHearts(){
   }
 
 
-  /* ---------------------------------------------
+  /* =================================================
      左上
-  --------------------------------------------- */
+  ================================================= */
 
   for(let i=0;i<10;i++){
 
@@ -1522,9 +1558,9 @@ function startHearts(){
   }
 
 
-  /* ---------------------------------------------
+  /* =================================================
      右上
-  --------------------------------------------- */
+  ================================================= */
 
   for(let i=0;i<10;i++){
 
@@ -1551,11 +1587,11 @@ function startHearts(){
   }
 
 
-  /* ---------------------------------------------
+  /* =================================================
      左
-  --------------------------------------------- */
+  ================================================= */
 
-  for(let i=0;i<12;i++){
+  for(let i=12;i--;){
 
     hearts.push({
 
@@ -1580,11 +1616,11 @@ function startHearts(){
   }
 
 
-  /* ---------------------------------------------
+  /* =================================================
      右
-  --------------------------------------------- */
+  ================================================= */
 
-  for(let i=0;i<12;i++){
+  for(let i=12;i--;){
 
     hearts.push({
 
@@ -1609,11 +1645,11 @@ function startHearts(){
   }
 
 
-  /* ---------------------------------------------
+  /* =================================================
      左下
-  --------------------------------------------- */
+  ================================================= */
 
-  for(let i=0;i<8;i++){
+  for(let i=8;i--;){
 
     hearts.push({
 
@@ -1638,11 +1674,11 @@ function startHearts(){
   }
 
 
-  /* ---------------------------------------------
+  /* =================================================
      右下
-  --------------------------------------------- */
+  ================================================= */
 
-  for(let i=0;i<8;i++){
+  for(let i=8;i--;){
 
     hearts.push({
 
@@ -1667,24 +1703,22 @@ function startHearts(){
   }
 
 
-  /* ---------------------------------------------
-     ハートを実際に作る
-  --------------------------------------------- */
+  /* =================================================
+     ハート生成
+  ================================================= */
 
   hearts.forEach(
     (data,index)=>{
 
       const heart =
-        document.createElement("span");
+        document.createElement(
+          "span"
+        );
 
 
       heart.className =
         "heart";
 
-
-      /*
-       * ♥と♡を混ぜる
-       */
 
       heart.textContent =
         index % 4 === 0
@@ -1716,10 +1750,6 @@ function startHearts(){
       );
 
 
-      /*
-       * 回転方向もバラバラ
-       */
-
       const rotation =
         -60 +
         Math.random()*120;
@@ -1731,10 +1761,6 @@ function startHearts(){
       );
 
 
-      /*
-       * 大きさをランダムに
-       */
-
       const size =
         11 +
         Math.random()*13;
@@ -1745,11 +1771,10 @@ function startHearts(){
 
 
       /*
-       * 出るタイミングを少しずつずらす
+       * 少しずつタイミングをずらす
        */
-
       const delay =
-        Math.random()*900;
+        Math.random()*350;
 
 
       heart.style.animationDelay =
@@ -1802,37 +1827,55 @@ function celebrate(){
 
 
   /* ---------------------------------------------
-     ベルちゃんを喜ばせる
+     アニメーションをリセット
   --------------------------------------------- */
 
   bellImage.classList.remove(
     "celebrating"
   );
 
-
-  /*
-   * ブラウザに一度リセットさせる
-   */
-
   void bellImage.offsetWidth;
 
+
+  /* ---------------------------------------------
+     喜びアニメーション開始
+  --------------------------------------------- */
 
   bellImage.classList.add(
     "celebrating"
   );
 
 
-  /* ---------------------------------------------
-     大量のハートを発生
-  --------------------------------------------- */
+  /* =================================================
+     1回目のジャンプ
+     → 大量のハート
+  ================================================= */
 
-  startHearts();
+  setTimeout(
+    ()=>{
+      startHearts();
+    },
+    150
+  );
+
+
+  /* =================================================
+     2回目のジャンプ
+     → もう一度大量のハート
+  ================================================= */
+
+  setTimeout(
+    ()=>{
+      startHearts();
+    },
+    950
+  );
 
 }
 
 
 /* =====================================================
-   喜びアニメーション終了
+   アニメーション終了
 ===================================================== */
 
 bellImage.addEventListener(
@@ -1854,26 +1897,17 @@ bellImage.addEventListener(
     );
 
 
-    /*
-     * メッセージ変更
-     */
-
+    /* メッセージ変更 */
     changeBellMessage();
 
 
-    /*
-     * 吹き出しを再表示
-     */
-
+    /* 吹き出し再表示 */
     bubble.classList.remove(
       "bubble-hidden"
     );
 
 
-    /*
-     * 吹き出しアニメーションを
-     * もう一度発生させる
-     */
+    /* 吹き出しアニメーションを再実行 */
 
     bubble.style.animation="none";
 
