@@ -70,6 +70,13 @@ textarea{
   resize:vertical
 }
 
+input:disabled,
+select:disabled{
+  background:#f1f3f6;
+  color:#68717d;
+  cursor:not-allowed
+}
+
 button{
   border:0;
   border-radius:10px;
@@ -89,6 +96,14 @@ button{
 .secondary{
   background:#eef3fb;
   color:#20242a
+}
+
+.cancel-button{
+  width:100%;
+  margin-top:8px;
+  background:#f5f7fa;
+  color:#68717d;
+  border:1px solid #dfe4eb
 }
 
 .msg{
@@ -789,7 +804,7 @@ button{
      部員登録
 ===================================================== -->
 
-<div class="card">
+<div class="card" id="memberRegistrationCard">
 
   <h2 class="section-title">
     部員登録
@@ -878,6 +893,14 @@ button{
     type="button"
   >
     登録する
+  </button>
+
+  <button
+    id="cancelMemberEditButton"
+    class="cancel-button hidden"
+    type="button"
+  >
+    変更をやめる
   </button>
 
   <div id="memberMsg"></div>
@@ -1245,6 +1268,49 @@ const classOrder={
 };
 
 
+/*
+  null
+  = 通常の新規登録モード
+
+  学校ID
+  = 変更中の部員ID
+*/
+
+let editingMemberId=null;
+
+
+/* =====================================================
+   部員登録・変更モード解除
+===================================================== */
+
+function resetMemberForm(){
+
+  editingMemberId=null;
+
+  $("mid").value="";
+  $("mname").value="";
+  $("mgrade").value="";
+  $("mclass").value="";
+
+  $("mid").disabled=false;
+
+  $("addMemberButton").textContent="登録する";
+
+  $("cancelMemberEditButton")
+    .classList
+    .add("hidden");
+
+  message(
+    "memberMsg",
+    ""
+  );
+}
+
+
+/* =====================================================
+   部員登録
+===================================================== */
+
 async function addMember(){
 
   if(!(await isAdmin())){
@@ -1255,6 +1321,89 @@ async function addMember(){
   const name=$("mname").value.trim();
   const grade=$("mgrade").value;
   const className=$("mclass").value;
+
+
+  /* ===================================================
+     変更モード
+  =================================================== */
+
+  if(editingMemberId){
+
+    const originalId=editingMemberId;
+
+
+    if(
+      !name||
+      !grade||
+      !className
+    ){
+
+      message(
+        "memberMsg",
+        "名前・学年・クラスをすべて入力してください。",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if(
+      !Object.hasOwn(gradeOrder,grade)||
+      !Object.hasOwn(classOrder,className)
+    ){
+
+      message(
+        "memberMsg",
+        "学年・クラスを確認してください。",
+        "error"
+      );
+
+      return;
+    }
+
+
+    try{
+
+      await update(
+        ref(db,"memberRegistrations/"+originalId),
+        {
+          name,
+          grade,
+          className
+        }
+      );
+
+
+      message(
+        "memberMsg",
+        "部員情報を変更しました。",
+        "success"
+      );
+
+
+      resetMemberForm();
+
+      await loadMembers();
+
+    }catch(e){
+
+      message(
+        "memberMsg",
+        "部員情報の変更に失敗しました。\n\n"+
+        (e.message||"不明"),
+        "error"
+      );
+
+    }
+
+    return;
+  }
+
+
+  /* ===================================================
+     新規登録
+  =================================================== */
 
   if(
     !id||
@@ -1403,81 +1552,87 @@ async function loadMembers(){
 }
 
 
+/* =====================================================
+   部員変更
+===================================================== */
+
 async function editMember(id){
 
   if(!(await isAdmin())){
     return;
   }
 
+
   const s=
     await get(
       ref(db,"memberRegistrations/"+id)
     );
 
+
   if(!s.exists()){
     return;
   }
 
+
   const d=s.val();
 
-  const name=
-    prompt(
-      "名前",
-      d.name||""
-    );
 
-  if(name===null){
-    return;
-  }
+  /*
+    変更モードにする
+  */
 
-  const grade=
-    prompt(
-      "学年",
-      d.grade||""
-    );
+  editingMemberId=id;
 
-  if(grade===null){
-    return;
-  }
 
-  const c=
-    prompt(
-      "クラス（A〜K）",
-      d.className||""
-    );
+  /*
+    学校IDは変更不可
+  */
 
-  if(c===null){
-    return;
-  }
+  $("mid").value=id;
+  $("mid").disabled=true;
 
-  const cl=
-    c
-      .replace("組","")
-      .trim()
-      .toUpperCase();
 
-  if(
-    !Object.hasOwn(gradeOrder,grade)||
-    !Object.hasOwn(classOrder,cl)
-  ){
+  /*
+    名前・学年・クラスを入力欄へ入れる
+  */
 
-    alert(
-      "入力内容を確認してください。"
-    );
+  $("mname").value=d.name||"";
+  $("mgrade").value=d.grade||"";
+  $("mclass").value=d.className||"";
 
-    return;
-  }
 
-  await update(
-    ref(db,"memberRegistrations/"+id),
-    {
-      name:name.trim(),
-      grade,
-      className:cl
-    }
+  /*
+    ボタンを変更保存にする
+  */
+
+  $("addMemberButton").textContent="変更を保存";
+
+
+  /*
+    変更をやめるボタンを表示
+  */
+
+  $("cancelMemberEditButton")
+    .classList
+    .remove("hidden");
+
+
+  message(
+    "memberMsg",
+    "部員情報を変更できます。学校IDは変更できません。"
   );
 
-  await loadMembers();
+
+  /*
+    部員登録欄まで移動
+  */
+
+  $("memberRegistrationCard")
+    .scrollIntoView({
+      behavior:"smooth",
+      block:"center"
+    });
+
 }
 
 
@@ -1490,6 +1645,7 @@ async function deleteMember(id){
     return;
   }
 
+
   await remove(
     ref(db,"memberRegistrations/"+id)
   );
@@ -1497,6 +1653,19 @@ async function deleteMember(id){
   await remove(
     ref(db,"memberIds/"+id)
   );
+
+
+  /*
+    削除中の部員を編集していた場合は
+    変更モードを解除する
+  */
+
+  if(editingMemberId===id){
+
+    resetMemberForm();
+
+  }
+
 
   await loadMembers();
 }
@@ -3180,6 +3349,13 @@ $("addMemberButton")
   .addEventListener(
     "click",
     addMember
+  );
+
+
+$("cancelMemberEditButton")
+  .addEventListener(
+    "click",
+    resetMemberForm
   );
 
 
