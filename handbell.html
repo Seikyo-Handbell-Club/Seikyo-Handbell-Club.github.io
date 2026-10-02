@@ -2205,7 +2205,7 @@ onAuthStateChanged(
     }
 
 
-    if(setupInProgress){
+    if(authProcessing || setupInProgress){
 
       return;
 
@@ -2237,10 +2237,6 @@ onAuthStateChanged(
       $("loginMsg")
         .innerHTML =
           '<div class="msg error">ログインは確認できましたが、生徒情報を取得できませんでした。管理者に登録内容を確認してもらってください。</div>';
-
-
-      authProcessing =
-        false;
 
 
       showLogin();
@@ -5164,57 +5160,64 @@ async function saveRecoveryEmail(){
     $("myRecoveryPassword")
       .value;
 
-  if(!newEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)){
-    $("myPageMsg").innerHTML=
+  if(
+    !newEmail ||
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)
+  ){
+
+    $("myPageMsg").innerHTML =
       '<div class="msg error">復旧用メールアドレスを正しく入力してください。</div>';
+
     return;
   }
 
   if(!currentPassword){
-    $("myPageMsg").innerHTML=
+
+    $("myPageMsg").innerHTML =
       '<div class="msg error">現在のパスワードを入力してください。</div>';
+
     return;
   }
 
+  $("myPageMsg").innerHTML =
+    '<div class="msg">保存しています……</div>';
+
   try{
-
-    const authUser =
-      auth.currentUser ||
-      currentUser;
-
-    if(!authUser){
-      throw Error("not-signed-in");
-    }
 
     const credential =
       EmailAuthProvider.credential(
-        authUser.email,
+        currentUser.email,
         currentPassword
       );
 
     await reauthenticateWithCredential(
-      authUser,
+      currentUser,
       credential
     );
 
     await updateEmail(
-      authUser,
+      currentUser,
       newEmail
     );
 
-    currentUser =
-      authUser;
-
     await update(
-      ref(db,"memberIds/" + profile.schoolId),
+      ref(
+        db,
+        "memberIds/" + profile.schoolId
+      ),
       {
         authEmail:newEmail,
         recoveryEmail:newEmail
       }
     );
 
-    $("myRecoveryPassword").value="";
-    $("myPageMsg").innerHTML=
+    $("myRecoveryEmail").value =
+      newEmail;
+
+    $("myRecoveryPassword").value =
+      "";
+
+    $("myPageMsg").innerHTML =
       '<div class="msg">復旧用メールアドレスを保存しました。</div>';
 
   }catch(e){
@@ -5228,33 +5231,75 @@ async function saveRecoveryEmail(){
       "復旧用メールアドレスを保存できませんでした。";
 
     if(
-      e.code === "auth/wrong-password" ||
-      e.code === "auth/invalid-credential"
-    )
-      message = "現在のパスワードが正しくありません。";
+      e.code ===
+      "auth/wrong-password"
+    ){
 
-    if(e.code === "auth/email-already-in-use")
-      message = "そのメールアドレスはすでに別のアカウントで使用されています。";
+      message =
+        "現在のパスワードが正しくありません。";
 
-    if(e.code === "auth/requires-recent-login")
-      message = "安全のため、いったんログアウトして再ログインしてから、もう一度お試しください。";
+    }
+    else if(
+      e.code ===
+      "auth/invalid-credential"
+    ){
 
-    if(e.code === "auth/invalid-email")
-      message = "メールアドレスの形式が正しくありません。";
+      message =
+        "現在のパスワードが正しくないか、認証情報を確認できませんでした。";
 
-    if(e.code === "auth/network-request-failed")
-      message = "通信に失敗しました。通信状態を確認して、もう一度お試しください。";
+    }
+    else if(
+      e.code ===
+      "auth/requires-recent-login"
+    ){
 
-    if(e.message === "not-signed-in")
-      message = "ログイン状態を確認できませんでした。いったんログアウトして再ログインしてください。";
+      message =
+        "安全のため、いったんログアウトして、もう一度ログインしてから変更してください。";
 
-    $("myPageMsg").innerHTML=
+    }
+    else if(
+      e.code ===
+      "auth/email-already-in-use"
+    ){
+
+      message =
+        "そのメールアドレスはすでに別のアカウントで使用されています。";
+
+    }
+    else if(
+      e.code ===
+      "auth/invalid-email"
+    ){
+
+      message =
+        "メールアドレスの形式が正しくありません。";
+
+    }
+    else if(
+      e.code ===
+      "auth/operation-not-allowed"
+    ){
+
+      message =
+        "メールアドレス変更がFirebase側で許可されていません。";
+
+    }
+    else if(
+      e.code ===
+      "PERMISSION_DENIED"
+    ){
+
+      message =
+        "データベースへの保存権限がありません。Firebaseのルールを確認してください。";
+
+    }
+
+    $("myPageMsg").innerHTML =
       `<div class="msg error">${esc(message)}</div>`;
 
   }
 
 }
-
 
 /* =========================
    パスワード変更
