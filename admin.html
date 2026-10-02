@@ -1565,13 +1565,13 @@ async function addMember(){
       }
     );
 
+    clearMemberForm();
+
     message(
       "memberMsg",
-      "部員情報を変更しました。",
+      "変更を保存しました。",
       "success"
     );
-
-    cancelMemberEdit();
 
     await loadMembers();
 
