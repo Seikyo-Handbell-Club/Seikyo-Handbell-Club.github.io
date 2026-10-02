@@ -565,7 +565,9 @@ button{
 }
 
 .date-picker-popup .count{
-  display:none;
+  display:block;
+  font-size:10px;
+  margin-top:3px;
 }
 
 .date-picker-popup .selected-date-day{
@@ -802,7 +804,9 @@ PDFを読み込む
 
 <input
   id="sdate"
-  type="date"
+  type="text"
+  readonly
+  placeholder="日付を選択"
 >
 
 <label>
@@ -883,7 +887,9 @@ PDFを読み込む
 
 <input
   id="examStartDate"
-  type="date"
+  type="text"
+  readonly
+  placeholder="日付を選択"
 >
 
 <label for="examEndDate">
@@ -892,7 +898,9 @@ PDFを読み込む
 
 <input
   id="examEndDate"
-  type="date"
+  type="text"
+  readonly
+  placeholder="日付を選択"
 >
 
 <label for="examTitle">
@@ -925,7 +933,9 @@ PDFを読み込む
 
 <input
   id="concertDate"
-  type="date"
+  type="text"
+  readonly
+  placeholder="日付を選択"
 >
 
 <label>
@@ -1006,7 +1016,9 @@ PDFを読み込む
 
 <input
   id="schoolHolidayDate"
-  type="date"
+  type="text"
+  readonly
+  placeholder="日付を選択"
 >
 
 <label for="schoolHolidayTitle">
@@ -1039,7 +1051,9 @@ PDFを読み込む
 
 <input
   id="eventDate"
-  type="date"
+  type="text"
+  readonly
+  placeholder="日付を選択"
 >
 
 <label>
@@ -3574,17 +3588,44 @@ function renderDatePicker(input,popup){
       today.getFullYear(),today.getMonth(),today.getDate()
     );
 
+    const list=getSchedulesForDateFromData(
+      registeredSchedulesData,
+      date
+    );
+
+    const scheduleClass=getScheduleDayClass(list);
+
     let cls="day";
     if(date===todayStr)cls+=" today-day";
     if(date===selected)cls+=" selected-date-day";
+    if(list.length)cls+=` ${scheduleClass}`;
+
+    const labels=list.map(x=>{
+      const type=x.type||"normal";
+      const label={
+        normal:"部活動",
+        exam:"試験期間",
+        concert:"演奏会",
+        schoolHoliday:"学校が休み",
+        event:"その他"
+      }[type]||"予定";
+      return x.title ? `${label}：${x.title}` : label;
+    });
+
+    const title=labels.join(" / ");
 
     html+=`
       <button
         type="button"
         class="${cls}"
         data-picker-date="${date}"
+        ${title?`title="${esc(title)}"`:""}
       >
         <div class="daynum">${d}</div>
+        ${list.length
+          ? `<span class="count registered-count">${list.length}件</span>`
+          : ""
+        }
       </button>
     `;
   }
@@ -3621,12 +3662,12 @@ function renderDatePicker(input,popup){
         e.stopPropagation();
         const value=button.dataset.pickerDate;
         input.value=value;
+        input.dispatchEvent(new Event("change",{bubbles:true}));
         popup.classList.add("hidden");
         activeDatePicker=null;
       });
     });
 }
-
 function openDatePicker(input){
 
   if(activeDatePicker && activeDatePicker!==input){
