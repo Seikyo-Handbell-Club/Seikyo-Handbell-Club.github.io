@@ -1,0 +1,4191 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>管理者設定｜清教学園ハンドベル部</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:#f5f7fb;
+  color:#20242a;
+  font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif
+}
+
+header{
+  background:#fff;
+  padding:20px;
+  border-bottom:1px solid #e5e8ed
+}
+
+h1{
+  margin:0;
+  text-align:center;
+  font-size:21px
+}
+
+main{
+  max-width:850px;
+  margin:auto;
+  padding:18px
+}
+
+.card{
+  background:#fff;
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:16px;
+  box-shadow:0 2px 12px #0000000b
+}
+
+.hidden{display:none!important}
+
+label{
+  display:block;
+  font-weight:700;
+  font-size:14px;
+  margin:12px 0 5px
+}
+
+input,
+select,
+textarea{
+  width:100%;
+  padding:11px;
+  border:1px solid #d9dee7;
+  border-radius:10px;
+  font-size:16px;
+  background:#fff
+}
+
+input:disabled{
+  background:#f1f3f6;
+  color:#68717d
+}
+
+textarea{
+  min-height:80px;
+  resize:vertical
+}
+
+button{
+  border:0;
+  border-radius:10px;
+  padding:11px 14px;
+  font-weight:700;
+  cursor:pointer;
+  font-size:14px
+}
+
+.primary{
+  background:#1f6feb;
+  color:#fff;
+  width:100%;
+  margin-top:14px
+}
+
+.secondary{
+  background:#eef3fb;
+  color:#20242a
+}
+
+.msg{
+  padding:12px;
+  border-radius:10px;
+  background:#fff8df;
+  color:#69520a;
+  margin-top:10px;
+  font-size:14px;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere
+}
+
+.error{
+  background:#fff0f0;
+  color:#9b1c1c
+}
+
+.success{
+  background:#effaf1;
+  color:#176b2c
+}
+
+.item{
+  border:1px solid #e3e7ed;
+  border-radius:12px;
+  padding:12px;
+  margin:10px 0
+}
+
+.small{
+  font-size:12px;
+  color:#6f7882
+}
+
+.section-title{
+  margin-top:0;
+  margin-bottom:4px
+}
+
+.sub-title{
+  margin-top:0;
+  color:#68717d;
+  font-size:13px
+}
+
+.pdf-box{
+  border:2px dashed #cfd7e3;
+  border-radius:14px;
+  padding:16px;
+  background:#fafbfd;
+  margin-top:10px
+}
+
+.divider{
+  height:1px;
+  background:#e5e8ed;
+  margin:20px 0
+}
+
+.app-topbar{
+  display:flex;
+  justify-content:flex-end;
+  margin-bottom:16px
+}
+
+.logout-button{
+  background:#f5f7fa;
+  color:#68717d;
+  border:1px solid #dfe4eb;
+  padding:7px 11px;
+  border-radius:8px;
+  font-size:13px
+}
+
+.item-main{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px
+}
+
+.item-actions{
+  display:flex;
+  gap:5px;
+  flex-shrink:0
+}
+
+.item-actions button{
+  padding:5px 8px;
+  font-size:12px;
+  background:#f7f8fa;
+  color:#68717d;
+  border:1px solid #e1e5ea
+}
+
+.item-actions .delete-button{
+  background:transparent;
+  color:#a06a6a;
+  border-color:#ead6d6
+}
+
+.time-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px
+}
+
+.time-field label{
+  margin-top:0
+}
+
+.time-note{
+  margin-top:6px;
+  font-size:12px;
+  color:#6f7882
+}
+
+
+/* =====================================================
+   カレンダー
+===================================================== */
+
+.calendar-wrap{
+  margin-top:14px
+}
+
+.monthbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:14px;
+  gap:8px
+}
+
+.monthbar button{
+  background:#eef3fb;
+  padding:8px 12px;
+  flex:none
+}
+
+.month-center{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-width:0;
+  flex:1
+}
+
+.month-title{
+  font-size:18px;
+  font-weight:800;
+  white-space:nowrap
+}
+
+.today-button{
+  background:#eef3fb!important;
+  padding:7px 9px!important;
+  font-size:12px!important;
+  white-space:nowrap
+}
+
+.week,
+.days{
+  display:grid;
+  grid-template-columns:repeat(7,minmax(0,1fr));
+  gap:5px
+}
+
+.week div{
+  text-align:center;
+  font-size:12px;
+  color:#7b8490;
+  padding:5px 0
+}
+
+.day{
+  min-height:72px;
+  background:#f8f9fb;
+  border-radius:10px;
+  padding:6px;
+  cursor:pointer;
+  overflow:hidden;
+  border:2px solid transparent;
+  transition:.15s
+}
+
+.day:hover{
+  border-color:#dbe5f7
+}
+
+.day.empty{
+  background:transparent;
+  cursor:default;
+  border-color:transparent
+}
+
+.day.off{
+  opacity:.45
+}
+
+.day.club-day{
+  background:#eaf2ff;
+  opacity:1
+}
+
+.day.exam-day{
+  background:#eaf8ea;
+  opacity:1
+}
+
+.day.concert-day{
+  background:#f3eafa;
+  opacity:1
+}
+
+.day.school-holiday-day{
+  background:#fff0f0;
+  opacity:1
+}
+
+.day.event-day{
+  background:#fff4e5;
+  opacity:1
+}
+
+.day.selected-day{
+  border-color:#1f6feb
+}
+
+.day.sunday-day,
+.day.national-holiday-day{
+  background:#fff0f0!important;
+  opacity:1
+}
+
+.day.today-day{
+  outline:2px solid #20242a;
+  outline-offset:-2px
+}
+
+.daynum{
+  font-weight:700;
+  font-size:14px
+}
+
+.count{
+  display:inline-block;
+  margin-top:8px;
+  background:#e8f0ff;
+  color:#1f6feb;
+  border-radius:999px;
+  padding:3px 7px;
+  font-size:12px;
+  font-weight:700
+}
+
+.pdf-count{
+  background:#e8f0ff;
+  color:#1f6feb
+}
+
+.registered-count{
+  background:#e8f0ff;
+  color:#1f6feb
+}
+
+.calendar-legend{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:6px;
+  margin-top:14px;
+  padding-top:12px;
+  border-top:1px solid #e7eaf0;
+  font-size:11px;
+  color:#4d5661;
+  white-space:nowrap
+}
+
+.calendar-legend-item{
+  display:flex;
+  align-items:center;
+  gap:3px;
+  min-width:0
+}
+
+.calendar-legend-dot{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  flex:none
+}
+
+.legend-blue{background:#4a90e2}
+.legend-green{background:#55a868}
+.legend-purple{background:#8e63ce}
+.legend-red{background:#e05a5a}
+.legend-orange{background:#e58b35}
+
+
+/* =====================================================
+   日付詳細
+===================================================== */
+
+.day-detail{
+  margin-top:16px;
+  border-top:1px solid #e5e8ed;
+  padding-top:16px
+}
+
+.day-detail-title{
+  margin:0 0 10px;
+  font-size:17px
+}
+
+.schedule-detail-item{
+  border:1px solid #e1e5ea;
+  border-radius:12px;
+  padding:12px;
+  margin:9px 0;
+  background:#fff
+}
+
+.schedule-detail-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px
+}
+
+.schedule-detail-actions{
+  display:flex;
+  gap:5px;
+  flex-shrink:0
+}
+
+.schedule-detail-actions button{
+  padding:6px 9px;
+  font-size:12px
+}
+
+.schedule-detail-actions .delete-button{
+  color:#a06a6a;
+  background:#fff;
+  border:1px solid #ead6d6
+}
+
+.schedule-type{
+  display:inline-block;
+  padding:3px 7px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:700;
+  margin-bottom:5px
+}
+
+.type-normal{
+  background:#e8f0ff;
+  color:#1f6feb
+}
+
+.type-exam{
+  background:#e8f6e9;
+  color:#367a43
+}
+
+.type-concert{
+  background:#f0e8f8;
+  color:#7451a5
+}
+
+.type-schoolHoliday{
+  background:#fde8e8;
+  color:#a83e3e
+}
+
+.type-event{
+  background:#fff0dc;
+  color:#a25d13
+}
+
+.detail-line{
+  margin-top:4px
+}
+
+.detail-note{
+  margin-top:7px;
+  color:#6f7882;
+  font-size:12px
+}
+
+
+/* =====================================================
+   PDF仮予定
+===================================================== */
+
+.pdf-calendar-title{
+  margin-top:0
+}
+
+.pdf-temp-note{
+  padding:10px 12px;
+  border-radius:10px;
+  background:#f0f6ff;
+  color:#315b91;
+  font-size:13px;
+  margin:10px 0
+}
+
+
+/* =====================================================
+   部員編集
+===================================================== */
+
+.member-editing{
+  border:2px solid #1f6feb!important;
+  background:#f7faff!important
+}
+
+.editing-label{
+  display:inline-block;
+  background:#e8f0ff;
+  color:#1f6feb;
+  border-radius:999px;
+  padding:4px 8px;
+  font-size:12px;
+  font-weight:700;
+  margin-bottom:5px
+}
+
+.cancel-edit{
+  margin-top:8px;
+  width:100%
+}
+
+
+@media(max-width:600px){
+
+  .item-main{
+    align-items:flex-start
+  }
+
+  .item-actions{
+    margin-left:auto
+  }
+
+  .calendar-legend{
+    font-size:9px;
+    gap:3px
+  }
+
+  .calendar-legend-dot{
+    width:7px;
+    height:7px
+  }
+
+  .day{
+    min-height:64px;
+    padding:5px
+  }
+
+  .daynum{
+    font-size:13px
+  }
+
+  .count{
+    font-size:10px;
+    padding:3px 5px
+  }
+
+  .schedule-detail-head{
+    flex-direction:column
+  }
+
+  .schedule-detail-actions{
+    width:100%
+  }
+
+  .schedule-detail-actions button{
+    flex:1
+  }
+}
+</style>
+</head>
+
+
+<body>
+
+<header>
+<h1>清教学園ハンドベル部 管理者設定</h1>
+</header>
+
+<main>
+
+<section id="login" class="card">
+
+<h2 class="section-title">管理者ログイン</h2>
+
+<p class="small">
+管理者用パスワードを入力してください。
+</p>
+
+<label for="password">パスワード</label>
+
+<input
+  id="password"
+  type="password"
+  autocomplete="current-password"
+  placeholder="パスワード"
+>
+
+<button
+  id="loginButton"
+  class="primary"
+  type="button"
+>
+ログイン
+</button>
+
+<div id="loginMsg"></div>
+
+</section>
+
+
+<section id="app" class="hidden">
+
+<div class="app-topbar">
+
+<button
+  id="logoutButton"
+  class="logout-button"
+  type="button"
+>
+ログアウト
+</button>
+
+</div>
+
+
+<!-- =====================================================
+     PDF読み込み
+===================================================== -->
+
+<div class="card">
+
+<h2 class="section-title">
+清教学園ハンドベル部予定表
+</h2>
+
+<p class="sub-title">
+PDFから予定を読み込み、確認してから登録できます。
+</p>
+
+<div class="pdf-box">
+
+<label for="schedulePdf">
+予定表PDF
+</label>
+
+<input
+  id="schedulePdf"
+  type="file"
+  accept="application/pdf,.pdf"
+>
+
+<button
+  id="readPdfButton"
+  class="primary"
+  type="button"
+>
+PDFを読み込む
+</button>
+
+<div id="pdfStatus"></div>
+
+</div>
+
+
+<div id="pdfCandidates" class="hidden">
+
+<div class="divider"></div>
+
+<h3 class="pdf-calendar-title">
+読み取った予定
+</h3>
+
+<div class="pdf-temp-note">
+このカレンダーは仮登録です。<br>
+「予定を登録」を押すまで部員サイトには反映されません。
+</div>
+
+<div id="pdfCalendar"></div>
+
+<div id="pdfDayDetail" class="day-detail hidden"></div>
+
+<button
+  id="registerCandidatesButton"
+  class="primary"
+  type="button"
+>
+予定を登録
+</button>
+
+<div id="candidateMsg"></div>
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     手動登録
+===================================================== -->
+
+<div class="card">
+
+<h2 class="section-title">
+予定を手動で登録
+</h2>
+
+<label for="stype">
+予定の種類
+</label>
+
+<select id="stype">
+
+<option value="normal">
+通常の部活予定
+</option>
+
+<option value="exam">
+試験期間
+</option>
+
+<option value="concert">
+演奏会
+</option>
+
+<option value="schoolHoliday">
+学校が休みの日
+</option>
+
+<option value="event">
+その他のイベント
+</option>
+
+</select>
+
+
+<div id="normalScheduleFields">
+
+<label for="sdate">
+日付
+</label>
+
+<input
+  id="sdate"
+  type="date"
+>
+
+<label>
+時間
+</label>
+
+<div class="time-row">
+
+<div class="time-field">
+
+<label for="stimeStart">
+開始
+</label>
+
+<input
+  id="stimeStart"
+  type="time"
+>
+
+</div>
+
+<div class="time-field">
+
+<label for="stimeEnd">
+終了
+</label>
+
+<input
+  id="stimeEnd"
+  type="time"
+>
+
+</div>
+
+</div>
+
+<div class="time-note">
+開始・終了を両方空欄にすると「終日」になります。
+</div>
+
+<label for="splace">
+場所
+</label>
+
+<input
+  id="splace"
+  type="text"
+  placeholder="例：音楽練習室"
+>
+
+<label for="sTitle">
+タイトル
+</label>
+
+<input
+  id="sTitle"
+  type="text"
+  placeholder="例：通常練習"
+>
+
+<label for="snote">
+備考
+</label>
+
+<textarea
+  id="snote"
+  placeholder="必要な場合のみ入力"
+></textarea>
+
+</div>
+
+
+<div id="examScheduleFields" class="hidden">
+
+<label for="examStartDate">
+開始日
+</label>
+
+<input
+  id="examStartDate"
+  type="date"
+>
+
+<label for="examEndDate">
+終了日
+</label>
+
+<input
+  id="examEndDate"
+  type="date"
+>
+
+<label for="examTitle">
+タイトル
+</label>
+
+<input
+  id="examTitle"
+  type="text"
+  placeholder="例：中間考査"
+>
+
+<label for="examNote">
+備考
+</label>
+
+<textarea
+  id="examNote"
+  placeholder="必要な場合のみ入力"
+></textarea>
+
+</div>
+
+
+<div id="concertScheduleFields" class="hidden">
+
+<label for="concertDate">
+日付
+</label>
+
+<input
+  id="concertDate"
+  type="date"
+>
+
+<label>
+時間
+</label>
+
+<div class="time-row">
+
+<div class="time-field">
+
+<label for="concertTimeStart">
+開始
+</label>
+
+<input
+  id="concertTimeStart"
+  type="time"
+>
+
+</div>
+
+<div class="time-field">
+
+<label for="concertTimeEnd">
+終了
+</label>
+
+<input
+  id="concertTimeEnd"
+  type="time"
+>
+
+</div>
+
+</div>
+
+<div class="time-note">
+開始・終了を両方空欄にすると「終日」になります。
+</div>
+
+<label for="concertTitle">
+タイトル
+</label>
+
+<input
+  id="concertTitle"
+  type="text"
+  placeholder="例：定期演奏会"
+>
+
+<label for="concertPlace">
+場所
+</label>
+
+<input
+  id="concertPlace"
+  type="text"
+  placeholder="例：講堂"
+>
+
+<label for="concertNote">
+備考
+</label>
+
+<textarea
+  id="concertNote"
+  placeholder="必要な場合のみ入力"
+></textarea>
+
+</div>
+
+
+<div id="schoolHolidayScheduleFields" class="hidden">
+
+<label for="schoolHolidayDate">
+日付
+</label>
+
+<input
+  id="schoolHolidayDate"
+  type="date"
+>
+
+<label for="schoolHolidayTitle">
+タイトル
+</label>
+
+<input
+  id="schoolHolidayTitle"
+  type="text"
+  placeholder="例：創立記念日"
+>
+
+<label for="schoolHolidayNote">
+備考
+</label>
+
+<textarea
+  id="schoolHolidayNote"
+  placeholder="必要な場合のみ入力"
+></textarea>
+
+</div>
+
+
+<div id="eventScheduleFields" class="hidden">
+
+<label for="eventDate">
+日付
+</label>
+
+<input
+  id="eventDate"
+  type="date"
+>
+
+<label>
+時間
+</label>
+
+<div class="time-row">
+
+<div class="time-field">
+
+<label for="eventTimeStart">
+開始
+</label>
+
+<input
+  id="eventTimeStart"
+  type="time"
+>
+
+</div>
+
+<div class="time-field">
+
+<label for="eventTimeEnd">
+終了
+</label>
+
+<input
+  id="eventTimeEnd"
+  type="time"
+>
+
+</div>
+
+</div>
+
+<div class="time-note">
+開始・終了を両方空欄にすると「終日」になります。
+</div>
+
+<label for="eventTitle">
+タイトル
+</label>
+
+<input
+  id="eventTitle"
+  type="text"
+  placeholder="例：部活動説明会"
+>
+
+<label for="eventPlace">
+場所
+</label>
+
+<input
+  id="eventPlace"
+  type="text"
+  placeholder="例：講堂"
+>
+
+<label for="eventNote">
+備考
+</label>
+
+<textarea
+  id="eventNote"
+  placeholder="必要な場合のみ入力"
+></textarea>
+
+</div>
+
+
+<button
+  id="saveScheduleButton"
+  class="primary"
+  type="button"
+>
+予定を保存
+</button>
+
+<div id="scheduleMsg"></div>
+
+</div>
+
+
+<!-- =====================================================
+     部員登録
+===================================================== -->
+
+<div
+  id="memberRegistrationCard"
+  class="card"
+>
+
+<h2 class="section-title">
+部員登録
+</h2>
+
+<p class="sub-title">
+部員の学校ID・名前・学年・クラスを登録します。
+</p>
+
+<div id="memberEditingLabel"></div>
+
+<label for="mid">
+学校ID
+</label>
+
+<input
+  id="mid"
+  autocomplete="off"
+>
+
+<label for="mname">
+名前
+</label>
+
+<input
+  id="mname"
+  autocomplete="off"
+>
+
+<label for="mgrade">
+学年
+</label>
+
+<select id="mgrade">
+
+<option value="">
+選択してください
+</option>
+
+<option>
+中学1年
+</option>
+
+<option>
+中学2年
+</option>
+
+<option>
+中学3年
+</option>
+
+<option>
+高校1年
+</option>
+
+<option>
+高校2年
+</option>
+
+</select>
+
+
+<label for="mclass">
+クラス
+</label>
+
+<select id="mclass">
+
+<option value="">
+選択してください
+</option>
+
+<option>A</option>
+<option>B</option>
+<option>C</option>
+<option>D</option>
+<option>E</option>
+<option>F</option>
+<option>G</option>
+<option>H</option>
+<option>I</option>
+<option>J</option>
+<option>K</option>
+
+</select>
+
+
+<button
+  id="addMemberButton"
+  class="primary"
+  type="button"
+>
+登録する
+</button>
+
+<button
+  id="cancelMemberEditButton"
+  class="secondary cancel-edit hidden"
+  type="button"
+>
+変更をキャンセル
+</button>
+
+<div id="memberMsg"></div>
+
+</div>
+
+
+<!-- =====================================================
+     部員名簿
+===================================================== -->
+
+<div class="card">
+
+<h2 class="section-title">
+部員名簿
+</h2>
+
+<div id="members">
+<p class="small">
+読み込み中...
+</p>
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     登録済み予定
+===================================================== -->
+
+<div class="card">
+
+<h2 class="section-title">
+登録済みの予定
+</h2>
+
+<p class="sub-title">
+部員サイトに公開されている予定です。
+</p>
+
+<div id="registeredCalendar"></div>
+
+<div
+  id="registeredDayDetail"
+  class="day-detail hidden"
+></div>
+
+</div>
+
+
+</section>
+
+</main>
+
+
+<script type="module">
+
+import{
+  initializeApp
+}
+from
+"https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+
+import{
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+  setPersistence,
+  browserLocalPersistence
+}
+from
+"https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+
+import{
+  getDatabase,
+  ref,
+  get,
+  set,
+  update,
+  remove
+}
+from
+"https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+
+
+const firebaseConfig={
+  apiKey:"AIzaSyAK9yRsSLSfYpLSyluzwRyI22Zp32KeMSA",
+  authDomain:"seikyo-handbell-club.firebaseapp.com",
+  databaseURL:"https://seikyo-handbell-club-default-rtdb.firebaseio.com",
+  projectId:"seikyo-handbell-club",
+  storageBucket:"seikyo-handbell-club.firebasestorage.app",
+  messagingSenderId:"55435007971",
+  appId:"1:55435007971:web:25f5c3b9dcd4324bc3f2d6"
+};
+
+const ADMIN_EMAIL="kazuma.cosmos@gmail.com";
+
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getDatabase(app);
+
+await setPersistence(
+  auth,
+  browserLocalPersistence
+);
+
+const $=id=>document.getElementById(id);
+
+
+/* =====================================================
+   共通
+===================================================== */
+
+function esc(v){
+  return String(v??"").replace(
+    /[&<>"']/g,
+    c=>({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#39;"
+    }[c])
+  );
+}
+
+
+function message(id,text,type=""){
+  const e=$(id);
+  if(!e)return;
+
+  e.className=text?`msg ${type}`:"";
+  e.textContent=text||"";
+}
+
+
+function makeTimeRange(start,end){
+
+  start=String(start||"").trim();
+  end=String(end||"").trim();
+
+  if(!start&&!end){
+    return "終日";
+  }
+
+  if(!start||!end||start>=end){
+    return null;
+  }
+
+  return `${start}〜${end}`;
+}
+
+
+function splitTimeRange(time){
+
+  const v=String(time||"").trim();
+
+  if(!v||v==="終日"){
+    return{
+      start:"",
+      end:""
+    };
+  }
+
+  const m=v.match(
+    /^(\d{1,2}:\d{2})\s*[〜~\-－]\s*(\d{1,2}:\d{2})$/
+  );
+
+  if(!m){
+    return{
+      start:"",
+      end:""
+    };
+  }
+
+  return{
+    start:m[1],
+    end:m[2]
+  };
+}
+
+
+/* =====================================================
+   管理者
+===================================================== */
+
+async function isAdmin(){
+
+  if(!auth.currentUser){
+    return false;
+  }
+
+  const s=await get(
+    ref(db,"admins/"+auth.currentUser.uid)
+  );
+
+  return s.exists()&&s.val()===true;
+}
+
+
+onAuthStateChanged(
+  auth,
+  async user=>{
+
+    if(!user){
+
+      $("login").classList.remove("hidden");
+      $("app").classList.add("hidden");
+
+      return;
+    }
+
+    try{
+
+      if(!(await isAdmin())){
+
+        await signOut(auth);
+        return;
+      }
+
+      $("login").classList.add("hidden");
+      $("app").classList.remove("hidden");
+      $("password").value="";
+
+      await loadMembers();
+      await loadSchedules();
+
+    }catch(e){
+
+      console.error(e);
+
+      message(
+        "loginMsg",
+        "管理者権限の確認に失敗しました。\n\n"+
+        (e.message||"不明"),
+        "error"
+      );
+    }
+
+  }
+);
+
+
+async function adminLogin(){
+
+  const password=$("password").value;
+
+  message("loginMsg","");
+
+  if(!password){
+
+    message(
+      "loginMsg",
+      "パスワードを入力してください。",
+      "error"
+    );
+
+    return;
+  }
+
+  const b=$("loginButton");
+
+  b.disabled=true;
+  b.textContent="ログイン中...";
+
+  try{
+
+    const c=
+      await signInWithEmailAndPassword(
+        auth,
+        ADMIN_EMAIL,
+        password
+      );
+
+    const s=
+      await get(
+        ref(db,"admins/"+c.user.uid)
+      );
+
+    if(!s.exists()||s.val()!==true){
+
+      await signOut(auth);
+
+      message(
+        "loginMsg",
+        "管理者として登録されていません。",
+        "error"
+      );
+
+      return;
+    }
+
+    $("login").classList.add("hidden");
+    $("app").classList.remove("hidden");
+
+    await loadMembers();
+    await loadSchedules();
+
+  }catch(e){
+
+    message(
+      "loginMsg",
+      "ログインできませんでした。\n\n"+
+      "エラーコード: "+(e.code||"不明")+
+      "\n詳細: "+(e.message||"不明"),
+      "error"
+    );
+
+  }finally{
+
+    b.disabled=false;
+    b.textContent="ログイン";
+  }
+}
+
+
+async function logout(){
+
+  if(!confirm("ログアウトしますか？")){
+    return;
+  }
+
+  await signOut(auth);
+}
+
+
+/* =====================================================
+   部員登録
+===================================================== */
+
+const gradeOrder={
+  "中学1年":0,
+  "中学2年":1,
+  "中学3年":2,
+  "高校1年":3,
+  "高校2年":4
+};
+
+const classOrder={
+  A:0,B:1,C:2,D:3,E:4,F:5,
+  G:6,H:7,I:8,J:9,K:10
+};
+
+
+let editingMemberId=null;
+
+
+async function addMember(){
+
+  if(!(await isAdmin()))return;
+
+  const id=$("mid").value.trim();
+  const name=$("mname").value.trim();
+  const grade=$("mgrade").value;
+  const className=$("mclass").value;
+
+  if(!id||!name||!grade||!className){
+
+    message(
+      "memberMsg",
+      "学校ID・名前・学年・クラスをすべて入力してください。",
+      "error"
+    );
+
+    return;
+  }
+
+
+  /* -----------------------------
+     編集
+  ----------------------------- */
+
+  if(editingMemberId){
+
+    await update(
+      ref(db,"memberRegistrations/"+editingMemberId),
+      {
+        name,
+        grade,
+        className
+      }
+    );
+
+    clearMemberForm();
+
+    message(
+      "memberMsg",
+      "変更を保存しました。",
+      "success"
+    );
+
+    await loadMembers();
+
+    return;
+  }
+
+
+  /* -----------------------------
+     新規登録
+  ----------------------------- */
+
+  if(
+    (await get(
+      ref(db,"memberRegistrations/"+id)
+    )).exists()
+  ){
+
+    message(
+      "memberMsg",
+      "その学校IDはすでに登録されています。",
+      "error"
+    );
+
+    return;
+  }
+
+
+  await set(
+    ref(db,"memberRegistrations/"+id),
+    {
+      schoolId:id,
+      name,
+      grade,
+      className,
+      createdAt:Date.now()
+    }
+  );
+
+
+  await set(
+    ref(db,"memberIds/"+id),
+    {
+      accountCreated:false
+    }
+  );
+
+
+  clearMemberForm();
+
+  message(
+    "memberMsg",
+    "登録しました。",
+    "success"
+  );
+
+  await loadMembers();
+}
+
+
+async function loadMembers(){
+
+  const s=
+    await get(
+      ref(db,"memberRegistrations")
+    );
+
+  const data=s.exists()?s.val():{};
+
+  const members=Object.entries(data);
+
+  members.sort(
+    ([,a],[,b])=>
+      (gradeOrder[a.grade]??99)-
+      (gradeOrder[b.grade]??99)||
+      (classOrder[a.className]??99)-
+      (classOrder[b.className]??99)||
+      String(a.name||"")
+        .localeCompare(
+          String(b.name||""),
+          "ja"
+        )
+  );
+
+
+  const membersWithAuth=
+    await Promise.all(
+      members.map(async ([id,x])=>{
+        const idSnap=
+          await get(ref(db,"memberIds/"+id));
+        return [
+          id,
+          x,
+          idSnap.exists()?(idSnap.val()||{}):{}
+        ];
+      })
+    );
+
+  $("members").innerHTML=
+    membersWithAuth.length
+
+    ?
+
+    membersWithAuth.map(
+      ([id,x,account])=>
+      `
+      <div class="item">
+
+        <div class="item-main">
+
+          <div>
+            <strong>
+              ${esc(x.name)}
+            </strong>
+
+            <div class="small">
+              （${esc(id)}）
+            </div>
+          </div>
+
+          <div class="item-actions">
+
+            <button
+              onclick="editMember('${esc(id)}')"
+            >
+              変更
+            </button>
+
+            <button
+              class="delete-button"
+              onclick="deleteMember('${esc(id)}')"
+            >
+              削除
+            </button>
+
+          </div>
+
+        </div>
+
+        <div class="small">
+          ${esc(x.grade)}・${esc(x.className)}組
+        </div>
+
+        <div class="small" style="margin-top:5px">
+          復旧用メール：${esc(account.recoveryEmail || account.authEmail || "未登録")}
+        </div>
+
+      </div>
+      `
+    ).join("")
+
+    :
+
+    "<p class='small'>まだ登録されていません。</p>";
+}
+
+
+async function editMember(id){
+
+  if(!(await isAdmin()))return;
+
+  const s=
+    await get(
+      ref(db,"memberRegistrations/"+id)
+    );
+
+  if(!s.exists())return;
+
+  const d=s.val();
+
+  editingMemberId=id;
+
+  $("mid").value=id;
+  $("mid").disabled=true;
+
+  $("mname").value=d.name||"";
+  $("mgrade").value=d.grade||"";
+  $("mclass").value=d.className||"";
+
+  $("addMemberButton").textContent=
+    "変更を保存";
+
+  $("cancelMemberEditButton")
+    .classList.remove("hidden");
+
+  $("memberEditingLabel").innerHTML=
+    `<span class="editing-label">部員情報を変更中</span>`;
+
+  $("memberRegistrationCard")
+    .classList.add("member-editing");
+
+  $("memberRegistrationCard")
+    .scrollIntoView({
+      behavior:"smooth",
+      block:"center"
+    });
+}
+
+
+function clearMemberForm(){
+
+  editingMemberId=null;
+
+  $("mid").value="";
+  $("mid").disabled=false;
+
+  $("mname").value="";
+  $("mgrade").value="";
+  $("mclass").value="";
+
+  $("addMemberButton").textContent=
+    "登録する";
+
+  $("cancelMemberEditButton")
+    .classList.add("hidden");
+
+  $("memberEditingLabel").innerHTML="";
+
+  $("memberRegistrationCard")
+    .classList.remove("member-editing");
+}
+
+
+function cancelMemberEdit(){
+
+  clearMemberForm();
+
+  message(
+    "memberMsg",
+    "変更をキャンセルしました。"
+  );
+}
+
+
+async function deleteMember(id){
+
+  if(!(await isAdmin()))return;
+
+  if(
+    !confirm(
+      "この部員登録を削除しますか？"
+    )
+  ){
+    return;
+  }
+
+  await remove(
+    ref(db,"memberRegistrations/"+id)
+  );
+
+  await remove(
+    ref(db,"memberIds/"+id)
+  );
+
+  await loadMembers();
+}
+
+
+/* =====================================================
+   PDF
+===================================================== */
+
+let pdfjsLib=null;
+
+
+async function getPdfJs(){
+
+  if(pdfjsLib){
+    return pdfjsLib;
+  }
+
+  const m=
+    await import(
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs"
+    );
+
+  m.GlobalWorkerOptions.workerSrc=
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
+
+  return pdfjsLib=m;
+}
+
+
+/*
+  PDFから読み取らない項目。
+
+  「備考」「練習曲の目安」など、
+  予定そのものではない項目を除外する。
+*/
+
+function isPdfIgnoredText(text){
+
+  const v=
+    String(text||"")
+      .replace(/\s+/g,"")
+      .trim();
+
+  if(!v){
+    return true;
+  }
+
+  return(
+    v==="備考"||
+    v==="練習曲の目安"||
+    v==="練習曲"||
+    v==="持ち物"||
+    v==="連絡事項"||
+    v==="注意事項"||
+    v==="注意"||
+    v==="メモ"||
+    v==="参考"||
+    v==="その他"
+  );
+}
+
+
+async function extractPdfLines(file){
+
+  const pdf=await getPdfJs();
+
+  const buf=await file.arrayBuffer();
+
+  const doc=
+    await pdf.getDocument({
+      data:buf
+    }).promise;
+
+  const all=[];
+
+  for(
+    let p=1;
+    p<=doc.numPages;
+    p++
+  ){
+
+    const page=await doc.getPage(p);
+
+    const items=
+      (await page.getTextContent())
+      .items
+      .filter(
+        i=>i.str&&i.str.trim()
+      )
+      .map(
+        i=>({
+          text:i.str.trim(),
+          x:Number(i.transform?.[4]||0),
+          y:Number(i.transform?.[5]||0)
+        })
+      );
+
+
+    items.sort(
+      (a,b)=>
+        Math.abs(a.y-b.y)>3
+        ?b.y-a.y
+        :a.x-b.x
+    );
+
+
+    const rows=[];
+
+    for(const item of items){
+
+      let r=
+        rows.find(
+          r=>Math.abs(r.y-item.y)<4
+        );
+
+      if(!r){
+
+        r={
+          y:item.y,
+          items:[]
+        };
+
+        rows.push(r);
+      }
+
+      r.items.push(item);
+    }
+
+
+    rows.sort(
+      (a,b)=>b.y-a.y
+    );
+
+
+    for(const r of rows){
+
+      r.items.sort(
+        (a,b)=>a.x-b.x
+      );
+
+      const text=
+        r.items
+        .map(i=>i.text)
+        .join(" ")
+        .replace(/\s+/g," ")
+        .trim();
+
+      if(
+        text&&
+        !isPdfIgnoredText(text)
+      ){
+
+        all.push({
+          page:p,
+          y:r.y,
+          items:r.items,
+          text
+        });
+      }
+    }
+  }
+
+  return all;
+}
+
+
+/*
+  PDFの1行から部活予定を作る。
+
+  重要：
+  ・備考は作らない
+  ・練習曲の目安は作らない
+  ・PDFから読み込んだタイトルは空欄
+*/
+
+function makeCandidate(dateObj,text){
+
+  if(!text)return null;
+
+
+  /*
+    「備考」「練習曲の目安」などは
+    予定として一切読み込まない。
+  */
+
+  if(isPdfIgnoredText(text)){
+    return null;
+  }
+
+
+  /*
+    行の中に「備考」や「練習曲の目安」が
+    含まれている場合も読み込まない。
+  */
+
+  const compact=
+    String(text)
+      .replace(/\s+/g,"")
+      .trim();
+
+  if(
+    compact.includes("備考")||
+    compact.includes("練習曲の目安")||
+    compact.includes("練習曲")
+  ){
+    return null;
+  }
+
+
+  const date=
+    `${dateObj.year}-`+
+    `${String(dateObj.month).padStart(2,"0")}-`+
+    `${String(dateObj.day).padStart(2,"0")}`;
+
+
+  const tm=
+    text.match(
+      /\d{1,2}:\d{2}\s*[〜~\-－]\s*\d{1,2}:\d{2}/
+    )?.[0]
+    ?.replace(/\s+/g,"")
+    ||"";
+
+
+  const place=
+    text.includes("音楽練習室")
+    ? "音楽練習室"
+    :"";
+
+
+  /*
+    PDF読み込み時はタイトルを自動生成しない。
+    ここでは必ず空欄にする。
+  */
+
+  const title="";
+
+
+  /*
+    時間も場所もなく、
+    部活予定と判断できない普通の文章は除外。
+
+    「不在」「文化祭」「リハーサル」
+    「準備」「休み」は従来どおり候補として扱う。
+  */
+
+  if(
+    !tm&&
+    !place&&
+    !/不在|文化祭|リハーサル|準備|休み/.test(text)
+  ){
+    return null;
+  }
+
+
+  return{
+    date,
+    time:tm||"終日",
+    place,
+    title
+  };
+}
+
+
+function parseScheduleLines(lines){
+
+  let month=null;
+
+  for(const l of lines){
+
+    if(isPdfIgnoredText(l.text)){
+      continue;
+    }
+
+    const m=
+      l.text.match(/(\d{1,2})月/);
+
+    if(
+      m&&
+      +m[1]>=1&&
+      +m[1]<=12
+    ){
+
+      month=+m[1];
+      break;
+    }
+  }
+
+
+  if(!month){
+
+    throw new Error(
+      "PDFから月を読み取れませんでした。"
+    );
+  }
+
+
+  const year=
+    new Date().getFullYear();
+
+  const out=[];
+
+  let cur=null;
+
+
+  for(const l of lines){
+
+    const raw=l.text;
+
+
+    /*
+      備考・練習曲関係は完全に無視。
+    */
+
+    if(isPdfIgnoredText(raw)){
+      continue;
+    }
+
+
+    const compact=
+      String(raw)
+        .replace(/\s+/g,"")
+        .trim();
+
+
+    if(
+      compact.includes("備考")||
+      compact.includes("練習曲の目安")||
+      compact.includes("練習曲")
+    ){
+      continue;
+    }
+
+
+    const m=
+      raw.match(
+        /(\d{1,2})月\s*(\d{1,2})日?/
+      )
+      ||
+      raw.match(
+        /(\d{1,2})[\/／](\d{1,2})/
+      );
+
+
+    if(
+      m&&
+      +m[1]>=1&&
+      +m[1]<=12&&
+      +m[2]>=1&&
+      +m[2]<=31
+    ){
+
+      cur={
+        year,
+        month:+m[1],
+        day:+m[2]
+      };
+
+
+      const rest=
+        raw
+        .replace(m[0],"")
+        .trim();
+
+
+      if(
+        rest&&
+        !isPdfIgnoredText(rest)
+      ){
+
+        const c=
+          makeCandidate(
+            cur,
+            rest
+          );
+
+        if(c){
+          out.push(c);
+        }
+      }
+
+      continue;
+    }
+
+
+    if(cur){
+
+      const c=
+        makeCandidate(
+          cur,
+          raw
+        );
+
+
+      if(
+        c&&
+        (
+          /\d{1,2}:\d{2}/.test(raw)||
+          raw.includes("音楽練習室")||
+          /不在|文化祭|リハーサル|準備|休み/.test(raw)
+        )
+      ){
+
+        out.push(c);
+      }
+    }
+  }
+
+
+  /*
+    月を1か月だけに限定
+  */
+
+  const months=
+    [...new Set(
+      out.map(x=>x.date.slice(0,7))
+    )];
+
+
+  if(months.length>1){
+
+    throw new Error(
+      "1回の読み込みで扱えるのは1か月分だけです。"
+    );
+  }
+
+
+  /*
+    同一内容の重複を除去。
+
+    タイトルは常に空欄なので、
+    日付・時間・場所で重複を判定する。
+  */
+
+  return[
+    ...new Map(
+      out.map(
+        x=>[
+          [
+            x.date,
+            x.time,
+            x.place
+          ].join("|"),
+          x
+        ]
+      )
+    ).values()
+  ];
+}
+
+
+/* =====================================================
+   PDF仮カレンダー
+===================================================== */
+
+let pdfCandidatesData=[];
+
+let pdfCalendarYear=null;
+let pdfCalendarMonth=null;
+
+let pdfSelectedDate=null;
+
+
+async function readSchedulePDF(){
+
+  if(!(await isAdmin()))return;
+
+  const file=
+    $("schedulePdf").files[0];
+
+  if(!file){
+
+    message(
+      "pdfStatus",
+      "PDFファイルを選択してください。",
+      "error"
+    );
+
+    return;
+  }
+
+
+  const b=$("readPdfButton");
+
+  b.disabled=true;
+  b.textContent=
+    "PDFを読み込んでいます...";
+
+
+  try{
+
+    const c=
+      parseScheduleLines(
+        await extractPdfLines(file)
+      );
+
+
+    if(!c.length){
+
+      message(
+        "pdfStatus",
+        "PDFから部活予定を見つけられませんでした。",
+        "error"
+      );
+
+      return;
+    }
+
+
+    pdfCandidatesData=c;
+
+
+    const firstDate=
+      c
+      .map(x=>x.date)
+      .sort()[0];
+
+
+    pdfCalendarYear=
+      Number(firstDate.slice(0,4));
+
+    pdfCalendarMonth=
+      Number(firstDate.slice(5,7))-1;
+
+
+    pdfSelectedDate=null;
+
+
+    renderPdfCalendar();
+
+
+    $("pdfCandidates")
+      .classList.remove("hidden");
+
+
+    message(
+      "pdfStatus",
+      `${c.length}件の予定を読み取りました。`,
+      "success"
+    );
+
+
+  }catch(e){
+
+    message(
+      "pdfStatus",
+      "PDFの読み込みに失敗しました。\n\n"+
+      (e.message||"不明"),
+      "error"
+    );
+
+  }finally{
+
+    b.disabled=false;
+    b.textContent="PDFを読み込む";
+  }
+}
+
+
+function getPdfCandidatesForDate(date){
+
+  return pdfCandidatesData
+    .filter(x=>x.date===date);
+}
+
+
+function getPdfDaysCount(date){
+
+  return getPdfCandidatesForDate(date).length;
+}
+
+
+function renderPdfCalendar(){
+
+  if(
+    pdfCalendarYear===null||
+    pdfCalendarMonth===null
+  ){
+    return;
+  }
+
+
+  const year=pdfCalendarYear;
+  const month=pdfCalendarMonth;
+
+
+  const first=
+    new Date(
+      year,
+      month,
+      1
+    );
+
+
+  /*
+    月曜始まり
+  */
+
+  let start=
+    first.getDay();
+
+  start=
+    start===0
+    ?6
+    :start-1;
+
+
+  const last=
+    new Date(
+      year,
+      month+1,
+      0
+    ).getDate();
+
+
+  let html=`
+
+    <div class="monthbar">
+
+      <div class="month-center">
+
+        <div class="month-title">
+          ${year}年${month+1}月
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="week">
+
+      <div>月</div>
+      <div>火</div>
+      <div>水</div>
+      <div>木</div>
+      <div>金</div>
+      <div>土</div>
+      <div>日</div>
+
+    </div>
+
+    <div class="days">
+  `;
+
+
+  for(
+    let i=0;
+    i<start;
+    i++
+  ){
+
+    html+=`
+      <div class="day empty"></div>
+    `;
+  }
+
+
+  for(
+    let d=1;
+    d<=last;
+    d++
+  ){
+
+    const date=
+      `${year}-`+
+      `${String(month+1).padStart(2,"0")}-`+
+      `${String(d).padStart(2,"0")}`;
+
+
+    const count=
+      getPdfDaysCount(date);
+
+
+    /*
+      既存登録済み予定も背景に反映
+    */
+
+    const registered=
+      registeredSchedulesData
+      ?getSchedulesForDateFromData(
+        registeredSchedulesData,
+        date
+      )
+      :[];
+
+
+    const classes=
+      getScheduleDayClass(
+        registered
+      );
+
+
+    const sunday=
+      new Date(
+        year,
+        month,
+        d
+      ).getDay()===0;
+
+
+    const selected=
+      pdfSelectedDate===date;
+
+
+    html+=`
+
+      <div
+        class="day
+          ${classes}
+          ${sunday?"sunday-day":""}
+          ${selected?"selected-day":""}
+        "
+        onclick="openPdfDay('${date}')"
+      >
+
+        <div class="daynum">
+          ${d}
+        </div>
+
+        ${
+          count
+          ?
+          `<span class="count pdf-count">
+            ${count}件
+          </span>`
+          :
+          ""
+        }
+
+      </div>
+    `;
+  }
+
+
+  html+=`
+    </div>
+
+    <div class="calendar-legend">
+
+      <div class="calendar-legend-item">
+        <span class="calendar-legend-dot legend-blue"></span>
+        <span>部活動</span>
+      </div>
+
+      <div class="calendar-legend-item">
+        <span class="calendar-legend-dot legend-green"></span>
+        <span>試験期間</span>
+      </div>
+
+      <div class="calendar-legend-item">
+        <span class="calendar-legend-dot legend-purple"></span>
+        <span>演奏会</span>
+      </div>
+
+      <div class="calendar-legend-item">
+        <span class="calendar-legend-dot legend-red"></span>
+        <span>学校が休み</span>
+      </div>
+
+      <div class="calendar-legend-item">
+        <span class="calendar-legend-dot legend-orange"></span>
+        <span>その他</span>
+      </div>
+
+    </div>
+  `;
+
+
+  $("pdfCalendar").innerHTML=html;
+
+
+  if(pdfSelectedDate){
+
+    renderPdfDayDetail(
+      pdfSelectedDate
+    );
+
+  }else{
+
+    $("pdfDayDetail")
+      .classList.add("hidden");
+  }
+}
+
+
+function openPdfDay(date){
+
+  pdfSelectedDate=date;
+
+  renderPdfCalendar();
+
+  renderPdfDayDetail(date);
+}
+
+
+function renderPdfDayDetail(date){
+
+  const list=
+    getPdfCandidatesForDate(date);
+
+
+  const box=$("pdfDayDetail");
+
+  box.classList.remove("hidden");
+
+
+  if(!list.length){
+
+    box.innerHTML=`
+
+      <h3 class="day-detail-title">
+        ${formatJapaneseDate(date)}
+      </h3>
+
+      <p class="small">
+        PDFから読み取った部活予定はありません。
+      </p>
+    `;
+
+    return;
+  }
+
+
+  box.innerHTML=`
+
+    <h3 class="day-detail-title">
+      ${formatJapaneseDate(date)}
+    </h3>
+
+    ${list.map(
+      (x,i)=>`
+
+      <div class="schedule-detail-item">
+
+        <div class="schedule-detail-head">
+
+          <div>
+
+            <span class="schedule-type type-normal">
+              部活動
+            </span>
+
+            ${
+              x.title
+              ?
+              `<div>
+                <strong>${esc(x.title)}</strong>
+              </div>`
+              :
+              ""
+            }
+
+            ${
+              x.time
+              ?
+              `<div class="detail-line">
+                時間：${esc(x.time)}
+              </div>`
+              :
+              ""
+            }
+
+            ${
+              x.place
+              ?
+              `<div class="detail-line">
+                場所：${esc(x.place)}
+              </div>`
+              :
+              ""
+            }
+
+          </div>
+
+          <div class="schedule-detail-actions">
+
+            <button
+              class="delete-button"
+              onclick="deletePdfCandidate(${i})"
+            >
+              削除
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      `
+    ).join("")}
+
+  `;
+}
+
+
+function deletePdfCandidate(index){
+
+  const list=
+    getPdfCandidatesForDate(
+      pdfSelectedDate
+    );
+
+  const target=list[index];
+
+  if(!target)return;
+
+
+  if(
+    !confirm(
+      `${formatJapaneseDate(pdfSelectedDate)}の部活予定を削除しますか？`
+    )
+  ){
+
+    return;
+  }
+
+
+  const targetIndex=
+    pdfCandidatesData.indexOf(target);
+
+
+  if(targetIndex>=0){
+
+    pdfCandidatesData.splice(
+      targetIndex,
+      1
+    );
+  }
+
+
+  renderPdfCalendar();
+}
+
+
+async function registerCandidates(){
+
+  if(!(await isAdmin()))return;
+
+
+  if(!pdfCandidatesData.length){
+
+    message(
+      "candidateMsg",
+      "登録する予定がありません。",
+      "error"
+    );
+
+    return;
+  }
+
+
+  const b=
+    $("registerCandidatesButton");
+
+  b.disabled=true;
+  b.textContent=
+    "登録しています...";
+
+
+  try{
+
+    /*
+      PDF予定はここで初めてFirebaseへ登録
+    */
+
+    for(
+      const x of pdfCandidatesData
+    ){
+
+      await set(
+        ref(db,"schedules/"+x.date),
+        {
+          type:"normal",
+          date:x.date,
+          time:x.time,
+          place:x.place,
+          title:x.title,
+          updatedAt:Date.now()
+        }
+      );
+    }
+
+
+    message(
+      "candidateMsg",
+      `${pdfCandidatesData.length}件の予定を登録しました。部員サイトにも反映されます。`,
+      "success"
+    );
+
+
+    await loadSchedules();
+
+
+  }catch(e){
+
+    message(
+      "candidateMsg",
+      "予定の登録に失敗しました。\n\n"+
+      (e.message||"不明"),
+      "error"
+    );
+
+  }finally{
+
+    b.disabled=false;
+    b.textContent="予定を登録";
+  }
+}
+
+
+/* =====================================================
+   登録済み予定
+===================================================== */
+
+let registeredSchedulesData={};
+
+let registeredCalendarYear=
+  new Date().getFullYear();
+
+let registeredCalendarMonth=
+  new Date().getMonth();
+
+let registeredSelectedDate=null;
+
+
+async function loadSchedules(){
+
+  const s=
+    await get(
+      ref(db,"schedules")
+    );
+
+  registeredSchedulesData=
+    s.exists()
+    ?s.val()
+    :{};
+
+
+  renderRegisteredCalendar();
+}
+
+
+function getSchedulesForDateFromData(
+  data,
+  date
+){
+
+  const result=[];
+
+  for(
+    const [key,x] of Object.entries(data||{})
+  ){
+
+    const type=x.type||"normal";
+
+
+    if(type==="normal"){
+
+      const xDate=
+        x.date||key;
+
+      if(xDate===date){
+
+        result.push({
+          ...x,
+          _key:key
+        });
+      }
+
+      continue;
+    }
+
+
+    if(type==="exam"){
+
+      if(
+        x.startDate&&
+        x.endDate&&
+        date>=x.startDate&&
+        date<=x.endDate
+      ){
+
+        result.push({
+          ...x,
+          _key:key
+        });
+      }
+
+      continue;
+    }
+
+
+    if(
+      (type==="concert"||
+       type==="schoolHoliday"||
+       type==="event")&&
+      x.date===date
+    ){
+
+      result.push({
+        ...x,
+        _key:key
+      });
+    }
+
+  }
+
+  return result;
+}
+
+
+function getScheduleDayClass(list){
+
+  if(!list.length){
+    return "off";
+  }
+
+
+  const types=
+    list.map(
+      x=>x.type||"normal"
+    );
+
+
+  if(types.includes("normal")){
+    return "club-day";
+  }
+
+  if(types.includes("exam")){
+    return "exam-day";
+  }
+
+  if(types.includes("concert")){
+    return "concert-day";
+  }
+
+  if(types.includes("schoolHoliday")){
+    return "school-holiday-day";
+  }
+
+  if(types.includes("event")){
+    return "event-day";
+  }
+
+  return "off";
+}
+
+
+function formatJapaneseDate(date){
+
+  const [y,m,d]=
+    date.split("-").map(Number);
+
+  const dt=
+    new Date(
+      y,
+      m-1,
+      d
+    );
+
+  const week=
+    ["日","月","火","水","木","金","土"]
+    [dt.getDay()];
+
+  return `${y}年${m}月${d}日（${week}）`;
+}
+
+
+function renderRegisteredCalendar(){
+
+  const year=
+    registeredCalendarYear;
+
+  const month=
+    registeredCalendarMonth;
+
+
+  const first=
+    new Date(
+      year,
+      month,
+      1
+    );
+
+
+  let start=
+    first.getDay();
+
+  start=
+    start===0
+    ?6
+    :start-1;
+
+
+  const last=
+    new Date(
+      year,
+      month+1,
+      0
+    ).getDate();
+
+
+  let html=`
+
+    <div class="monthbar">
+
+      <button
+        onclick="changeRegisteredMonth(-1)"
+      >
+        ‹
+      </button>
+
+      <div class="month-center">
+
+        <div class="month-title">
+          ${year}年${month+1}月
+        </div>
+
+        <button
+          class="today-button"
+          onclick="goRegisteredCurrentMonth()"
+        >
+          今月に戻る
+        </button>
+
+      </div>
+
+      <button
+        onclick="changeRegisteredMonth(1)"
+      >
+        ›
+      </button>
+
+    </div>
+
+    <div class="week">
+
+      <div>月</div>
+      <div>火</div>
+      <div>水</div>
+      <div>木</div>
+      <div>金</div>
+      <div>土</div>
+      <div>日</div>
+
+    </div>
+
+    <div class="days">
+  `;
+
+
+  for(
+    let i=0;
+    i<start;
+    i++
+  ){
+
+    html+=`
+      <div class="day empty"></div>
+    `;
+  }
+
+
+  for(
+    let d=1;
+    d<=last;
+    d++
+  ){
+
+    const date=
+      `${year}-`+
+      `${String(month+1).padStart(2,"0")}-`+
+      `${String(d).padStart(2,"0")}`;
+
+
+    const list=
+      getSchedulesForDateFromData(
+        registeredSchedulesData,
+        date
+      );
+
+
+    const cls=
+      getScheduleDayClass(list);
+
+
+    const sunday=
+      new Date(
+        year,
+        month,
+        d
+      ).getDay()===0;
+
+
+    const selected=
+      registeredSelectedDate===date;
+
+
+    html+=`
+
+      <div
+        class="day
+          ${cls}
+          ${sunday?"sunday-day":""}
+          ${selected?"selected-day":""}
+        "
+        onclick="openRegisteredDay('${date}')"
+      >
+
+        <div class="daynum">
+          ${d}
+        </div>
+
+        ${
+          list.length
+          ?
+          `<span class="count registered-count">
+            ${list.length}件
+          </span>`
+          :
+          ""
+        }
+
+      </div>
+
+    `;
+  }
+
+
+  html+=`
+
+    </div>
+
+    <div class="calendar-legend">
+
+      <div class="calendar-legend-item">
+        <span class="calendar-legend-dot legend-blue"></span>
+        <span>部活動</span>
+      </div>
+
+      <div class="calendar-legend-item">
+        <span class="calendar-legend-dot legend-green"></span>
+        <span>試験期間</span>
+      </div>
+
+      <div class="calendar-legend-item">
+        <span class="calendar-legend-dot legend-purple"></span>
+        <span>演奏会</span>
+      </div>
+
+      <div class="calendar-legend-item">
+        <span class="calendar-legend-dot legend-red"></span>
+        <span>学校が休み</span>
+      </div>
+
+      <div class="calendar-legend-item">
+        <span class="calendar-legend-dot legend-orange"></span>
+        <span>その他</span>
+      </div>
+
+    </div>
+
+  `;
+
+
+  $("registeredCalendar").innerHTML=html;
+
+
+  if(registeredSelectedDate){
+
+    renderRegisteredDayDetail(
+      registeredSelectedDate
+    );
+
+  }
+}
+
+
+function changeRegisteredMonth(delta){
+
+  registeredCalendarMonth+=delta;
+
+  if(registeredCalendarMonth<0){
+
+    registeredCalendarMonth=11;
+    registeredCalendarYear--;
+
+  }
+
+  if(registeredCalendarMonth>11){
+
+    registeredCalendarMonth=0;
+    registeredCalendarYear++;
+
+  }
+
+
+  registeredSelectedDate=null;
+
+  $("registeredDayDetail")
+    .classList.add("hidden");
+
+  renderRegisteredCalendar();
+}
+
+
+function goRegisteredCurrentMonth(){
+
+  const now=new Date();
+
+  registeredCalendarYear=
+    now.getFullYear();
+
+  registeredCalendarMonth=
+    now.getMonth();
+
+  registeredSelectedDate=null;
+
+  $("registeredDayDetail")
+    .classList.add("hidden");
+
+  renderRegisteredCalendar();
+}
+
+
+function openRegisteredDay(date){
+
+  registeredSelectedDate=date;
+
+  renderRegisteredCalendar();
+
+  renderRegisteredDayDetail(date);
+}
+
+
+function renderRegisteredDayDetail(date){
+
+  const list=
+    getSchedulesForDateFromData(
+      registeredSchedulesData,
+      date
+    );
+
+
+  const box=
+    $("registeredDayDetail");
+
+  box.classList.remove("hidden");
+
+
+  if(!list.length){
+
+    box.innerHTML=`
+
+      <h3 class="day-detail-title">
+        ${formatJapaneseDate(date)}
+      </h3>
+
+      <p class="small">
+        登録されている予定はありません。
+      </p>
+
+    `;
+
+    return;
+  }
+
+
+  box.innerHTML=`
+
+    <h3 class="day-detail-title">
+      ${formatJapaneseDate(date)}
+    </h3>
+
+    ${list.map(
+      x=>renderRegisteredScheduleItem(x)
+    ).join("")}
+
+  `;
+}
+
+
+function renderRegisteredScheduleItem(x){
+
+  const type=
+    x.type||"normal";
+
+
+  const label={
+    normal:"部活動",
+    exam:"試験期間",
+    concert:"演奏会",
+    schoolHoliday:"学校が休みの日",
+    event:"その他のイベント"
+  }[type]||"予定";
+
+
+  let dateText="";
+
+
+  if(type==="exam"){
+
+    dateText=
+      `${x.startDate||""} 〜 ${x.endDate||""}`;
+
+  }else{
+
+    dateText=
+      x.date||"";
+  }
+
+
+  return`
+
+    <div class="schedule-detail-item">
+
+      <div class="schedule-detail-head">
+
+        <div>
+
+          <span
+            class="schedule-type type-${esc(type)}"
+          >
+            ${esc(label)}
+          </span>
+
+          ${
+            x.title
+            ?
+            `<div>
+              <strong>
+                ${esc(x.title)}
+              </strong>
+            </div>`
+            :
+            ""
+          }
+
+          ${
+            type==="exam"
+            ?
+            `<div class="detail-line">
+              期間：${esc(dateText)}
+            </div>`
+            :
+            ""
+          }
+
+          ${
+            x.time
+            ?
+            `<div class="detail-line">
+              時間：${esc(x.time)}
+            </div>`
+            :
+            ""
+          }
+
+          ${
+            x.place
+            ?
+            `<div class="detail-line">
+              場所：${esc(x.place)}
+            </div>`
+            :
+            ""
+          }
+
+          ${
+            x.note
+            ?
+            `<div class="detail-note">
+              備考：${esc(x.note)}
+            </div>`
+            :
+            ""
+          }
+
+        </div>
+
+
+        <div class="schedule-detail-actions">
+
+          <button
+            onclick="editSchedule('${esc(x._key)}')"
+          >
+            変更
+          </button>
+
+          <button
+            class="delete-button"
+            onclick="deleteSchedule('${esc(x._key)}')"
+          >
+            削除
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
+}
+
+
+/* =====================================================
+   手動予定
+===================================================== */
+
+let editingScheduleKey=null;
+
+
+function updateScheduleFields(){
+
+  const t=$("stype").value;
+
+  for(
+    const x of [
+      "normal",
+      "exam",
+      "concert",
+      "schoolHoliday",
+      "event"
+    ]
+  ){
+
+    $(x+"ScheduleFields")
+      .classList.toggle(
+        "hidden",
+        t!==x
+      );
+  }
+}
+
+
+async function saveSchedule(){
+
+  if(!(await isAdmin()))return;
+
+  const type=$("stype").value;
+
+
+  /* ==========================
+     通常部活
+  ========================== */
+
+  if(type==="normal"){
+
+    const date=$("sdate").value;
+
+    const time=
+      makeTimeRange(
+        $("stimeStart").value,
+        $("stimeEnd").value
+      );
+
+    const place=
+      $("splace").value.trim();
+
+    const title=
+      $("sTitle").value.trim();
+
+    const note=
+      $("snote").value.trim();
+
+
+    if(!date||time===null){
+
+      message(
+        "scheduleMsg",
+        "日付と時間を確認してください。",
+        "error"
+      );
+
+      return;
+    }
+
+
+    /*
+      変更時に日付が変わった場合
+    */
+
+    if(editingScheduleKey){
+
+      const oldKey=
+        editingScheduleKey;
+
+      const newKey=date;
+
+
+      await remove(
+        ref(db,"schedules/"+oldKey)
+      );
+
+
+      await set(
+        ref(db,"schedules/"+newKey),
+        {
+          type:"normal",
+          date,
+          title,
+          time,
+          place,
+          note,
+          updatedAt:Date.now()
+        }
+      );
+
+
+      editingScheduleKey=null;
+
+      clearScheduleForm();
+
+
+      message(
+        "scheduleMsg",
+        "予定を変更しました。",
+        "success"
+      );
+
+
+      await loadSchedules();
+
+      return;
+    }
+
+
+    await set(
+      ref(db,"schedules/"+date),
+      {
+        type:"normal",
+        date,
+        title,
+        time,
+        place,
+        note,
+        updatedAt:Date.now()
+      }
+    );
+
+
+    clearScheduleForm();
+
+
+    message(
+      "scheduleMsg",
+      "予定を保存しました。",
+      "success"
+    );
+
+
+    await loadSchedules();
+
+    return;
+  }
+
+
+  /* ==========================
+     試験期間
+  ========================== */
+
+  if(type==="exam"){
+
+    const startDate=
+      $("examStartDate").value;
+
+    const endDate=
+      $("examEndDate").value;
+
+    const title=
+      $("examTitle").value.trim();
+
+    const note=
+      $("examNote").value.trim();
+
+
+    if(
+      !startDate||
+      !endDate||
+      startDate>endDate||
+      !title
+    ){
+
+      message(
+        "scheduleMsg",
+        "開始日・終了日・タイトルを確認してください。",
+        "error"
+      );
+
+      return;
+    }
+
+
+    const key=
+      editingScheduleKey
+      ||"special_"+Date.now();
+
+
+    await set(
+      ref(db,"schedules/"+key),
+      {
+        type:"exam",
+        startDate,
+        endDate,
+        title,
+        note,
+        updatedAt:Date.now()
+      }
+    );
+
+
+    editingScheduleKey=null;
+
+    clearScheduleForm();
+
+
+    message(
+      "scheduleMsg",
+      "試験期間を保存しました。",
+      "success"
+    );
+
+
+    await loadSchedules();
+
+    return;
+  }
+
+
+  /* ==========================
+     演奏会
+  ========================== */
+
+  if(type==="concert"){
+
+    const date=
+      $("concertDate").value;
+
+    const time=
+      makeTimeRange(
+        $("concertTimeStart").value,
+        $("concertTimeEnd").value
+      );
+
+    const title=
+      $("concertTitle").value.trim();
+
+    const place=
+      $("concertPlace").value.trim();
+
+    const note=
+      $("concertNote").value.trim();
+
+
+    if(!date||time===null||!title){
+
+      message(
+        "scheduleMsg",
+        "日付・時間・タイトルを確認してください。",
+        "error"
+      );
+
+      return;
+    }
+
+
+    const key=
+      editingScheduleKey
+      ||"special_"+Date.now();
+
+
+    await set(
+      ref(db,"schedules/"+key),
+      {
+        type:"concert",
+        date,
+        time,
+        title,
+        place,
+        note,
+        updatedAt:Date.now()
+      }
+    );
+
+
+    editingScheduleKey=null;
+
+    clearScheduleForm();
+
+
+    message(
+      "scheduleMsg",
+      "演奏会を保存しました。",
+      "success"
+    );
+
+
+    await loadSchedules();
+
+    return;
+  }
+
+
+  /* ==========================
+     学校休み
+  ========================== */
+
+  if(type==="schoolHoliday"){
+
+    const date=
+      $("schoolHolidayDate").value;
+
+    const title=
+      $("schoolHolidayTitle").value.trim();
+
+    const note=
+      $("schoolHolidayNote").value.trim();
+
+
+    if(!date){
+
+      message(
+        "scheduleMsg",
+        "日付を入力してください。",
+        "error"
+      );
+
+      return;
+    }
+
+
+    const key=
+      editingScheduleKey
+      ||"special_"+Date.now();
+
+
+    await set(
+      ref(db,"schedules/"+key),
+      {
+        type:"schoolHoliday",
+        date,
+        title,
+        note,
+        updatedAt:Date.now()
+      }
+    );
+
+
+    editingScheduleKey=null;
+
+    clearScheduleForm();
+
+
+    message(
+      "scheduleMsg",
+      "学校が休みの日を保存しました。",
+      "success"
+    );
+
+
+    await loadSchedules();
+
+    return;
+  }
+
+
+  /* ==========================
+     イベント
+  ========================== */
+
+  if(type==="event"){
+
+    const date=
+      $("eventDate").value;
+
+    const time=
+      makeTimeRange(
+        $("eventTimeStart").value,
+        $("eventTimeEnd").value
+      );
+
+    const title=
+      $("eventTitle").value.trim();
+
+    const place=
+      $("eventPlace").value.trim();
+
+    const note=
+      $("eventNote").value.trim();
+
+
+    if(!date||time===null||!title){
+
+      message(
+        "scheduleMsg",
+        "日付・時間・タイトルを確認してください。",
+        "error"
+      );
+
+      return;
+    }
+
+
+    const key=
+      editingScheduleKey
+      ||"special_"+Date.now();
+
+
+    await set(
+      ref(db,"schedules/"+key),
+      {
+        type:"event",
+        date,
+        time,
+        title,
+        place,
+        note,
+        updatedAt:Date.now()
+      }
+    );
+
+
+    editingScheduleKey=null;
+
+    clearScheduleForm();
+
+
+    message(
+      "scheduleMsg",
+      "イベントを保存しました。",
+      "success"
+    );
+
+
+    await loadSchedules();
+  }
+}
+
+
+function clearScheduleForm(){
+
+  $("sdate").value="";
+  $("stimeStart").value="";
+  $("stimeEnd").value="";
+  $("splace").value="";
+  $("sTitle").value="";
+  $("snote").value="";
+
+  $("examStartDate").value="";
+  $("examEndDate").value="";
+  $("examTitle").value="";
+  $("examNote").value="";
+
+  $("concertDate").value="";
+  $("concertTimeStart").value="";
+  $("concertTimeEnd").value="";
+  $("concertTitle").value="";
+  $("concertPlace").value="";
+  $("concertNote").value="";
+
+  $("schoolHolidayDate").value="";
+  $("schoolHolidayTitle").value="";
+  $("schoolHolidayNote").value="";
+
+  $("eventDate").value="";
+  $("eventTimeStart").value="";
+  $("eventTimeEnd").value="";
+  $("eventTitle").value="";
+  $("eventPlace").value="";
+  $("eventNote").value="";
+
+  $("saveScheduleButton").textContent=
+    "予定を保存";
+
+  editingScheduleKey=null;
+}
+
+
+async function editSchedule(key){
+
+  if(!(await isAdmin()))return;
+
+
+  const s=
+    await get(
+      ref(db,"schedules/"+key)
+    );
+
+  if(!s.exists())return;
+
+
+  const d=s.val();
+
+  const t=d.type||"normal";
+
+
+  editingScheduleKey=key;
+
+
+  $("stype").value=t;
+
+  updateScheduleFields();
+
+
+  if(t==="normal"){
+
+    $("sdate").value=
+      d.date||key;
+
+    const z=
+      splitTimeRange(d.time);
+
+    $("stimeStart").value=z.start;
+    $("stimeEnd").value=z.end;
+
+    $("splace").value=
+      d.place||"";
+
+    $("sTitle").value=
+      d.title||"";
+
+    $("snote").value=
+      d.note||"";
+  }
+
+
+  if(t==="exam"){
+
+    $("examStartDate").value=
+      d.startDate||d.date||"";
+
+    $("examEndDate").value=
+      d.endDate||d.date||"";
+
+    $("examTitle").value=
+      d.title||"";
+
+    $("examNote").value=
+      d.note||"";
+  }
+
+
+  if(t==="concert"){
+
+    $("concertDate").value=
+      d.date||"";
+
+    const z=
+      splitTimeRange(d.time);
+
+    $("concertTimeStart").value=
+      z.start;
+
+    $("concertTimeEnd").value=
+      z.end;
+
+    $("concertTitle").value=
+      d.title||"";
+
+    $("concertPlace").value=
+      d.place||"";
+
+    $("concertNote").value=
+      d.note||"";
+  }
+
+
+  if(t==="schoolHoliday"){
+
+    $("schoolHolidayDate").value=
+      d.date||key;
+
+    $("schoolHolidayTitle").value=
+      d.title||"";
+
+    $("schoolHolidayNote").value=
+      d.note||"";
+  }
+
+
+  if(t==="event"){
+
+    $("eventDate").value=
+      d.date||"";
+
+    const z=
+      splitTimeRange(d.time);
+
+    $("eventTimeStart").value=
+      z.start;
+
+    $("eventTimeEnd").value=
+      z.end;
+
+    $("eventTitle").value=
+      d.title||"";
+
+    $("eventPlace").value=
+      d.place||"";
+
+    $("eventNote").value=
+      d.note||"";
+  }
+
+
+  $("saveScheduleButton").textContent=
+    "変更を保存";
+
+
+  $("stype").scrollIntoView({
+    behavior:"smooth",
+    block:"center"
+  });
+}
+
+
+async function deleteSchedule(key){
+
+  if(!(await isAdmin()))return;
+
+
+  const s=
+    await get(
+      ref(db,"schedules/"+key)
+    );
+
+  if(!s.exists())return;
+
+
+  if(
+    !confirm(
+      "この予定を削除しますか？"
+    )
+  ){
+
+    return;
+  }
+
+
+  await remove(
+    ref(db,"schedules/"+key)
+  );
+
+
+  registeredSelectedDate=null;
+
+  $("registeredDayDetail")
+    .classList.add("hidden");
+
+
+  await loadSchedules();
+}
+
+
+/* =====================================================
+   window
+===================================================== */
+
+Object.assign(
+  window,
+  {
+    adminLogin,
+    logout,
+
+    addMember,
+    editMember,
+    deleteMember,
+
+    cancelMemberEdit,
+
+    readSchedulePDF,
+    openPdfDay,
+    deletePdfCandidate,
+    registerCandidates,
+
+    changeRegisteredMonth,
+    goRegisteredCurrentMonth,
+    openRegisteredDay,
+
+    saveSchedule,
+    editSchedule,
+    deleteSchedule
+  }
+);
+
+
+/* =====================================================
+   イベント
+===================================================== */
+
+$("loginButton")
+  .addEventListener(
+    "click",
+    adminLogin
+  );
+
+
+$("logoutButton")
+  .addEventListener(
+    "click",
+    logout
+  );
+
+
+$("addMemberButton")
+  .addEventListener(
+    "click",
+    addMember
+  );
+
+
+$("cancelMemberEditButton")
+  .addEventListener(
+    "click",
+    cancelMemberEdit
+  );
+
+
+$("readPdfButton")
+  .addEventListener(
+    "click",
+    readSchedulePDF
+  );
+
+
+$("registerCandidatesButton")
+  .addEventListener(
+    "click",
+    registerCandidates
+  );
+
+
+$("saveScheduleButton")
+  .addEventListener(
+    "click",
+    saveSchedule
+  );
+
+
+$("stype")
+  .addEventListener(
+    "change",
+    updateScheduleFields
+  );
+
+
+$("password")
+  .addEventListener(
+    "keydown",
+    e=>{
+      if(e.key==="Enter"){
+        adminLogin();
+      }
+    }
+  );
+
+
+updateScheduleFields();
+
+</script>
+
+</body>
+</html>
