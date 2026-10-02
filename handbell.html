@@ -2708,7 +2708,10 @@ async function sendPasswordReset(){
       s.val() || {};
 
     const resetEmail =
-      data.authEmail || data.recoveryEmail || "";
+      data.pendingRecoveryEmail ||
+      data.authEmail ||
+      data.recoveryEmail ||
+      "";
 
     if(!resetEmail){
       throw Error("no-recovery-email");
