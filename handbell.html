@@ -2205,7 +2205,7 @@ onAuthStateChanged(
     }
 
 
-    if(authProcessing || setupInProgress){
+    if(setupInProgress){
 
       return;
 
@@ -2237,6 +2237,10 @@ onAuthStateChanged(
       $("loginMsg")
         .innerHTML =
           '<div class="msg error">ログインは確認できましたが、生徒情報を取得できませんでした。管理者に登録内容を確認してもらってください。</div>';
+
+
+      authProcessing =
+        false;
 
 
       showLogin();
@@ -5174,21 +5178,32 @@ async function saveRecoveryEmail(){
 
   try{
 
+    const authUser =
+      auth.currentUser ||
+      currentUser;
+
+    if(!authUser){
+      throw Error("not-signed-in");
+    }
+
     const credential =
       EmailAuthProvider.credential(
-        currentUser.email,
+        authUser.email,
         currentPassword
       );
 
     await reauthenticateWithCredential(
-      currentUser,
+      authUser,
       credential
     );
 
     await updateEmail(
-      currentUser,
+      authUser,
       newEmail
     );
+
+    currentUser =
+      authUser;
 
     await update(
       ref(db,"memberIds/" + profile.schoolId),
@@ -5212,11 +5227,26 @@ async function saveRecoveryEmail(){
     let message =
       "復旧用メールアドレスを保存できませんでした。";
 
-    if(e.code === "auth/wrong-password")
+    if(
+      e.code === "auth/wrong-password" ||
+      e.code === "auth/invalid-credential"
+    )
       message = "現在のパスワードが正しくありません。";
 
     if(e.code === "auth/email-already-in-use")
       message = "そのメールアドレスはすでに別のアカウントで使用されています。";
+
+    if(e.code === "auth/requires-recent-login")
+      message = "安全のため、いったんログアウトして再ログインしてから、もう一度お試しください。";
+
+    if(e.code === "auth/invalid-email")
+      message = "メールアドレスの形式が正しくありません。";
+
+    if(e.code === "auth/network-request-failed")
+      message = "通信に失敗しました。通信状態を確認して、もう一度お試しください。";
+
+    if(e.message === "not-signed-in")
+      message = "ログイン状態を確認できませんでした。いったんログアウトして再ログインしてください。";
 
     $("myPageMsg").innerHTML=
       `<div class="msg error">${esc(message)}</div>`;
