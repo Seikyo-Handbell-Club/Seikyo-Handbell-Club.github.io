@@ -1281,6 +1281,22 @@ const ADMIN_EMAIL="kazuma.cosmos@gmail.com";
 
 const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
+/* =====================================================
+   カレンダー共通の表示範囲
+===================================================== */
+
+function getCalendarMinMonth(){
+  const now=new Date();
+  return new Date(now.getFullYear(),now.getMonth()-3,1);
+}
+
+function isCalendarMonthAllowed(date){
+  const min=getCalendarMinMonth();
+  const target=new Date(date.getFullYear(),date.getMonth(),1);
+  return target>=min;
+}
+
+
 const db=getDatabase(app);
 
 await setPersistence(
@@ -1565,13 +1581,13 @@ async function addMember(){
       }
     );
 
-    clearMemberForm();
-
     message(
       "memberMsg",
-      "変更を保存しました。",
+      "部員情報を変更しました。",
       "success"
     );
+
+    cancelMemberEdit();
 
     await loadMembers();
 
@@ -1656,26 +1672,13 @@ async function loadMembers(){
   );
 
 
-  const membersWithAuth=
-    await Promise.all(
-      members.map(async ([id,x])=>{
-        const idSnap=
-          await get(ref(db,"memberIds/"+id));
-        return [
-          id,
-          x,
-          idSnap.exists()?(idSnap.val()||{}):{}
-        ];
-      })
-    );
-
   $("members").innerHTML=
-    membersWithAuth.length
+    members.length
 
     ?
 
-    membersWithAuth.map(
-      ([id,x,account])=>
+    members.map(
+      ([id,x])=>
       `
       <div class="item">
 
@@ -1712,10 +1715,6 @@ async function loadMembers(){
 
         <div class="small">
           ${esc(x.grade)}・${esc(x.className)}組
-        </div>
-
-        <div class="small" style="margin-top:5px">
-          復旧用メール：${esc(account.recoveryEmail || account.authEmail || "未登録")}
         </div>
 
       </div>
@@ -2850,22 +2849,65 @@ let registeredCalendarMonth=
 let registeredSelectedDate=null;
 
 
+async function purgeExpiredSchedules(){
+
+  if(!(await isAdmin()))
+    return;
+
+  const s=await get(ref(db,"schedules"));
+
+  if(!s.exists())
+    return;
+
+  const schedules=s.val();
+  const now=new Date();
+  const expired=[];
+
+  for(const [key,x] of Object.entries(schedules||{})){
+
+    if(!x || typeof x!=="object")
+      continue;
+
+    const type=x.type||"normal";
+    let endDate="";
+
+    if(type==="exam")
+      endDate=x.endDate||x.startDate||"";
+    else
+      endDate=x.date||key;
+
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(String(endDate)))
+      continue;
+
+    const [y,m,d]=String(endDate).split("-").map(Number);
+    const expiry=new Date(y,m-1,d);
+    expiry.setMonth(expiry.getMonth()+4);
+
+    if(now>=expiry)
+      expired.push(key);
+  }
+
+  if(expired.length){
+    await Promise.all(
+      expired.map(key=>remove(ref(db,"schedules/"+key)))
+    );
+  }
+}
+
+
 async function loadSchedules(){
 
-  const s=
-    await get(
-      ref(db,"schedules")
-    );
+  await purgeExpiredSchedules();
+
+  const s=await get(ref(db,"schedules"));
 
   registeredSchedulesData=
     s.exists()
     ?s.val()
     :{};
 
-
   renderRegisteredCalendar();
 }
-
 
 function getSchedulesForDateFromData(
   data,
@@ -3205,22 +3247,17 @@ function renderRegisteredCalendar(){
 
 function changeRegisteredMonth(delta){
 
-  registeredCalendarMonth+=delta;
+  const next=new Date(
+    registeredCalendarYear,
+    registeredCalendarMonth+delta,
+    1
+  );
 
-  if(registeredCalendarMonth<0){
+  if(!isCalendarMonthAllowed(next))
+    return;
 
-    registeredCalendarMonth=11;
-    registeredCalendarYear--;
-
-  }
-
-  if(registeredCalendarMonth>11){
-
-    registeredCalendarMonth=0;
-    registeredCalendarYear++;
-
-  }
-
+  registeredCalendarYear=next.getFullYear();
+  registeredCalendarMonth=next.getMonth();
 
   registeredSelectedDate=null;
 
@@ -3229,7 +3266,6 @@ function changeRegisteredMonth(delta){
 
   renderRegisteredCalendar();
 }
-
 
 function goRegisteredCurrentMonth(){
 
