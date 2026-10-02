@@ -2252,13 +2252,6 @@ onAuthStateChanged(
     }
 
 
-    if(authProcessing || setupInProgress){
-
-      return;
-
-    }
-
-
     const loaded =
       await loadProfile();
 
@@ -5395,6 +5388,18 @@ window.backFromForm =
 
 window.showEdit =
   showEdit;
+
+
+window.changeEditMonth =
+  changeEditMonth;
+
+
+window.goEditCurrentMonth =
+  goEditCurrentMonth;
+
+
+window.showEditDate =
+  showEditDate;
 
 
 window.toggleOtherReason =
