@@ -1420,7 +1420,7 @@ import{
   sendPasswordResetEmail,
   reauthenticateWithCredential,
   EmailAuthProvider,
-  updateEmail,
+  verifyBeforeUpdateEmail,
   setPersistence,
   browserLocalPersistence
 }
@@ -2359,14 +2359,67 @@ async function login(){
     const memberIdData =
       memberIdSnap.val() || {};
 
-    const loginEmail =
-      memberIdData.authEmail || email(id);
+    const loginEmails = [];
 
-    await signInWithEmailAndPassword(
-      auth,
-      loginEmail,
-      pw
-    );
+    if(memberIdData.authEmail)
+      loginEmails.push(memberIdData.authEmail);
+
+    if(memberIdData.pendingRecoveryEmail &&
+       !loginEmails.includes(memberIdData.pendingRecoveryEmail))
+      loginEmails.push(memberIdData.pendingRecoveryEmail);
+
+    if(!loginEmails.includes(email(id)))
+      loginEmails.push(email(id));
+
+    let loginError = null;
+    let signedInEmail = "";
+
+    for(const loginEmail of loginEmails){
+
+      try{
+
+        await signInWithEmailAndPassword(
+          auth,
+          loginEmail,
+          pw
+        );
+
+        signedInEmail = loginEmail;
+        loginError = null;
+        break;
+
+      }catch(e){
+
+        loginError = e;
+
+      }
+
+    }
+
+    if(loginError)
+      throw loginError;
+
+    if(
+      memberIdData.pendingRecoveryEmail &&
+      auth.currentUser &&
+      auth.currentUser.email &&
+      auth.currentUser.email.toLowerCase() ===
+        memberIdData.pendingRecoveryEmail.toLowerCase()
+    ){
+
+      await update(
+        ref(db,"memberIds/" + id),
+        {
+          authEmail:auth.currentUser.email,
+          recoveryEmail:auth.currentUser.email,
+          pendingRecoveryEmail:null
+        }
+      );
+
+    }
+
+    authProcessing =
+      false;
 
 
   }catch(e){
@@ -5172,6 +5225,15 @@ async function saveRecoveryEmail(){
     return;
   }
 
+  if(
+    currentUser.email &&
+    currentUser.email.toLowerCase() === newEmail.toLowerCase()
+  ){
+    $("myPageMsg").innerHTML=
+      '<div class="msg error">現在と同じメールアドレスです。</div>';
+    return;
+  }
+
   try{
 
     const credential =
@@ -5185,7 +5247,7 @@ async function saveRecoveryEmail(){
       credential
     );
 
-    await updateEmail(
+    await verifyBeforeUpdateEmail(
       currentUser,
       newEmail
     );
@@ -5193,14 +5255,13 @@ async function saveRecoveryEmail(){
     await update(
       ref(db,"memberIds/" + profile.schoolId),
       {
-        authEmail:newEmail,
-        recoveryEmail:newEmail
+        pendingRecoveryEmail:newEmail
       }
     );
 
     $("myRecoveryPassword").value="";
     $("myPageMsg").innerHTML=
-      '<div class="msg">復旧用メールアドレスを保存しました。</div>';
+      '<div class="msg">確認メールを新しいメールアドレスに送信しました。メール内のリンクを押すと、復旧用メールアドレスの変更が完了します。</div>';
 
   }catch(e){
 
@@ -5210,39 +5271,29 @@ async function saveRecoveryEmail(){
     );
 
     let message =
-      "復旧用メールアドレスを保存できませんでした。";
+      "復旧用メールアドレスを変更できませんでした。";
 
-    if(e.code === "auth/wrong-password")
+    if(e.code === "auth/wrong-password" ||
+       e.code === "auth/invalid-credential")
       message = "現在のパスワードが正しくありません。";
 
-    if(e.code === "auth/invalid-credential")
-      message = "現在のパスワードが正しくないか、現在のログイン情報を確認できませんでした。";
-
     if(e.code === "auth/requires-recent-login")
-      message = "セキュリティのため、いったんログアウトして再ログインしてから、もう一度お試しください。";
+      message = "認証の有効期限が切れています。いったんログアウトして、もう一度ログインしてからお試しください。";
 
     if(e.code === "auth/email-already-in-use")
       message = "そのメールアドレスはすでに別のアカウントで使用されています。";
 
     if(e.code === "auth/invalid-email")
-      message = "入力したメールアドレスが正しくありません。";
+      message = "メールアドレスの形式が正しくありません。";
 
     if(e.code === "auth/operation-not-allowed")
-      message = "Firebase Authenticationでメールアドレス変更が許可されていません。";
+      message = "このメールアドレス変更方法は現在のFirebase設定では利用できません。";
 
-    if(e.code === "auth/admin-restricted-operation")
-      message = "Firebase Authenticationのユーザー操作が制限されています。";
-
-    if(e.code === "PERMISSION_DENIED" || e.message === "PERMISSION_DENIED")
-      message = "Realtime Databaseのルールによってメールアドレス情報の保存が拒否されました。";
-
-    const detail =
-      e.code ||
-      e.message ||
-      "unknown-error";
+    if(e.code === "PERMISSION_DENIED")
+      message = "Firebase Databaseへの保存が許可されていません。";
 
     $("myPageMsg").innerHTML=
-      `<div class="msg error">${esc(message)}<br><br><span style="font-size:12px">エラーコード: ${esc(detail)}</span></div>`;
+      `<div class="msg error">${esc(message)}</div>`;
 
   }
 
