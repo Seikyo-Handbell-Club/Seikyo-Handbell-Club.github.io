@@ -131,7 +131,7 @@ body:not(.logged-in) .bell{
 body:not(.logged-in) .bubble{
   min-width:105px;
   right:0px;
-  bottom:75px;
+  bottom:80px;
 }
 
 body:not(.logged-in) .bubble:after{
@@ -167,7 +167,7 @@ body.logged-in .bell{
 body.logged-in .bubble{
   min-width:105px;
   right:0px;
-  bottom:75px;
+  bottom:80px;
 }
 
 body.logged-in .bubble:after{
@@ -212,43 +212,6 @@ body.logged-in .bubble:after{
       translateY(0);
   }
 
-}
-
-/* =====================================================
-   ハートの枠
-===================================================== */
-
-.heart-frame{
-  position:absolute;
-
-  left:0;
-  top:0;
-
-  width:220px;
-  height:140px;
-
-  pointer-events:none;
-
-  z-index:5;
-
-  opacity:0;
-}
-
-.heart-frame.active{
-  opacity:1;
-}
-
-.frame-heart{
-  position:absolute;
-
-  color:#ff7eb9;
-
-  font-size:13px;
-  line-height:1;
-
-  opacity:.95;
-
-  transform:translate(-50%,-50%);
 }
 
 /* =====================================================
@@ -468,13 +431,7 @@ body.logged-in .bubble:after{
 
   </div>
 
-  <!-- ハートの枠 -->
-  <div
-    class="heart-frame"
-    id="heartFrame">
-  </div>
-
-  <!-- 飛んでいくハート -->
+  <!-- ハート -->
   <div
     class="heart-container"
     id="heartContainer">
@@ -515,124 +472,6 @@ const heartContainer =
   document.getElementById(
     "heartContainer"
   );
-
-const heartFrame =
-  document.getElementById(
-    "heartFrame"
-  );
-
-/* =====================================================
-   ハートの枠を作る
-===================================================== */
-
-function createHeartFrame(){
-
-  if(!heartFrame)return;
-
-  heartFrame.innerHTML="";
-
-  const hearts=[];
-
-  /* 上 */
-  for(let x=12;x<=208;x+=18){
-
-    hearts.push({
-      x:x,
-      y:8
-    });
-
-  }
-
-  /* 下 */
-  for(let x=12;x<=208;x+=18){
-
-    hearts.push({
-      x:x,
-      y:132
-    });
-
-  }
-
-  /* 左 */
-  for(let y=26;y<=114;y+=18){
-
-    hearts.push({
-      x:8,
-      y:y
-    });
-
-  }
-
-  /* 右 */
-  for(let y=26;y<=114;y+=18){
-
-    hearts.push({
-      x:212,
-      y:y
-    });
-
-  }
-
-  hearts.forEach(
-    (data,index)=>{
-
-      const heart =
-        document.createElement(
-          "span"
-        );
-
-      heart.className=
-        "frame-heart";
-
-      heart.textContent=
-        index%3===0
-          ? "♡"
-          : "♥";
-
-      heart.style.left=
-        `${data.x}px`;
-
-      heart.style.top=
-        `${data.y}px`;
-
-      heartFrame.appendChild(
-        heart
-      );
-
-    }
-  );
-
-}
-
-createHeartFrame();
-
-/* =====================================================
-   ハートの枠を表示
-===================================================== */
-
-function showHeartFrame(){
-
-  if(!heartFrame)return;
-
-  heartFrame.classList.add(
-    "active"
-  );
-
-}
-
-/* =====================================================
-   ハートの枠を消す
-===================================================== */
-
-function hideHeartFrame(){
-
-  if(!heartFrame)return;
-
-  heartFrame.classList.remove(
-    "active"
-  );
-
-}
 
 /* =====================================================
    ログイン状態によるサイズ調整
@@ -1900,12 +1739,6 @@ function celebrate(){
   isAnimating=true;
 
   /* ---------------------------------------------
-     ハートの枠を表示
-  --------------------------------------------- */
-
-  showHeartFrame();
-
-  /* ---------------------------------------------
      吹き出しを消す
   --------------------------------------------- */
 
@@ -1977,9 +1810,6 @@ bellImage.addEventListener(
     bellImage.classList.remove(
       "celebrating"
     );
-
-    /* ハートの枠を消す */
-    hideHeartFrame();
 
     /* メッセージ変更 */
     changeBellMessage();
