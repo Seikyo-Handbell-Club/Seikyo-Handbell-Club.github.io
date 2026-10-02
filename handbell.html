@@ -527,6 +527,20 @@ textarea{
   margin:10px 0
 }
 
+.edit-notice-card{
+  border-top:1px solid #e3e7ed;
+  margin-top:12px;
+  padding-top:12px
+}
+
+#editDateDetail{
+  margin-top:14px
+}
+
+#editView .day{
+  min-height:64px
+}
+
 .meta{
   font-size:13px;
   color:#66717e;
@@ -1384,7 +1398,7 @@ textarea{
 >
 
   <button
-    class="secondary"
+    class="secondary page-back"
     onclick="backHome()"
   >
     ← ホームに戻る
@@ -1394,7 +1408,40 @@ textarea{
     連絡を修正
   </h2>
 
-  <div id="myNotices"></div>
+  <p class="small">
+    日付をタップすると、その日の連絡を確認・修正できます。
+  </p>
+
+  <div class="monthbar">
+    <button onclick="changeEditMonth(-1)">‹</button>
+
+    <div class="month-center">
+      <div class="month-title" id="editMonthTitle"></div>
+      <button class="today-button" onclick="goEditCurrentMonth()">
+        今月に戻る
+      </button>
+    </div>
+
+    <button onclick="changeEditMonth(1)">›</button>
+  </div>
+
+  <div class="week">
+    <div>月</div>
+    <div>火</div>
+    <div>水</div>
+    <div>木</div>
+    <div>金</div>
+    <div>土</div>
+    <div>日</div>
+  </div>
+
+  <div class="days" id="editDays"></div>
+
+  <div id="editDateDetail">
+    <p class="small">
+      日付をタップすると、その日の連絡を確認・修正できます。
+    </p>
+  </div>
 
 </section>
 
@@ -1420,7 +1467,7 @@ import{
   sendPasswordResetEmail,
   reauthenticateWithCredential,
   EmailAuthProvider,
-  verifyBeforeUpdateEmail,
+  updateEmail,
   setPersistence,
   browserLocalPersistence
 }
@@ -2205,7 +2252,7 @@ onAuthStateChanged(
     }
 
 
-    if(setupInProgress){
+    if(authProcessing || setupInProgress){
 
       return;
 
@@ -2359,67 +2406,14 @@ async function login(){
     const memberIdData =
       memberIdSnap.val() || {};
 
-    const loginEmails = [];
+    const loginEmail =
+      memberIdData.authEmail || email(id);
 
-    if(memberIdData.authEmail)
-      loginEmails.push(memberIdData.authEmail);
-
-    if(memberIdData.pendingRecoveryEmail &&
-       !loginEmails.includes(memberIdData.pendingRecoveryEmail))
-      loginEmails.push(memberIdData.pendingRecoveryEmail);
-
-    if(!loginEmails.includes(email(id)))
-      loginEmails.push(email(id));
-
-    let loginError = null;
-    let signedInEmail = "";
-
-    for(const loginEmail of loginEmails){
-
-      try{
-
-        await signInWithEmailAndPassword(
-          auth,
-          loginEmail,
-          pw
-        );
-
-        signedInEmail = loginEmail;
-        loginError = null;
-        break;
-
-      }catch(e){
-
-        loginError = e;
-
-      }
-
-    }
-
-    if(loginError)
-      throw loginError;
-
-    if(
-      memberIdData.pendingRecoveryEmail &&
-      auth.currentUser &&
-      auth.currentUser.email &&
-      auth.currentUser.email.toLowerCase() ===
-        memberIdData.pendingRecoveryEmail.toLowerCase()
-    ){
-
-      await update(
-        ref(db,"memberIds/" + id),
-        {
-          authEmail:auth.currentUser.email,
-          recoveryEmail:auth.currentUser.email,
-          pendingRecoveryEmail:null
-        }
-      );
-
-    }
-
-    authProcessing =
-      false;
+    await signInWithEmailAndPassword(
+      auth,
+      loginEmail,
+      pw
+    );
 
 
   }catch(e){
@@ -2708,10 +2702,7 @@ async function sendPasswordReset(){
       s.val() || {};
 
     const resetEmail =
-      data.pendingRecoveryEmail ||
-      data.authEmail ||
-      data.recoveryEmail ||
-      "";
+      data.authEmail || data.recoveryEmail || "";
 
     if(!resetEmail){
       throw Error("no-recovery-email");
@@ -4623,156 +4614,158 @@ async function saveNotice(){
    連絡修正
 ========================= */
 
+let editCalendarCurrent = new Date();
+let editCalendarNotices = {};
+
+function renderEditCalendar(){
+
+  const y = editCalendarCurrent.getFullYear();
+  const m = editCalendarCurrent.getMonth();
+
+  $("editMonthTitle").textContent =
+    y + "年" + (m + 1) + "月";
+
+  const first = new Date(y,m,1);
+  const last = new Date(y,m+1,0);
+
+  let start = first.getDay();
+  start = (start + 6) % 7;
+
+  let html = "";
+
+  for(let i=0;i<start;i++){
+    html += `<div class="day empty"></div>`;
+  }
+
+  for(let d=1;d<=last.getDate();d++){
+
+    const date =
+      y + "-" +
+      String(m+1).padStart(2,"0") + "-" +
+      String(d).padStart(2,"0");
+
+    const notices =
+      editCalendarNotices[date] || [];
+
+    const count = notices.length;
+
+    const today = new Date();
+    const todayStr =
+      today.getFullYear() + "-" +
+      String(today.getMonth()+1).padStart(2,"0") + "-" +
+      String(today.getDate()).padStart(2,"0");
+
+    let cls = "day";
+
+    if(date === todayStr)
+      cls += " today-day";
+
+    html += `
+      <div
+        class="${cls}"
+        onclick="showEditDate('${date}')"
+      >
+        <div class="daynum">${d}</div>
+        ${count ? `<span class="count">${count}件</span>` : ""}
+      </div>
+    `;
+  }
+
+  $("editDays").innerHTML = html;
+}
+
+function changeEditMonth(diff){
+  editCalendarCurrent.setMonth(
+    editCalendarCurrent.getMonth() + diff
+  );
+  renderEditCalendar();
+}
+
+function goEditCurrentMonth(){
+  editCalendarCurrent = new Date();
+  renderEditCalendar();
+}
+
+function showEditDate(date){
+
+  const notices =
+    editCalendarNotices[date] || [];
+
+  const box = $("editDateDetail");
+
+  if(!notices.length){
+    box.innerHTML = `
+      <div class="item">
+        <strong>${jp(date)}</strong>
+        <p class="small">この日に登録された連絡はありません。</p>
+      </div>
+    `;
+    return;
+  }
+
+  box.innerHTML = `
+    <div class="item">
+      <strong>${jp(date)}</strong>
+      ${notices.map(n => `
+        <div class="edit-notice-card">
+          <div><span class="badge">${esc(n.type || "欠席")}</span></div>
+          ${getNoticeTimeText(n) ? `<div class="meta">時刻：${getNoticeTimeText(n)}</div>` : ""}
+          <div class="meta">理由：${esc(n.reason)}</div>
+          <div class="row">
+            <button onclick="editNotice('${n.id}')">修正</button>
+            <button class="danger" onclick="deleteNotice('${n.id}')">削除</button>
+          </div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+
+  box.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
 async function showEdit(){
 
   if(!currentUser){
-
     showLogin();
-
     return;
-
   }
-
 
   if(!profile){
-
-    const loaded =
-      await loadProfile();
-
-
+    const loaded = await loadProfile();
     if(!loaded){
-
       showLogin();
-
       return;
-
     }
-
   }
-
 
   hide();
 
+  $("editView").classList.remove("hidden");
 
-  $("editView")
-    .classList
-    .remove("hidden");
+  const s = await get(ref(db,"notices"));
+  const all = s.exists() ? s.val() : {};
 
+  editCalendarNotices = {};
 
-  const s =
-    await get(
-      ref(
-        db,
-        "notices"
-      )
-    );
+  Object.entries(all)
+    .filter(([id,n]) => n.uid === currentUser.uid)
+    .forEach(([id,n]) => {
+      if(!editCalendarNotices[n.date])
+        editCalendarNotices[n.date] = [];
+      editCalendarNotices[n.date].push({
+        ...n,
+        id
+      });
+    });
 
+  editCalendarCurrent = new Date();
+  renderEditCalendar();
 
-  const all =
-    s.exists()
-      ?
-      s.val()
-      :
-      {};
-
-
-  const list =
-    Object
-      .entries(all)
-      .filter(
-        ([id,n]) =>
-          n.uid ===
-          currentUser.uid
-      );
-
-
-  list.sort(
-    (a,b) =>
-      String(b[1].date)
-        .localeCompare(
-          String(a[1].date)
-        )
-  );
-
-
-  $("myNotices")
-    .innerHTML =
-
-      list.length
-
-        ?
-
-        list
-          .map(
-            ([id,n]) =>
-              `
-
-              <div class="item">
-
-                <strong>
-                  ${jp(n.date)}
-                </strong>
-
-                <div class="meta">
-
-                  種類：
-                  ${esc(n.type || "欠席")}
-
-                </div>
-
-                ${
-                  getNoticeTimeText(n)
-                    ?
-                    `
-                    <div class="meta">
-
-                      時刻：
-                      ${getNoticeTimeText(n)}
-
-                    </div>
-                    `
-                    :
-                    ""
-                }
-
-                <div class="meta">
-
-                  理由：
-                  ${esc(n.reason)}
-
-                </div>
-
-                <div class="row">
-
-                  <button
-                    onclick="editNotice('${id}')"
-                  >
-                    修正
-                  </button>
-
-                  <button
-                    class="danger"
-                    onclick="deleteNotice('${id}')"
-                  >
-                    削除
-                  </button>
-
-                </div>
-
-              </div>
-
-              `
-          )
-          .join("")
-
-        :
-
-        `
-        <p class="small">
-          登録された連絡がありません。
-        </p>
-        `;
-
+  $("editDateDetail").innerHTML = `
+    <p class="small">
+      日付をタップすると、その日の連絡を確認・修正できます。
+    </p>
+  `;
 }
 
 
@@ -5228,15 +5221,6 @@ async function saveRecoveryEmail(){
     return;
   }
 
-  if(
-    currentUser.email &&
-    currentUser.email.toLowerCase() === newEmail.toLowerCase()
-  ){
-    $("myPageMsg").innerHTML=
-      '<div class="msg error">現在と同じメールアドレスです。</div>';
-    return;
-  }
-
   try{
 
     const credential =
@@ -5250,7 +5234,7 @@ async function saveRecoveryEmail(){
       credential
     );
 
-    await verifyBeforeUpdateEmail(
+    await updateEmail(
       currentUser,
       newEmail
     );
@@ -5258,13 +5242,14 @@ async function saveRecoveryEmail(){
     await update(
       ref(db,"memberIds/" + profile.schoolId),
       {
-        pendingRecoveryEmail:newEmail
+        authEmail:newEmail,
+        recoveryEmail:newEmail
       }
     );
 
     $("myRecoveryPassword").value="";
     $("myPageMsg").innerHTML=
-      '<div class="msg">確認メールを新しいメールアドレスに送信しました。メール内のリンクを押すと、復旧用メールアドレスの変更が完了します。</div>';
+      '<div class="msg">復旧用メールアドレスを保存しました。</div>';
 
   }catch(e){
 
@@ -5274,26 +5259,13 @@ async function saveRecoveryEmail(){
     );
 
     let message =
-      "復旧用メールアドレスを変更できませんでした。";
+      "復旧用メールアドレスを保存できませんでした。";
 
-    if(e.code === "auth/wrong-password" ||
-       e.code === "auth/invalid-credential")
+    if(e.code === "auth/wrong-password")
       message = "現在のパスワードが正しくありません。";
-
-    if(e.code === "auth/requires-recent-login")
-      message = "認証の有効期限が切れています。いったんログアウトして、もう一度ログインしてからお試しください。";
 
     if(e.code === "auth/email-already-in-use")
       message = "そのメールアドレスはすでに別のアカウントで使用されています。";
-
-    if(e.code === "auth/invalid-email")
-      message = "メールアドレスの形式が正しくありません。";
-
-    if(e.code === "auth/operation-not-allowed")
-      message = "このメールアドレス変更方法は現在のFirebase設定では利用できません。";
-
-    if(e.code === "PERMISSION_DENIED")
-      message = "Firebase Databaseへの保存が許可されていません。";
 
     $("myPageMsg").innerHTML=
       `<div class="msg error">${esc(message)}</div>`;
