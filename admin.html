@@ -528,6 +528,59 @@ button{
 }
 
 
+
+/* =====================================================
+   手動登録の日付カレンダー
+===================================================== */
+
+.date-picker-wrap{
+  position:relative;
+}
+
+.date-picker-button{
+  margin-top:6px;
+  background:#eef3fb;
+  color:#20242a;
+  font-size:12px;
+  padding:8px 10px;
+}
+
+.date-picker-popup{
+  position:absolute;
+  left:0;
+  right:0;
+  top:100%;
+  z-index:30;
+  margin-top:6px;
+  background:#fff;
+  border:1px solid #e1e5ea;
+  border-radius:14px;
+  padding:12px;
+  box-shadow:0 8px 28px #00000018;
+}
+
+.date-picker-popup .day{
+  min-height:54px;
+  padding:5px;
+}
+
+.date-picker-popup .count{
+  display:none;
+}
+
+.date-picker-popup .selected-date-day{
+  border-color:#1f6feb;
+  background:#eaf2ff;
+}
+
+@media(max-width:600px){
+  .date-picker-popup{
+    position:relative;
+    top:auto;
+    margin-top:8px;
+  }
+}
+
 @media(max-width:600px){
 
   .item-main{
@@ -3468,6 +3521,206 @@ function renderRegisteredScheduleItem(x){
 
 
 /* =====================================================
+   手動登録の日付選択カレンダー
+===================================================== */
+
+let activeDatePicker=null;
+let datePickerMonth=new Date();
+
+function formatPickerDate(y,m,d){
+  return y+"-"+
+    String(m+1).padStart(2,"0")+"-"+
+    String(d).padStart(2,"0");
+}
+
+function renderDatePicker(input,popup){
+
+  const y=datePickerMonth.getFullYear();
+  const m=datePickerMonth.getMonth();
+
+  const first=new Date(y,m,1);
+  let start=first.getDay();
+  start=start===0?6:start-1;
+
+  const last=new Date(y,m+1,0).getDate();
+  const selected=input.value||"";
+
+  let html=`
+    <div class="monthbar">
+      <button type="button" class="date-picker-prev">‹</button>
+      <div class="month-center">
+        <div class="month-title">${y}年${m+1}月</div>
+        <button type="button" class="today-button date-picker-today">今月に戻る</button>
+      </div>
+      <button type="button" class="date-picker-next">›</button>
+    </div>
+
+    <div class="week">
+      <div>月</div><div>火</div><div>水</div><div>木</div>
+      <div>金</div><div>土</div><div>日</div>
+    </div>
+
+    <div class="days">
+  `;
+
+  for(let i=0;i<start;i++){
+    html+=`<div class="day empty"></div>`;
+  }
+
+  for(let d=1;d<=last;d++){
+    const date=formatPickerDate(y,m,d);
+    const today=new Date();
+    const todayStr=formatPickerDate(
+      today.getFullYear(),today.getMonth(),today.getDate()
+    );
+
+    let cls="day";
+    if(date===todayStr)cls+=" today-day";
+    if(date===selected)cls+=" selected-date-day";
+
+    html+=`
+      <button
+        type="button"
+        class="${cls}"
+        data-picker-date="${date}"
+      >
+        <div class="daynum">${d}</div>
+      </button>
+    `;
+  }
+
+  html+=`</div>`;
+  popup.innerHTML=html;
+
+  popup.querySelector(".date-picker-prev")
+    .addEventListener("click",e=>{
+      e.stopPropagation();
+      const next=new Date(y,m-1,1);
+      if(!isCalendarMonthAllowed(next))return;
+      datePickerMonth=next;
+      renderDatePicker(input,popup);
+    });
+
+  popup.querySelector(".date-picker-next")
+    .addEventListener("click",e=>{
+      e.stopPropagation();
+      datePickerMonth=new Date(y,m+1,1);
+      renderDatePicker(input,popup);
+    });
+
+  popup.querySelector(".date-picker-today")
+    .addEventListener("click",e=>{
+      e.stopPropagation();
+      datePickerMonth=new Date();
+      renderDatePicker(input,popup);
+    });
+
+  popup.querySelectorAll("[data-picker-date]")
+    .forEach(button=>{
+      button.addEventListener("click",e=>{
+        e.stopPropagation();
+        const value=button.dataset.pickerDate;
+        input.value=value;
+        popup.classList.add("hidden");
+        activeDatePicker=null;
+      });
+    });
+}
+
+function openDatePicker(input){
+
+  if(activeDatePicker && activeDatePicker!==input){
+    const oldPopup=activeDatePicker.parentElement
+      ?.querySelector(".date-picker-popup");
+    if(oldPopup)oldPopup.classList.add("hidden");
+  }
+
+  const wrap=input.parentElement;
+  const popup=wrap.querySelector(".date-picker-popup");
+
+  if(!popup)return;
+
+  if(!popup.classList.contains("hidden")){
+    popup.classList.add("hidden");
+    activeDatePicker=null;
+    return;
+  }
+
+  if(input.value){
+    const parts=input.value.split("-").map(Number);
+    if(parts.length===3 && !Number.isNaN(parts[0])){
+      datePickerMonth=new Date(parts[0],parts[1]-1,1);
+    }else{
+      datePickerMonth=new Date();
+    }
+  }else{
+    datePickerMonth=new Date();
+  }
+
+  const min=getCalendarMinMonth();
+  if(datePickerMonth<min)
+    datePickerMonth=min;
+
+  renderDatePicker(input,popup);
+  popup.classList.remove("hidden");
+  activeDatePicker=input;
+}
+
+function initDatePickers(){
+
+  const ids=[
+    "sdate",
+    "examStartDate",
+    "examEndDate",
+    "concertDate",
+    "schoolHolidayDate",
+    "eventDate"
+  ];
+
+  const min=getCalendarMinMonth();
+  const minStr=formatPickerDate(
+    min.getFullYear(),min.getMonth(),1
+  );
+
+  for(const id of ids){
+    const input=$(id);
+    if(!input || input.dataset.datePickerReady)return;
+
+    input.dataset.datePickerReady="1";
+    input.min=minStr;
+
+    const wrap=document.createElement("div");
+    wrap.className="date-picker-wrap";
+    input.parentNode.insertBefore(wrap,input);
+    wrap.appendChild(input);
+
+    const button=document.createElement("button");
+    button.type="button";
+    button.className="date-picker-button";
+    button.textContent="カレンダーから選択";
+    button.addEventListener("click",e=>{
+      e.stopPropagation();
+      openDatePicker(input);
+    });
+    wrap.appendChild(button);
+
+    const popup=document.createElement("div");
+    popup.className="date-picker-popup hidden";
+    popup.addEventListener("click",e=>e.stopPropagation());
+    wrap.appendChild(popup);
+  }
+}
+
+document.addEventListener("click",()=>{
+  if(!activeDatePicker)return;
+  const popup=activeDatePicker.parentElement
+    ?.querySelector(".date-picker-popup");
+  if(popup)popup.classList.add("hidden");
+  activeDatePicker=null;
+});
+
+
+/* =====================================================
    手動予定
 ===================================================== */
 
@@ -4220,6 +4473,7 @@ $("password")
 
 
 updateScheduleFields();
+initDatePickers();
 
 </script>
 
