@@ -2162,6 +2162,9 @@ function updateProfileDisplay(){
 let authProcessing =
   false;
 
+let setupInProgress =
+  false;
+
 
 onAuthStateChanged(
   auth,
@@ -2196,6 +2199,13 @@ onAuthStateChanged(
         .classList
         .add("hidden");
 
+
+      return;
+
+    }
+
+
+    if(authProcessing || setupInProgress){
 
       return;
 
@@ -2490,6 +2500,12 @@ async function setupPassword(){
     const data =
       reg.val();
 
+    authProcessing =
+      true;
+
+    setupInProgress =
+      true;
+
     const cred =
       await createUserWithEmailAndPassword(
         auth,
@@ -2527,15 +2543,56 @@ async function setupPassword(){
 
     updateProfileDisplay();
 
-    authProcessing =
-      true;
+    $("loggedOutLeft")
+      .classList
+      .add("hidden");
+
+    $("loggedOutRight")
+      .classList
+      .add("hidden");
+
+    $("loggedInLeft")
+      .classList
+      .remove("hidden");
+
+    $("loggedInRight")
+      .classList
+      .remove("hidden");
+
+    hide();
+
+    $("calendarView")
+      .classList
+      .remove("hidden");
+
+    render();
 
     $("setupRecoveryEmail").value="";
     $("setupPassword").value="";
     $("setupPassword2").value="";
     $("setupMsg").innerHTML="";
 
+    setupInProgress =
+      false;
+
+    authProcessing =
+      false;
+
   }catch(e){
+
+    setupInProgress =
+      false;
+
+    authProcessing =
+      false;
+
+    if(auth.currentUser){
+      try{
+        await signOut(auth);
+      }catch(signOutError){
+        console.error(signOutError);
+      }
+    }
 
     console.error(
       "初回設定エラー:",
