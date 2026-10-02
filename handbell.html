@@ -5160,27 +5160,17 @@ async function saveRecoveryEmail(){
     $("myRecoveryPassword")
       .value;
 
-  if(
-    !newEmail ||
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)
-  ){
-
-    $("myPageMsg").innerHTML =
+  if(!newEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)){
+    $("myPageMsg").innerHTML=
       '<div class="msg error">復旧用メールアドレスを正しく入力してください。</div>';
-
     return;
   }
 
   if(!currentPassword){
-
-    $("myPageMsg").innerHTML =
+    $("myPageMsg").innerHTML=
       '<div class="msg error">現在のパスワードを入力してください。</div>';
-
     return;
   }
-
-  $("myPageMsg").innerHTML =
-    '<div class="msg">保存しています……</div>';
 
   try{
 
@@ -5201,23 +5191,15 @@ async function saveRecoveryEmail(){
     );
 
     await update(
-      ref(
-        db,
-        "memberIds/" + profile.schoolId
-      ),
+      ref(db,"memberIds/" + profile.schoolId),
       {
         authEmail:newEmail,
         recoveryEmail:newEmail
       }
     );
 
-    $("myRecoveryEmail").value =
-      newEmail;
-
-    $("myRecoveryPassword").value =
-      "";
-
-    $("myPageMsg").innerHTML =
+    $("myRecoveryPassword").value="";
+    $("myPageMsg").innerHTML=
       '<div class="msg">復旧用メールアドレスを保存しました。</div>';
 
   }catch(e){
@@ -5230,76 +5212,42 @@ async function saveRecoveryEmail(){
     let message =
       "復旧用メールアドレスを保存できませんでした。";
 
-    if(
-      e.code ===
-      "auth/wrong-password"
-    ){
+    if(e.code === "auth/wrong-password")
+      message = "現在のパスワードが正しくありません。";
 
-      message =
-        "現在のパスワードが正しくありません。";
+    if(e.code === "auth/invalid-credential")
+      message = "現在のパスワードが正しくないか、現在のログイン情報を確認できませんでした。";
 
-    }
-    else if(
-      e.code ===
-      "auth/invalid-credential"
-    ){
+    if(e.code === "auth/requires-recent-login")
+      message = "セキュリティのため、いったんログアウトして再ログインしてから、もう一度お試しください。";
 
-      message =
-        "現在のパスワードが正しくないか、認証情報を確認できませんでした。";
+    if(e.code === "auth/email-already-in-use")
+      message = "そのメールアドレスはすでに別のアカウントで使用されています。";
 
-    }
-    else if(
-      e.code ===
-      "auth/requires-recent-login"
-    ){
+    if(e.code === "auth/invalid-email")
+      message = "入力したメールアドレスが正しくありません。";
 
-      message =
-        "安全のため、いったんログアウトして、もう一度ログインしてから変更してください。";
+    if(e.code === "auth/operation-not-allowed")
+      message = "Firebase Authenticationでメールアドレス変更が許可されていません。";
 
-    }
-    else if(
-      e.code ===
-      "auth/email-already-in-use"
-    ){
+    if(e.code === "auth/admin-restricted-operation")
+      message = "Firebase Authenticationのユーザー操作が制限されています。";
 
-      message =
-        "そのメールアドレスはすでに別のアカウントで使用されています。";
+    if(e.code === "PERMISSION_DENIED" || e.message === "PERMISSION_DENIED")
+      message = "Realtime Databaseのルールによってメールアドレス情報の保存が拒否されました。";
 
-    }
-    else if(
-      e.code ===
-      "auth/invalid-email"
-    ){
+    const detail =
+      e.code ||
+      e.message ||
+      "unknown-error";
 
-      message =
-        "メールアドレスの形式が正しくありません。";
-
-    }
-    else if(
-      e.code ===
-      "auth/operation-not-allowed"
-    ){
-
-      message =
-        "メールアドレス変更がFirebase側で許可されていません。";
-
-    }
-    else if(
-      e.code ===
-      "PERMISSION_DENIED"
-    ){
-
-      message =
-        "データベースへの保存権限がありません。Firebaseのルールを確認してください。";
-
-    }
-
-    $("myPageMsg").innerHTML =
-      `<div class="msg error">${esc(message)}</div>`;
+    $("myPageMsg").innerHTML=
+      `<div class="msg error">${esc(message)}<br><br><span style="font-size:12px">エラーコード: ${esc(detail)}</span></div>`;
 
   }
 
 }
+
 
 /* =========================
    パスワード変更
