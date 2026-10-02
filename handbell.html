@@ -1601,6 +1601,22 @@ const ymd =
     `${y}-${pad(m+1)}-${pad(d)}`;
 
 
+/* =========================
+   カレンダー共通の表示範囲
+========================= */
+
+function getCalendarMinMonth(){
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth()-3, 1);
+}
+
+function isCalendarMonthAllowed(date){
+  const min = getCalendarMinMonth();
+  const target = new Date(date.getFullYear(), date.getMonth(), 1);
+  return target >= min;
+}
+
+
 const jp =
   s => {
 
@@ -2246,6 +2262,13 @@ onAuthStateChanged(
         .classList
         .add("hidden");
 
+
+      return;
+
+    }
+
+
+    if(authProcessing || setupInProgress){
 
       return;
 
@@ -3033,12 +3056,17 @@ function renderCalendarData(y,m,sch,all){
 
 function changeMonth(n){
 
-  current =
+  const next =
     new Date(
       current.getFullYear(),
       current.getMonth()+n,
       1
     );
+
+  if(!isCalendarMonthAllowed(next))
+    return;
+
+  current = next;
 
   /*
     月タイトルと日付を同じ処理で即更新。
@@ -3066,7 +3094,6 @@ function changeMonth(n){
   }
 
 }
-
 
 /* =========================
    日付詳細
@@ -3921,16 +3948,17 @@ async function renderFormCalendar(){
 
 function changeFormMonth(n){
 
-  formCurrent =
-    new Date(
-      formCurrent.getFullYear(),
-      formCurrent.getMonth()+n,
-      1
-    );
+  const next = new Date(
+    formCurrent.getFullYear(),
+    formCurrent.getMonth()+n,
+    1
+  );
 
+  if(!isCalendarMonthAllowed(next))
+    return;
 
+  formCurrent = next;
   renderFormCalendar();
-
 }
 
 
@@ -4668,9 +4696,17 @@ function renderEditCalendar(){
 }
 
 function changeEditMonth(diff){
-  editCalendarCurrent.setMonth(
-    editCalendarCurrent.getMonth() + diff
+
+  const next = new Date(
+    editCalendarCurrent.getFullYear(),
+    editCalendarCurrent.getMonth()+diff,
+    1
   );
+
+  if(!isCalendarMonthAllowed(next))
+    return;
+
+  editCalendarCurrent = next;
   renderEditCalendar();
 }
 
@@ -5388,18 +5424,6 @@ window.backFromForm =
 
 window.showEdit =
   showEdit;
-
-
-window.changeEditMonth =
-  changeEditMonth;
-
-
-window.goEditCurrentMonth =
-  goEditCurrentMonth;
-
-
-window.showEditDate =
-  showEditDate;
 
 
 window.toggleOtherReason =
