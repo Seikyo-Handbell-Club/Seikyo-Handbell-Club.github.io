@@ -371,8 +371,31 @@ textarea{
 /* 2種類の予定を斜め2色で表示するときは、
    グラデーションを角丸の枠内だけに収める */
 .day.split-schedule-day{
-  background-clip:padding-box !important;
+  position:relative;
+  background:transparent !important;
   overflow:hidden;
+}
+
+/* 2種類以上の予定の色は、日付枠そのものの中で描画する */
+.day.multi-schedule-day{
+  position:relative;
+  background:transparent !important;
+  overflow:hidden;
+}
+
+.day.multi-schedule-day::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  background:var(--schedule-bg);
+  pointer-events:none;
+  z-index:0;
+}
+
+.day.multi-schedule-day > *{
+  position:relative;
+  z-index:1;
 }
 
 .daynum{
@@ -3106,8 +3129,8 @@ function renderCalendarData(y,m,sch,all){
     h += `
 
       <div
-        class="day ${dayClass} ${sunday ? "sunday-day" : ""} ${nationalHoliday ? "national-holiday-day" : ""} ${today ? "today-day" : ""} ${scheduleList.length === 2 && getScheduleColors(scheduleList).length === 2 ? "split-schedule-day" : ""}"
-        ${background ? `style="background:${background}"` : ""}
+        class="day ${dayClass} ${sunday ? "sunday-day" : ""} ${nationalHoliday ? "national-holiday-day" : ""} ${today ? "today-day" : ""} ${scheduleList.length >= 2 && getScheduleColors(scheduleList).length >= 2 ? "multi-schedule-day" : ""}"
+        ${background ? `style="${getScheduleColors(scheduleList).length >= 2 ? `--schedule-bg:${background}` : `background:${background}`}"` : ""}
         onclick="openDay('${date}')"
       >
 
@@ -3901,8 +3924,8 @@ function renderFormCalendarData(y,m,sch,all){
 
     h += `
       <div
-        class="day ${dayClass} ${sunday ? "sunday-day" : ""} ${nationalHoliday ? "national-holiday-day" : ""} ${selected ? "selected-day" : ""} ${today ? "today-day" : ""} ${scheduleList.length === 2 && getScheduleColors(scheduleList).length === 2 ? "split-schedule-day" : ""}"
-        ${background ? `style="background:${background}"` : ""}
+        class="day ${dayClass} ${sunday ? "sunday-day" : ""} ${nationalHoliday ? "national-holiday-day" : ""} ${selected ? "selected-day" : ""} ${today ? "today-day" : ""} ${scheduleList.length >= 2 && getScheduleColors(scheduleList).length >= 2 ? "multi-schedule-day" : ""}"
+        ${background ? `style="${getScheduleColors(scheduleList).length >= 2 ? `--schedule-bg:${background}` : `background:${background}`}"` : ""}
         onclick="selectFormDate('${date}')"
       >
         <div class="daynum">${d}</div>
