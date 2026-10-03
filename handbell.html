@@ -368,6 +368,13 @@ textarea{
   outline-offset:-2px
 }
 
+/* 2種類の予定を斜め2色で表示するときは、
+   グラデーションを角丸の枠内だけに収める */
+.day.split-schedule-day{
+  background-clip:padding-box !important;
+  overflow:hidden;
+}
+
 .daynum{
   font-weight:700;
   font-size:14px
@@ -3099,7 +3106,7 @@ function renderCalendarData(y,m,sch,all){
     h += `
 
       <div
-        class="day ${dayClass} ${sunday ? "sunday-day" : ""} ${nationalHoliday ? "national-holiday-day" : ""} ${today ? "today-day" : ""}"
+        class="day ${dayClass} ${sunday ? "sunday-day" : ""} ${nationalHoliday ? "national-holiday-day" : ""} ${today ? "today-day" : ""} ${scheduleList.length === 2 && getScheduleColors(scheduleList).length === 2 ? "split-schedule-day" : ""}"
         ${background ? `style="background:${background}"` : ""}
         onclick="openDay('${date}')"
       >
@@ -3894,7 +3901,7 @@ function renderFormCalendarData(y,m,sch,all){
 
     h += `
       <div
-        class="day ${dayClass} ${sunday ? "sunday-day" : ""} ${nationalHoliday ? "national-holiday-day" : ""} ${selected ? "selected-day" : ""} ${today ? "today-day" : ""}"
+        class="day ${dayClass} ${sunday ? "sunday-day" : ""} ${nationalHoliday ? "national-holiday-day" : ""} ${selected ? "selected-day" : ""} ${today ? "today-day" : ""} ${scheduleList.length === 2 && getScheduleColors(scheduleList).length === 2 ? "split-schedule-day" : ""}"
         ${background ? `style="background:${background}"` : ""}
         onclick="selectFormDate('${date}')"
       >
