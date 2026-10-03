@@ -728,6 +728,79 @@ textarea{
     font-size:13px;
   }
 }
+
+.monthly-image-setting{
+  margin-top:24px;
+  padding:14px 16px;
+  border:1px solid #e4e8ee;
+  border-radius:14px;
+  background:#fafbfc;
+}
+
+.monthly-image-setting-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+}
+
+.monthly-image-setting-title{
+  font-weight:700;
+  color:#303740;
+}
+
+.monthly-image-setting-note{
+  margin-top:6px;
+  font-size:12px;
+  color:#7b8490;
+  line-height:1.5;
+}
+
+.monthly-image-switch{
+  position:relative;
+  display:inline-flex;
+  flex:0 0 auto;
+  width:50px;
+  height:30px;
+}
+
+.monthly-image-switch input{
+  position:absolute;
+  opacity:0;
+  width:1px;
+  height:1px;
+  pointer-events:none;
+}
+
+.monthly-image-slider{
+  position:absolute;
+  inset:0;
+  border-radius:999px;
+  background:#cfd5dc;
+  cursor:pointer;
+  transition:background .2s ease;
+}
+
+.monthly-image-slider::before{
+  content:"";
+  position:absolute;
+  width:24px;
+  height:24px;
+  left:3px;
+  top:3px;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:0 1px 4px rgba(0,0,0,.18);
+  transition:transform .2s ease;
+}
+
+.monthly-image-switch input:checked + .monthly-image-slider{
+  background:#f4c94f;
+}
+
+.monthly-image-switch input:checked + .monthly-image-slider::before{
+  transform:translateX(20px);
+}
 </style>
 </head>
 
@@ -1195,6 +1268,30 @@ textarea{
   >
     プロフィールを保存
   </button>
+
+  <div class="monthly-image-setting">
+    <div class="monthly-image-setting-row">
+      <div class="monthly-image-setting-title">
+        毎月の画像を表示する
+      </div>
+
+      <label class="monthly-image-switch">
+        <input
+          id="monthlyImageToggle"
+          type="checkbox"
+          onchange="saveMonthlyImageSetting(this.checked)"
+        >
+        <span class="monthly-image-slider"></span>
+      </label>
+    </div>
+
+    <div
+      id="monthlyImageSettingNote"
+      class="monthly-image-setting-note"
+    >
+      今月の画像を表示します。
+    </div>
+  </div>
 
   <h3 style="margin-top:24px">
     復旧用メールアドレス
@@ -5211,6 +5308,131 @@ async function deleteNotice(id){
 
 
 /* =========================
+   毎月の画像設定
+========================= */
+
+function getCurrentMonthKey(date = new Date()){
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}`;
+}
+
+async function normalizeMonthlyImageSetting(data){
+  if(!currentUser) return true;
+
+  const now = new Date();
+  const monthKey = getCurrentMonthKey(now);
+  const settingMonth = data.monthlyImageSettingMonth;
+
+  /*
+    設定がまだない場合はON。
+    月が変わった場合も自動的にONへ戻す。
+  */
+  if(settingMonth !== monthKey){
+    const next = {
+      monthlyImageEnabled: true,
+      monthlyImageSettingMonth: monthKey
+    };
+
+    await update(
+      ref(db, `members/${currentUser.uid}`),
+      next
+    );
+
+    if(profile){
+      profile = {
+        ...profile,
+        ...next
+      };
+    }
+
+    return true;
+  }
+
+  return data.monthlyImageEnabled !== false;
+}
+
+async function renderMonthlyImageSetting(){
+  const toggle = $("monthlyImageToggle");
+  const note = $("monthlyImageSettingNote");
+
+  if(!toggle || !currentUser) return;
+
+  try{
+    const snap = await get(
+      ref(db, `members/${currentUser.uid}`)
+    );
+
+    const data = snap.exists()
+      ? (snap.val() || {})
+      : {};
+
+    const enabled =
+      await normalizeMonthlyImageSetting(data);
+
+    toggle.checked = enabled;
+
+    if(note){
+      note.textContent = enabled
+        ? "今月の画像を表示します。"
+        : "今月は月別画像を表示しません。";
+    }
+  }catch(e){
+    console.error("毎月の画像設定の読み込みに失敗しました",e);
+  }
+}
+
+async function saveMonthlyImageSetting(enabled){
+  if(!currentUser) return;
+
+  const toggle = $("monthlyImageToggle");
+  const note = $("monthlyImageSettingNote");
+  const monthKey = getCurrentMonthKey();
+
+  if(toggle){
+    toggle.disabled = true;
+  }
+
+  try{
+    await update(
+      ref(db, `members/${currentUser.uid}`),
+      {
+        monthlyImageEnabled: !!enabled,
+        monthlyImageSettingMonth: monthKey
+      }
+    );
+
+    if(profile){
+      profile = {
+        ...profile,
+        monthlyImageEnabled: !!enabled,
+        monthlyImageSettingMonth: monthKey
+      };
+    }
+
+    if(note){
+      note.textContent = enabled
+        ? "今月の画像を表示します。"
+        : "今月は月別画像を表示しません。";
+    }
+  }catch(e){
+    console.error("毎月の画像設定の保存に失敗しました",e);
+
+    if(toggle){
+      toggle.checked = !enabled;
+    }
+
+    if(note){
+      note.textContent =
+        "保存できませんでした。もう一度お試しください。";
+    }
+  }finally{
+    if(toggle){
+      toggle.disabled = false;
+    }
+  }
+}
+
+
+/* =========================
    マイページ
 ========================= */
 
@@ -5284,6 +5506,8 @@ async function showMyPage(){
   $("myPageMsg")
     .innerHTML =
       "";
+
+  await renderMonthlyImageSetting();
 
 }
 
@@ -5641,6 +5865,10 @@ window.showMyPage =
   showMyPage;
 
 
+window.saveMonthlyImageSetting =
+  saveMonthlyImageSetting;
+
+
 window.saveProfile =
   saveProfile;
 
@@ -5799,8 +6027,14 @@ async function decideLoginImage(){
     };
   }
 
-  /* ③ 月別：その月の最初のログインだけ */
-  if(data.monthlyImageShownMonth !== monthKey){
+  /* ③ 月別：マイページの設定がONのときだけ表示 */
+  const monthlyEnabled =
+    await normalizeMonthlyImageSetting(data);
+
+  if(
+    monthlyEnabled &&
+    data.monthlyImageShownMonth !== monthKey
+  ){
     await update(memberRef, {monthlyImageShownMonth:monthKey});
     return {
       kind: "monthly",
