@@ -5724,11 +5724,23 @@ const jugoyaDates = {
 function getEventImageInfo(date){
   const [y,m,d] = date.split("-").map(Number);
 
-  if(m === 1){
+  /* 1月1日〜1月5日は、お正月画像を毎回表示する */
+  if(m === 1 && d >= 1 && d <= 5){
     return {
-      key: `${y}-newyear`,
+      key: `${y}-newyear-${m}-${d}`,
       file: "newyear.jpg.PNG",
-      name: "お正月"
+      name: "お正月",
+      everyOpen: true
+    };
+  }
+
+  /* 1月6日〜1月31日は、お正月画像を期間中1回だけ表示する */
+  if(m === 1 && d >= 6 && d <= 31){
+    return {
+      key: `${y}-newyear-late`,
+      file: "newyear.jpg.PNG",
+      name: "お正月",
+      everyOpen: false
     };
   }
 
@@ -5755,7 +5767,8 @@ function getEventImageInfo(date){
           md === "10-31" ? "ハロウィン" :
           md === "12-24" ? "クリスマスイブ" :
           md === "12-25" ? "クリスマス" :
-          md === "12-31" ? "大晦日" : "イベント"
+          md === "12-31" ? "大晦日" : "イベント",
+    everyOpen: false
   };
 }
 
@@ -5783,26 +5796,33 @@ async function decideLoginImage(){
     };
   }
 
-  /* ② イベント：その日（お正月は1月全体）の最初のログインだけ */
+  /* ② イベント：イベント日は月別画像より優先する */
   const event = getEventImageInfo(todayString);
-  if(event && data.eventImageShownKey !== event.key){
-    await update(memberRef, {eventImageShownKey:event.key});
-    return {
-      kind: "event",
-      src: `images/events/${event.file}`,
-      name: event.name
-    };
+  if(event){
+    if(event.everyOpen){
+      return {
+        kind: "event",
+        src: `images/events/${event.file}`,
+        name: event.name
+      };
+    }
+
+    if(data.eventImageShownKey !== event.key){
+      await update(memberRef, {eventImageShownKey:event.key});
+      return {
+        kind: "event",
+        src: `images/events/${event.file}`,
+        name: event.name
+      };
+    }
   }
 
-  /* ③ 月別：その月の最初のログインだけ */
-  if(data.monthlyImageShownMonth !== monthKey){
-    await update(memberRef, {monthlyImageShownMonth:monthKey});
-    return {
-      kind: "monthly",
-      src: `images/monthly/${monthlyImageFiles[today.getMonth()+1]}`,
-      name: `${today.getMonth()+1}月`
-    };
-  }
+  /* ③ 月別：ページを開くたびに表示する */
+  return {
+    kind: "monthly",
+    src: `images/monthly/${monthlyImageFiles[today.getMonth()+1]}`,
+    name: `${today.getMonth()+1}月`
+  };
 
   /* ④ 何も表示しない */
   return null;
