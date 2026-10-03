@@ -616,6 +616,67 @@ textarea{
 
 
 /* =========================
+   毎月の画像設定スイッチ
+========================= */
+
+.image-setting-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin:14px 0 0;
+  padding:13px 14px;
+  background:#f8f9fb;
+  border-radius:12px;
+  font-size:14px;
+}
+
+.switch-wrap{
+  position:relative;
+  width:50px;
+  height:30px;
+  flex:none;
+}
+
+.switch-input{
+  position:absolute;
+  width:1px;
+  height:1px;
+  opacity:0;
+  pointer-events:none;
+}
+
+.switch-slider{
+  position:absolute;
+  inset:0;
+  border-radius:999px;
+  background:#cfd5de;
+  cursor:pointer;
+  transition:.2s ease;
+}
+
+.switch-slider::after{
+  content:"";
+  position:absolute;
+  width:24px;
+  height:24px;
+  left:3px;
+  top:3px;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:0 2px 5px rgba(0,0,0,.15);
+  transition:.2s ease;
+}
+
+.switch-input:checked + .switch-slider{
+  background:#1f6feb;
+}
+
+.switch-input:checked + .switch-slider::after{
+  transform:translateX(20px);
+}
+
+/* =========================
    ログイン成功ウェルカム画面
 ========================= */
 
@@ -679,22 +740,26 @@ textarea{
   border:0;
   border-radius:999px;
   position:absolute;
-  left:50%;
-  bottom:max(48px, calc(env(safe-area-inset-bottom) + 34px));
-  transform:translateX(-50%);
-  padding:13px 38px;
-  background:#f4c94f;
-  color:#4b321f;
-  font-size:16px;
+  top:max(16px, calc(env(safe-area-inset-top) + 16px));
+  right:16px;
+  left:auto;
+  bottom:auto;
+  transform:none;
+  padding:10px 16px;
+  background:rgba(0,0,0,.28);
+  color:#fff;
+  font-size:13px;
   font-weight:700;
-  box-shadow:0 6px 18px rgba(100,75,20,.16);
+  box-shadow:0 2px 10px rgba(0,0,0,.12);
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
   cursor:pointer;
   transition:transform .18s ease, box-shadow .18s ease;
 }
 
 .welcome-start-button:active{
-  transform:translateX(-50%) scale(.96);
-  box-shadow:0 3px 10px rgba(100,75,20,.14);
+  transform:scale(.96);
+  box-shadow:0 2px 8px rgba(0,0,0,.12);
 }
 
 #welcomeOverlay.closing{
@@ -718,9 +783,22 @@ textarea{
   }
 
   .welcome-start-button{
-    bottom:max(40px, calc(env(safe-area-inset-bottom) + 28px));
-    padding:12px 32px;
-    font-size:15px;
+    top:max(12px, calc(env(safe-area-inset-top) + 12px));
+    right:12px;
+    left:auto;
+    bottom:auto;
+    transform:none;
+    padding:9px 15px;
+    font-size:13px;
+    background:rgba(0,0,0,.28);
+    color:#fff;
+    box-shadow:0 2px 10px rgba(0,0,0,.12);
+    backdrop-filter:blur(4px);
+    -webkit-backdrop-filter:blur(4px);
+  }
+
+  .welcome-start-button:active{
+    transform:scale(.96);
   }
 }
 </style>
@@ -1190,6 +1268,30 @@ textarea{
   >
     プロフィールを保存
   </button>
+
+  <h3 style="margin-top:24px">
+    毎月の画像
+  </h3>
+
+  <p class="small">
+    毎月の画像をページを開くたびに表示するか設定できます。OFFにすると今月は表示されず、翌月になると自動でONに戻ります。
+  </p>
+
+  <label class="image-setting-row">
+    <span>毎月の画像を表示する</span>
+    <span class="switch-wrap">
+      <input
+        id="monthlyImageToggle"
+        class="switch-input"
+        type="checkbox"
+        checked
+        onchange="toggleMonthlyImage()"
+      >
+      <span class="switch-slider"></span>
+    </span>
+  </label>
+
+  <div id="monthlyImageSettingMsg"></div>
 
   <h3 style="margin-top:24px">
     復旧用メールアドレス
@@ -5260,6 +5362,14 @@ async function showMyPage(){
     profile.name ??
     "";
 
+  const monthlyToggle = $("monthlyImageToggle");
+  if(monthlyToggle){
+    const now = new Date();
+    const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
+    const disabledMonth = String(profile.monthlyImageDisabledMonth || "");
+    monthlyToggle.checked = disabledMonth !== currentMonthKey && profile.monthlyImageEnabled !== false;
+  }
+
   $("myRecoveryEmail").value =
     currentUser?.email ||
     "";
@@ -5280,6 +5390,52 @@ async function showMyPage(){
     .innerHTML =
       "";
 
+}
+
+
+/* =========================
+   毎月の画像設定
+========================= */
+
+async function toggleMonthlyImage(){
+  if(!currentUser || !profile) return;
+
+  const toggle = $("monthlyImageToggle");
+  if(!toggle) return;
+
+  const now = new Date();
+  const monthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
+  const enabled = toggle.checked;
+
+  try{
+    await update(
+      ref(db,"members/" + currentUser.uid),
+      enabled
+        ? {
+            monthlyImageEnabled:true,
+            monthlyImageDisabledMonth:null
+          }
+        : {
+            monthlyImageEnabled:false,
+            monthlyImageDisabledMonth:monthKey
+          }
+    );
+
+    profile = {
+      ...profile,
+      monthlyImageEnabled:enabled,
+      monthlyImageDisabledMonth:enabled ? null : monthKey
+    };
+
+    $("monthlyImageSettingMsg").innerHTML =
+      `<div class="msg">${enabled ? "毎月の画像を表示します。" : "今月の毎月の画像を表示しません。"}</div>`;
+
+  }catch(e){
+    console.error("毎月の画像設定保存エラー:",e);
+    toggle.checked = !enabled;
+    $("monthlyImageSettingMsg").innerHTML =
+      '<div class="msg error">設定を保存できませんでした。</div>';
+  }
 }
 
 
@@ -5817,12 +5973,22 @@ async function decideLoginImage(){
     }
   }
 
-  /* ③ 月別：ページを開くたびに表示する */
-  return {
-    kind: "monthly",
-    src: `images/monthly/${monthlyImageFiles[today.getMonth()+1]}`,
-    name: `${today.getMonth()+1}月`
-  };
+  /* ③ 月別：ONのときだけページを開くたびに表示する */
+  const monthlyDisabledMonth = String(data.monthlyImageDisabledMonth || "");
+  const monthlyEnabled =
+    monthlyDisabledMonth !== monthKey &&
+    data.monthlyImageEnabled !== false;
+
+  if(monthlyEnabled){
+    return {
+      kind: "monthly",
+      src: `images/monthly/${monthlyImageFiles[today.getMonth()+1]}`,
+      name: `${today.getMonth()+1}月`
+    };
+  }
+
+  /* ④ 今月だけOFF。翌月になれば自動的にON扱いにする */
+  return null;
 
   /* ④ 何も表示しない */
   return null;
