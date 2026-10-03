@@ -626,7 +626,7 @@ textarea{
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:24px;
+  padding:0;
   box-sizing:border-box;
   background:rgba(255,255,255,.78);
   backdrop-filter:blur(5px);
@@ -634,27 +634,28 @@ textarea{
   opacity:0;
   visibility:hidden;
   pointer-events:none;
-  transition:opacity .55s ease, visibility 0s linear .55s;
+  transition:opacity .7s ease, visibility 0s linear .7s;
 }
 
 #welcomeOverlay.show{
   opacity:1;
   visibility:visible;
   pointer-events:auto;
-  transition:opacity .55s ease;
+  transition:opacity .7s ease;
 }
 
 .welcome-card{
-  width:min(920px,94vw);
-  max-height:90vh;
+  position:relative;
+  width:100vw;
+  height:100vh;
+  max-width:none;
+  max-height:none;
   display:flex;
-  flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:18px;
-  transform:scale(.92);
+  transform:scale(.94);
   opacity:0;
-  transition:transform .65s cubic-bezier(.22,1,.36,1), opacity .55s ease;
+  transition:transform .7s cubic-bezier(.22,1,.36,1), opacity .7s ease;
 }
 
 #welcomeOverlay.show .welcome-card{
@@ -664,11 +665,12 @@ textarea{
 
 .welcome-image{
   display:block;
-  width:100%;
-  max-width:920px;
-  max-height:calc(90vh - 90px);
-  object-fit:contain;
-  border-radius:20px;
+  width:100vw;
+  height:100vh;
+  max-width:none;
+  max-height:none;
+  object-fit:cover;
+  border-radius:0;
   box-shadow:0 18px 50px rgba(60,45,20,.16);
 }
 
@@ -676,7 +678,11 @@ textarea{
   appearance:none;
   border:0;
   border-radius:999px;
-  padding:12px 34px;
+  position:absolute;
+  left:50%;
+  bottom:34px;
+  transform:translateX(-50%);
+  padding:13px 38px;
   background:#f4c94f;
   color:#4b321f;
   font-size:16px;
@@ -687,39 +693,32 @@ textarea{
 }
 
 .welcome-start-button:active{
-  transform:scale(.96);
+  transform:translateX(-50%) scale(.96);
   box-shadow:0 3px 10px rgba(100,75,20,.14);
 }
 
 #welcomeOverlay.closing{
   opacity:0;
   pointer-events:none;
-  transition:opacity .45s ease;
+  transition:opacity .7s ease;
 }
 
 #welcomeOverlay.closing .welcome-card{
-  transform:scale(.94);
+  transform:scale(1.02);
   opacity:0;
-  transition:transform .45s ease, opacity .4s ease;
+  transition:transform .7s ease, opacity .7s ease;
 }
 
 @media (max-width:600px){
-  #welcomeOverlay{
-    padding:14px;
-  }
-
-  .welcome-card{
-    width:96vw;
-    gap:14px;
-  }
-
   .welcome-image{
-    max-height:calc(90vh - 76px);
-    border-radius:14px;
+    width:100vw;
+    height:100vh;
+    border-radius:0;
   }
 
   .welcome-start-button{
-    padding:11px 30px;
+    bottom:24px;
+    padding:12px 32px;
     font-size:15px;
   }
 }
@@ -5690,7 +5689,7 @@ function closeWelcomeOverlay(){
 
   setTimeout(() => {
     overlay.classList.remove("closing");
-  }, 500);
+  }, 750);
 }
 
 const welcomeStartButton = $("welcomeStartButton");
