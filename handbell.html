@@ -1760,11 +1760,28 @@ function getSchedulesForDate(
           return;
 
 
+        /*
+          日付が直接入っている予定
+          （通常部活・演奏会・学校が休み・その他のイベント）
+          は、種類に関係なく同じ日付なら表示する。
+        */
         if(
-          (
-            s.type === "exam" ||
-            s.type === "schoolHoliday"
-          ) &&
+          s.date === date
+        ){
+
+          result.push(s);
+
+          return;
+
+        }
+
+
+        /*
+          試験期間など、開始日～終了日の予定
+          は期間内なら表示する。
+        */
+        if(
+          s.type === "exam" &&
           dateInRange(
             date,
             s.startDate,
@@ -1780,11 +1797,12 @@ function getSchedulesForDate(
 
 
         if(
-          (
-            s.type === "concert" ||
-            s.type === "event"
-          ) &&
-          s.date === date
+          s.type === "schoolHoliday" &&
+          dateInRange(
+            date,
+            s.startDate,
+            s.endDate
+          )
         ){
 
           result.push(s);
@@ -1798,6 +1816,7 @@ function getSchedulesForDate(
   return result;
 
 }
+
 
 
 function hasClubSchedule(
