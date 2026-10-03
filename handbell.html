@@ -679,8 +679,9 @@ textarea{
   border:0;
   border-radius:999px;
   position:absolute;
-  top:max(16px, calc(env(safe-area-inset-top) + 10px));
+  top:24px !important;
   right:14px;
+  z-index:10;
   left:auto;
   bottom:auto;
   transform:none;
@@ -722,7 +723,7 @@ textarea{
   }
 
   .welcome-start-button{
-    top:max(16px, calc(env(safe-area-inset-top) + 10px));
+    top:24px !important;
     right:12px;
     padding:7px 12px;
     font-size:13px;
