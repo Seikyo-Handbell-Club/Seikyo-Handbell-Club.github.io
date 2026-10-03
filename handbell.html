@@ -2549,6 +2549,11 @@ let authProcessing =
 let setupInProgress =
   false;
 
+/* 初回パスワード設定直後にWELCOMEを表示した場合、
+   onAuthStateChanged側で画像判定を二重実行しないためのフラグ */
+let skipNextAuthImageCheck =
+  false;
+
 
 onAuthStateChanged(
   auth,
@@ -2680,14 +2685,18 @@ onAuthStateChanged(
        ログイン後／ページを開いたときの画像表示
        認証が確認できた時点で必ず判定する
     ========================= */
-    try{
-      showWelcomeAfterLogin = false;
-      const imageInfo = await decideLoginImage();
-      if(imageInfo){
-        showWelcomeOverlay(imageInfo);
+    if(skipNextAuthImageCheck){
+      skipNextAuthImageCheck = false;
+    }else{
+      try{
+        showWelcomeAfterLogin = false;
+        const imageInfo = await decideLoginImage();
+        if(imageInfo){
+          showWelcomeOverlay(imageInfo);
+        }
+      }catch(e){
+        console.error("ログイン後の画像表示判定に失敗しました",e);
       }
-    }catch(e){
-      console.error("ログイン後の画像表示判定に失敗しました",e);
     }
 
   }
@@ -2939,6 +2948,18 @@ async function setupPassword(){
           pendingRecoveryEmail:null
         }
       );
+
+      /* 初回パスワード設定そのものが「初回ログイン」なので、
+         この時点でWELCOMEを一度だけ表示済みにする。 */
+      await update(
+        ref(db,"members/" + cred.user.uid),
+        {
+          welcomeShown:true
+        }
+      );
+
+      skipNextAuthImageCheck = true;
+
     }catch(dbError){
       try{
         await remove(ref(db,"members/" + cred.user.uid));
@@ -2984,6 +3005,14 @@ async function setupPassword(){
       .remove("hidden");
 
     render();
+
+    /* 初回パスワード設定後の最初のログインなので、
+       ログアウトを挟まず、その場でWELCOMEを表示する。 */
+    showWelcomeOverlay({
+      kind:"welcome",
+      src:"images/welcome/welcome.jpg",
+      name:"WELCOME"
+    });
 
     $("setupRecoveryEmail").value="";
     $("setupPassword").value="";
