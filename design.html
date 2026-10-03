@@ -197,6 +197,14 @@ function buildBellMessages(schedules){
   /* 通常セリフは必ず先に作る。予定データがなくても2種類にはならない。 */
   const all=[...buildRegularMessages(values,now)];
 
+  /*
+    0:00〜3:59は就寝タイム。
+    この時間帯は予定・部活前・イベント関連のセリフを追加しない。
+  */
+  if(now.getHours()>=0 && now.getHours()<4){
+    return [...new Set(all)];
+  }
+
   try{
     const today=dateString(now);
     all.push(...getClubBeforeStartMessages(values,today,now));
@@ -255,10 +263,20 @@ function timeToMinutes(value){
 
 function getGreeting(date=new Date()){
   const hour=date.getHours();
-  if(hour>=4 && hour<10)return "おはよう！";
-  if(hour>=10 && hour<17)return "こんにちは！";
-  if(hour>=17 && hour<24)return "こんばんは！";
-  return "";
+
+  if(hour>=4 && hour<10){
+    return "おはよう！";
+  }
+
+  if(hour>=10 && hour<17){
+    return "こんにちは！";
+  }
+
+  if(hour>=17 && hour<24){
+    return "こんばんは！";
+  }
+
+  return "……zzz……💤";
 }
 
 function greetingMessage(text,date=new Date()){
@@ -335,6 +353,12 @@ function getMonthlyClubCount(values,today){
 }
 
 function getClubBeforeStartMessages(values,today,dateNow){
+
+  /* 0:00〜3:59はベルちゃんは寝ている */
+  if(dateNow.getHours()>=0 && dateNow.getHours()<4){
+    return [];
+  }
+
   const todayNormal=getNormalSchedulesForDate(values,today)[0];
   if(!todayNormal)return [];
 
@@ -381,7 +405,9 @@ function buildRegularMessages(values,dateNow){
     );
     if(hour>=4 && hour<6.5)result.push("おはよう〜まだ眠いよ〜");
     if(hour>=5 && hour<7)result.push("おはよう！朝はやいね");
+
   }else if(hour>=10 && hour<17){
+
     result.push(
       "こんにちは！",
       "こんにちは！無理せず頑張ろうね！",
@@ -395,7 +421,9 @@ function buildRegularMessages(values,dateNow){
     );
     if(hour>=12 && hour<13)result.push("こんにちは！お昼ご飯はもう食べたかな？");
     if(hour>=12 && hour<15)result.push("こんにちは！今日のお昼ご飯なんだった？");
+
   }else if(hour>=17 && hour<24){
+
     result.push(
       "こんばんは！",
       "こんばんは！予定を確認してみてね！",
@@ -407,12 +435,25 @@ function buildRegularMessages(values,dateNow){
       "こんばんは！自主練はもうやった？",
       `こんばんは！今月の部活は${monthCount}回だよ`
     );
-    if(hour>=22 && hour<24)result.push("こんばんは〜。そろそろ眠たくなっちゃった、、、");
+
+    if(hour>=22 && hour<24){
+      result.push("こんばんは〜。そろそろ眠たくなっちゃった、、、");
+    }
+
     if(getNormalSchedulesForDate(values,getTomorrowString(dateNow)).length>0){
       result.push("こんばんは！明日も部活頑張ろう！");
     }
-    if(hour>=22 && hour<24)result.push("こんばんは！夜遅くまでお疲れ様");
+
+    if(hour>=22 && hour<24){
+      result.push("こんばんは！夜遅くまでお疲れ様");
+    }
+
   }else{
+
+    /* =====================================================
+       0:00〜3:59 就寝タイム
+       この7種類からランダム
+    ===================================================== */
     result.push(
       "すやすや……💤",
       "もう眠たいよ〜……💤",
@@ -461,11 +502,14 @@ function showMessage(text){
 
 function changeBellMessage(){
   if(!bellMessages.length)return;
+
   let next=pickRandom(bellMessages);
+
   if(bellMessages.length>1 && next===message.textContent){
     const other=bellMessages.filter(item=>item!==message.textContent);
     next=pickRandom(other);
   }
+
   showMessage(next);
 }
 
