@@ -699,14 +699,15 @@ textarea{
 
 #welcomeOverlay.closing{
   opacity:0;
+  visibility:visible;
   pointer-events:none;
-  transition:opacity .7s ease;
+  transition:opacity .8s ease;
 }
 
 #welcomeOverlay.closing .welcome-card{
   transform:scale(1.02);
   opacity:0;
-  transition:transform .7s ease, opacity .7s ease;
+  transition:transform .8s ease, opacity .8s ease;
 }
 
 @media (max-width:600px){
@@ -5689,7 +5690,7 @@ function closeWelcomeOverlay(){
 
   setTimeout(() => {
     overlay.classList.remove("closing");
-  }, 750);
+  }, 850);
 }
 
 const welcomeStartButton = $("welcomeStartButton");
