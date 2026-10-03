@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ベルちゃん</title>
+<style>
+html,body{margin:0;width:100%;height:100%;background:transparent;overflow:hidden}
+.bell-area{position:relative;width:100%;height:100%;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
+.bell{position:absolute;right:8px;bottom:4px;width:175px;max-width:62%;height:auto;filter:drop-shadow(0 12px 10px rgba(40,55,65,.15));cursor:pointer;user-select:none;transition:transform .15s ease}
+.bell:active{transform:scale(.96)}
+.bubble{position:absolute;right:166px;bottom:108px;width:220px;max-width:76%;background:#fff;border:2px solid #d9e5ed;border-radius:18px;padding:12px 15px;box-shadow:0 10px 24px rgba(48,72,92,.12);font-size:14px;line-height:1.55;animation:bubbleAppear .55s cubic-bezier(.2,.9,.25,1.2) both}
+.bubble:after{content:"";position:absolute;right:-11px;bottom:24px;width:18px;height:18px;background:#fff;border-top:2px solid #d9e5ed;border-right:2px solid #d9e5ed;transform:rotate(45deg)}
+.bubble small{display:block;color:#84939d;font-size:10px;margin-bottom:3px}
+@keyframes bubbleAppear{from{opacity:0;transform:scale(.9) translateY(7px)}to{opacity:1;transform:scale(1) translateY(0)}}
+
+
+/* 全画面共通：スマホ版サイズ */
+.bell{width:min(210px,58vw,58vh);max-width:210px;right:5px;bottom:0}
+.bubble{right:5px;bottom:calc(min(210px,58vw,58vh) * .43);width:min(225px,calc(100% - 10px));max-width:225px;font-size:10px;padding:7px 8px}
+.bubble:after{right:20px;bottom:-7px;width:12px;height:12px;background:#fff;border-top:0;border-right:2px solid #d9e5ed;border-bottom:2px solid #d9e5ed;transform:rotate(45deg)}
+.bubble small{font-size:8px;margin-bottom:2px}
+.logged-in .bell{width:min(210px,58vw,58vh);max-width:210px}
+.logged-in .bubble{width:min(225px,calc(100% - 10px));bottom:calc(min(210px,58vw,58vh) * .43);max-width:225px}
+
+</style>
+</head>
+<body>
+<div class="bell-area">
+  <div class="bubble"><small>ベルちゃん</small><span id="bellMessage">予定を確認してるよ！</span></div>
+  <img class="bell" src="bell.png" alt="ベルちゃん" id="bellImage">
+</div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+
+
+const firebaseConfig={
+  apiKey:"AIzaSyAK9yRsSLSfYpLSyluzwRyI22Zp32KeMSA",
+  authDomain:"seikyo-handbell-club.firebaseapp.com",
+  databaseURL:"https://seikyo-handbell-club-default-rtdb.firebaseio.com",
+  projectId:"seikyo-handbell-club",
+  storageBucket:"seikyo-handbell-club.firebasestorage.app",
+  messagingSenderId:"55435007971",
+  appId:"1:55435007971:web:25f5c3b9dcd4324bc3f2d6"
+};
+
+const message=document.getElementById("bellMessage");
+const bellImage=document.getElementById("bellImage");
+
+function updateLoginSize(){
+  try{
+    const parentDocument=window.parent.document;
+    const loggedInElement=parentDocument.getElementById("loggedInLeft");
+    const isLoggedIn=!!loggedInElement && !loggedInElement.classList.contains("hidden");
+    document.body.classList.toggle("logged-in",isLoggedIn);
+  }catch(error){
+    document.body.classList.remove("logged-in");
+  }
+}
+
+updateLoginSize();
+
+try{
+  const parentDocument=window.parent.document;
+  const loggedInElement=parentDocument.getElementById("loggedInLeft");
+  if(loggedInElement){
+    new MutationObserver(updateLoginSize).observe(loggedInElement,{attributes:true,attributeFilter:["class"]});
+  }
+}catch(error){}
+
+let bellMessages=[];
+let currentSchedules={};
+let lastMessage="";
+
+function pad(n){return String(n).padStart(2,"0");}
+function dateString(date=new Date()){return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`;}
+function monthString(date=new Date()){return `${date.getFullYear()}-${pad(date.getMonth()+1)}`;}
+function timeToMinutes(value){const match=String(value||"").match(/^(\d{1,2}):(\d{2})$/);return match?Number(match[1])*60+Number(match[2]):null;}
+function getGreeting(date=new Date()){const hour=date.getHours();if(hour>=4&&hour<10)return "おはよう！";if(hour>=10&&hour<17)return "こんにちは！";return "こんばんは！";}
+function greetingMessage(text,date=new Date()){return `${getGreeting(date)}${text}`;}
+function formatJapaneseTime(value){const match=String(value||"").match(/^(\d{1,2}):(\d{2})$/);return match?`${Number(match[1])}時${match[2]}分`:String(value||"");}
+function formatTimeRange(time){const value=String(time||"").trim();if(!value||value==="終日")return "";const match=value.match(/^(\d{1,2}:\d{2})\s*[〜~\-－]\s*(\d{1,2}:\d{2})$/);return match?`${formatJapaneseTime(match[1])}〜${formatJapaneseTime(match[2])}`:value;}
+function getTomorrowString(date=new Date()){return dateString(new Date(date.getFullYear(),date.getMonth(),date.getDate()+1));}
+function daysFromToday(value,today=new Date()){const target=new Date(`${value}T00:00:00`);const base=new Date(today.getFullYear(),today.getMonth(),today.getDate());return Math.round((target-base)/86400000);}
+function isUpcomingWithinDays(value,today,days){const diff=daysFromToday(value,today);return !!value&&diff>0&&diff<=days;}
+function getNormalSchedulesForDate(values,date){return values.filter(s=>s&&s.type==="normal"&&s.date===date);}
+function getEventSchedulesForDate(values,date){return values.filter(s=>s&&(s.type==="concert"||s.type==="event")&&s.date===date);}
+function getUpcomingEvents(values,today){return values.filter(s=>s&&(s.type==="concert"||s.type==="event")&&isUpcomingWithinDays(s.date,today,7)).sort((a,b)=>String(a.date).localeCompare(String(b.date)));}
+function getMonthlyClubCount(values,today){const month=monthString(today);return values.filter(s=>s&&s.type==="normal"&&typeof s.date==="string"&&s.date.startsWith(month)).length;}
+function getClubBeforeStartMessages(values,today,dateNow){
+  const todayNormals=getNormalSchedulesForDate(values,today);if(!todayNormals.length)return [];
+  const nowMinutes=dateNow.getHours()*60+dateNow.getMinutes();
+  const result=[];
+  todayNormals.forEach(s=>{const match=String(s.time||"").match(/^(\d{1,2}:\d{2})/);const start=match?timeToMinutes(match[1]):null;if(start!==null&&nowMinutes<start){const range=formatTimeRange(s.time);if(range)result.push(greetingMessage(`今日の部活は${range}だよ`,dateNow));}});
+  result.push(greetingMessage("今日の部活、頑張ろうね！",dateNow),greetingMessage("今日もみんなでハンドベル頑張ろうね！",dateNow),greetingMessage("今日の部活も楽しみだね！",dateNow),greetingMessage("今日はどんな曲を練習するのかな？",dateNow),greetingMessage("今日の部活も一緒に頑張ろうね！",dateNow));
+  return result;
+}
+function buildRegularMessages(values,dateNow){
+  const result=[];const hour=dateNow.getHours();const monthCount=getMonthlyClubCount(values,dateNow);
+  if(hour>=4&&hour<10){result.push("おはよう！","おはよう！今日も一日頑張ろうね！","おはよう！無理せず頑張ろうね！","おはよう！今日も楽しく過ごそうね！","おはよう！予定を確認してみてね！","おはよう！今月の予定もチェックしてみてね！","おはよう！みんなで楽しく活動しようね！","おはよう！今日も素敵な一日にしようね！","おはよう！今日も予定を見にきてくれてありがとう",`おはよう！今月の部活は${monthCount}回だよ`);if(hour<6.5)result.push("おはよう〜まだ眠いよ〜");if(hour>=5&&hour<7)result.push("おはよう！朝はやいね");}
+  else if(hour>=10&&hour<17){result.push("こんにちは！","こんにちは！無理せず頑張ろうね！","こんにちは！今日も楽しく過ごそうね！","こんにちは！予定を確認してみてね！","こんにちは！今月の予定もチェックしてみてね！","こんにちは！みんなで楽しく活動しようね！","こんにちは！今日も素敵な一日にしようね！","こんにちは！今日も予定を見にきてくれてありがとう",`こんにちは！今月の部活は${monthCount}回だよ`);if(hour>=12&&hour<13)result.push("こんにちは！お昼ご飯はもう食べたかな？");if(hour>=12&&hour<15)result.push("こんにちは！今日のお昼ご飯なんだった？");}
+  else{result.push("こんばんは！","こんばんは！予定を確認してみてね！","こんばんは！今月の予定もチェックしてみてね！","こんばんは！今日も予定を見にきてくれてありがとう","こんばんは！今日はどんな1日だったかな？","こんばんは！1日お疲れ様！","こんばんは！明日も1日頑張ろう！","こんばんは！自主練はもうやった？",`こんばんは！今月の部活は${monthCount}回だよ`);if(hour>=22)result.push("こんばんは〜。そろそろ眠たくなっちゃった、、、","こんばんは！夜遅くまでお疲れ様");if(getNormalSchedulesForDate(values,getTomorrowString(dateNow)).length)result.push("こんばんは！明日も部活頑張ろう！");}
+  return result;
+}
+function pickRandom(list){if(!list.length)return "予定を確認してみてね！";return list[Math.floor(Math.random()*list.length)];}
+function buildMessages(schedules){
+  const now=new Date(),today=dateString(now),values=Object.values(schedules||{}).filter(s=>s&&typeof s==="object");
+  const regular=buildRegularMessages(values,now),club=getClubBeforeStartMessages(values,today,now),todayEvents=getEventSchedulesForDate(values,today),upcoming=getUpcomingEvents(values,today),all=[...regular,...club];
+  todayEvents.forEach(e=>all.push(`今日は${e.title||"演奏会・イベント"}だね！`));
+  upcoming.forEach(e=>all.push(`もうすぐ${e.title||"演奏会・イベント"}だね！`));
+  return [...new Set(all)];
+}
+function chooseBellMessage(schedules){
+  const now=new Date(),today=dateString(now),values=Object.values(schedules||{}).filter(s=>s&&typeof s==="object");
+  const todayEvents=getEventSchedulesForDate(values,today);if(todayEvents.length&&Math.random()<.5){const e=todayEvents[Math.floor(Math.random()*todayEvents.length)];return `今日は${e.title||"演奏会・イベント"}だね！`;}
+  const upcoming=getUpcomingEvents(values,today);if(upcoming.length&&Math.random()<.2){const e=upcoming[0];return `もうすぐ${e.title||"演奏会・イベント"}だね！`;}
+  return pickRandom([...buildRegularMessages(values,now),...getClubBeforeStartMessages(values,today,now)]);
+}
+function showMessage(text){lastMessage=text;message.textContent=text;}
+function changeBellMessage(){if(!bellMessages.length)bellMessages=buildMessages(currentSchedules);let next=pickRandom(bellMessages);if(bellMessages.length>1&&next===lastMessage)next=pickRandom(bellMessages.filter(v=>v!==lastMessage));showMessage(next);}
+function applySchedules(schedules){currentSchedules=schedules&&typeof schedules==="object"?schedules:{};bellMessages=buildMessages(currentSchedules);showMessage(chooseBellMessage(currentSchedules));}
+window.addEventListener("message",event=>{if(event.source!==window.parent)return;if(!event.data||event.data.type!=="handbellSchedules")return;applySchedules(event.data.schedules||{});});
+
+bellImage.addEventListener("click",changeBellMessage);
+showMessage("予定を確認してるよ！");
+setTimeout(()=>{if(!bellMessages.length)showMessage("予定を確認してみてね！");},1200);
+</script>
+</body>
+</html>
