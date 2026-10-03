@@ -6027,15 +6027,11 @@ async function decideLoginImage(){
     };
   }
 
-  /* ③ 月別：マイページの設定がONのときだけ表示 */
+  /* ③ 月別：マイページの設定がONなら、ページを開くたびに表示 */
   const monthlyEnabled =
     await normalizeMonthlyImageSetting(data);
 
-  if(
-    monthlyEnabled &&
-    data.monthlyImageShownMonth !== monthKey
-  ){
-    await update(memberRef, {monthlyImageShownMonth:monthKey});
+  if(monthlyEnabled){
     return {
       kind: "monthly",
       src: `images/monthly/${monthlyImageFiles[today.getMonth()+1]}`,
