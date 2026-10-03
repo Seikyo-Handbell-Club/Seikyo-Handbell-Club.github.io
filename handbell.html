@@ -616,6 +616,67 @@ textarea{
 
 
 /* =========================
+   毎月の画像設定スイッチ
+========================= */
+
+.image-setting-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin:14px 0 0;
+  padding:13px 14px;
+  background:#f8f9fb;
+  border-radius:12px;
+  font-size:14px;
+}
+
+.switch-wrap{
+  position:relative;
+  width:50px;
+  height:30px;
+  flex:none;
+}
+
+.switch-input{
+  position:absolute;
+  width:1px;
+  height:1px;
+  opacity:0;
+  pointer-events:none;
+}
+
+.switch-slider{
+  position:absolute;
+  inset:0;
+  border-radius:999px;
+  background:#cfd5de;
+  cursor:pointer;
+  transition:.2s ease;
+}
+
+.switch-slider::after{
+  content:"";
+  position:absolute;
+  width:24px;
+  height:24px;
+  left:3px;
+  top:3px;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:0 2px 5px rgba(0,0,0,.15);
+  transition:.2s ease;
+}
+
+.switch-input:checked + .switch-slider{
+  background:#1f6feb;
+}
+
+.switch-input:checked + .switch-slider::after{
+  transform:translateX(20px);
+}
+
+/* =========================
    ログイン成功ウェルカム画面
 ========================= */
 
@@ -666,10 +727,10 @@ textarea{
 .welcome-image{
   display:block;
   width:100vw;
-  height:auto;
+  height:100vh;
   max-width:none;
   max-height:none;
-  object-fit:contain;
+  object-fit:cover;
   border-radius:0;
   box-shadow:0 18px 50px rgba(60,45,20,.16);
 }
@@ -679,27 +740,26 @@ textarea{
   border:0;
   border-radius:999px;
   position:absolute;
-  top:60px !important;
-  right:14px;
-  z-index:10;
+  top:max(16px, calc(env(safe-area-inset-top) + 16px));
+  right:16px;
   left:auto;
   bottom:auto;
   transform:none;
-  padding:8px 14px;
-  background:rgba(0,0,0,.38);
+  padding:10px 16px;
+  background:rgba(0,0,0,.28);
   color:#fff;
   font-size:13px;
   font-weight:700;
   box-shadow:0 2px 10px rgba(0,0,0,.12);
-  backdrop-filter:blur(6px);
-  -webkit-backdrop-filter:blur(6px);
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
   cursor:pointer;
   transition:transform .18s ease, box-shadow .18s ease;
 }
 
 .welcome-start-button:active{
   transform:scale(.96);
-  box-shadow:0 1px 6px rgba(0,0,0,.10);
+  box-shadow:0 2px 8px rgba(0,0,0,.12);
 }
 
 #welcomeOverlay.closing{
@@ -718,89 +778,28 @@ textarea{
 @media (max-width:600px){
   .welcome-image{
     width:100vw;
-    height:auto;
+    height:100vh;
     border-radius:0;
   }
 
   .welcome-start-button{
-    top:80px !important;
+    top:max(12px, calc(env(safe-area-inset-top) + 12px));
     right:12px;
-    padding:7px 12px;
+    left:auto;
+    bottom:auto;
+    transform:none;
+    padding:9px 15px;
     font-size:13px;
+    background:rgba(0,0,0,.28);
+    color:#fff;
+    box-shadow:0 2px 10px rgba(0,0,0,.12);
+    backdrop-filter:blur(4px);
+    -webkit-backdrop-filter:blur(4px);
   }
-}
 
-.monthly-image-setting{
-  margin-top:24px;
-  padding:14px 16px;
-  border:1px solid #e4e8ee;
-  border-radius:14px;
-  background:#fafbfc;
-}
-
-.monthly-image-setting-row{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:14px;
-}
-
-.monthly-image-setting-title{
-  font-weight:700;
-  color:#303740;
-}
-
-.monthly-image-setting-note{
-  margin-top:6px;
-  font-size:12px;
-  color:#7b8490;
-  line-height:1.5;
-}
-
-.monthly-image-switch{
-  position:relative;
-  display:inline-flex;
-  flex:0 0 auto;
-  width:50px;
-  height:30px;
-}
-
-.monthly-image-switch input{
-  position:absolute;
-  opacity:0;
-  width:1px;
-  height:1px;
-  pointer-events:none;
-}
-
-.monthly-image-slider{
-  position:absolute;
-  inset:0;
-  border-radius:999px;
-  background:#cfd5dc;
-  cursor:pointer;
-  transition:background .2s ease;
-}
-
-.monthly-image-slider::before{
-  content:"";
-  position:absolute;
-  width:24px;
-  height:24px;
-  left:3px;
-  top:3px;
-  border-radius:50%;
-  background:#fff;
-  box-shadow:0 1px 4px rgba(0,0,0,.18);
-  transition:transform .2s ease;
-}
-
-.monthly-image-switch input:checked + .monthly-image-slider{
-  background:#f4c94f;
-}
-
-.monthly-image-switch input:checked + .monthly-image-slider::before{
-  transform:translateX(20px);
+  .welcome-start-button:active{
+    transform:scale(.96);
+  }
 }
 </style>
 </head>
@@ -1270,29 +1269,29 @@ textarea{
     プロフィールを保存
   </button>
 
-  <div class="monthly-image-setting">
-    <div class="monthly-image-setting-row">
-      <div class="monthly-image-setting-title">
-        毎月の画像を表示する
-      </div>
+  <h3 style="margin-top:24px">
+    毎月の画像
+  </h3>
 
-      <label class="monthly-image-switch">
-        <input
-          id="monthlyImageToggle"
-          type="checkbox"
-          onchange="saveMonthlyImageSetting(this.checked)"
-        >
-        <span class="monthly-image-slider"></span>
-      </label>
-    </div>
+  <p class="small">
+    毎月の画像をページを開くたびに表示するか設定できます。OFFにすると今月は表示されず、翌月になると自動でONに戻ります。
+  </p>
 
-    <div
-      id="monthlyImageSettingNote"
-      class="monthly-image-setting-note"
-    >
-      今月の画像を表示します。
-    </div>
-  </div>
+  <label class="image-setting-row">
+    <span>毎月の画像を表示する</span>
+    <span class="switch-wrap">
+      <input
+        id="monthlyImageToggle"
+        class="switch-input"
+        type="checkbox"
+        checked
+        onchange="toggleMonthlyImage()"
+      >
+      <span class="switch-slider"></span>
+    </span>
+  </label>
+
+  <div id="monthlyImageSettingMsg"></div>
 
   <h3 style="margin-top:24px">
     復旧用メールアドレス
@@ -2549,11 +2548,6 @@ let authProcessing =
 let setupInProgress =
   false;
 
-/* 初回パスワード設定直後にWELCOMEを表示した場合、
-   onAuthStateChanged側で画像判定を二重実行しないためのフラグ */
-let skipNextAuthImageCheck =
-  false;
-
 
 onAuthStateChanged(
   auth,
@@ -2685,18 +2679,14 @@ onAuthStateChanged(
        ログイン後／ページを開いたときの画像表示
        認証が確認できた時点で必ず判定する
     ========================= */
-    if(skipNextAuthImageCheck){
-      skipNextAuthImageCheck = false;
-    }else{
-      try{
-        showWelcomeAfterLogin = false;
-        const imageInfo = await decideLoginImage();
-        if(imageInfo){
-          showWelcomeOverlay(imageInfo);
-        }
-      }catch(e){
-        console.error("ログイン後の画像表示判定に失敗しました",e);
+    try{
+      showWelcomeAfterLogin = false;
+      const imageInfo = await decideLoginImage();
+      if(imageInfo){
+        showWelcomeOverlay(imageInfo);
       }
+    }catch(e){
+      console.error("ログイン後の画像表示判定に失敗しました",e);
     }
 
   }
@@ -2948,18 +2938,6 @@ async function setupPassword(){
           pendingRecoveryEmail:null
         }
       );
-
-      /* 初回パスワード設定そのものが「初回ログイン」なので、
-         この時点でWELCOMEを一度だけ表示済みにする。 */
-      await update(
-        ref(db,"members/" + cred.user.uid),
-        {
-          welcomeShown:true
-        }
-      );
-
-      skipNextAuthImageCheck = true;
-
     }catch(dbError){
       try{
         await remove(ref(db,"members/" + cred.user.uid));
@@ -3005,14 +2983,6 @@ async function setupPassword(){
       .remove("hidden");
 
     render();
-
-    /* 初回パスワード設定後の最初のログインなので、
-       ログアウトを挟まず、その場でWELCOMEを表示する。 */
-    showWelcomeOverlay({
-      kind:"welcome",
-      src:"images/welcome/welcome.jpg",
-      name:"WELCOME"
-    });
 
     $("setupRecoveryEmail").value="";
     $("setupPassword").value="";
@@ -5338,131 +5308,6 @@ async function deleteNotice(id){
 
 
 /* =========================
-   毎月の画像設定
-========================= */
-
-function getCurrentMonthKey(date = new Date()){
-  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}`;
-}
-
-async function normalizeMonthlyImageSetting(data){
-  if(!currentUser) return true;
-
-  const now = new Date();
-  const monthKey = getCurrentMonthKey(now);
-  const settingMonth = data.monthlyImageSettingMonth;
-
-  /*
-    設定がまだない場合はON。
-    月が変わった場合も自動的にONへ戻す。
-  */
-  if(settingMonth !== monthKey){
-    const next = {
-      monthlyImageEnabled: true,
-      monthlyImageSettingMonth: monthKey
-    };
-
-    await update(
-      ref(db, `members/${currentUser.uid}`),
-      next
-    );
-
-    if(profile){
-      profile = {
-        ...profile,
-        ...next
-      };
-    }
-
-    return true;
-  }
-
-  return data.monthlyImageEnabled !== false;
-}
-
-async function renderMonthlyImageSetting(){
-  const toggle = $("monthlyImageToggle");
-  const note = $("monthlyImageSettingNote");
-
-  if(!toggle || !currentUser) return;
-
-  try{
-    const snap = await get(
-      ref(db, `members/${currentUser.uid}`)
-    );
-
-    const data = snap.exists()
-      ? (snap.val() || {})
-      : {};
-
-    const enabled =
-      await normalizeMonthlyImageSetting(data);
-
-    toggle.checked = enabled;
-
-    if(note){
-      note.textContent = enabled
-        ? "今月の画像を表示します。"
-        : "今月は月別画像を表示しません。";
-    }
-  }catch(e){
-    console.error("毎月の画像設定の読み込みに失敗しました",e);
-  }
-}
-
-async function saveMonthlyImageSetting(enabled){
-  if(!currentUser) return;
-
-  const toggle = $("monthlyImageToggle");
-  const note = $("monthlyImageSettingNote");
-  const monthKey = getCurrentMonthKey();
-
-  if(toggle){
-    toggle.disabled = true;
-  }
-
-  try{
-    await update(
-      ref(db, `members/${currentUser.uid}`),
-      {
-        monthlyImageEnabled: !!enabled,
-        monthlyImageSettingMonth: monthKey
-      }
-    );
-
-    if(profile){
-      profile = {
-        ...profile,
-        monthlyImageEnabled: !!enabled,
-        monthlyImageSettingMonth: monthKey
-      };
-    }
-
-    if(note){
-      note.textContent = enabled
-        ? "今月の画像を表示します。"
-        : "今月は月別画像を表示しません。";
-    }
-  }catch(e){
-    console.error("毎月の画像設定の保存に失敗しました",e);
-
-    if(toggle){
-      toggle.checked = !enabled;
-    }
-
-    if(note){
-      note.textContent =
-        "保存できませんでした。もう一度お試しください。";
-    }
-  }finally{
-    if(toggle){
-      toggle.disabled = false;
-    }
-  }
-}
-
-
-/* =========================
    マイページ
 ========================= */
 
@@ -5517,6 +5362,14 @@ async function showMyPage(){
     profile.name ??
     "";
 
+  const monthlyToggle = $("monthlyImageToggle");
+  if(monthlyToggle){
+    const now = new Date();
+    const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
+    const disabledMonth = String(profile.monthlyImageDisabledMonth || "");
+    monthlyToggle.checked = disabledMonth !== currentMonthKey && profile.monthlyImageEnabled !== false;
+  }
+
   $("myRecoveryEmail").value =
     currentUser?.email ||
     "";
@@ -5537,8 +5390,52 @@ async function showMyPage(){
     .innerHTML =
       "";
 
-  await renderMonthlyImageSetting();
+}
 
+
+/* =========================
+   毎月の画像設定
+========================= */
+
+async function toggleMonthlyImage(){
+  if(!currentUser || !profile) return;
+
+  const toggle = $("monthlyImageToggle");
+  if(!toggle) return;
+
+  const now = new Date();
+  const monthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
+  const enabled = toggle.checked;
+
+  try{
+    await update(
+      ref(db,"members/" + currentUser.uid),
+      enabled
+        ? {
+            monthlyImageEnabled:true,
+            monthlyImageDisabledMonth:null
+          }
+        : {
+            monthlyImageEnabled:false,
+            monthlyImageDisabledMonth:monthKey
+          }
+    );
+
+    profile = {
+      ...profile,
+      monthlyImageEnabled:enabled,
+      monthlyImageDisabledMonth:enabled ? null : monthKey
+    };
+
+    $("monthlyImageSettingMsg").innerHTML =
+      `<div class="msg">${enabled ? "毎月の画像を表示します。" : "今月の毎月の画像を表示しません。"}</div>`;
+
+  }catch(e){
+    console.error("毎月の画像設定保存エラー:",e);
+    toggle.checked = !enabled;
+    $("monthlyImageSettingMsg").innerHTML =
+      '<div class="msg error">設定を保存できませんでした。</div>';
+  }
 }
 
 
@@ -5895,10 +5792,6 @@ window.showMyPage =
   showMyPage;
 
 
-window.saveMonthlyImageSetting =
-  saveMonthlyImageSetting;
-
-
 window.saveProfile =
   saveProfile;
 
@@ -5955,6 +5848,11 @@ const monthlyImageFiles = {
   12: "december.jpg.PNG"
 };
 
+const luckyImageFiles = {
+  rare: "rare.PNG",
+  ultraRare: "ultra_rare.PNG"
+};
+
 const eventImageFiles = {
   "01-01": "newyear.jpg.PNG",
   "02-03": "setsubun.jpg.PNG",
@@ -5987,11 +5885,23 @@ const jugoyaDates = {
 function getEventImageInfo(date){
   const [y,m,d] = date.split("-").map(Number);
 
-  if(m === 1){
+  /* 1月1日〜1月5日は、お正月画像を毎回表示する */
+  if(m === 1 && d >= 1 && d <= 5){
     return {
-      key: `${y}-newyear`,
+      key: `${y}-newyear-${m}-${d}`,
       file: "newyear.jpg.PNG",
-      name: "お正月"
+      name: "お正月",
+      everyOpen: true
+    };
+  }
+
+  /* 1月6日〜1月31日は、お正月画像を期間中1回だけ表示する */
+  if(m === 1 && d >= 6 && d <= 31){
+    return {
+      key: `${y}-newyear-late`,
+      file: "newyear.jpg.PNG",
+      name: "お正月",
+      everyOpen: false
     };
   }
 
@@ -6018,7 +5928,8 @@ function getEventImageInfo(date){
           md === "10-31" ? "ハロウィン" :
           md === "12-24" ? "クリスマスイブ" :
           md === "12-25" ? "クリスマス" :
-          md === "12-31" ? "大晦日" : "イベント"
+          md === "12-31" ? "大晦日" : "イベント",
+    everyOpen: false
   };
 }
 
@@ -6036,7 +5947,7 @@ async function decideLoginImage(){
   const snap = await get(memberRef);
   const data = snap.exists() ? (snap.val() || {}) : {};
 
-  /* ① WELCOME：初回ログインだけ */
+  /* ① WELCOME：初回ログインだけ。ここは100% */
   if(!data.welcomeShown){
     await update(memberRef, {welcomeShown:true});
     return {
@@ -6046,20 +5957,53 @@ async function decideLoginImage(){
     };
   }
 
-  /* ② イベント：その日（お正月は1月全体）の最初のログインだけ */
-  const event = getEventImageInfo(todayString);
-  if(event && data.eventImageShownKey !== event.key){
-    await update(memberRef, {eventImageShownKey:event.key});
+  /* ② 幸運画像：ページを開くたびに抽選する。イベントより先 */
+  const luckyRandom = Math.random();
+
+  if(luckyRandom < 0.001){
     return {
-      kind: "event",
-      src: `images/events/${event.file}`,
-      name: event.name
+      kind: "lucky",
+      rarity: "ultraRare",
+      src: `images/lucky/${luckyImageFiles.ultraRare}`,
+      name: "超レア"
     };
   }
 
-  /* ③ 月別：マイページの設定がONなら、ページを開くたびに表示 */
+  if(luckyRandom < 0.005){
+    return {
+      kind: "lucky",
+      rarity: "rare",
+      src: `images/lucky/${luckyImageFiles.rare}`,
+      name: "レア"
+    };
+  }
+
+  /* ③ イベント：幸運画像に当選しなかった場合だけ判定する */
+  const event = getEventImageInfo(todayString);
+  if(event){
+    if(event.everyOpen){
+      return {
+        kind: "event",
+        src: `images/events/${event.file}`,
+        name: event.name
+      };
+    }
+
+    if(data.eventImageShownKey !== event.key){
+      await update(memberRef, {eventImageShownKey:event.key});
+      return {
+        kind: "event",
+        src: `images/events/${event.file}`,
+        name: event.name
+      };
+    }
+  }
+
+  /* ④ 月別：ONのときだけページを開くたびに表示する */
+  const monthlyDisabledMonth = String(data.monthlyImageDisabledMonth || "");
   const monthlyEnabled =
-    await normalizeMonthlyImageSetting(data);
+    monthlyDisabledMonth !== monthKey &&
+    data.monthlyImageEnabled !== false;
 
   if(monthlyEnabled){
     return {
@@ -6069,7 +6013,7 @@ async function decideLoginImage(){
     };
   }
 
-  /* ④ 何も表示しない */
+  /* ⑤ 今月だけOFF。翌月になれば自動的にON扱いにする */
   return null;
 }
 
