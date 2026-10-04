@@ -327,6 +327,99 @@ main{
   display:block;
 }
 
+.collection-open-button{
+  appearance:none;
+  -webkit-appearance:none;
+  border:0;
+  border-radius:0;
+  margin:0;
+  padding:0;
+  width:100%;
+  height:100%;
+  min-height:0;
+  background:transparent;
+  color:inherit;
+  font:inherit;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+
+.collection-open-button:focus-visible{
+  outline:2px solid #1f6feb;
+  outline-offset:-2px;
+}
+
+.collection-image-overlay,
+.collection-costume-overlay{
+  position:fixed;
+  inset:0;
+  z-index:100000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  background:rgba(0,0,0,.82);
+  overscroll-behavior:contain;
+}
+
+.collection-image-overlay.show,
+.collection-costume-overlay.show{
+  display:flex;
+}
+
+.collection-image-overlay img{
+  display:block;
+  width:auto;
+  height:auto;
+  max-width:calc(100vw - 32px);
+  max-height:calc(100vh - 32px);
+  object-fit:contain;
+  border-radius:12px;
+  box-shadow:0 18px 60px rgba(0,0,0,.35);
+}
+
+.collection-costume-overlay{
+  padding:0;
+  background:#000;
+}
+
+.collection-costume-overlay img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
+.collection-overlay-close{
+  position:absolute;
+  top:max(12px, calc(env(safe-area-inset-top) + 12px));
+  right:max(12px, calc(env(safe-area-inset-right) + 12px));
+  z-index:2;
+  border:1px solid rgba(255,255,255,.45);
+  border-radius:999px;
+  padding:7px 12px;
+  background:rgba(0,0,0,.28);
+  color:#fff;
+  font-size:12px;
+  font-weight:700;
+  line-height:1.2;
+  box-shadow:0 2px 10px rgba(0,0,0,.16);
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+}
+
+.collection-overlay-close:active{
+  transform:scale(.96);
+}
+
+body.collection-overlay-open{
+  overflow:hidden;
+  touch-action:none;
+}
+
 .collection-secret{
   color:#fff;
   font-size:13px;
@@ -1432,9 +1525,7 @@ textarea{
 
   <h2>📚 コレクション</h2>
 
-  <p class="small">実際に画像やイベント衣装が表示されたものだけが記録されます。取得したコレクションはFirebaseに永久保存されます。</p>
-
-  <div id="collectionContent"></div>
+    <div id="collectionContent"></div>
 
 </section>
 
@@ -1919,6 +2010,50 @@ textarea{
       はじめる
     </button>
   </div>
+</div>
+
+<!-- コレクション画像拡大表示 -->
+<div
+  id="collectionImageOverlay"
+  class="collection-image-overlay"
+  aria-hidden="true"
+  onclick="closeCollectionOverlays()"
+>
+  <button
+    type="button"
+    class="collection-overlay-close"
+    onclick="event.stopPropagation();closeCollectionOverlays()"
+  >
+    閉じる
+  </button>
+  <img
+    id="collectionImageOverlayImg"
+    src=""
+    alt=""
+    onclick="event.stopPropagation()"
+  >
+</div>
+
+<!-- イベント衣装フルスクリーン表示 -->
+<div
+  id="collectionCostumeOverlay"
+  class="collection-costume-overlay"
+  aria-hidden="true"
+  onclick="closeCollectionOverlays()"
+>
+  <button
+    type="button"
+    class="collection-overlay-close"
+    onclick="event.stopPropagation();closeCollectionOverlays()"
+  >
+    閉じる
+  </button>
+  <img
+    id="collectionCostumeOverlayImg"
+    src=""
+    alt=""
+    onclick="event.stopPropagation()"
+  >
 </div>
 
 <script type="module">
@@ -6360,14 +6495,110 @@ async function loadCollectionData(){
 
 function collectionCardHtml(item,acquired){
   const displayName=acquired ? item.name : (item.hiddenName || "？？？");
-  const visual=acquired
-    ? `<img class="collection-image" src="${esc(item.src)}" alt="${esc(item.name)}">`
-    : `<div class="collection-secret">？？？</div>`;
+
+  /* ？？？は未取得なので拡大・全画面表示不可 */
+  if(!acquired){
+    return `<div class="collection-card">
+      <div class="collection-image-wrap">
+        <div class="collection-secret">？？？</div>
+      </div>
+      <div class="collection-name">${esc(displayName)}</div>
+    </div>`;
+  }
+
+  /* ベルちゃん・チャイムくんのイベント衣装はフルスクリーン表示 */
+  const isCostume =
+    item.group === "bell" ||
+    item.group === "chime" ||
+    item.id === "secret_bell_rare_costume" ||
+    item.id === "secret_chime_rare_costume";
+
+  const openType = isCostume ? "costume" : "normal";
+
+  const visual = `
+    <button
+      type="button"
+      class="collection-image-wrap collection-open-button"
+      data-open-type="${openType}"
+      data-src="${esc(item.src)}"
+      data-name="${esc(item.name)}"
+      aria-label="${esc(item.name)}を拡大表示"
+      onclick="openCollectionItem(this)"
+    >
+      <img
+        class="collection-image"
+        src="${esc(item.src)}"
+        alt="${esc(item.name)}"
+      >
+    </button>`;
+
   return `<div class="collection-card">
-    <div class="collection-image-wrap">${visual}</div>
+    ${visual}
     <div class="collection-name">${esc(displayName)}</div>
   </div>`;
 }
+
+function openCollectionItem(button){
+  if(!button) return;
+
+  const type = button.dataset.openType || "normal";
+  const src = button.dataset.src || "";
+  const name = button.dataset.name || "";
+
+  if(!src) return;
+
+  closeCollectionOverlays();
+
+  if(type === "costume"){
+    const overlay = $("collectionCostumeOverlay");
+    const image = $("collectionCostumeOverlayImg");
+    if(!overlay || !image) return;
+
+    image.src = src;
+    image.alt = name;
+    overlay.classList.add("show");
+    overlay.setAttribute("aria-hidden","false");
+  }else{
+    const overlay = $("collectionImageOverlay");
+    const image = $("collectionImageOverlayImg");
+    if(!overlay || !image) return;
+
+    image.src = src;
+    image.alt = name;
+    overlay.classList.add("show");
+    overlay.setAttribute("aria-hidden","false");
+  }
+
+  document.body.classList.add("collection-overlay-open");
+}
+
+function closeCollectionOverlays(){
+  const normalOverlay = $("collectionImageOverlay");
+  const normalImage = $("collectionImageOverlayImg");
+  const costumeOverlay = $("collectionCostumeOverlay");
+  const costumeImage = $("collectionCostumeOverlayImg");
+
+  if(normalOverlay){
+    normalOverlay.classList.remove("show");
+    normalOverlay.setAttribute("aria-hidden","true");
+  }
+
+  if(costumeOverlay){
+    costumeOverlay.classList.remove("show");
+    costumeOverlay.setAttribute("aria-hidden","true");
+  }
+
+  if(normalImage) normalImage.src = "";
+  if(costumeImage) costumeImage.src = "";
+
+  document.body.classList.remove("collection-overlay-open");
+}
+
+document.addEventListener("keydown",event=>{
+  if(event.key === "Escape"){
+    closeCollectionOverlays();
+  }
+});
 
 async function renderCollection(){
   if(!currentUser) return;
