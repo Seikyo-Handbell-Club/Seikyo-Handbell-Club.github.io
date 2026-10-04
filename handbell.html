@@ -323,6 +323,22 @@ main{
   letter-spacing:2px
 }
 
+.collection-button{
+  display:flex !important;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  width:100%;
+}
+
+.collection-count{
+  flex:0 0 auto;
+  font-size:13px;
+  font-weight:700;
+  color:#66717e;
+  white-space:nowrap;
+}
+
 .collection-name{
   display:flex !important;
   align-items:center;
@@ -1439,11 +1455,12 @@ textarea{
 
   <div class="mypage-setting-block">
     <button
-      class="secondary mypage-subpage-button"
+      class="secondary collection-button"
       type="button"
       onclick="showCollection()"
     >
-      📚 コレクション
+      <span>📚 コレクション</span>
+      <span id="collectionCountMini" class="collection-count">0/52</span>
     </button>
   </div>
 
@@ -5316,6 +5333,9 @@ async function showEdit(){
     }
   }
 
+  await loadCollectionData();
+  updateCollectionCountMini();
+
   hide();
 
   $("editView").classList.remove("hidden");
@@ -5604,6 +5624,26 @@ async function deleteNotice(id){
    マイページ
 ========================= */
 
+function updateCollectionCountMini(){
+  const countElement=$("collectionCountMini");
+  if(!countElement)return;
+
+  const total=[
+    ...collectionMonthlyItems,
+    ...collectionEventItems,
+    ...collectionSecretItems
+  ].length;
+
+  const acquired=[
+    ...collectionMonthlyItems,
+    ...collectionEventItems,
+    ...collectionSecretItems
+  ].filter(item=>!!collectionData[item.id]).length;
+
+  countElement.textContent=`${acquired}/${total}`;
+}
+
+
 async function showMyPage(){
 
   if(!currentUser){
@@ -5788,6 +5828,7 @@ function renderCollectionGrid(elementId,items){
 
 async function renderCollection(){
   await loadCollectionData();
+  updateCollectionCountMini();
   renderCollectionGrid("monthlyCollectionGrid",collectionMonthlyItems);
   renderCollectionGrid("eventCollectionGrid",collectionEventItems);
   renderCollectionGrid("secretCollectionGrid",collectionSecretItems);
