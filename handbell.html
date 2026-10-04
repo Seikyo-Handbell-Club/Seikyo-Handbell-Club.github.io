@@ -6359,10 +6359,10 @@ const collectionItems = [
   {id:"event_christmas_chime",group:"chime",name:"チャイムくん・クリスマス",src:"costumes/chime-Christmas.png"},
   {id:"event_newyearseve_chime",group:"chime",name:"チャイムくん・大晦日",src:"costumes/chime-winter.png"},
 
-  {id:"secret_rare_image",group:"secret",name:"レア画像",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.rare}`},
-  {id:"secret_ultra_rare_image",group:"secret",name:"超レア画像",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.ultraRare}`},
-  {id:"secret_bell_rare_costume",group:"secret",name:"ベルちゃん・レア衣装",hiddenName:"シークレット衣装",src:`costumes/${rareCostumeFiles.bell}`},
-  {id:"secret_chime_rare_costume",group:"secret",name:"チャイムくん・レア衣装",hiddenName:"シークレット衣装",src:`costumes/${rareCostumeFiles.chime}`}
+  {id:"secret_rare_image",group:"secret",name:"レア画像（0.15%）",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.rare}`},
+  {id:"secret_ultra_rare_image",group:"secret",name:"激レア画像（0.05%）",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.ultraRare}`},
+  {id:"secret_bell_rare_costume",group:"secret",name:"ベルちゃん・レア衣装（0.25%）",hiddenName:"シークレット衣装",src:`costumes/${rareCostumeFiles.bell}`},
+  {id:"secret_chime_rare_costume",group:"secret",name:"チャイムくん・レア衣装（0.25%）",hiddenName:"シークレット衣装",src:`costumes/${rareCostumeFiles.chime}`}
 ];
 
 function getCollectionItem(itemId){
@@ -6572,7 +6572,7 @@ window.openCollectionItem = function(button){
   document.body.classList.add("collection-overlay-open");
 }
 
-function closeCollectionOverlays(){
+window.closeCollectionOverlays = function(){
   const normalOverlay = $("collectionImageOverlay");
   const normalImage = $("collectionImageOverlayImg");
   const costumeOverlay = $("collectionCostumeOverlay");
