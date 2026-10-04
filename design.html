@@ -28,38 +28,84 @@ html,body{margin:0;width:100%;height:100%;background:transparent;overflow:hidden
    ↓ ここを変えるとベルちゃんとチャイムくんを別々に調整できます
 ===================================================== */
 .bell-character{
-  /* 🔔 ベルちゃん・ログイン前 */
-  width:125px;
+  width:145px;
   right:3px;
   bottom:3px;
 }
 
 .chime-character{
-  /* 🎵 チャイムくん・ログイン前 */
-  width:125px;
+  width:145px;
   right:3px;
   bottom:3px;
 }
 
 .logged-in .bell-character{
-  /* 🔔 ベルちゃん・ログイン後 */
   width:145px;
   right:3px;
   bottom:3px;
 }
 
 .logged-in .chime-character{
-  /* 🎵 チャイムくん・ログイン後 */
   width:145px;
   right:3px;
   bottom:3px;
 }
 
 
+
+/* =====================================================
+   ベルちゃん・チャイムくん お祝いアニメーション
+   クリック中は吹き出しを隠し、約1.8秒で2回ジャンプ＋ハート演出
+===================================================== */
+.bell-area{position:relative;overflow:visible}
+.heart-container{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  overflow:visible;
+  z-index:5;
+}
+.heart-effect{
+  position:absolute;
+  left:50%;
+  bottom:30%;
+  font-size:18px;
+  line-height:1;
+  opacity:0;
+  transform:translate(-50%,0) scale(.5);
+  animation:heartFly 1.05s ease-out forwards;
+}
+.bell-celebrating{
+  animation:characterCelebrate 1.8s ease-in-out both;
+}
+.bubble.celebrating-hidden{
+  opacity:0!important;
+  visibility:hidden;
+  transition:opacity .12s ease,visibility 0s linear .12s;
+}
+@keyframes characterCelebrate{
+  0%{transform:translateY(0) rotate(0deg)}
+  11%{transform:translateY(5px) rotate(0deg)}
+  22%{transform:translateY(-25px) rotate(-4deg)}
+  34%{transform:translateY(-4px) rotate(4deg)}
+  46%{transform:translateY(0) rotate(0deg)}
+  57%{transform:translateY(5px) rotate(0deg)}
+  70%{transform:translateY(-32px) rotate(5deg)}
+  82%{transform:translateY(-5px) rotate(-4deg)}
+  92%{transform:translateY(2px) rotate(2deg)}
+  100%{transform:translateY(0) rotate(0deg)}
+}
+@keyframes heartFly{
+  0%{opacity:0;transform:translate(-50%,10px) scale(.35) rotate(-10deg)}
+  15%{opacity:1}
+  100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-120px + var(--dy))) scale(1) rotate(var(--rot))}
+}
+
 </style>
 </head>
 <body>
 <div class="bell-area">
+  <div class="heart-container" id="heartContainer"></div>
   <div class="bubble"><small id="characterName">ベルちゃん</small><span id="bellMessage">予定を確認してるよ！</span></div>
   <img class="bell bell-character" src="bell.png" alt="ベルちゃん" id="bellImage">
 </div>
@@ -75,6 +121,7 @@ const characterImages={
 };
 
 let currentCharacter="bell";
+let isCelebrating=false;
 
 function setCharacter(character){
   const selected=character === "chime" ? "chime" : "bell";
@@ -87,6 +134,56 @@ function setCharacter(character){
   bellImage.classList.remove("bell-character","chime-character");
   bellImage.classList.add(selected === "chime" ? "chime-character" : "bell-character");
   if(characterName) characterName.textContent=data.name;
+}
+
+function startHearts(){
+  const container=document.getElementById("heartContainer");
+  if(!container)return;
+
+  container.innerHTML="";
+
+  const hearts=[
+    {delay:0,dx:"-42px",dy:"-10px",rot:"-18deg",size:"17px"},
+    {delay:40,dx:"0px",dy:"-22px",rot:"8deg",size:"21px"},
+    {delay:90,dx:"42px",dy:"-8px",rot:"20deg",size:"16px"},
+    {delay:720,dx:"-48px",dy:"-14px",rot:"-24deg",size:"18px"},
+    {delay:760,dx:"-4px",dy:"-32px",rot:"6deg",size:"23px"},
+    {delay:810,dx:"46px",dy:"-16px",rot:"22deg",size:"17px"}
+  ];
+
+  hearts.forEach(h=>{
+    const el=document.createElement("span");
+    el.className="heart-effect";
+    el.textContent="♥";
+    el.style.setProperty("--dx",h.dx);
+    el.style.setProperty("--dy",h.dy);
+    el.style.setProperty("--rot",h.rot);
+    el.style.fontSize=h.size;
+    el.style.animationDelay=`${h.delay}ms`;
+    container.appendChild(el);
+  });
+}
+
+function celebrate(){
+  if(isCelebrating)return;
+  isCelebrating=true;
+
+  const bubble=document.querySelector(".bubble");
+  bellImage.classList.remove("bell-celebrating");
+  void bellImage.offsetWidth;
+  bellImage.classList.add("bell-celebrating");
+
+  if(bubble) bubble.classList.add("celebrating-hidden");
+  startHearts();
+
+  setTimeout(()=>{
+    bellImage.classList.remove("bell-celebrating");
+    if(bubble) bubble.classList.remove("celebrating-hidden");
+    isCelebrating=false;
+    const container=document.getElementById("heartContainer");
+    if(container) container.innerHTML="";
+    changeBellMessage();
+  },1800);
 }
 
 window.addEventListener("message",event=>{
@@ -106,6 +203,8 @@ function updateLoginSize(){
 }
 
 updateLoginSize();
+
+bellImage.addEventListener("click",celebrate);
 
 try{
   const parentDocument=window.parent.document;
