@@ -5963,7 +5963,7 @@ async function decideLoginImage(){
   /* ② 幸運画像：ページを開くたびに抽選する。イベントより先 */
   const luckyRandom = Math.random();
 
-  if(luckyRandom < 0.1){
+  if(luckyRandom < 0.4){
     return {
       kind: "lucky",
       rarity: "ultraRare",
