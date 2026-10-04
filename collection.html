@@ -104,10 +104,6 @@ h1{
   align-items:center;
   justify-content:center;
   overflow:hidden;
-
-  /*
-    タップを枠全体で受け取る
-  */
   touch-action:manipulation;
   -webkit-tap-highlight-color:transparent;
 }
@@ -121,11 +117,6 @@ h1{
   height:100%;
   object-fit:contain;
   display:block;
-
-  /*
-    画像自身がタップを奪わず、
-    親の.image-wrapで受け取る
-  */
   pointer-events:none;
 }
 
@@ -138,13 +129,38 @@ h1{
   -webkit-user-select:none;
 }
 
+
+/* =====================================================
+   タイトル
+===================================================== */
+
 .name{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  width:100%;
+  min-height:40px;
+
   padding:8px 6px 9px;
+
+  background:#fff;
+  color:#20242a;
+
   text-align:center;
+
   font-size:11px;
   font-weight:700;
-  line-height:1.35;
+  line-height:1.4;
+
+  word-break:break-word;
+  overflow-wrap:anywhere;
 }
+
+
+/* =====================================================
+   ステータス
+===================================================== */
 
 .status{
   color:#66717e;
@@ -162,23 +178,17 @@ h1{
 
 
 /* =====================================================
-   通常コレクション画像の拡大表示
-   ===================================================== */
+   通常コレクション画像の拡大
+===================================================== */
 
 .collection-image-overlay{
   position:fixed;
   inset:0;
 
-  /*
-    handbell側などの要素より十分上に出す
-  */
   z-index:999999;
 
   background:#000000e8;
 
-  /*
-    opacity/visibilityではなくdisplayで完全に切り替える
-  */
   display:none;
 
   align-items:center;
@@ -186,9 +196,6 @@ h1{
 
   padding:24px;
 
-  /*
-    タップを確実に受け取る
-  */
   touch-action:auto;
 }
 
@@ -213,16 +220,13 @@ h1{
 
   background:#fff;
 
-  /*
-    画像を押しても閉じる処理などを邪魔しない
-  */
   pointer-events:none;
 }
 
 
 /* =====================================================
    イベント衣装の全画面表示
-   ===================================================== */
+===================================================== */
 
 .costume-overlay{
   position:fixed;
@@ -261,7 +265,7 @@ h1{
 
 /* =====================================================
    閉じるボタン
-   ===================================================== */
+===================================================== */
 
 .overlay-close{
   position:absolute;
@@ -269,7 +273,7 @@ h1{
   top:14px;
   right:14px;
 
-  z-index:10;
+  z-index:100;
 
   border:0;
 
@@ -303,7 +307,7 @@ h1{
 
 /* =====================================================
    スマホ
-   ===================================================== */
+===================================================== */
 
 @media(max-width:700px){
 
@@ -423,7 +427,7 @@ h1{
 
 <!-- =====================================================
      通常コレクション画像の拡大表示
-     ===================================================== -->
+===================================================== -->
 
 <div
   id="collectionImageOverlay"
@@ -450,7 +454,7 @@ h1{
 
 <!-- =====================================================
      イベント衣装の全画面表示
-     ===================================================== -->
+===================================================== -->
 
 <div
   id="costumeOverlay"
@@ -497,7 +501,7 @@ import{
 
 /* =====================================================
    Firebase
-   ===================================================== */
+===================================================== */
 
 const firebaseConfig={
 
@@ -544,7 +548,7 @@ setPersistence(
 
 /* =====================================================
    月替わり画像
-   ===================================================== */
+===================================================== */
 
 const monthlyImageFiles={
 
@@ -568,7 +572,7 @@ const monthlyImageFiles={
 
 /* =====================================================
    イベント画像
-   ===================================================== */
+===================================================== */
 
 const eventImageFiles={
 
@@ -590,7 +594,7 @@ const eventImageFiles={
 
 /* =====================================================
    イベント定義
-   ===================================================== */
+===================================================== */
 
 const eventDefinitions=[
 
@@ -623,7 +627,7 @@ const eventDefinitions=[
 
 /* =====================================================
    月替わりアイテム
-   ===================================================== */
+===================================================== */
 
 const monthlyItems=
   Array.from(
@@ -645,7 +649,7 @@ const monthlyItems=
 
 /* =====================================================
    イベントアイテム
-   ===================================================== */
+===================================================== */
 
 const eventItems=[];
 
@@ -664,8 +668,12 @@ eventDefinitions.forEach(
       id:
         `event_${key}_image`,
 
+      /*
+        「画像」はタイトルにつけない
+      */
+
       name:
-        `${name}画像`,
+        name,
 
       src:
         `images/events/${file}`,
@@ -704,7 +712,7 @@ eventDefinitions.forEach(
         `event_${key}_bell`,
 
       name:
-        `${name}・ベルちゃん`,
+        `ベルちゃん・${name}`,
 
       src:
         `costumes/bell-${costumeFile}.png`,
@@ -723,7 +731,7 @@ eventDefinitions.forEach(
         `event_${key}_chime`,
 
       name:
-        `${name}・チャイムくん`,
+        `チャイムくん・${name}`,
 
       src:
         `costumes/chime-${costumeFile}.png`,
@@ -739,7 +747,7 @@ eventDefinitions.forEach(
 
 /* =====================================================
    シークレット
-   ===================================================== */
+===================================================== */
 
 const secretItems=[
 
@@ -752,7 +760,7 @@ const secretItems=[
       "シークレット画像",
 
     name:
-      "レア画像",
+      "レア画像（0.15%）",
 
     src:
       "images/lucky/rare.PNG.PNG",
@@ -768,16 +776,54 @@ const secretItems=[
       "secret_ultra_rare_image",
 
     unknownName:
-      "超レア画像",
+      "シークレット画像",
 
     name:
-      "超レア画像",
+      "激レア画像（0.05%）",
 
     src:
       "images/lucky/ultra_rare.PNG.PNG",
 
     type:
       "normal"
+
+  },
+
+  {
+
+    id:
+      "secret_bell_rare_costume",
+
+    unknownName:
+      "シークレット衣装",
+
+    name:
+      "ベルちゃん・レア衣装（0.25%）",
+
+    src:
+      "costumes/bell-rare.png",
+
+    type:
+      "costume"
+
+  },
+
+  {
+
+    id:
+      "secret_chime_rare_costume",
+
+    unknownName:
+      "シークレット衣装",
+
+    name:
+      "チャイムくん・レア衣装（0.25%）",
+
+    src:
+      "costumes/chime-rare.png",
+
+    type:
+      "costume"
 
   }
 
@@ -786,7 +832,7 @@ const secretItems=[
 
 /* =====================================================
    ID取得
-   ===================================================== */
+===================================================== */
 
 function $(id){
 
@@ -797,7 +843,7 @@ function $(id){
 
 /* =====================================================
    bodyのスクロール制御
-   ===================================================== */
+===================================================== */
 
 function lockBody(){
 
@@ -819,7 +865,7 @@ function unlockBody(){
 
 /* =====================================================
    通常画像を拡大
-   ===================================================== */
+===================================================== */
 
 function openCollectionImage(item){
 
@@ -848,10 +894,6 @@ function openCollectionImage(item){
     item.name || "";
 
 
-  /*
-    display:flexに変更
-  */
-
   overlay.classList.add(
     "show"
   );
@@ -869,7 +911,7 @@ function openCollectionImage(item){
 
 /* =====================================================
    通常画像を閉じる
-   ===================================================== */
+===================================================== */
 
 function closeCollectionImage(){
 
@@ -894,10 +936,6 @@ function closeCollectionImage(){
   image.alt="";
 
 
-  /*
-    衣装画面も閉じている場合だけ解除
-  */
-
   if(
     !$("costumeOverlay")
       .classList.contains("show")
@@ -912,7 +950,7 @@ function closeCollectionImage(){
 
 /* =====================================================
    衣装を全画面表示
-   ===================================================== */
+===================================================== */
 
 function openCostume(item){
 
@@ -958,7 +996,7 @@ function openCostume(item){
 
 /* =====================================================
    衣装を閉じる
-   ===================================================== */
+===================================================== */
 
 function closeCostume(){
 
@@ -997,22 +1035,15 @@ function closeCostume(){
 
 /* =====================================================
    タップ処理
-   ===================================================== */
+===================================================== */
 
-/*
-  iPad / iPhoneでは
-  touch → clickの二重発火を避けるため、
-  最後のタッチ時刻を記録する。
-*/
+function attachTap(
+  element,
+  callback
+){
 
-let lastTouchTime=0;
+  let touchHandled=false;
 
-
-function attachTap(element,callback){
-
-  /*
-    タッチ端末
-  */
 
   element.addEventListener(
     "touchend",
@@ -1020,10 +1051,16 @@ function attachTap(element,callback){
 
       event.preventDefault();
 
-      lastTouchTime=
-        Date.now();
+      touchHandled=true;
 
-      callback();
+      callback(event);
+
+      setTimeout(
+        ()=>{
+          touchHandled=false;
+        },
+        700
+      );
 
     },
     {
@@ -1032,26 +1069,19 @@ function attachTap(element,callback){
   );
 
 
-  /*
-    マウス・通常クリック
-
-    touchend直後のclickは無視
-  */
-
   element.addEventListener(
     "click",
     event=>{
 
       if(
-        Date.now()-lastTouchTime<
-        700
+        touchHandled
       ){
 
         return;
 
       }
 
-      callback();
+      callback(event);
 
     }
   );
@@ -1061,7 +1091,7 @@ function attachTap(element,callback){
 
 /* =====================================================
    コレクション表示
-   ===================================================== */
+===================================================== */
 
 function renderGrid(
   elementId,
@@ -1101,11 +1131,9 @@ function renderGrid(
         "image-wrap";
 
 
-      if(acquired){
-
-        /*
-          取得済み画像
-        */
+      if(
+        acquired
+      ){
 
         const img=
           document.createElement(
@@ -1123,11 +1151,6 @@ function renderGrid(
           "lazy";
 
 
-        /*
-          画像ではなく
-          枠全体をタップ対象にする
-        */
-
         imageWrap.classList.add(
           "clickable"
         );
@@ -1140,7 +1163,9 @@ function renderGrid(
               item.type==="costume"
             ){
 
-              openCostume(item);
+              openCostume(
+                item
+              );
 
             }else{
 
@@ -1158,10 +1183,6 @@ function renderGrid(
           openThisItem
         );
 
-
-        /*
-          キーボードでも操作可能
-        */
 
         imageWrap.setAttribute(
           "role",
@@ -1202,7 +1223,7 @@ function renderGrid(
 
         /*
           未取得は「？？？」
-          絶対にタップできない
+          タップ処理を一切つけない
         */
 
         const unknown=
@@ -1224,6 +1245,10 @@ function renderGrid(
       }
 
 
+      /*
+        ここで必ずタイトルを作る
+      */
+
       const name=
         document.createElement(
           "div"
@@ -1233,13 +1258,20 @@ function renderGrid(
         "name";
 
 
-      name.textContent=
+      if(
         acquired
-          ? item.name
-          : (
-              item.unknownName ||
-              item.name
-            );
+      ){
+
+        name.textContent=
+          item.name;
+
+      }else{
+
+        name.textContent=
+          item.unknownName ||
+          "？？？";
+
+      }
 
 
       card.appendChild(
@@ -1263,7 +1295,7 @@ function renderGrid(
 
 /* =====================================================
    ホームへ戻る
-   ===================================================== */
+===================================================== */
 
 function backToHome(){
 
@@ -1279,80 +1311,27 @@ window.backToHome=
 
 /* =====================================================
    閉じるボタン
-   ===================================================== */
+===================================================== */
 
 attachTap(
   $("collectionImageClose"),
-  closeCollectionImage
+  ()=>{
+    closeCollectionImage();
+  }
 );
+
 
 attachTap(
   $("costumeClose"),
-  closeCostume
-);
-
-
-/* =====================================================
-   背景タップでも閉じる
-   ===================================================== */
-
-attachTap(
-  $("collectionImageOverlay"),
-  event=>{
-
-    /*
-      ボタンではなく
-      背景部分をタップした場合だけ閉じる
-    */
-
-    if(
-      event &&
-      event.target &&
-      event.target.id===
-      "collectionImageOverlay"
-    ){
-
-      closeCollectionImage();
-
-    }
-
+  ()=>{
+    closeCostume();
   }
 );
-
-
-attachTap(
-  $("costumeOverlay"),
-  event=>{
-
-    if(
-      event &&
-      event.target &&
-      event.target.id===
-      "costumeOverlay"
-    ){
-
-      closeCostume();
-
-    }
-
-  }
-);
-
-
-/*
-  注意：
-  上の背景タップ処理では、
-  attachTapがcallbackにeventを渡していないため
-  実際には閉じるボタンだけが確実に動く。
-
-  背景タップ閉じる必要がないため、
-  ここでは何もしなくても問題なし。
-*/
 
 
 /* =====================================================
    Escキー
-   ===================================================== */
+===================================================== */
 
 document.addEventListener(
   "keydown",
@@ -1377,13 +1356,15 @@ document.addEventListener(
 
 /* =====================================================
    Firebaseから取得
-   ===================================================== */
+===================================================== */
 
 onAuthStateChanged(
   auth,
   async user=>{
 
-    if(!user){
+    if(
+      !user
+    ){
 
       $("status").textContent=
         "ログインしてください。";
