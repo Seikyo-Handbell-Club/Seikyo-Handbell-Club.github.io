@@ -1324,7 +1324,30 @@ textarea{
     個人情報の変更
   </h2>
 
-  <h3>クラス</h3>
+  <h3>名前・学年・クラス</h3>
+
+  <label>
+    名前
+  </label>
+
+  <input
+    id="myName"
+    type="text"
+    autocomplete="name"
+  >
+
+  <label>
+    学年
+  </label>
+
+  <select id="myGrade">
+    <option value="">選択してください</option>
+    <option value="中1">中1</option>
+    <option value="中2">中2</option>
+    <option value="中3">中3</option>
+    <option value="高1">高1</option>
+    <option value="高2">高2</option>
+  </select>
 
   <label>
     クラス
@@ -1349,7 +1372,7 @@ textarea{
     class="primary"
     onclick="saveProfile()"
   >
-    クラスを保存
+    個人情報を保存
   </button>
 
   <h3 style="margin-top:24px">復旧用メールアドレス</h3>
@@ -5425,6 +5448,8 @@ function showPersonalInfo(){
     .classList
     .remove("hidden");
 
+  $("myName").value = String(profile?.name || "");
+  $("myGrade").value = getProfileGrade();
   $("myClass").value = getProfileClass();
   $("myRecoveryEmail").value = currentUser?.email || "";
   $("myRecoveryPassword").value = "";
@@ -5525,7 +5550,21 @@ async function saveProfile(){
 
   if(!currentUser || !profile) return;
 
+  const name = $("myName").value.trim();
+  const grade = $("myGrade").value;
   const className = $("myClass").value;
+
+  if(!name){
+    $("myPageMsg").innerHTML =
+      '<div class="msg error">名前を入力してください。</div>';
+    return;
+  }
+
+  if(!grade){
+    $("myPageMsg").innerHTML =
+      '<div class="msg error">学年を選択してください。</div>';
+    return;
+  }
 
   if(!className){
     $("myPageMsg").innerHTML =
@@ -5536,18 +5575,20 @@ async function saveProfile(){
   try{
     await update(
       ref(db, "members/" + currentUser.uid),
-      { className }
+      { name, grade, className }
     );
 
     profile = {
       ...profile,
+      name,
+      grade,
       className
     };
 
     updateProfileDisplay();
 
     $("myPageMsg").innerHTML =
-      '<div class="msg">クラスを保存しました。</div>';
+      '<div class="msg">名前・学年・クラスを保存しました。</div>';
 
   }catch(e){
     console.error(e);
