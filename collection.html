@@ -7,21 +7,32 @@
 
 <style>
 *{
-  box-sizing:border-box
+  box-sizing:border-box;
+}
+
+html,
+body{
+  margin:0;
+  padding:0;
+  width:100%;
+  min-height:100%;
 }
 
 body{
-  margin:0;
   font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif;
   background:#f5f7fb;
-  color:#20242a
+  color:#20242a;
+}
+
+body.modal-open{
+  overflow:hidden;
 }
 
 main{
   width:100%;
   max-width:900px;
   margin:auto;
-  padding:18px
+  padding:18px;
 }
 
 .card{
@@ -29,18 +40,18 @@ main{
   border-radius:18px;
   padding:16px;
   margin-bottom:16px;
-  box-shadow:0 2px 12px #0000000b
+  box-shadow:0 2px 12px #0000000b;
 }
 
 h1{
   margin:0 0 4px;
-  font-size:22px
+  font-size:22px;
 }
 
 .subtitle{
   color:#66717e;
   font-size:12px;
-  margin-bottom:18px
+  margin-bottom:18px;
 }
 
 .back-button{
@@ -52,29 +63,29 @@ h1{
   font-size:14px;
   font-weight:700;
   cursor:pointer;
-  margin-bottom:14px
+  margin-bottom:14px;
 }
 
 .section{
   margin-top:22px;
   padding-top:18px;
-  border-top:1px solid #e7eaf0
+  border-top:1px solid #e7eaf0;
 }
 
 .section:first-of-type{
   border-top:0;
-  padding-top:0
+  padding-top:0;
 }
 
 .section h2{
   margin:0 0 12px;
-  font-size:18px
+  font-size:18px;
 }
 
 .grid{
   display:grid;
   grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:10px
+  gap:10px;
 }
 
 .item{
@@ -82,7 +93,7 @@ h1{
   border:1px solid #e1e6ee;
   border-radius:14px;
   overflow:hidden;
-  background:#fff
+  background:#fff;
 }
 
 .image-wrap{
@@ -92,14 +103,17 @@ h1{
   display:flex;
   align-items:center;
   justify-content:center;
-  overflow:hidden
-}
+  overflow:hidden;
 
-/* 取得済み画像のタップ範囲 */
-.image-wrap.clickable{
-  cursor:pointer;
+  /*
+    タップを枠全体で受け取る
+  */
   touch-action:manipulation;
   -webkit-tap-highlight-color:transparent;
+}
+
+.image-wrap.clickable{
+  cursor:pointer;
 }
 
 .image-wrap img{
@@ -107,16 +121,21 @@ h1{
   height:100%;
   object-fit:contain;
   display:block;
+
+  /*
+    画像自身がタップを奪わず、
+    親の.image-wrapで受け取る
+  */
   pointer-events:none;
-  user-select:none;
-  -webkit-user-drag:none
 }
 
 .unknown{
   color:#fff;
   font-size:25px;
   font-weight:800;
-  letter-spacing:2px
+  letter-spacing:2px;
+  user-select:none;
+  -webkit-user-select:none;
 }
 
 .name{
@@ -124,13 +143,13 @@ h1{
   text-align:center;
   font-size:11px;
   font-weight:700;
-  line-height:1.35
+  line-height:1.35;
 }
 
 .status{
   color:#66717e;
   font-size:12px;
-  margin:0 0 14px
+  margin:0 0 14px;
 }
 
 .error{
@@ -138,42 +157,48 @@ h1{
   background:#fff0f0;
   border-radius:10px;
   padding:12px;
-  display:none
+  display:none;
 }
 
 
 /* =====================================================
    通常コレクション画像の拡大表示
-===================================================== */
+   ===================================================== */
 
 .collection-image-overlay{
   position:fixed;
   inset:0;
-  z-index:1000;
-  background:#000000b8;
 
-  display:flex;
+  /*
+    handbell側などの要素より十分上に出す
+  */
+  z-index:999999;
+
+  background:#000000e8;
+
+  /*
+    opacity/visibilityではなくdisplayで完全に切り替える
+  */
+  display:none;
+
   align-items:center;
   justify-content:center;
 
   padding:24px;
 
-  opacity:0;
-  visibility:hidden;
-
-  transition:
-    opacity .2s ease,
-    visibility .2s ease;
-
-  touch-action:manipulation
+  /*
+    タップを確実に受け取る
+  */
+  touch-action:auto;
 }
 
 .collection-image-overlay.show{
-  opacity:1;
-  visibility:visible
+  display:flex;
 }
 
 .collection-image-overlay img{
+  display:block;
+
   max-width:94vw;
   max-height:88vh;
 
@@ -183,45 +208,44 @@ h1{
   object-fit:contain;
 
   border-radius:12px;
+
   box-shadow:0 8px 30px #00000055;
 
   background:#fff;
 
-  user-select:none;
-  -webkit-user-drag:none
+  /*
+    画像を押しても閉じる処理などを邪魔しない
+  */
+  pointer-events:none;
 }
 
 
 /* =====================================================
-   衣装の背景表示
-===================================================== */
+   イベント衣装の全画面表示
+   ===================================================== */
 
 .costume-overlay{
   position:fixed;
   inset:0;
-  z-index:1100;
+
+  z-index:1000000;
 
   background:#000;
 
-  opacity:0;
-  visibility:hidden;
-
-  transition:
-    opacity .2s ease,
-    visibility .2s ease;
+  display:none;
 
   overflow:hidden;
 
-  touch-action:manipulation
+  touch-action:auto;
 }
 
 .costume-overlay.show{
-  opacity:1;
-  visibility:visible
+  display:block;
 }
 
 .costume-overlay img{
   position:absolute;
+
   inset:0;
 
   width:100%;
@@ -231,14 +255,13 @@ h1{
 
   display:block;
 
-  user-select:none;
-  -webkit-user-drag:none
+  pointer-events:none;
 }
 
 
 /* =====================================================
-   共通の薄い閉じるボタン
-===================================================== */
+   閉じるボタン
+   ===================================================== */
 
 .overlay-close{
   position:absolute;
@@ -246,11 +269,12 @@ h1{
   top:14px;
   right:14px;
 
-  z-index:5;
+  z-index:10;
 
   border:0;
 
   background:#ffffff80;
+
   color:#fff;
 
   border-radius:999px;
@@ -259,29 +283,32 @@ h1{
 
   font-size:12px;
   font-weight:600;
+
   line-height:1;
 
   cursor:pointer;
 
+  touch-action:manipulation;
+
+  -webkit-tap-highlight-color:transparent;
+
   backdrop-filter:blur(4px);
   -webkit-backdrop-filter:blur(4px);
-
-  touch-action:manipulation
 }
 
 .overlay-close:active{
-  background:#ffffffa8
+  background:#ffffffb8;
 }
 
 
 /* =====================================================
    スマホ
-===================================================== */
+   ===================================================== */
 
 @media(max-width:700px){
 
   .grid{
-    grid-template-columns:repeat(3,minmax(0,1fr))
+    grid-template-columns:repeat(3,minmax(0,1fr));
   }
 
 }
@@ -289,26 +316,26 @@ h1{
 @media(max-width:480px){
 
   main{
-    padding:12px
+    padding:12px;
   }
 
   .grid{
-    grid-template-columns:repeat(2,minmax(0,1fr))
+    grid-template-columns:repeat(2,minmax(0,1fr));
   }
 
   .collection-image-overlay{
-    padding:16px
+    padding:16px;
   }
 
   .collection-image-overlay img{
     max-width:96vw;
-    max-height:84vh
+    max-height:84vh;
   }
 
   .overlay-close{
     top:10px;
     right:10px;
-    padding:7px 11px
+    padding:7px 11px;
   }
 
 }
@@ -324,7 +351,8 @@ h1{
     <button
       class="back-button"
       type="button"
-      onclick="backToHome()">
+      onclick="backToHome()"
+    >
       ← 部活動欠席連絡に戻る
     </button>
 
@@ -334,57 +362,57 @@ h1{
       清教学園ハンドベル部
     </div>
 
-    <p id="status" class="status">
+    <p
+      id="status"
+      class="status"
+    >
       コレクションを読み込んでいます…
     </p>
 
-    <div id="error" class="error"></div>
+    <div
+      id="error"
+      class="error"
+    ></div>
 
-
-    <!-- =================================================
-         月替わり画像
-    ================================================== -->
 
     <section class="section">
 
-      <h2>月替わり画像</h2>
+      <h2>
+        月替わり画像
+      </h2>
 
       <div
         id="monthlyGrid"
-        class="grid">
-      </div>
+        class="grid"
+      ></div>
 
     </section>
 
 
-    <!-- =================================================
-         イベント画像
-    ================================================== -->
-
     <section class="section">
 
-      <h2>イベント画像</h2>
+      <h2>
+        イベント画像
+      </h2>
 
       <div
         id="eventGrid"
-        class="grid">
-      </div>
+        class="grid"
+      ></div>
 
     </section>
 
 
-    <!-- =================================================
-         シークレット
-    ================================================== -->
-
     <section class="section">
 
-      <h2>シークレット</h2>
+      <h2>
+        シークレット
+      </h2>
 
       <div
         id="secretGrid"
-        class="grid">
-      </div>
+        class="grid"
+      ></div>
 
     </section>
 
@@ -395,48 +423,54 @@ h1{
 
 <!-- =====================================================
      通常コレクション画像の拡大表示
-===================================================== -->
+     ===================================================== -->
 
 <div
   id="collectionImageOverlay"
   class="collection-image-overlay"
-  aria-hidden="true">
+  aria-hidden="true"
+>
 
   <button
     id="collectionImageClose"
     class="overlay-close"
-    type="button">
+    type="button"
+  >
     閉じる
   </button>
 
   <img
     id="collectionImage"
     src=""
-    alt="">
+    alt=""
+  >
 
 </div>
 
 
 <!-- =====================================================
-     イベント衣装の背景表示
-===================================================== -->
+     イベント衣装の全画面表示
+     ===================================================== -->
 
 <div
   id="costumeOverlay"
   class="costume-overlay"
-  aria-hidden="true">
+  aria-hidden="true"
+>
 
   <button
     id="costumeClose"
     class="overlay-close"
-    type="button">
+    type="button"
+  >
     閉じる
   </button>
 
   <img
     id="costumeImage"
     src=""
-    alt="">
+    alt=""
+  >
 
 </div>
 
@@ -463,12 +497,11 @@ import{
 
 /* =====================================================
    Firebase
-===================================================== */
+   ===================================================== */
 
 const firebaseConfig={
 
-  apiKey:
-    "AIzaSyAK9yRsSLSfYpLSyluzwRyI22Zp32KeMSA",
+  apiKey:"AIzaSyAK9yRsSLSfYpLSyluzwRyI22Zp32KeMSA",
 
   authDomain:
     "seikyo-handbell-club.firebaseapp.com",
@@ -511,7 +544,7 @@ setPersistence(
 
 /* =====================================================
    月替わり画像
-===================================================== */
+   ===================================================== */
 
 const monthlyImageFiles={
 
@@ -535,7 +568,7 @@ const monthlyImageFiles={
 
 /* =====================================================
    イベント画像
-===================================================== */
+   ===================================================== */
 
 const eventImageFiles={
 
@@ -557,7 +590,7 @@ const eventImageFiles={
 
 /* =====================================================
    イベント定義
-===================================================== */
+   ===================================================== */
 
 const eventDefinitions=[
 
@@ -590,10 +623,9 @@ const eventDefinitions=[
 
 /* =====================================================
    月替わりアイテム
-===================================================== */
+   ===================================================== */
 
 const monthlyItems=
-
   Array.from(
     {length:12},
     (_,i)=>({
@@ -613,7 +645,7 @@ const monthlyItems=
 
 /* =====================================================
    イベントアイテム
-===================================================== */
+   ===================================================== */
 
 const eventItems=[];
 
@@ -625,9 +657,7 @@ eventDefinitions.forEach(
       eventImageFiles[md];
 
 
-    /* ---------------------------------------------
-       通常イベント画像
-    --------------------------------------------- */
+    /* 通常イベント画像 */
 
     eventItems.push({
 
@@ -646,20 +676,21 @@ eventDefinitions.forEach(
     });
 
 
-    /* ---------------------------------------------
-       イベント衣装
-    --------------------------------------------- */
+    /* 衣装 */
 
     let costume=key;
 
 
-    if(key==="newyearseve"){
+    if(
+      key==="newyearseve"
+    ){
+
       costume="winter";
+
     }
 
 
     const costumeFile=
-
       costume==="christmas"
         ? "Christmas"
         : costume;
@@ -708,7 +739,7 @@ eventDefinitions.forEach(
 
 /* =====================================================
    シークレット
-===================================================== */
+   ===================================================== */
 
 const secretItems=[
 
@@ -755,7 +786,7 @@ const secretItems=[
 
 /* =====================================================
    ID取得
-===================================================== */
+   ===================================================== */
 
 function $(id){
 
@@ -765,8 +796,30 @@ function $(id){
 
 
 /* =====================================================
+   bodyのスクロール制御
+   ===================================================== */
+
+function lockBody(){
+
+  document.body.classList.add(
+    "modal-open"
+  );
+
+}
+
+
+function unlockBody(){
+
+  document.body.classList.remove(
+    "modal-open"
+  );
+
+}
+
+
+/* =====================================================
    通常画像を拡大
-===================================================== */
+   ===================================================== */
 
 function openCollectionImage(item){
 
@@ -775,7 +828,9 @@ function openCollectionImage(item){
     !item.src ||
     item.type==="costume"
   ){
+
     return;
+
   }
 
 
@@ -793,19 +848,28 @@ function openCollectionImage(item){
     item.name || "";
 
 
-  overlay.classList.add("show");
+  /*
+    display:flexに変更
+  */
+
+  overlay.classList.add(
+    "show"
+  );
 
   overlay.setAttribute(
     "aria-hidden",
     "false"
   );
 
+
+  lockBody();
+
 }
 
 
 /* =====================================================
    通常画像を閉じる
-===================================================== */
+   ===================================================== */
 
 function closeCollectionImage(){
 
@@ -816,7 +880,9 @@ function closeCollectionImage(){
     $("collectionImage");
 
 
-  overlay.classList.remove("show");
+  overlay.classList.remove(
+    "show"
+  );
 
   overlay.setAttribute(
     "aria-hidden",
@@ -824,29 +890,29 @@ function closeCollectionImage(){
   );
 
 
-  setTimeout(
-    ()=>{
+  image.src="";
+  image.alt="";
 
-      if(
-        !overlay.classList.contains("show")
-      ){
 
-        image.src="";
+  /*
+    衣装画面も閉じている場合だけ解除
+  */
 
-        image.alt="";
+  if(
+    !$("costumeOverlay")
+      .classList.contains("show")
+  ){
 
-      }
+    unlockBody();
 
-    },
-    220
-  );
+  }
 
 }
 
 
 /* =====================================================
    衣装を全画面表示
-===================================================== */
+   ===================================================== */
 
 function openCostume(item){
 
@@ -855,7 +921,9 @@ function openCostume(item){
     !item.src ||
     item.type!=="costume"
   ){
+
     return;
+
   }
 
 
@@ -873,19 +941,24 @@ function openCostume(item){
     item.name || "";
 
 
-  overlay.classList.add("show");
+  overlay.classList.add(
+    "show"
+  );
 
   overlay.setAttribute(
     "aria-hidden",
     "false"
   );
 
+
+  lockBody();
+
 }
 
 
 /* =====================================================
    衣装を閉じる
-===================================================== */
+   ===================================================== */
 
 function closeCostume(){
 
@@ -896,7 +969,9 @@ function closeCostume(){
     $("costumeImage");
 
 
-  overlay.classList.remove("show");
+  overlay.classList.remove(
+    "show"
+  );
 
   overlay.setAttribute(
     "aria-hidden",
@@ -904,21 +979,81 @@ function closeCostume(){
   );
 
 
-  setTimeout(
-    ()=>{
+  image.src="";
+  image.alt="";
+
+
+  if(
+    !$("collectionImageOverlay")
+      .classList.contains("show")
+  ){
+
+    unlockBody();
+
+  }
+
+}
+
+
+/* =====================================================
+   タップ処理
+   ===================================================== */
+
+/*
+  iPad / iPhoneでは
+  touch → clickの二重発火を避けるため、
+  最後のタッチ時刻を記録する。
+*/
+
+let lastTouchTime=0;
+
+
+function attachTap(element,callback){
+
+  /*
+    タッチ端末
+  */
+
+  element.addEventListener(
+    "touchend",
+    event=>{
+
+      event.preventDefault();
+
+      lastTouchTime=
+        Date.now();
+
+      callback();
+
+    },
+    {
+      passive:false
+    }
+  );
+
+
+  /*
+    マウス・通常クリック
+
+    touchend直後のclickは無視
+  */
+
+  element.addEventListener(
+    "click",
+    event=>{
 
       if(
-        !overlay.classList.contains("show")
+        Date.now()-lastTouchTime<
+        700
       ){
 
-        image.src="";
-
-        image.alt="";
+        return;
 
       }
 
-    },
-    220
+      callback();
+
+    }
   );
 
 }
@@ -926,7 +1061,7 @@ function closeCostume(){
 
 /* =====================================================
    コレクション表示
-===================================================== */
+   ===================================================== */
 
 function renderGrid(
   elementId,
@@ -949,27 +1084,33 @@ function renderGrid(
 
 
       const card=
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
 
       card.className=
         "item";
 
 
       const imageWrap=
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
 
       imageWrap.className=
         "image-wrap";
 
 
-      /* =================================================
-         取得済み
-      ================================================= */
-
       if(acquired){
 
+        /*
+          取得済み画像
+        */
+
         const img=
-          document.createElement("img");
+          document.createElement(
+            "img"
+          );
 
 
         img.src=
@@ -983,12 +1124,8 @@ function renderGrid(
 
 
         /*
-          ここが今回の重要な変更。
-
-          imgそのものではなく、
-          image-wrap全体をタップ対象にする。
-
-          iPad / Safariでも反応しやすくする。
+          画像ではなく
+          枠全体をタップ対象にする
         */
 
         imageWrap.classList.add(
@@ -996,11 +1133,40 @@ function renderGrid(
         );
 
 
+        const openThisItem=
+          ()=>{
+
+            if(
+              item.type==="costume"
+            ){
+
+              openCostume(item);
+
+            }else{
+
+              openCollectionImage(
+                item
+              );
+
+            }
+
+          };
+
+
+        attachTap(
+          imageWrap,
+          openThisItem
+        );
+
+
+        /*
+          キーボードでも操作可能
+        */
+
         imageWrap.setAttribute(
           "role",
           "button"
         );
-
 
         imageWrap.setAttribute(
           "tabindex",
@@ -1008,41 +1174,16 @@ function renderGrid(
         );
 
 
-        const openThisItem=()=>{
-
-          if(item.type==="costume"){
-
-            openCostume(item);
-
-          }else{
-
-            openCollectionImage(item);
-
-          }
-
-        };
-
-
-        imageWrap.addEventListener(
-          "click",
-          openThisItem
-        );
-
-
-        /*
-          キーボード操作にも対応
-        */
-
         imageWrap.addEventListener(
           "keydown",
-          e=>{
+          event=>{
 
             if(
-              e.key==="Enter" ||
-              e.key===" "
+              event.key==="Enter" ||
+              event.key===" "
             ){
 
-              e.preventDefault();
+              event.preventDefault();
 
               openThisItem();
 
@@ -1052,43 +1193,28 @@ function renderGrid(
         );
 
 
-        imageWrap.appendChild(img);
+        imageWrap.appendChild(
+          img
+        );
 
 
       }else{
 
-        /* =================================================
-           未取得
-        ================================================= */
+        /*
+          未取得は「？？？」
+          絶対にタップできない
+        */
 
         const unknown=
-          document.createElement("div");
-
+          document.createElement(
+            "div"
+          );
 
         unknown.className=
           "unknown";
 
-
         unknown.textContent=
           "？？？";
-
-
-        /*
-          ？？？はクリック不可
-        */
-
-        imageWrap.style.cursor=
-          "default";
-
-
-        imageWrap.removeAttribute(
-          "role"
-        );
-
-
-        imageWrap.removeAttribute(
-          "tabindex"
-        );
 
 
         imageWrap.appendChild(
@@ -1098,13 +1224,10 @@ function renderGrid(
       }
 
 
-      /* =================================================
-         名前
-      ================================================= */
-
       const name=
-        document.createElement("div");
-
+        document.createElement(
+          "div"
+        );
 
       name.className=
         "name";
@@ -1123,7 +1246,6 @@ function renderGrid(
         imageWrap
       );
 
-
       card.appendChild(
         name
       );
@@ -1141,7 +1263,7 @@ function renderGrid(
 
 /* =====================================================
    ホームへ戻る
-===================================================== */
+   ===================================================== */
 
 function backToHome(){
 
@@ -1157,32 +1279,91 @@ window.backToHome=
 
 /* =====================================================
    閉じるボタン
-===================================================== */
+   ===================================================== */
 
-$("collectionImageClose")
-  .addEventListener(
-    "click",
-    closeCollectionImage
-  );
+attachTap(
+  $("collectionImageClose"),
+  closeCollectionImage
+);
 
-
-$("costumeClose")
-  .addEventListener(
-    "click",
-    closeCostume
-  );
+attachTap(
+  $("costumeClose"),
+  closeCostume
+);
 
 
 /* =====================================================
-   ESCでも閉じる
-===================================================== */
+   背景タップでも閉じる
+   ===================================================== */
+
+attachTap(
+  $("collectionImageOverlay"),
+  event=>{
+
+    /*
+      ボタンではなく
+      背景部分をタップした場合だけ閉じる
+    */
+
+    if(
+      event &&
+      event.target &&
+      event.target.id===
+      "collectionImageOverlay"
+    ){
+
+      closeCollectionImage();
+
+    }
+
+  }
+);
+
+
+attachTap(
+  $("costumeOverlay"),
+  event=>{
+
+    if(
+      event &&
+      event.target &&
+      event.target.id===
+      "costumeOverlay"
+    ){
+
+      closeCostume();
+
+    }
+
+  }
+);
+
+
+/*
+  注意：
+  上の背景タップ処理では、
+  attachTapがcallbackにeventを渡していないため
+  実際には閉じるボタンだけが確実に動く。
+
+  背景タップ閉じる必要がないため、
+  ここでは何もしなくても問題なし。
+*/
+
+
+/* =====================================================
+   Escキー
+   ===================================================== */
 
 document.addEventListener(
   "keydown",
-  e=>{
+  event=>{
 
-    if(e.key!=="Escape"){
+    if(
+      event.key!=="Escape"
+    ){
+
       return;
+
     }
 
 
@@ -1195,8 +1376,8 @@ document.addEventListener(
 
 
 /* =====================================================
-   Firebaseからコレクション取得
-===================================================== */
+   Firebaseから取得
+   ===================================================== */
 
 onAuthStateChanged(
   auth,
@@ -1209,7 +1390,10 @@ onAuthStateChanged(
 
 
       setTimeout(
-        ()=>location.href="handbell.html",
+        ()=>{
+          location.href=
+            "handbell.html";
+        },
         900
       );
 
@@ -1230,18 +1414,18 @@ onAuthStateChanged(
         );
 
 
-      const collection=
-
-        snap.exists() &&
-        snap.val() &&
-        typeof snap.val()==="object"
-
+      const value=
+        snap.exists()
           ? snap.val()
-
           : {};
 
 
-      /* 月替わり */
+      const collection=
+        value &&
+        typeof value==="object"
+          ? value
+          : {};
+
 
       renderGrid(
         "monthlyGrid",
@@ -1250,8 +1434,6 @@ onAuthStateChanged(
       );
 
 
-      /* イベント */
-
       renderGrid(
         "eventGrid",
         eventItems,
@@ -1259,18 +1441,12 @@ onAuthStateChanged(
       );
 
 
-      /* シークレット */
-
       renderGrid(
         "secretGrid",
         secretItems,
         collection
       );
 
-
-      /* =================================================
-         取得数
-      ================================================= */
 
       const allItems=[
 
@@ -1295,15 +1471,14 @@ onAuthStateChanged(
 
 
       $("status").textContent=
-
         `取得数：${acquired} / ${total}`;
 
 
-    }catch(e){
+    }catch(error){
 
       console.error(
         "コレクション読み込みエラー:",
-        e
+        error
       );
 
 
@@ -1315,7 +1490,8 @@ onAuthStateChanged(
         "コレクションを読み込めませんでした。もう一度開いてみてください。";
 
 
-      $("status").textContent="";
+      $("status").textContent=
+        "";
 
     }
 
