@@ -632,22 +632,6 @@ function buildBellMessages(
     )
   ];
 
-  /* =====================================================
-     0:00〜3:59は就寝タイム
-     予定・イベントのメッセージは追加しない
-  ===================================================== */
-
-  if(
-    now.getHours()>=0 &&
-    now.getHours()<4
-  ){
-
-    return [
-      ...new Set(all)
-    ];
-
-  }
-
   try{
 
     const today =
@@ -868,16 +852,7 @@ function getGreeting(
 
   }
 
-  if(
-    hour>=17 &&
-    hour<24
-  ){
-
-    return "こんばんは！";
-
-  }
-
-  return "……zzz……💤";
+  return "こんばんは!";
 
 }
 
@@ -1139,19 +1114,6 @@ function getClubBeforeStartMessages(
   dateNow
 ){
 
-  /* =====================================================
-     0:00〜3:59はベルちゃん就寝中
-  ===================================================== */
-
-  if(
-    dateNow.getHours()>=0 &&
-    dateNow.getHours()<4
-  ){
-
-    return [];
-
-  }
-
   const todayNormal =
     getNormalSchedulesForDate(
       values,
@@ -1349,10 +1311,7 @@ function buildRegularMessages(
 
     }
 
-  }else if(
-    hour>=17 &&
-    hour<24
-  ){
+  }else{
 
     result.push(
 
@@ -1410,26 +1369,6 @@ function buildRegularMessages(
       );
 
     }
-
-  }else{
-
-    result.push(
-
-      "すやすや……💤",
-
-      "もう眠たいよ〜……💤",
-
-      "みんなも早く寝てね……💤",
-
-      "明日また予定を確認しにきてね……おやすみ！",
-
-      "こんな時間までお疲れ様！ゆっくり休んでね……💤",
-
-      "明日に備えて、今日はもうおやすみ〜！……💤",
-
-      "……zzz……💤"
-
-    );
 
   }
 
