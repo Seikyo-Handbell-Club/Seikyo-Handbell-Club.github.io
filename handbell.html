@@ -6079,6 +6079,12 @@ const luckyImageFiles = {
   ultraRare: "ultra_rare.PNG.PNG"
 };
 
+/* レア衣装：ページを開いたときに低確率で表示 */
+const rareCostumeFiles = {
+  bell: "bell-rare.jpg",
+  chime: "chime-rare.jpg"
+};
+
 const eventImageFiles = {
   "01-01": "newyear.jpg.PNG",
   "02-03": "setsubun.jpg.PNG",
@@ -6165,10 +6171,10 @@ function getTodayString(date = new Date()){
 
 /* =========================
    コレクション
-   50種類：
+   52種類：
    月別画像12 + イベント画像12 +
    ベルちゃん衣装12 + チャイムくん衣装12 +
-   シークレット画像2
+   シークレット画像2 + レア衣装2
 ========================= */
 
 const collectionItems = [
@@ -6219,7 +6225,9 @@ const collectionItems = [
   {id:"event_newyearseve_chime",group:"chime",name:"チャイムくん・大晦日",src:"costumes/chime-winter.jpg"},
 
   {id:"secret_rare_image",group:"secret",name:"レア画像",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.rare}`},
-  {id:"secret_ultra_rare_image",group:"secret",name:"超レア画像",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.ultraRare}`}
+  {id:"secret_ultra_rare_image",group:"secret",name:"超レア画像",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.ultraRare}`},
+  {id:"secret_bell_rare_costume",group:"secret",name:"ベルちゃん・レア衣装",hiddenName:"シークレット衣装",src:`costumes/${rareCostumeFiles.bell}`},
+  {id:"secret_chime_rare_costume",group:"secret",name:"チャイムくん・レア衣装",hiddenName:"シークレット衣装",src:`costumes/${rareCostumeFiles.chime}`}
 ];
 
 function getCollectionItem(itemId){
@@ -6277,6 +6285,11 @@ function getCollectionItemForImageInfo(imageInfo){
     return map[md] || null;
   }
   if(imageInfo.kind === "lucky") return imageInfo.rarity === "ultraRare" ? "secret_ultra_rare_image" : "secret_rare_image";
+  if(imageInfo.kind === "rareCostume") {
+    return imageInfo.character === "chime"
+      ? "secret_chime_rare_costume"
+      : "secret_bell_rare_costume";
+  }
   return null;
 }
 
@@ -6453,7 +6466,20 @@ async function decideLoginImage(){
     };
   }
 
-  /* ③ イベント：幸運画像に当選しなかった場合だけ判定する */
+  /* ②.5 レア衣装：ページを開くたびに0.25%で抽選。
+     現在選択しているキャラクターの衣装だけを対象にする。 */
+  const rareCostumeRandom = Math.random();
+  if(rareCostumeRandom < 0.0025){
+    const character = profile?.characterType === "chime" ? "chime" : "bell";
+    return {
+      kind: "rareCostume",
+      character,
+      src: `costumes/${rareCostumeFiles[character]}`,
+      name: character === "chime" ? "チャイムくん・レア衣装" : "ベルちゃん・レア衣装"
+    };
+  }
+
+  /* ③ イベント：幸運画像・レア衣装に当選しなかった場合だけ判定する */
   const event = getEventImageInfo(todayString);
   if(event){
     if(event.everyOpen){
