@@ -188,8 +188,7 @@ header{
   border:0px solid #000;
   background:transparent;
   display:block;
-  z-index:20;
-  pointer-events:auto;
+  z-index:2
 
 }
 
@@ -268,70 +267,96 @@ main{
 /* =========================
    コレクション
 ========================= */
-.collection-section{
-  margin-top:20px;
-  padding-top:16px;
-  border-top:1px solid #e7eaf0
+.collection-button{
+  width:100%;
+  text-align:left;
+  background:#f8fafc;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
 }
 
-.collection-section:first-of-type{
-  border-top:0;
-  padding-top:0
+.collection-count{
+  flex:none;
+  padding:4px 9px;
+  border-radius:999px;
+  background:#eef3fb;
+  color:#526170;
+  font-size:12px;
+  font-weight:800;
+}
+
+.collection-section{
+  margin-top:20px;
 }
 
 .collection-section h3{
-  margin:0 0 12px;
-  font-size:17px
+  margin:0 0 10px;
 }
 
 .collection-grid{
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:10px
+  gap:9px;
 }
 
 .collection-card{
   min-width:0;
-  border:1px solid #e1e6ee;
-  border-radius:14px;
+  border:1px solid #e1e6ed;
+  border-radius:12px;
   overflow:hidden;
   background:#fff;
-  box-shadow:0 2px 8px #00000008
 }
 
 .collection-image-wrap{
   width:100%;
   aspect-ratio:1/1;
-  background:#000;
+  background:#111;
   display:flex;
   align-items:center;
   justify-content:center;
-  overflow:hidden
+  overflow:hidden;
 }
 
-.collection-image-wrap img{
+.collection-image{
   width:100%;
   height:100%;
-  object-fit:contain;
-  display:block
+  object-fit:cover;
+  display:block;
 }
 
-.collection-unknown{
+.collection-secret{
   color:#fff;
-  font-size:24px;
+  font-size:13px;
   font-weight:800;
-  letter-spacing:2px
+  text-align:center;
+  padding:8px;
+  line-height:1.4;
 }
 
 .collection-name{
-  padding:8px 7px 9px;
-  text-align:center;
+  min-height:38px;
+  padding:7px 6px 8px;
   font-size:11px;
   font-weight:700;
-  line-height:1.35
+  line-height:1.35;
+  text-align:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  word-break:break-word;
 }
 
-@media(max-width:600px){
+.collection-empty{
+  padding:16px;
+  border-radius:12px;
+  background:#f8f9fb;
+  color:#77818e;
+  font-size:13px;
+}
+
+@media(max-width:420px){
   .collection-grid{
     grid-template-columns:repeat(2,minmax(0,1fr));
   }
@@ -1029,7 +1054,7 @@ textarea{
 
   <!-- ベルちゃん表示エリア（ベルちゃん本体のコードは design.html 側） -->
   <iframe
-    src="design.html?v=20261004-5"
+    src="design.html?v=20261001-3"
     title="ベルちゃん"
     class="bell-frame"
   ></iframe>
@@ -1371,11 +1396,12 @@ textarea{
 
   <div class="mypage-setting-block">
     <button
-      class="secondary mypage-subpage-button"
+      class="secondary collection-button"
       type="button"
       onclick="showCollection()"
     >
-      📚 コレクション
+      <span>📚 コレクション</span>
+      <span id="collectionCountMini" class="collection-count">0/50</span>
     </button>
   </div>
 
@@ -1398,33 +1424,16 @@ textarea{
 
   <button
     class="secondary page-back"
-    onclick="backMyPageFromCollection()"
+    onclick="showMyPage()"
   >
     ← マイページに戻る
   </button>
 
-  <h2>
-    コレクション
-  </h2>
+  <h2>📚 コレクション</h2>
 
-  <p class="small">
-    実際に出現した画像や衣装を集めよう！
-  </p>
+  <p class="small">実際に画像やイベント衣装が表示されたものだけが記録されます。取得したコレクションはFirebaseに永久保存されます。</p>
 
-  <div class="collection-section">
-    <h3>月替わり画像</h3>
-    <div id="monthlyCollectionGrid" class="collection-grid"></div>
-  </div>
-
-  <div class="collection-section">
-    <h3>イベント画像</h3>
-    <div id="eventCollectionGrid" class="collection-grid"></div>
-  </div>
-
-  <div class="collection-section">
-    <h3>シークレット</h3>
-    <div id="secretCollectionGrid" class="collection-grid"></div>
-  </div>
+  <div id="collectionContent"></div>
 
 </section>
 
@@ -2504,10 +2513,10 @@ function hide(){
     "passwordResetView",
     "setupView",
     "myPageView",
+    "collectionView",
     "personalInfoView",
     "formView",
-    "editView",
-    "collectionView"
+    "editView"
   ]
   .forEach(
     x =>
@@ -2885,7 +2894,6 @@ onAuthStateChanged(
       showWelcomeAfterLogin = false;
       const imageInfo = await decideLoginImage();
       if(imageInfo){
-        await recordDisplayedLoginImage(imageInfo);
         showWelcomeOverlay(imageInfo);
       }
     }catch(e){
@@ -3449,15 +3457,14 @@ function setupBellBridge(){
 /* ベルちゃん側から準備完了通知が来たら、その時点の予定を送る。
    iframe の読み込みと Firebase の取得の順番が前後しても確実に渡す。 */
 window.addEventListener("message",event=>{
-  if(event.data && event.data.type === "handbell-ready"){
-    sendSchedulesToBell();
-    sendCharacterToBell();
-    return;
-  }
+  if(!event.data || event.data.type !== "handbell-ready") return;
+  sendSchedulesToBell();
+});
 
-  if(event.data && event.data.type === "handbell-collection-acquire"){
-    recordCollectionItem(event.data.itemId);
-  }
+/* ベルちゃん側で実際にイベント衣装が画像として表示されたときに取得 */
+window.addEventListener("message",event=>{
+  if(!event.data || event.data.type !== "handbell-collection-acquire") return;
+  acquireCollectionItem(event.data.itemId);
 });
 
 setupBellBridge();
@@ -5570,164 +5577,9 @@ async function showMyPage(){
   if(chimeRadio) chimeRadio.checked = character === "chime";
 
   $("characterSettingMsg").innerHTML = "";
+  updateCollectionMiniCount();
 }
 
-
-/* =========================
-   コレクション
-========================= */
-
-const collectionMonthlyItems = [
-  {id:"monthly_1",name:"1月",src:"images/monthly/january.jpg.PNG"},
-  {id:"monthly_2",name:"2月",src:"images/monthly/february.jpg.PNG"},
-  {id:"monthly_3",name:"3月",src:"images/monthly/march.jpg.PNG"},
-  {id:"monthly_4",name:"4月",src:"images/monthly/april.jpg.PNG"},
-  {id:"monthly_5",name:"5月",src:"images/monthly/may.jpg.PNG"},
-  {id:"monthly_6",name:"6月",src:"images/monthly/june.jpg.PNG"},
-  {id:"monthly_7",name:"7月",src:"images/monthly/july.jpg.PNG"},
-  {id:"monthly_8",name:"8月",src:"images/monthly/august.jpg.PNG"},
-  {id:"monthly_9",name:"9月",src:"images/monthly/september.jpg.PNG"},
-  {id:"monthly_10",name:"10月",src:"images/monthly/october.jpg.PNG"},
-  {id:"monthly_11",name:"11月",src:"images/monthly/november.jpg.PNG"},
-  {id:"monthly_12",name:"12月",src:"images/monthly/december.jpg.PNG"}
-];
-
-const collectionEventItems = [
-  {id:"event_newyear_image",name:"お正月画像",src:"images/events/newyear.jpg.PNG"},
-  {id:"event_newyear_bell",name:"お正月・ベルちゃん",src:"costumes/bell-newyear.jpg"},
-  {id:"event_newyear_chime",name:"お正月・チャイムくん",src:"costumes/chime-newyear.jpg"},
-  {id:"event_setsubun_image",name:"節分画像",src:"images/events/setsubun.jpg.PNG"},
-  {id:"event_setsubun_bell",name:"節分・ベルちゃん",src:"costumes/bell-setsubun.jpg"},
-  {id:"event_setsubun_chime",name:"節分・チャイムくん",src:"costumes/chime-setsubun.jpg"},
-  {id:"event_valentine_image",name:"バレンタイン画像",src:"images/events/valentine.jpg.PNG"},
-  {id:"event_valentine_bell",name:"バレンタイン・ベルちゃん",src:"costumes/bell-valentine.jpg"},
-  {id:"event_valentine_chime",name:"バレンタイン・チャイムくん",src:"costumes/chime-valentine.jpg"},
-  {id:"event_hinamatsuri_image",name:"ひな祭り画像",src:"images/events/hinamatsuri.jpg.PNG"},
-  {id:"event_hinamatsuri_bell",name:"ひな祭り・ベルちゃん",src:"costumes/bell-hinamatsuri.jpg"},
-  {id:"event_hinamatsuri_chime",name:"ひな祭り・チャイムくん",src:"costumes/chime-hinamatsuri.jpg"},
-  {id:"event_whiteday_image",name:"ホワイトデー画像",src:"images/events/whiteday.jpg.PNG"},
-  {id:"event_whiteday_bell",name:"ホワイトデー・ベルちゃん",src:"costumes/bell-whiteday.jpg"},
-  {id:"event_whiteday_chime",name:"ホワイトデー・チャイムくん",src:"costumes/chime-whiteday.jpg"},
-  {id:"event_kodomonohi_image",name:"こどもの日画像",src:"images/events/childrensday.jpg.PNG"},
-  {id:"event_kodomonohi_bell",name:"こどもの日・ベルちゃん",src:"costumes/bell-kodomonohi.jpg"},
-  {id:"event_kodomonohi_chime",name:"こどもの日・チャイムくん",src:"costumes/chime-kodomonohi.jpg"},
-  {id:"event_tanabata_image",name:"七夕画像",src:"images/events/tanabata.jpg.PNG"},
-  {id:"event_tanabata_bell",name:"七夕・ベルちゃん",src:"costumes/bell-tanabata.jpg"},
-  {id:"event_tanabata_chime",name:"七夕・チャイムくん",src:"costumes/chime-tanabata.jpg"},
-  {id:"event_tsukimi_image",name:"十五夜画像",src:"images/events/jugoya.jpg.PNG"},
-  {id:"event_tsukimi_bell",name:"十五夜・ベルちゃん",src:"costumes/bell-tsukimi.jpg"},
-  {id:"event_tsukimi_chime",name:"十五夜・チャイムくん",src:"costumes/chime-tsukimi.jpg"},
-  {id:"event_halloween_image",name:"ハロウィン画像",src:"images/events/halloween.jpg.PNG"},
-  {id:"event_halloween_bell",name:"ハロウィン・ベルちゃん",src:"costumes/bell-halloween.jpg"},
-  {id:"event_halloween_chime",name:"ハロウィン・チャイムくん",src:"costumes/chime-halloween.jpg"},
-  {id:"event_christmaseve_image",name:"クリスマスイブ画像",src:"images/events/christmas_eve.jpg.PNG"},
-  {id:"event_christmaseve_bell",name:"クリスマスイブ・ベルちゃん",src:"costumes/bell-christmaseve.jpg"},
-  {id:"event_christmaseve_chime",name:"クリスマスイブ・チャイムくん",src:"costumes/chime-christmaseve.jpg"},
-  {id:"event_christmas_image",name:"クリスマス画像",src:"images/events/christmas.jpg.PNG"},
-  {id:"event_christmas_bell",name:"クリスマス・ベルちゃん",src:"costumes/bell-Christmas.jpg"},
-  {id:"event_christmas_chime",name:"クリスマス・チャイムくん",src:"costumes/chime-Christmas.jpg"},
-  {id:"event_newyearseve_image",name:"大晦日画像",src:"images/events/newyears_eve.jpg.PNG"},
-  {id:"event_newyearseve_bell",name:"大晦日・ベルちゃん",src:"costumes/bell-winter.jpg"},
-  {id:"event_newyearseve_chime",name:"大晦日・チャイムくん",src:"costumes/chime-winter.jpg"}
-];
-
-const collectionSecretItems = [
-  {id:"secret_rare_image",name:"レア画像",src:"images/lucky/rare.PNG.PNG"},
-  {id:"secret_ultra_rare_image",name:"超レア画像",src:"images/lucky/ultra_rare.PNG.PNG"}
-];
-
-let collectionData = {};
-
-async function loadCollectionData(){
-  if(!currentUser) return {};
-  try{
-    const snap = await get(ref(db,`members/${currentUser.uid}/collection`));
-    collectionData = snap.exists() && snap.val() && typeof snap.val()==="object"
-      ? snap.val()
-      : {};
-  }catch(e){
-    console.error("コレクション読み込みエラー:",e);
-    collectionData = {};
-  }
-  return collectionData;
-}
-
-async function recordCollectionItem(itemId){
-  if(!currentUser || !itemId) return;
-  if(collectionData[itemId]) return;
-
-  try{
-    await update(ref(db,`members/${currentUser.uid}/collection`),{
-      [itemId]:true
-    });
-    collectionData[itemId]=true;
-  }catch(e){
-    console.error("コレクション取得記録エラー:",e);
-  }
-}
-
-function createCollectionCard(item){
-  const acquired=!!collectionData[item.id];
-  const card=document.createElement("div");
-  card.className="collection-card";
-
-  const wrap=document.createElement("div");
-  wrap.className="collection-image-wrap";
-
-  if(acquired){
-    const img=document.createElement("img");
-    img.src=item.src || "";
-    img.alt=item.name;
-    img.loading="lazy";
-    wrap.appendChild(img);
-  }else{
-    const unknown=document.createElement("div");
-    unknown.className="collection-unknown";
-    unknown.textContent="？？？";
-    wrap.appendChild(unknown);
-  }
-
-  const name=document.createElement("div");
-  name.className="collection-name";
-  name.textContent=acquired ? item.name : "？？？";
-
-  card.appendChild(wrap);
-  card.appendChild(name);
-  return card;
-}
-
-function renderCollectionGrid(elementId,items){
-  const grid=$(elementId);
-  if(!grid)return;
-  grid.innerHTML="";
-  items.forEach(item=>grid.appendChild(createCollectionCard(item)));
-}
-
-async function renderCollection(){
-  await loadCollectionData();
-  renderCollectionGrid("monthlyCollectionGrid",collectionMonthlyItems);
-  renderCollectionGrid("eventCollectionGrid",collectionEventItems);
-  renderCollectionGrid("secretCollectionGrid",collectionSecretItems);
-}
-
-async function showCollection(){
-  if(!currentUser){
-    showLogin();
-    return;
-  }
-
-  hide();
-
-  $("collectionView")
-    .classList
-    .remove("hidden");
-
-  renderCollection();
-}
-
-function backMyPageFromCollection(){
-  showMyPage();
-}
 
 function showPersonalInfo(){
   if(!currentUser) return;
@@ -6144,10 +5996,6 @@ window.showCollection =
   showCollection;
 
 
-window.backMyPageFromCollection =
-  backMyPageFromCollection;
-
-
 window.showPersonalInfo =
   showPersonalInfo;
 
@@ -6305,32 +6153,102 @@ function getTodayString(date = new Date()){
   return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
 }
 
-async function recordDisplayedLoginImage(imageInfo){
-  if(!imageInfo || !currentUser) return;
+/* =========================
+   コレクション
+   50種類：
+   月別画像12 + イベント画像12 +
+   ベルちゃん衣装12 + チャイムくん衣装12 +
+   シークレット画像2
+========================= */
 
+const collectionItems = [
+  ...Object.entries(monthlyImageFiles).map(([month,file]) => ({
+    id:`monthly_${String(month).padStart(2,"0")}`,
+    group:"monthly",
+    name:`${month}月`,
+    src:`images/monthly/${file}`
+  })),
+
+  {id:"event_newyear_image",group:"eventImage",name:"お正月",src:"images/events/newyear.jpg.PNG"},
+  {id:"event_setsubun_image",group:"eventImage",name:"節分",src:"images/events/setsubun.jpg.PNG"},
+  {id:"event_valentine_image",group:"eventImage",name:"バレンタイン",src:"images/events/valentine.jpg.PNG"},
+  {id:"event_hinamatsuri_image",group:"eventImage",name:"ひな祭り",src:"images/events/hinamatsuri.jpg.PNG"},
+  {id:"event_whiteday_image",group:"eventImage",name:"ホワイトデー",src:"images/events/whiteday.jpg.PNG"},
+  {id:"event_kodomonohi_image",group:"eventImage",name:"こどもの日",src:"images/events/childrensday.jpg.PNG"},
+  {id:"event_tanabata_image",group:"eventImage",name:"七夕",src:"images/events/tanabata.jpg.PNG"},
+  {id:"event_tsukimi_image",group:"eventImage",name:"十五夜",src:"images/events/jugoya.jpg.PNG"},
+  {id:"event_halloween_image",group:"eventImage",name:"ハロウィン",src:"images/events/halloween.jpg.PNG"},
+  {id:"event_christmaseve_image",group:"eventImage",name:"クリスマスイブ",src:"images/events/christmas_eve.jpg.PNG"},
+  {id:"event_christmas_image",group:"eventImage",name:"クリスマス",src:"images/events/christmas.jpg.PNG"},
+  {id:"event_newyearseve_image",group:"eventImage",name:"大晦日",src:"images/events/newyears_eve.jpg.PNG"},
+
+  {id:"event_newyear_bell",group:"bell",name:"ベルちゃん・お正月",src:"costumes/bell-newyear.jpg"},
+  {id:"event_setsubun_bell",group:"bell",name:"ベルちゃん・節分",src:"costumes/bell-setsubun.jpg"},
+  {id:"event_valentine_bell",group:"bell",name:"ベルちゃん・バレンタイン",src:"costumes/bell-valentine.jpg"},
+  {id:"event_hinamatsuri_bell",group:"bell",name:"ベルちゃん・ひな祭り",src:"costumes/bell-hinamatsuri.jpg"},
+  {id:"event_whiteday_bell",group:"bell",name:"ベルちゃん・ホワイトデー",src:"costumes/bell-whiteday.jpg"},
+  {id:"event_kodomonohi_bell",group:"bell",name:"ベルちゃん・こどもの日",src:"costumes/bell-kodomonohi.jpg"},
+  {id:"event_tanabata_bell",group:"bell",name:"ベルちゃん・七夕",src:"costumes/bell-tanabata.jpg"},
+  {id:"event_tsukimi_bell",group:"bell",name:"ベルちゃん・十五夜",src:"costumes/bell-tsukimi.jpg"},
+  {id:"event_halloween_bell",group:"bell",name:"ベルちゃん・ハロウィン",src:"costumes/bell-halloween.jpg"},
+  {id:"event_christmaseve_bell",group:"bell",name:"ベルちゃん・クリスマスイブ",src:"costumes/bell-christmaseve.jpg"},
+  {id:"event_christmas_bell",group:"bell",name:"ベルちゃん・クリスマス",src:"costumes/bell-Christmas.jpg"},
+  {id:"event_newyearseve_bell",group:"bell",name:"ベルちゃん・大晦日",src:"costumes/bell-winter.jpg"},
+
+  {id:"event_newyear_chime",group:"chime",name:"チャイムくん・お正月",src:"costumes/chime-newyear.jpg"},
+  {id:"event_setsubun_chime",group:"chime",name:"チャイムくん・節分",src:"costumes/chime-setsubun.jpg"},
+  {id:"event_valentine_chime",group:"chime",name:"チャイムくん・バレンタイン",src:"costumes/chime-valentine.jpg"},
+  {id:"event_hinamatsuri_chime",group:"chime",name:"チャイムくん・ひな祭り",src:"costumes/chime-hinamatsuri.jpg"},
+  {id:"event_whiteday_chime",group:"chime",name:"チャイムくん・ホワイトデー",src:"costumes/chime-whiteday.jpg"},
+  {id:"event_kodomonohi_chime",group:"chime",name:"チャイムくん・こどもの日",src:"costumes/chime-kodomonohi.jpg"},
+  {id:"event_tanabata_chime",group:"chime",name:"チャイムくん・七夕",src:"costumes/chime-tanabata.jpg"},
+  {id:"event_tsukimi_chime",group:"chime",name:"チャイムくん・十五夜",src:"costumes/chime-tsukimi.jpg"},
+  {id:"event_halloween_chime",group:"chime",name:"チャイムくん・ハロウィン",src:"costumes/chime-halloween.jpg"},
+  {id:"event_christmaseve_chime",group:"chime",name:"チャイムくん・クリスマスイブ",src:"costumes/chime-christmaseve.jpg"},
+  {id:"event_christmas_chime",group:"chime",name:"チャイムくん・クリスマス",src:"costumes/chime-Christmas.jpg"},
+  {id:"event_newyearseve_chime",group:"chime",name:"チャイムくん・大晦日",src:"costumes/chime-winter.jpg"},
+
+  {id:"secret_rare_image",group:"secret",name:"レア画像",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.rare}`},
+  {id:"secret_ultra_rare_image",group:"secret",name:"超レア画像",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.ultraRare}`}
+];
+
+function getCollectionItem(itemId){
+  return collectionItems.find(item => item.id === itemId) || null;
+}
+
+async function acquireCollectionItem(itemId){
+  if(!currentUser || !itemId) return;
+  const item = getCollectionItem(itemId);
+  if(!item) return;
+
+  try{
+    const itemRef = ref(db,`members/${currentUser.uid}/collection/${itemId}`);
+    const snap = await get(itemRef);
+    if(!snap.exists() || !snap.val()){
+      await set(itemRef,{
+        acquiredAt:Date.now()
+      });
+    }
+
+    if($("collectionView") && !$("collectionView").classList.contains("hidden")){
+      await renderCollection();
+    }
+    updateCollectionMiniCount();
+  }catch(e){
+    console.error("コレクション保存エラー:",e);
+  }
+}
+
+function getCollectionItemForImageInfo(imageInfo){
+  if(!imageInfo) return null;
   if(imageInfo.kind === "monthly"){
-    const monthNumber=new Date().getMonth()+1;
-    await recordCollectionItem(`monthly_${monthNumber}`);
-    return;
+    return `monthly_${String(new Date().getMonth()+1).padStart(2,"0")}`;
   }
-
-  if(imageInfo.kind === "lucky"){
-    if(imageInfo.rarity === "rare"){
-      await recordCollectionItem("secret_rare_image");
-    }
-    if(imageInfo.rarity === "ultraRare"){
-      await recordCollectionItem("secret_ultra_rare_image");
-    }
-    return;
-  }
-
   if(imageInfo.kind === "event"){
-    const today=new Date();
-    const event=getEventImageInfo(getTodayString(today));
-    if(!event) return;
-
-    const md=getTodayString(today).slice(5);
-    const imageMap={
+    const event = getEventImageInfo(getTodayString());
+    if(!event) return null;
+    const md = getTodayString().slice(5);
+    const map={
       "01-01":"event_newyear_image",
       "02-03":"event_setsubun_image",
       "02-14":"event_valentine_image",
@@ -6338,16 +6256,99 @@ async function recordDisplayedLoginImage(imageInfo){
       "03-14":"event_whiteday_image",
       "05-05":"event_kodomonohi_image",
       "07-07":"event_tanabata_image",
+      "09-25":"event_tsukimi_image",
       "10-31":"event_halloween_image",
       "12-24":"event_christmaseve_image",
       "12-25":"event_christmas_image",
       "12-31":"event_newyearseve_image"
     };
-
-    let imageId=imageMap[md] || null;
-    if(event.file === "jugoya.jpg.PNG") imageId="event_tsukimi_image";
-    if(imageId) await recordCollectionItem(imageId);
+    const y=getTodayString().slice(0,4);
+    if(jugoyaDates[y]===md) return "event_tsukimi_image";
+    return map[md] || null;
   }
+  if(imageInfo.kind === "lucky") return imageInfo.rarity === "ultraRare" ? "secret_ultra_rare_image" : "secret_rare_image";
+  return null;
+}
+
+async function acquireCollectionForDisplayedImage(imageInfo){
+  const itemId=getCollectionItemForImageInfo(imageInfo);
+  if(itemId) await acquireCollectionItem(itemId);
+}
+
+async function loadCollectionData(){
+  if(!currentUser) return {};
+  try{
+    const snap=await get(ref(db,`members/${currentUser.uid}/collection`));
+    return snap.exists() ? (snap.val() || {}) : {};
+  }catch(e){
+    console.error("コレクション取得エラー:",e);
+    return {};
+  }
+}
+
+function collectionCardHtml(item,acquired){
+  const displayName=acquired ? item.name : (item.hiddenName || "？？？");
+  const visual=acquired
+    ? `<img class="collection-image" src="${esc(item.src)}" alt="${esc(item.name)}">`
+    : `<div class="collection-secret">？？？</div>`;
+  return `<div class="collection-card">
+    <div class="collection-image-wrap">${visual}</div>
+    <div class="collection-name">${esc(displayName)}</div>
+  </div>`;
+}
+
+async function renderCollection(){
+  if(!currentUser) return;
+  const box=$("collectionContent");
+  if(!box) return;
+  box.innerHTML='<div class="collection-empty">読み込んでいます……</div>';
+
+  const acquiredData=await loadCollectionData();
+  const isAcquired=id=>!!acquiredData[id];
+  const acquiredCount=collectionItems.filter(item=>isAcquired(item.id)).length;
+
+  const groups=[
+    ["🖼️ 月別画像",collectionItems.filter(item=>item.group==="monthly")],
+    ["🎉 イベント画像",collectionItems.filter(item=>item.group==="eventImage")],
+    ["🔔 ベルちゃん衣装",collectionItems.filter(item=>item.group==="bell")],
+    ["🎵 チャイムくん衣装",collectionItems.filter(item=>item.group==="chime")],
+    ["✨ シークレット",collectionItems.filter(item=>item.group==="secret")]
+  ];
+
+  box.innerHTML=groups.map(([title,items])=>`
+    <div class="collection-section">
+      <h3>${title}</h3>
+      <div class="collection-grid">
+        ${items.map(item=>collectionCardHtml(item,isAcquired(item.id))).join("")}
+      </div>
+    </div>
+  `).join("");
+
+  const mini=$("collectionCountMini");
+  if(mini) mini.textContent=`${acquiredCount}/${collectionItems.length}`;
+}
+
+async function updateCollectionMiniCount(){
+  if(!currentUser) return;
+  const mini=$("collectionCountMini");
+  if(!mini) return;
+  const data=await loadCollectionData();
+  const count=collectionItems.filter(item=>!!data[item.id]).length;
+  mini.textContent=`${count}/${collectionItems.length}`;
+}
+
+async function showCollection(){
+  if(!currentUser){
+    showLogin();
+    return;
+  }
+  if(!profile){
+    const loaded=await loadProfile();
+    if(!loaded){showLogin();return;}
+  }
+  hide();
+  $("collectionView").classList.remove("hidden");
+  await renderCollection();
 }
 
 async function decideLoginImage(){
@@ -6441,10 +6442,24 @@ function showWelcomeOverlay(imageInfo){
   const image = $("welcomeImage");
   if(!overlay || !image || !imageInfo) return;
 
+  /* 画像が本当に読み込まれて表示可能になった時点で取得 */
+  image.onload = () => {
+    acquireCollectionForDisplayedImage(imageInfo);
+  };
+
+  image.onerror = () => {
+    /* 読み込み失敗時は取得しない */
+  };
+
   image.src = imageInfo.src;
   image.alt = imageInfo.name || "Welcome";
   overlay.classList.remove("closing");
   overlay.setAttribute("aria-hidden","false");
+
+  /* キャッシュ済み画像でもonloadが発火しない場合に備える */
+  if(image.complete && image.naturalWidth > 0){
+    acquireCollectionForDisplayedImage(imageInfo);
+  }
 
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {

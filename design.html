@@ -236,15 +236,41 @@ function sendCostumeCollection(character,costumeKey){
   },"*");
 }
 
+function applyCharacterImage(imageData,character){
+  if(!imageData)return;
+
+  /*
+   * 画像が「表示できた」ことを確認してからコレクション取得通知を送る。
+   * srcをセットしただけでは取得扱いにしない。
+   */
+  const targetSrc=imageData.src;
+  const costumeKey=imageData.costumeKey;
+
+  bellImage.onload=()=>{
+    if(costumeKey !== "normal"){
+      sendCostumeCollection(character,costumeKey);
+    }
+  };
+
+  bellImage.onerror=()=>{};
+  bellImage.src=targetSrc;
+  bellImage.alt=imageData.name;
+
+  /* キャッシュ済み画像にも対応 */
+  if(bellImage.complete && bellImage.naturalWidth > 0 && costumeKey !== "normal"){
+    sendCostumeCollection(character,costumeKey);
+  }
+}
+
 function updateCostume(){
   const data=getCharacterImage(currentCharacter);
   const resolvedSrc=new URL(data.src,document.baseURI).href;
+
   if(bellImage.src!==resolvedSrc || currentCostumeKey!==data.costumeKey){
-    bellImage.src=data.src;
-    bellImage.alt=data.name;
     currentCostumeKey=data.costumeKey;
-    if(data.costumeKey!=="normal")sendCostumeCollection(currentCharacter,data.costumeKey);
-  }else if(data.costumeKey!=="normal"){
+    applyCharacterImage(data,currentCharacter);
+  }else if(data.costumeKey!=="normal" && bellImage.complete && bellImage.naturalWidth > 0){
+    /* すでに表示済みのイベント衣装も、親側で未取得なら再通知できる */
     sendCostumeCollection(currentCharacter,data.costumeKey);
   }
 }
@@ -256,10 +282,8 @@ function setCharacter(character){
 
   currentCharacter=selected;
   const imageData=getCharacterImage(selected);
-  bellImage.src=imageData.src;
-  bellImage.alt=imageData.name;
   currentCostumeKey=imageData.costumeKey;
-  if(imageData.costumeKey !== "normal")sendCostumeCollection(selected,imageData.costumeKey);
+  applyCharacterImage(imageData,selected);
   bellImage.classList.remove("bell-character","chime-character");
   bellImage.classList.add(selected === "chime" ? "chime-character" : "bell-character");
   if(characterName) characterName.textContent=data.name;
