@@ -3324,7 +3324,9 @@ function setupBellBridge(){
    iframe の読み込みと Firebase の取得の順番が前後しても確実に渡す。 */
 window.addEventListener("message",event=>{
   if(!event.data || event.data.type !== "handbell-ready") return;
-  sendSchedulesToBell();
+  
+sendSchedulesToBell();  
+sendCharacterToBell();
 });
 
 setupBellBridge();
