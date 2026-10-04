@@ -6538,7 +6538,7 @@ function collectionCardHtml(item,acquired){
   </div>`;
 }
 
-function openCollectionItem(button){
+window.openCollectionItem = function(button){
   if(!button) return;
 
   const type = button.dataset.openType || "normal";
