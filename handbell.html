@@ -217,6 +217,53 @@ main{
   box-shadow:0 2px 12px #0000000b
 }
 
+
+.mypage-setting-block{
+  margin-top:18px;
+  padding:16px;
+  border:1px solid #edf0f4;
+  border-radius:14px;
+  background:#fff;
+}
+
+.mypage-setting-block h3{
+  margin:0 0 8px;
+}
+
+.character-choice-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.character-choice{
+  margin:0;
+  padding:12px;
+  border:1px solid #dfe4eb;
+  border-radius:12px;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  cursor:pointer;
+}
+
+.character-choice input{
+  width:auto;
+}
+
+.mypage-subpage-button{
+  width:100%;
+  text-align:left;
+  background:#f8fafc;
+}
+
+@media(max-width:600px){
+  .character-choice-row{
+    grid-template-columns:1fr;
+  }
+}
+
 .hidden{
   display:none!important
 }
@@ -1197,52 +1244,94 @@ textarea{
     マイページ
   </h2>
 
-  <p class="small">
-    学年・クラス・名前・パスワードを変更できます。
-  </p>
+  <div class="mypage-setting-block">
+    <h3>🔔 キャラクター設定</h3>
+    <p class="small">表示するキャラクターを選べます。</p>
 
-  <label>
-    学年
-  </label>
+    <div class="character-choice-row">
+      <label class="character-choice">
+        <input
+          id="characterBell"
+          name="characterType"
+          type="radio"
+          value="bell"
+          onchange="saveCharacterSetting()"
+        >
+        <span>🔔 ベルちゃん</span>
+      </label>
 
-  <select id="myGrade">
+      <label class="character-choice">
+        <input
+          id="characterChime"
+          name="characterType"
+          type="radio"
+          value="chime"
+          onchange="saveCharacterSetting()"
+        >
+        <span>🎵 チャイム君</span>
+      </label>
+    </div>
 
-    <option value="">
-      選択してください
-    </option>
+    <div id="characterSettingMsg"></div>
+  </div>
 
-    <option value="中学1年">
-      中学1年
-    </option>
+  <div class="mypage-setting-block">
+    <h3>🖼️ 月別画像</h3>
+    <p class="small">毎月の画像をページを開くたびに表示するか設定できます。OFFにすると今月は表示されず、翌月になると自動でONに戻ります。</p>
 
-    <option value="中学2年">
-      中学2年
-    </option>
+    <label class="image-setting-row">
+      <span>毎月の画像を表示する</span>
+      <span class="switch-wrap">
+        <input
+          id="monthlyImageToggle"
+          class="switch-input"
+          type="checkbox"
+          checked
+          onchange="toggleMonthlyImage()"
+        >
+        <span class="switch-slider"></span>
+      </span>
+    </label>
 
-    <option value="中学3年">
-      中学3年
-    </option>
+    <div id="monthlyImageSettingMsg"></div>
+  </div>
 
-    <option value="高校1年">
-      高校1年
-    </option>
+  <div class="mypage-setting-block">
+    <button
+      class="secondary mypage-subpage-button"
+      type="button"
+      onclick="showPersonalInfo()"
+    >
+      🔐 個人情報の変更
+    </button>
+  </div>
 
-    <option value="高校2年">
-      高校2年
-    </option>
+</section>
 
-  </select>
+<section
+  id="personalInfoView"
+  class="panel hidden"
+>
+
+  <button
+    class="secondary page-back"
+    onclick="backMyPage()"
+  >
+    ← マイページに戻る
+  </button>
+
+  <h2>
+    個人情報の変更
+  </h2>
+
+  <h3>クラス</h3>
 
   <label>
     クラス
   </label>
 
   <select id="myClass">
-
-    <option value="">
-      選択してください
-    </option>
-
+    <option value="">選択してください</option>
     <option value="A">A組</option>
     <option value="B">B組</option>
     <option value="C">C組</option>
@@ -1254,55 +1343,18 @@ textarea{
     <option value="I">I組</option>
     <option value="J">J組</option>
     <option value="K">K組</option>
-
   </select>
-
-  <label>
-    名前
-  </label>
-
-  <input
-    id="myName"
-  >
 
   <button
     class="primary"
     onclick="saveProfile()"
   >
-    プロフィールを保存
+    クラスを保存
   </button>
 
-  <h3 style="margin-top:24px">
-    毎月の画像
-  </h3>
+  <h3 style="margin-top:24px">復旧用メールアドレス</h3>
 
-  <p class="small">
-    毎月の画像をページを開くたびに表示するか設定できます。OFFにすると今月は表示されず、翌月になると自動でONに戻ります。
-  </p>
-
-  <label class="image-setting-row">
-    <span>毎月の画像を表示する</span>
-    <span class="switch-wrap">
-      <input
-        id="monthlyImageToggle"
-        class="switch-input"
-        type="checkbox"
-        checked
-        onchange="toggleMonthlyImage()"
-      >
-      <span class="switch-slider"></span>
-    </span>
-  </label>
-
-  <div id="monthlyImageSettingMsg"></div>
-
-  <h3 style="margin-top:24px">
-    復旧用メールアドレス
-  </h3>
-
-  <p class="small">
-    パスワードを忘れたときに再設定メールを受け取るためのメールアドレスです。変更するときは現在のパスワードも入力してください。
-  </p>
+  <p class="small">パスワードを忘れたときに再設定メールを受け取るためのメールアドレスです。変更するときは現在のパスワードも入力してください。</p>
 
   <label>
     復旧用メールアドレス
@@ -1331,9 +1383,7 @@ textarea{
     復旧用メールを保存
   </button>
 
-  <h3 style="margin-top:24px">
-    パスワード変更
-  </h3>
+  <h3 style="margin-top:24px">パスワード変更</h3>
 
   <label>
     新しいパスワード（6文字以上）
@@ -2311,6 +2361,7 @@ function hide(){
     "passwordResetView",
     "setupView",
     "myPageView",
+    "personalInfoView",
     "formView",
     "editView"
   ]
@@ -3216,6 +3267,15 @@ async function render(){
 }
 
 
+function sendCharacterToBell(){
+  const frame=document.querySelector(".bell-frame");
+  if(!frame || !frame.contentWindow) return;
+  frame.contentWindow.postMessage({
+    type:"handbell-character",
+    character:profile?.characterType === "chime" ? "chime" : "bell"
+  },"*");
+}
+
 function sendSchedulesToBell(){
   const frame=document.querySelector(".bell-frame");
   if(!frame || !frame.contentWindow || scheduleCache === null) return;
@@ -3229,8 +3289,12 @@ function sendSchedulesToBell(){
 function setupBellBridge(){
   const frame=document.querySelector(".bell-frame");
   if(!frame) return;
-  frame.addEventListener("load",sendSchedulesToBell);
+  frame.addEventListener("load",()=>{
+    sendSchedulesToBell();
+    sendCharacterToBell();
+  });
   sendSchedulesToBell();
+  sendCharacterToBell();
 }
 
 /* ベルちゃん側から準備完了通知が来たら、その時点の予定を送る。
@@ -5317,53 +5381,23 @@ async function deleteNotice(id){
 async function showMyPage(){
 
   if(!currentUser){
-
     showLogin();
-
     return;
-
   }
-
 
   if(!profile){
-
-    const loaded =
-      await loadProfile();
-
-
+    const loaded = await loadProfile();
     if(!loaded){
-
       showLogin();
-
       return;
-
     }
-
   }
 
-
   hide();
-
 
   $("myPageView")
     .classList
     .remove("hidden");
-
-
-  $("myGrade").value =
-    String(
-      profile.grade ??
-      ""
-    );
-
-
-  $("myClass").value =
-    getProfileClass();
-
-
-  $("myName").value =
-    profile.name ??
-    "";
 
   const monthlyToggle = $("monthlyImageToggle");
   if(monthlyToggle){
@@ -5373,27 +5407,68 @@ async function showMyPage(){
     monthlyToggle.checked = disabledMonth !== currentMonthKey && profile.monthlyImageEnabled !== false;
   }
 
-  $("myRecoveryEmail").value =
-    currentUser?.email ||
-    "";
+  const character = profile.characterType === "chime" ? "chime" : "bell";
+  const bellRadio = $("characterBell");
+  const chimeRadio = $("characterChime");
+  if(bellRadio) bellRadio.checked = character === "bell";
+  if(chimeRadio) chimeRadio.checked = character === "chime";
 
-  $("myRecoveryPassword").value =
-    "";
-
-
-  $("myPassword").value =
-    "";
-
-
-  $("myPassword2").value =
-    "";
-
-
-  $("myPageMsg")
-    .innerHTML =
-      "";
-
+  $("characterSettingMsg").innerHTML = "";
 }
+
+
+function showPersonalInfo(){
+  if(!currentUser) return;
+
+  hide();
+  $("personalInfoView")
+    .classList
+    .remove("hidden");
+
+  $("myClass").value = getProfileClass();
+  $("myRecoveryEmail").value = currentUser?.email || "";
+  $("myRecoveryPassword").value = "";
+  $("myPassword").value = "";
+  $("myPassword2").value = "";
+  $("myPageMsg").innerHTML = "";
+}
+
+
+function backMyPage(){
+  showMyPage();
+}
+
+
+async function saveCharacterSetting(){
+  if(!currentUser || !profile) return;
+
+  const selected = $("characterChime")?.checked ? "chime" : "bell";
+  const msg = $("characterSettingMsg");
+
+  try{
+    await update(
+      ref(db, `members/${currentUser.uid}`),
+      { characterType:selected }
+    );
+
+    profile = {
+      ...profile,
+      characterType:selected
+    };
+
+    sendCharacterToBell();
+
+    if(msg){
+      msg.innerHTML = '<div class="msg">キャラクターを変更しました。</div>';
+    }
+  }catch(e){
+    console.error("キャラクター設定保存エラー:",e);
+    if(msg){
+      msg.innerHTML = '<div class="msg error">設定を保存できませんでした。</div>';
+    }
+  }
+}
+
 
 
 /* =========================
@@ -5448,99 +5523,39 @@ async function toggleMonthlyImage(){
 
 async function saveProfile(){
 
-  if(
-    !currentUser ||
-    !profile
-  )
+  if(!currentUser || !profile) return;
+
+  const className = $("myClass").value;
+
+  if(!className){
+    $("myPageMsg").innerHTML =
+      '<div class="msg error">クラスを選択してください。</div>';
     return;
-
-
-  const grade =
-    $("myGrade")
-      .value;
-
-
-  const className =
-    $("myClass")
-      .value;
-
-
-  const name =
-    $("myName")
-      .value
-      .trim();
-
-
-  if(
-    !grade ||
-    !className ||
-    !name
-  ){
-
-    $("myPageMsg")
-      .innerHTML =
-        '<div class="msg error">学年・クラス・名前を入力してください。</div>';
-
-
-    return;
-
   }
 
-
   try{
-
     await update(
-      ref(
-        db,
-        "members/" +
-        currentUser.uid
-      ),
-      {
-
-        grade,
-        className,
-        name
-
-      }
+      ref(db, "members/" + currentUser.uid),
+      { className }
     );
 
-
     profile = {
-
       ...profile,
-
-      grade,
-      className,
-      name
-
+      className
     };
-
 
     updateProfileDisplay();
 
-
-    $("myPageMsg")
-      .innerHTML =
-        '<div class="msg">プロフィールを保存しました。</div>';
-
-
-    alert(
-      "更新しました。"
-    );
-
+    $("myPageMsg").innerHTML =
+      '<div class="msg">クラスを保存しました。</div>';
 
   }catch(e){
-
     console.error(e);
-
-
-    $("myPageMsg")
-      .innerHTML =
-        '<div class="msg error">保存できませんでした。</div>';
-
+    $("myPageMsg").innerHTML =
+      '<div class="msg error">保存できませんでした。</div>';
   }
-
 }
+
 
 
 /* =========================
@@ -5793,6 +5808,18 @@ window.deleteNotice =
 
 window.showMyPage =
   showMyPage;
+
+
+window.showPersonalInfo =
+  showPersonalInfo;
+
+
+window.backMyPage =
+  backMyPage;
+
+
+window.saveCharacterSetting =
+  saveCharacterSetting;
 
 
 window.saveProfile =
