@@ -429,7 +429,9 @@ body.logged-in .bubble:after{
   <!-- 吹き出し -->
   <div class="bubble">
 
-    <small>ベルちゃん</small>
+    <small id="characterName">
+      ベルちゃん
+    </small>
 
     <span id="bellMessage">
       予定を確認してるよ！
@@ -443,7 +445,7 @@ body.logged-in .bubble:after{
     id="heartContainer">
   </div>
 
-  <!-- ベルちゃん -->
+  <!-- キャラクター -->
   <img
     class="bell"
     src="bell.png"
@@ -478,6 +480,88 @@ const heartContainer =
   document.getElementById(
     "heartContainer"
   );
+
+const characterName =
+  document.getElementById(
+    "characterName"
+  );
+
+/* =====================================================
+   キャラクター設定
+===================================================== */
+
+const characterImages = {
+
+  bell:{
+    src:"bell.png",
+    name:"ベルちゃん"
+  },
+
+  chime:{
+    src:"chime.png",
+    name:"チャイムくん"
+  }
+
+};
+
+let currentCharacter="bell";
+
+function setCharacter(
+  character
+){
+
+  const selected =
+    character === "chime"
+      ? "chime"
+      : "bell";
+
+  const data =
+    characterImages[selected];
+
+  if(!data)return;
+
+  currentCharacter =
+    selected;
+
+  bellImage.src =
+    data.src;
+
+  bellImage.alt =
+    data.name;
+
+  if(characterName){
+
+    characterName.textContent =
+      data.name;
+
+  }
+
+}
+
+/* =====================================================
+   親ページからキャラクター設定を受信
+===================================================== */
+
+window.addEventListener(
+  "message",
+  event=>{
+
+    if(
+      !event.data ||
+      event.data.type !==
+        "handbell-character"
+    ){
+
+      return;
+
+    }
+
+    setCharacter(
+      event.data.character
+    );
+
+  }
+);
 
 /* =====================================================
    ログイン状態によるサイズ調整
@@ -1419,7 +1503,7 @@ function buildRegularMessages(
 
       "もう眠たいよ〜……💤",
 
-      "みんなも早く寝てね……💤",
+      "みんなも早く寝てね……おやすみ！",
 
       "明日また予定を確認しにきてね……おやすみ！",
 
