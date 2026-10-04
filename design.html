@@ -22,16 +22,10 @@ body{
 
 .bell-area{
   position:absolute;
-
-  /*
-   * キャラクター本体が表示されるエリア
-   */
   width:220px;
   height:140px;
-
   right:0;
   bottom:0;
-
   font-family:
     -apple-system,
     BlinkMacSystemFont,
@@ -85,41 +79,19 @@ body.logged-in .bell{
 
 /* =====================================================
    ★ チャイムくん専用設定 ★
-   
-   ↓↓↓ チャイムくんの大きさ・位置はここだけ変更 ↓↓↓
 ===================================================== */
 
-/*
-   ログイン前
-*/
 body:not(.logged-in) .bell.chime{
   width:80px;
   right:18px;
   bottom:10px;
 }
 
-/*
-   ログイン後
-*/
 body.logged-in .bell.chime{
   width:80px;
   right:18px;
   bottom:0px;
 }
-
-/*
-   調整するときは、
-
-   width  = 大きさ
-   right  = 左右
-   bottom = 上下
-
-   例えば、
-
-   width:130px;   → 大きく
-   right:30px;    → 左へ
-   bottom:20px;   → 上へ
-*/
 
 /* =====================================================
    吹き出し
@@ -373,7 +345,6 @@ body.logged-in .bubble:after{
 
 @keyframes bellCelebrate{
 
-  /* 最初 */
   0%{
     transform:
       translateY(0)
@@ -381,7 +352,6 @@ body.logged-in .bubble:after{
       scale(1);
   }
 
-  /* 1回目：ジャンプ */
   12%{
     transform:
       translateY(-18px)
@@ -389,7 +359,6 @@ body.logged-in .bubble:after{
       scale(1.04);
   }
 
-  /* 1回目の頂点 */
   24%{
     transform:
       translateY(-25px)
@@ -397,7 +366,6 @@ body.logged-in .bubble:after{
       scale(1.05);
   }
 
-  /* 1回目着地 */
   38%{
     transform:
       translateY(0)
@@ -405,7 +373,6 @@ body.logged-in .bubble:after{
       scale(1);
   }
 
-  /* 少し跳ねる */
   45%{
     transform:
       translateY(-6px)
@@ -413,7 +380,6 @@ body.logged-in .bubble:after{
       scale(1.02);
   }
 
-  /* 2回目ジャンプ */
   57%{
     transform:
       translateY(-22px)
@@ -421,7 +387,6 @@ body.logged-in .bubble:after{
       scale(1.05);
   }
 
-  /* 2回目の頂点 */
   69%{
     transform:
       translateY(-30px)
@@ -429,7 +394,6 @@ body.logged-in .bubble:after{
       scale(1.06);
   }
 
-  /* 2回目着地 */
   83%{
     transform:
       translateY(0)
@@ -437,7 +401,6 @@ body.logged-in .bubble:after{
       scale(1);
   }
 
-  /* 最後に少しぷるん */
   92%{
     transform:
       translateY(-3px)
@@ -461,10 +424,6 @@ body.logged-in .bubble:after{
 
 <div class="bell-area">
 
-  <!-- =================================================
-       吹き出し
-  ================================================== -->
-
   <div class="bubble">
 
     <small id="characterName">
@@ -477,21 +436,10 @@ body.logged-in .bubble:after{
 
   </div>
 
-  <!-- =================================================
-       ハート
-  ================================================== -->
-
   <div
     class="heart-container"
     id="heartContainer">
   </div>
-
-  <!-- =================================================
-       キャラクター
-       
-       bell.png  → ベルちゃん
-       chime.png → チャイムくん
-  ================================================== -->
 
   <img
     class="bell"
@@ -540,6 +488,362 @@ const heartContainer =
 let currentCharacter="bell";
 
 /* =====================================================
+   通常キャラクター画像
+===================================================== */
+
+const characterImages={
+
+  bell:{
+    src:"bell.png",
+    name:"ベルちゃん"
+  },
+
+  chime:{
+    src:"chime.png",
+    name:"チャイムくん"
+  }
+
+};
+
+/* =====================================================
+   ★ 特殊服画像
+===================================================== */
+
+const costumeImages={
+
+  bell:{
+
+    newyear:
+      "costumes/bell-newyear.jpg",
+
+    setsubun:
+      "costumes/bell-setsubun.jpg",
+
+    valentine:
+      "costumes/bell-valentine.jpg",
+
+    hinamatsuri:
+      "costumes/bell-hinamatsuri.jpg",
+
+    whiteday:
+      "costumes/bell-whiteday.jpg",
+
+    kodomonohi:
+      "costumes/bell-kodomonohi.jpg",
+
+    tanabata:
+      "costumes/bell-tanabata.jpg",
+
+    tsukimi:
+      "costumes/bell-tsukimi.jpg",
+
+    halloween:
+      "costumes/bell-halloween.jpg",
+
+    christmaseve:
+      "costumes/bell-christmaseve.jpg",
+
+    christmas:
+      "costumes/bell-Christmas.jpg",
+
+    winter:
+      "costumes/bell-winter.jpg"
+
+  },
+
+  chime:{
+
+    newyear:
+      "costumes/chime-newyear.jpg",
+
+    setsubun:
+      "costumes/chime-setsubun.jpg",
+
+    valentine:
+      "costumes/chime-valentine.jpg",
+
+    hinamatsuri:
+      "costumes/chime-hinamatsuri.jpg",
+
+    whiteday:
+      "costumes/chime-whiteday.jpg",
+
+    kodomonohi:
+      "costumes/chime-kodomonohi.jpg",
+
+    tanabata:
+      "costumes/chime-tanabata.jpg",
+
+    tsukimi:
+      "costumes/chime-tsukimi.jpg",
+
+    halloween:
+      "costumes/chime-halloween.jpg",
+
+    christmaseve:
+      "costumes/chime-christmaseve.jpg",
+
+    christmas:
+      "costumes/chime-Christmas.jpg",
+
+    winter:
+      "costumes/chime-winter.jpg"
+
+  }
+
+};
+
+/* =====================================================
+   十五夜の日
+   handbell.htmlの元々の設定に合わせる
+===================================================== */
+
+const jugoyaDates={
+
+  2026:"09-25",
+  2027:"09-15",
+  2028:"10-03",
+  2029:"09-22",
+  2030:"09-12",
+  2031:"10-01",
+  2032:"09-19",
+  2033:"09-08",
+  2034:"09-27",
+  2035:"09-16",
+  2036:"10-04"
+
+};
+
+/* =====================================================
+   今日が特殊服の日か判定
+===================================================== */
+
+function getCostumeKey(
+  date=new Date()
+){
+
+  const month =
+    date.getMonth()+1;
+
+  const day =
+    date.getDate();
+
+  /* ---------------------------------------------
+     お正月
+     1月1日〜1月5日
+  --------------------------------------------- */
+
+  if(
+    month===1 &&
+    day>=1 &&
+    day<=5
+  ){
+
+    return "newyear";
+
+  }
+
+  /*
+   * 1月6日〜1月31日は
+   * 通常衣装のまま
+   */
+
+  /* ---------------------------------------------
+     節分
+  --------------------------------------------- */
+
+  if(
+    month===2 &&
+    day===3
+  ){
+
+    return "setsubun";
+
+  }
+
+  /* ---------------------------------------------
+     バレンタイン
+  --------------------------------------------- */
+
+  if(
+    month===2 &&
+    day===14
+  ){
+
+    return "valentine";
+
+  }
+
+  /* ---------------------------------------------
+     ひな祭り
+  --------------------------------------------- */
+
+  if(
+    month===3 &&
+    day===3
+  ){
+
+    return "hinamatsuri";
+
+  }
+
+  /* ---------------------------------------------
+     ホワイトデー
+  --------------------------------------------- */
+
+  if(
+    month===3 &&
+    day===14
+  ){
+
+    return "whiteday";
+
+  }
+
+  /* ---------------------------------------------
+     こどもの日
+  --------------------------------------------- */
+
+  if(
+    month===5 &&
+    day===5
+  ){
+
+    return "kodomonohi";
+
+  }
+
+  /* ---------------------------------------------
+     七夕
+  --------------------------------------------- */
+
+  if(
+    month===7 &&
+    day===7
+  ){
+
+    return "tanabata";
+
+  }
+
+  /* ---------------------------------------------
+     十五夜
+  --------------------------------------------- */
+
+  const monthDay =
+    `${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+
+  const jugoya =
+    jugoyaDates[
+      date.getFullYear()
+    ];
+
+  if(
+    jugoya &&
+    jugoya===monthDay
+  ){
+
+    return "tsukimi";
+
+  }
+
+  /* ---------------------------------------------
+     ハロウィン
+  --------------------------------------------- */
+
+  if(
+    month===10 &&
+    day===31
+  ){
+
+    return "halloween";
+
+  }
+
+  /* ---------------------------------------------
+     クリスマスイブ
+  --------------------------------------------- */
+
+  if(
+    month===12 &&
+    day===24
+  ){
+
+    return "christmaseve";
+
+  }
+
+  /* ---------------------------------------------
+     クリスマス
+  --------------------------------------------- */
+
+  if(
+    month===12 &&
+    day===25
+  ){
+
+    return "christmas";
+
+  }
+
+  /* ---------------------------------------------
+     大晦日
+     → winter衣装
+  --------------------------------------------- */
+
+  if(
+    month===12 &&
+    day===31
+  ){
+
+    return "winter";
+
+  }
+
+  return null;
+
+}
+
+/* =====================================================
+   今日のキャラクター画像を取得
+===================================================== */
+
+function getCharacterImage(
+  character,
+  date=new Date()
+){
+
+  const selected =
+    character==="chime"
+      ? "chime"
+      : "bell";
+
+  const costumeKey =
+    getCostumeKey(date);
+
+  /*
+   * イベント日なら特殊服
+   */
+
+  if(
+    costumeKey &&
+    costumeImages[selected] &&
+    costumeImages[selected][costumeKey]
+  ){
+
+    return costumeImages[selected][costumeKey];
+
+  }
+
+  /*
+   * 通常日は通常画像
+   */
+
+  return characterImages[selected].src;
+
+}
+
+/* =====================================================
    キャラクター切り替え
 ===================================================== */
 
@@ -552,55 +856,130 @@ function setCharacter(
       ? "chime"
       : "bell";
 
+  const data =
+    characterImages[
+      currentCharacter
+    ];
+
+  if(!data)return;
+
+  /*
+   * ★ここで特殊服を判定
+   */
+  bellImage.src =
+    getCharacterImage(
+      currentCharacter
+    );
+
+  bellImage.alt =
+    data.name;
+
   if(
     currentCharacter === "chime"
   ){
-
-    /*
-     * チャイムくん
-     */
-    bellImage.src =
-      "chime.png";
-
-    bellImage.alt =
-      "チャイムくん";
 
     bellImage.classList.add(
       "chime"
     );
 
-    if(characterName){
-
-      characterName.textContent =
-        "チャイムくん";
-
-    }
-
   }else{
-
-    /*
-     * ベルちゃん
-     */
-    bellImage.src =
-      "bell.png";
-
-    bellImage.alt =
-      "ベルちゃん";
 
     bellImage.classList.remove(
       "chime"
     );
 
-    if(characterName){
+  }
 
-      characterName.textContent =
-        "ベルちゃん";
+  if(characterName){
 
-    }
+    characterName.textContent =
+      data.name;
 
   }
 
 }
+
+/* =====================================================
+   日付が変わったら特殊服も切り替える
+===================================================== */
+
+let lastCostumeDate="";
+
+function getTodayKey(){
+
+  const now =
+    new Date();
+
+  return `${
+    now.getFullYear()
+  }-${
+    String(
+      now.getMonth()+1
+    ).padStart(2,"0")
+  }-${
+    String(
+      now.getDate()
+    ).padStart(2,"0")
+  }`;
+
+}
+
+function updateCostume(){
+
+  const today =
+    getTodayKey();
+
+  if(
+    today===lastCostumeDate
+  ){
+
+    return;
+
+  }
+
+  lastCostumeDate =
+    today;
+
+  /*
+   * キャラクターはそのまま。
+   * 今日の特殊服だけ再判定。
+   */
+
+  const costumeImage =
+    getCharacterImage(
+      currentCharacter
+    );
+
+  if(
+    bellImage.src !==
+    new URL(
+      costumeImage,
+      window.location.href
+    ).href
+  ){
+
+    bellImage.src =
+      costumeImage;
+
+  }
+
+}
+
+/*
+ * 初回判定
+ */
+
+updateCostume();
+
+/*
+ * ページを開いたまま日付が変わっても
+ * 1分以内に切り替える
+ */
+
+setInterval(
+  updateCostume,
+  60000
+);
 
 /* =====================================================
    ログイン状態によるサイズ調整
@@ -720,32 +1099,13 @@ function buildBellMessages(
     new Date();
 
   const values =
-    Object.entries(
+    Object.values(
       schedules || {}
     )
     .filter(
-      ([,s]) =>
+      s =>
         s &&
         typeof s === "object"
-    )
-    .map(
-      ([key,s])=>{
-
-        if(
-          (s.type==="normal" || !s.type) &&
-          typeof s.date !== "string"
-        ){
-
-          return {
-            ...s,
-            date:key
-          };
-
-        }
-
-        return s;
-
-      }
     );
 
   const all=[
@@ -879,9 +1239,7 @@ window.addEventListener(
 
     if(!event.data)return;
 
-    /* ---------------------------------------------
-       キャラクター変更
-    --------------------------------------------- */
+    /* キャラクター変更 */
 
     if(
       event.data.type ===
@@ -892,13 +1250,17 @@ window.addEventListener(
         event.data.character
       );
 
+      /*
+       * キャラクター変更直後にも
+       * 特殊服を再判定
+       */
+      updateCostume();
+
       return;
 
     }
 
-    /* ---------------------------------------------
-       スケジュール受信
-    --------------------------------------------- */
+    /* スケジュール */
 
     if(
       event.data.type !==
@@ -1360,11 +1722,6 @@ function buildRegularMessages(
       dateNow
     );
 
-  /* =================================================
-     就寝時間
-     0:00〜3:59
-  ================================================= */
-
   if(
     hour>=0 &&
     hour<4
@@ -1634,10 +1991,6 @@ function startHearts(){
 
   const hearts=[];
 
-  /* =================================================
-     上方向
-  ================================================= */
-
   for(let i=0;i<14;i++){
 
     hearts.push({
@@ -1661,10 +2014,6 @@ function startHearts(){
     });
 
   }
-
-  /* =================================================
-     左上
-  ================================================= */
 
   for(let i=0;i<10;i++){
 
@@ -1690,10 +2039,6 @@ function startHearts(){
 
   }
 
-  /* =================================================
-     右上
-  ================================================= */
-
   for(let i=0;i<10;i++){
 
     hearts.push({
@@ -1717,10 +2062,6 @@ function startHearts(){
     });
 
   }
-
-  /* =================================================
-     左
-  ================================================= */
 
   for(let i=12;i--;){
 
@@ -1746,10 +2087,6 @@ function startHearts(){
 
   }
 
-  /* =================================================
-     右
-  ================================================= */
-
   for(let i=12;i--;){
 
     hearts.push({
@@ -1773,10 +2110,6 @@ function startHearts(){
     });
 
   }
-
-  /* =================================================
-     左下
-  ================================================= */
 
   for(let i=8;i--;){
 
@@ -1802,10 +2135,6 @@ function startHearts(){
 
   }
 
-  /* =================================================
-     右下
-  ================================================= */
-
   for(let i=8;i--;){
 
     hearts.push({
@@ -1829,10 +2158,6 @@ function startHearts(){
     });
 
   }
-
-  /* =================================================
-     ハート生成
-  ================================================= */
 
   hearts.forEach(
     (data,index)=>{
@@ -1886,9 +2211,6 @@ function startHearts(){
       heart.style.fontSize =
         `${size}px`;
 
-      /*
-       * 少しずつタイミングをずらす
-       */
       const delay =
         Math.random()*350;
 
@@ -1927,17 +2249,9 @@ function celebrate(){
 
   isAnimating=true;
 
-  /* ---------------------------------------------
-     吹き出しを消す
-  --------------------------------------------- */
-
   bubble.classList.add(
     "bubble-hidden"
   );
-
-  /* ---------------------------------------------
-     アニメーションをリセット
-  --------------------------------------------- */
 
   bellImage.classList.remove(
     "celebrating"
@@ -1945,18 +2259,9 @@ function celebrate(){
 
   void bellImage.offsetWidth;
 
-  /* ---------------------------------------------
-     喜びアニメーション開始
-  --------------------------------------------- */
-
   bellImage.classList.add(
     "celebrating"
   );
-
-  /* =================================================
-     1回目のジャンプ
-     → 大量のハート
-  ================================================= */
 
   setTimeout(
     ()=>{
@@ -1964,11 +2269,6 @@ function celebrate(){
     },
     150
   );
-
-  /* =================================================
-     2回目のジャンプ
-     → もう一度大量のハート
-  ================================================= */
 
   setTimeout(
     ()=>{
@@ -2000,15 +2300,11 @@ bellImage.addEventListener(
       "celebrating"
     );
 
-    /* メッセージ変更 */
     changeBellMessage();
 
-    /* 吹き出し再表示 */
     bubble.classList.remove(
       "bubble-hidden"
     );
-
-    /* 吹き出しアニメーションを再実行 */
 
     bubble.style.animation="none";
 
@@ -2025,10 +2321,6 @@ bellImage.addEventListener(
    初期キャラクター
 ===================================================== */
 
-/*
- * 親ページから保存済み設定が届くまでは
- * ベルちゃんを表示する。
- */
 setCharacter("bell");
 
 /* =====================================================
