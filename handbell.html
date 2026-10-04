@@ -188,7 +188,8 @@ header{
   border:0px solid #000;
   background:transparent;
   display:block;
-  z-index:2
+  z-index:20;
+  pointer-events:auto;
 
 }
 
@@ -1054,7 +1055,7 @@ textarea{
 
   <!-- ベルちゃん表示エリア（ベルちゃん本体のコードは design.html 側） -->
   <iframe
-    src="design.html?v=20261001-3"
+    src="design.html?v=20261004-5"
     title="ベルちゃん"
     class="bell-frame"
   ></iframe>
@@ -3457,14 +3458,16 @@ function setupBellBridge(){
 /* ベルちゃん側から準備完了通知が来たら、その時点の予定を送る。
    iframe の読み込みと Firebase の取得の順番が前後しても確実に渡す。 */
 window.addEventListener("message",event=>{
-  if(!event.data || event.data.type !== "handbell-ready") return;
-  sendSchedulesToBell();
-});
+  if(event.data && event.data.type === "handbell-ready"){
+    sendSchedulesToBell();
+    sendCharacterToBell();
+    return;
+  }
 
-/* ベルちゃん側で実際にイベント衣装が画像として表示されたときに取得 */
-window.addEventListener("message",event=>{
-  if(!event.data || event.data.type !== "handbell-collection-acquire") return;
-  acquireCollectionItem(event.data.itemId);
+  /* ベルちゃん側で実際にイベント衣装が画像として表示されたときに取得 */
+  if(event.data && event.data.type === "handbell-collection-acquire"){
+    acquireCollectionItem(event.data.itemId);
+  }
 });
 
 setupBellBridge();
