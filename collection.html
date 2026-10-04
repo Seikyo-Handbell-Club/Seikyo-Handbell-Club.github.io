@@ -110,16 +110,109 @@ h1{
   padding:12px;
   display:none
 }
+
+/* =========================
+   通常コレクション画像の拡大表示
+========================= */
+.collection-image-overlay{
+  position:fixed;
+  inset:0;
+  z-index:1000;
+  background:#000000b8;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  opacity:0;
+  visibility:hidden;
+  transition:opacity .2s ease,visibility .2s ease
+}
+.collection-image-overlay.show{
+  opacity:1;
+  visibility:visible
+}
+.collection-image-overlay img{
+  max-width:94vw;
+  max-height:88vh;
+  width:auto;
+  height:auto;
+  object-fit:contain;
+  border-radius:12px;
+  box-shadow:0 8px 30px #00000055;
+  background:#fff
+}
+
+/* =========================
+   衣装の背景表示
+========================= */
+.costume-overlay{
+  position:fixed;
+  inset:0;
+  z-index:1100;
+  background:#000;
+  opacity:0;
+  visibility:hidden;
+  transition:opacity .2s ease,visibility .2s ease;
+  overflow:hidden
+}
+.costume-overlay.show{
+  opacity:1;
+  visibility:visible
+}
+.costume-overlay img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block
+}
+
+/* =========================
+   共通の薄い閉じるボタン
+========================= */
+.overlay-close{
+  position:absolute;
+  top:14px;
+  right:14px;
+  z-index:5;
+  border:0;
+  background:#ffffff80;
+  color:#fff;
+  border-radius:999px;
+  padding:7px 12px;
+  font-size:12px;
+  font-weight:600;
+  line-height:1;
+  cursor:pointer;
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px)
+}
+.overlay-close:active{
+  background:#ffffffa8
+}
+
 @media(max-width:700px){
   .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 @media(max-width:480px){
   main{padding:12px}
   .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .collection-image-overlay{padding:16px}
+  .collection-image-overlay img{
+    max-width:96vw;
+    max-height:84vh
+  }
+  .overlay-close{
+    top:10px;
+    right:10px;
+    padding:7px 11px
+  }
 }
 </style>
 </head>
 <body>
+
 <main>
   <div class="card">
     <button class="back-button" type="button" onclick="backToHome()">← 部活動欠席連絡に戻る</button>
@@ -145,6 +238,30 @@ h1{
   </div>
 </main>
 
+<!-- 通常コレクション画像の拡大表示 -->
+<div id="collectionImageOverlay"
+     class="collection-image-overlay"
+     aria-hidden="true">
+  <button id="collectionImageClose"
+          class="overlay-close"
+          type="button">閉じる</button>
+  <img id="collectionImage"
+       src=""
+       alt="">
+</div>
+
+<!-- イベント衣装の背景表示 -->
+<div id="costumeOverlay"
+     class="costume-overlay"
+     aria-hidden="true">
+  <button id="costumeClose"
+          class="overlay-close"
+          type="button">閉じる</button>
+  <img id="costumeImage"
+       src=""
+       alt="">
+</div>
+
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 import{getAuth,onAuthStateChanged,setPersistence,browserLocalPersistence}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
@@ -163,7 +280,9 @@ const firebaseConfig={
 const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const db=getDatabase(app);
-setPersistence(auth,browserLocalPersistence).catch(e=>console.error("認証状態の保存設定エラー:",e));
+
+setPersistence(auth,browserLocalPersistence)
+  .catch(e=>console.error("認証状態の保存設定エラー:",e));
 
 const monthlyImageFiles={
   1:"january.jpg.PNG",2:"february.jpg.PNG",3:"march.jpg.PNG",4:"april.jpg.PNG",
@@ -204,32 +323,140 @@ const eventDefinitions=[
 const monthlyItems=Array.from({length:12},(_,i)=>({
   id:`monthly_${i+1}`,
   name:`${i+1}月`,
-  src:`images/monthly/${monthlyImageFiles[i+1]}`
+  src:`images/monthly/${monthlyImageFiles[i+1]}`,
+  type:"normal"
 }));
 
 const eventItems=[];
+
 eventDefinitions.forEach(([key,name,md])=>{
-  let file=eventImageFiles[md];
-  eventItems.push({id:`event_${key}_image`,name:`${name}画像`,src:`images/events/${file}`});
+  const file=eventImageFiles[md];
+
+  /* 通常のイベント画像 */
+  eventItems.push({
+    id:`event_${key}_image`,
+    name:`${name}画像`,
+    src:`images/events/${file}`,
+    type:"normal"
+  });
+
+  /* イベント衣装 */
   let costume=key;
   if(key==="newyearseve")costume="winter";
-  eventItems.push({id:`event_${key}_bell`,name:`${name}・ベルちゃん`,src:`costumes/bell-${costume==="christmas"?"Christmas":costume}.jpg`});
-  eventItems.push({id:`event_${key}_chime`,name:`${name}・チャイムくん`,src:`costumes/chime-${costume==="christmas"?"Christmas":costume}.jpg`});
+
+  const costumeFile=
+    costume==="christmas"
+      ? "Christmas"
+      : costume;
+
+  eventItems.push({
+    id:`event_${key}_bell`,
+    name:`${name}・ベルちゃん`,
+    src:`costumes/bell-${costumeFile}.png`,
+    type:"costume"
+  });
+
+  eventItems.push({
+    id:`event_${key}_chime`,
+    name:`${name}・チャイムくん`,
+    src:`costumes/chime-${costumeFile}.png`,
+    type:"costume"
+  });
 });
 
 const secretItems=[
-  {id:"secret_rare_image",unknownName:"シークレット画像",name:"レア画像",src:"images/lucky/rare.PNG.PNG"},
-  {id:"secret_rare_bell",unknownName:"シークレットベルちゃん",name:"レアベルちゃん",src:"costumes/bell-rare.jpg"},
-  {id:"secret_rare_chime",unknownName:"シークレットチャイムくん",name:"レアチャイムくん",src:"costumes/chime-rare.jpg"}
+  {
+    id:"secret_rare_image",
+    unknownName:"シークレット画像",
+    name:"レア画像",
+    src:"images/lucky/rare.PNG.PNG",
+    type:"normal"
+  },
+  {
+    id:"secret_ultra_rare_image",
+    unknownName:"超レア画像",
+    name:"超レア画像",
+    src:"images/lucky/ultra_rare.PNG.PNG",
+    type:"normal"
+  }
 ];
 
-function $(id){return document.getElementById(id)}
+function $(id){
+  return document.getElementById(id);
+}
 
+/* =========================
+   通常画像を拡大
+========================= */
+function openCollectionImage(item){
+  if(!item || !item.src || item.type==="costume") return;
+
+  const overlay=$("collectionImageOverlay");
+  const image=$("collectionImage");
+
+  image.src=item.src;
+  image.alt=item.name || "";
+
+  overlay.classList.add("show");
+  overlay.setAttribute("aria-hidden","false");
+}
+
+function closeCollectionImage(){
+  const overlay=$("collectionImageOverlay");
+  const image=$("collectionImage");
+
+  overlay.classList.remove("show");
+  overlay.setAttribute("aria-hidden","true");
+
+  setTimeout(()=>{
+    if(!overlay.classList.contains("show")){
+      image.src="";
+      image.alt="";
+    }
+  },220);
+}
+
+/* =========================
+   衣装を背景表示
+========================= */
+function openCostume(item){
+  if(!item || !item.src || item.type!=="costume") return;
+
+  const overlay=$("costumeOverlay");
+  const image=$("costumeImage");
+
+  image.src=item.src;
+  image.alt=item.name || "";
+
+  overlay.classList.add("show");
+  overlay.setAttribute("aria-hidden","false");
+}
+
+function closeCostume(){
+  const overlay=$("costumeOverlay");
+  const image=$("costumeImage");
+
+  overlay.classList.remove("show");
+  overlay.setAttribute("aria-hidden","true");
+
+  setTimeout(()=>{
+    if(!overlay.classList.contains("show")){
+      image.src="";
+      image.alt="";
+    }
+  },220);
+}
+
+/* =========================
+   コレクション表示
+========================= */
 function renderGrid(elementId,items,collection){
   const grid=$(elementId);
   grid.innerHTML="";
+
   items.forEach(item=>{
     const acquired=collection[item.id]===true;
+
     const card=document.createElement("div");
     card.className="item";
 
@@ -241,8 +468,26 @@ function renderGrid(elementId,items,collection){
       img.src=item.src;
       img.alt=item.name;
       img.loading="lazy";
+
+      /*
+        取得済み画像だけクリック可能。
+        イベント衣装は背景表示、それ以外は通常拡大。
+      */
+      img.addEventListener("click",()=>{
+        if(item.type==="costume"){
+          openCostume(item);
+        }else{
+          openCollectionImage(item);
+        }
+      });
+
+      img.style.cursor="pointer";
       imageWrap.appendChild(img);
+
     }else{
+      /*
+        未取得の「？？？」はクリック不可。
+      */
       const unknown=document.createElement("div");
       unknown.className="unknown";
       unknown.textContent="？？？";
@@ -251,7 +496,9 @@ function renderGrid(elementId,items,collection){
 
     const name=document.createElement("div");
     name.className="name";
-    name.textContent=acquired?item.name:(item.unknownName || item.name);
+    name.textContent=acquired
+      ? item.name
+      : (item.unknownName || item.name);
 
     card.appendChild(imageWrap);
     card.appendChild(name);
@@ -265,6 +512,30 @@ function backToHome(){
 
 window.backToHome=backToHome;
 
+/* =========================
+   閉じるボタン
+========================= */
+$("collectionImageClose").addEventListener(
+  "click",
+  closeCollectionImage
+);
+
+$("costumeClose").addEventListener(
+  "click",
+  closeCostume
+);
+
+/*
+  オーバーレイ同士が残らないように、
+  Escキーでも閉じられるようにする。
+*/
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Escape") return;
+
+  closeCollectionImage();
+  closeCostume();
+});
+
 onAuthStateChanged(auth,async user=>{
   if(!user){
     $("status").textContent="ログインしてください。";
@@ -273,20 +544,61 @@ onAuthStateChanged(auth,async user=>{
   }
 
   try{
-    const snap=await get(ref(db,`members/${user.uid}/collection`));
-    const collection=snap.exists()&&snap.val()&&typeof snap.val()==="object"?snap.val():{};
+    const snap=await get(
+      ref(db,`members/${user.uid}/collection`)
+    );
 
-    renderGrid("monthlyGrid",monthlyItems,collection);
-    renderGrid("eventGrid",eventItems,collection);
-    renderGrid("secretGrid",secretItems,collection);
+    const collection=
+      snap.exists() &&
+      snap.val() &&
+      typeof snap.val()==="object"
+        ? snap.val()
+        : {};
 
-    const total=monthlyItems.length+eventItems.length+secretItems.length;
-    const acquired=[...monthlyItems,...eventItems,...secretItems].filter(item=>collection[item.id]===true).length;
-    $("status").textContent=`取得数：${acquired} / ${total}`;
+    renderGrid(
+      "monthlyGrid",
+      monthlyItems,
+      collection
+    );
+
+    renderGrid(
+      "eventGrid",
+      eventItems,
+      collection
+    );
+
+    renderGrid(
+      "secretGrid",
+      secretItems,
+      collection
+    );
+
+    const allItems=[
+      ...monthlyItems,
+      ...eventItems,
+      ...secretItems
+    ];
+
+    const total=allItems.length;
+
+    const acquired=allItems.filter(
+      item=>collection[item.id]===true
+    ).length;
+
+    $("status").textContent=
+      `取得数：${acquired} / ${total}`;
+
   }catch(e){
-    console.error("コレクション読み込みエラー:",e);
+    console.error(
+      "コレクション読み込みエラー:",
+      e
+    );
+
     $("error").style.display="block";
-    $("error").textContent="コレクションを読み込めませんでした。もう一度開いてみてください。";
+
+    $("error").textContent=
+      "コレクションを読み込めませんでした。もう一度開いてみてください。";
+
     $("status").textContent="";
   }
 });
