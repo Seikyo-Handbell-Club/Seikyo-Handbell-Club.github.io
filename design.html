@@ -8,7 +8,7 @@
 <style>
 
 /* =====================================================
-   ベルちゃん共通設定
+   共通設定
 ===================================================== */
 
 html,
@@ -24,8 +24,7 @@ body{
   position:absolute;
 
   /*
-   * ベルちゃん本体が表示されるエリア
-   * iframe自体にはこの外側にも透明な余白がある
+   * キャラクター本体が表示されるエリア
    */
   width:220px;
   height:140px;
@@ -42,7 +41,7 @@ body{
 }
 
 /* =====================================================
-   ベルちゃん
+   キャラクター共通
 ===================================================== */
 
 .bell{
@@ -67,6 +66,60 @@ body{
 .bell:active{
   transform:scale(.96);
 }
+
+/* =====================================================
+   ベルちゃん
+===================================================== */
+
+body:not(.logged-in) .bell{
+  width:85px;
+  right:20px;
+  bottom:12px;
+}
+
+body.logged-in .bell{
+  width:90px;
+  right:25px;
+  bottom:0px;
+}
+
+/* =====================================================
+   ★ チャイムくん専用設定 ★
+   
+   ↓↓↓ チャイムくんの大きさ・位置はここだけ変更 ↓↓↓
+===================================================== */
+
+/*
+   ログイン前
+*/
+body:not(.logged-in) .bell.chime{
+  width:110px;
+  right:10px;
+  bottom:5px;
+}
+
+/*
+   ログイン後
+*/
+body.logged-in .bell.chime{
+  width:115px;
+  right:15px;
+  bottom:0px;
+}
+
+/*
+   調整するときは、
+
+   width  = 大きさ
+   right  = 左右
+   bottom = 上下
+
+   例えば、
+
+   width:130px;   → 大きく
+   right:30px;    → 左へ
+   bottom:20px;   → 上へ
+*/
 
 /* =====================================================
    吹き出し
@@ -119,14 +172,8 @@ body{
 }
 
 /* =====================================================
-   ログイン前
+   ログイン前 吹き出し
 ===================================================== */
-
-body:not(.logged-in) .bell{
-  width:85px;
-  right:20px;
-  bottom:12px;
-}
 
 body:not(.logged-in) .bubble{
   min-width:105px;
@@ -158,14 +205,8 @@ body:not(.logged-in) .bubble:after{
 }
 
 /* =====================================================
-   ログイン後
+   ログイン後 吹き出し
 ===================================================== */
-
-body.logged-in .bell{
-  width:90px;
-  right:25px;
-  bottom:0px;
-}
 
 body.logged-in .bubble{
   min-width:105px;
@@ -227,9 +268,6 @@ body.logged-in .bubble:after{
 .heart-container{
   position:absolute;
 
-  /*
-   * ベルちゃんエリアの中央からハートを飛ばす
-   */
   left:50%;
   top:50%;
 
@@ -240,9 +278,6 @@ body.logged-in .bubble:after{
 
   z-index:20;
 
-  /*
-   * ハート自体をこの要素で切らない
-   */
   overflow:visible;
 }
 
@@ -319,7 +354,7 @@ body.logged-in .bubble:after{
 }
 
 /* =====================================================
-   ベルちゃん喜びアニメーション
+   キャラクター喜びアニメーション
 ===================================================== */
 
 .bell.celebrating{
@@ -426,10 +461,15 @@ body.logged-in .bubble:after{
 
 <div class="bell-area">
 
-  <!-- 吹き出し -->
+  <!-- =================================================
+       吹き出し
+  ================================================== -->
+
   <div class="bubble">
 
-    <small>ベルちゃん</small>
+    <small id="characterName">
+      ベルちゃん
+    </small>
 
     <span id="bellMessage">
       予定を確認してるよ！
@@ -437,13 +477,22 @@ body.logged-in .bubble:after{
 
   </div>
 
-  <!-- ハート -->
+  <!-- =================================================
+       ハート
+  ================================================== -->
+
   <div
     class="heart-container"
     id="heartContainer">
   </div>
 
-  <!-- ベルちゃん -->
+  <!-- =================================================
+       キャラクター
+       
+       bell.png  → ベルちゃん
+       chime.png → チャイムくん
+  ================================================== -->
+
   <img
     class="bell"
     src="bell.png"
@@ -469,6 +518,11 @@ const bellImage =
     "bellImage"
   );
 
+const characterName =
+  document.getElementById(
+    "characterName"
+  );
+
 const bubble =
   document.querySelector(
     ".bubble"
@@ -478,6 +532,75 @@ const heartContainer =
   document.getElementById(
     "heartContainer"
   );
+
+/* =====================================================
+   キャラクター設定
+===================================================== */
+
+let currentCharacter="bell";
+
+/* =====================================================
+   キャラクター切り替え
+===================================================== */
+
+function setCharacter(
+  character
+){
+
+  currentCharacter =
+    character === "chime"
+      ? "chime"
+      : "bell";
+
+  if(
+    currentCharacter === "chime"
+  ){
+
+    /*
+     * チャイムくん
+     */
+    bellImage.src =
+      "chime.png";
+
+    bellImage.alt =
+      "チャイムくん";
+
+    bellImage.classList.add(
+      "chime"
+    );
+
+    if(characterName){
+
+      characterName.textContent =
+        "チャイムくん";
+
+    }
+
+  }else{
+
+    /*
+     * ベルちゃん
+     */
+    bellImage.src =
+      "bell.png";
+
+    bellImage.alt =
+      "ベルちゃん";
+
+    bellImage.classList.remove(
+      "chime"
+    );
+
+    if(characterName){
+
+      characterName.textContent =
+        "ベルちゃん";
+
+    }
+
+  }
+
+}
 
 /* =====================================================
    ログイン状態によるサイズ調整
@@ -746,14 +869,40 @@ function receiveParentSchedules(
 
 }
 
+/* =====================================================
+   親ページからのメッセージ
+===================================================== */
+
 window.addEventListener(
   "message",
   event=>{
 
+    if(!event.data)return;
+
+    /* ---------------------------------------------
+       キャラクター変更
+    --------------------------------------------- */
+
     if(
-      !event.data ||
+      event.data.type ===
+      "handbell-character"
+    ){
+
+      setCharacter(
+        event.data.character
+      );
+
+      return;
+
+    }
+
+    /* ---------------------------------------------
+       スケジュール受信
+    --------------------------------------------- */
+
+    if(
       event.data.type !==
-        "handbell-schedules"
+      "handbell-schedules"
     ){
 
       return;
@@ -1769,7 +1918,7 @@ function startHearts(){
 let isAnimating=false;
 
 /* =====================================================
-   ベルちゃんをクリック
+   キャラクターをクリック
 ===================================================== */
 
 function celebrate(){
@@ -1871,6 +2020,16 @@ bellImage.addEventListener(
 
   }
 );
+
+/* =====================================================
+   初期キャラクター
+===================================================== */
+
+/*
+ * 親ページから保存済み設定が届くまでは
+ * ベルちゃんを表示する。
+ */
+setCharacter("bell");
 
 /* =====================================================
    初期メッセージ
