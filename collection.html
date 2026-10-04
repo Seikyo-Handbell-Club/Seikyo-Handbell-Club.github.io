@@ -218,8 +218,9 @@ eventDefinitions.forEach(([key,name,md])=>{
 });
 
 const secretItems=[
-  {id:"secret_rare_image",name:"レア画像",src:"images/lucky/rare.PNG.PNG"},
-  {id:"secret_ultra_rare_image",name:"超レア画像",src:"images/lucky/ultra_rare.PNG.PNG"}
+  {id:"secret_rare_image",unknownName:"シークレット画像",name:"レア画像",src:"images/lucky/rare.PNG.PNG"},
+  {id:"secret_rare_bell",unknownName:"シークレットベルちゃん",name:"レアベルちゃん",src:"costumes/bell-rare.jpg"},
+  {id:"secret_rare_chime",unknownName:"シークレットチャイムくん",name:"レアチャイムくん",src:"costumes/chime-rare.jpg"}
 ];
 
 function $(id){return document.getElementById(id)}
@@ -250,7 +251,7 @@ function renderGrid(elementId,items,collection){
 
     const name=document.createElement("div");
     name.className="name";
-    name.textContent=acquired?item.name:"？？？";
+    name.textContent=acquired?item.name:(item.unknownName || item.name);
 
     card.appendChild(imageWrap);
     card.appendChild(name);
