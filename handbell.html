@@ -1484,6 +1484,16 @@ textarea{
     <button
       class="secondary mypage-subpage-button"
       type="button"
+      onclick="location.href='costume.html'"
+    >
+      👕 着替える
+    </button>
+  </div>
+
+  <div class="mypage-setting-block">
+    <button
+      class="secondary mypage-subpage-button"
+      type="button"
       onclick="showPersonalInfo()"
     >
       🔐 個人情報の変更
@@ -2102,6 +2112,15 @@ const $ =
 
 let profile =
   null;
+
+/* =========================
+   装備中の衣装
+   ※ collectionとは別管理
+========================= */
+let equippedCostume = {
+  bell:null,
+  chime:null
+};
 
 
 let currentUser =
@@ -2814,6 +2833,51 @@ async function loadProfile(){
 
 }
 
+async function loadEquippedCostume(){
+
+  if(!currentUser){
+    equippedCostume = {
+      bell:null,
+      chime:null
+    };
+    return;
+  }
+
+  try{
+
+    const snap = await get(
+      ref(
+        db,
+        `members/${currentUser.uid}/equippedCostume`
+      )
+    );
+
+    const data =
+      snap.exists() && snap.val() && typeof snap.val() === "object"
+        ? snap.val()
+        : {};
+
+    equippedCostume = {
+      bell:data.bell || null,
+      chime:data.chime || null
+    };
+
+  }catch(e){
+
+    console.error(
+      "装備衣装の読み込みエラー:",
+      e
+    );
+
+    equippedCostume = {
+      bell:null,
+      chime:null
+    };
+
+  }
+
+}
+
 function updateProfileDisplay(){
 
   if(!profile)
@@ -2924,8 +2988,10 @@ onAuthStateChanged(
     }
 
 
-    /* プロフィール取得完了後に、保存済みキャラクターをiframeへ再送する */
+    /* プロフィール取得完了後に、保存済み衣装とキャラクターをiframeへ送る */
+    await loadEquippedCostume();
     sendCharacterToBell();
+    sendEquippedCostumeToBell();
 
     /* =========================
        イベント衣装のコレクション取得
@@ -3527,6 +3593,19 @@ function sendCharacterToBell(){
   },"*");
 }
 
+function sendEquippedCostumeToBell(){
+  const frame=document.querySelector(".bell-frame");
+  if(!frame || !frame.contentWindow) return;
+
+  frame.contentWindow.postMessage({
+    type:"handbell-equipped-costume",
+    equippedCostume:{
+      bell:equippedCostume?.bell || null,
+      chime:equippedCostume?.chime || null
+    }
+  },"*");
+}
+
 function sendSchedulesToBell(){
   const frame=document.querySelector(".bell-frame");
   if(!frame || !frame.contentWindow || scheduleCache === null) return;
@@ -3543,9 +3622,11 @@ function setupBellBridge(){
   frame.addEventListener("load",()=>{
     sendSchedulesToBell();
     sendCharacterToBell();
+    sendEquippedCostumeToBell();
   });
   sendSchedulesToBell();
   sendCharacterToBell();
+  sendEquippedCostumeToBell();
 }
 
 /* ベルちゃん側から準備完了通知が来たら、その時点の予定を送る。
@@ -3554,6 +3635,7 @@ window.addEventListener("message",event=>{
   if(event.data && event.data.type === "handbell-ready"){
     sendSchedulesToBell();
     sendCharacterToBell();
+    sendEquippedCostumeToBell();
     return;
   }
 
