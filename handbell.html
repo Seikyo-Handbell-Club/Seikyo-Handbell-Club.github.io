@@ -2069,7 +2069,7 @@ from
    通常運用: const TEST_DATE = null;
    ※ design.html でテストする日付と同じ値にしてください。
 ===================================================== */
-const TEST_DATE = null;
+const TEST_DATE = "2026-12-25";
 
 /* テスト日付を実際のDateとして取得 */
 function getTestDate(){
@@ -6538,13 +6538,9 @@ async function acquireTodayCharacterCostume(){
   const item = getCollectionItem(itemId);
   if(!item) return;
 
-  /* 実際に使用される衣装画像が読み込める場合だけ取得する */
-  const image = new Image();
-  image.onload = () => {
-    acquireCollectionItem(itemId);
-  };
-  image.onerror = () => {};
-  image.src = item.src;
+  /* テスト日付・本番日付の判定が一致していれば衣装を取得する。
+     画像の読み込み状態には依存させない。 */
+  await acquireCollectionItem(itemId);
 }
 
 async function loadCollectionData(){
@@ -6695,8 +6691,10 @@ async function decideLoginImage(){
       };
     }
 
-    if(data.eventImageShownKey !== event.key){
-      await update(memberRef, {eventImageShownKey:event.key});
+    if(TEST_DATE || data.eventImageShownKey !== event.key){
+      if(!TEST_DATE){
+        await update(memberRef, {eventImageShownKey:event.key});
+      }
       return {
         kind: "event",
         src: `images/events/${event.file}`,
