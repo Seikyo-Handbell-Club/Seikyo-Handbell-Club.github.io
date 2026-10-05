@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>着替える</title>
+
+<style>
+*{
+  box-sizing:border-box;
+}
+
+html,
+body{
+  margin:0;
+  min-height:100%;
+  background:#f6f8fa;
+  color:#26343d;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Hiragino Sans",
+    "Yu Gothic",
+    sans-serif;
+}
+
+body{
+  padding:18px 14px 30px;
+}
+
+.page{
+  width:min(760px,100%);
+  margin:0 auto;
+}
+
+.card{
+  background:#fff;
+  border:1px solid #e1e8ed;
+  border-radius:18px;
+  padding:18px;
+  box-shadow:0 4px 18px rgba(30,55,70,.06);
+  margin-bottom:16px;
+}
+
+h1{
+  margin:4px 0 8px;
+  font-size:24px;
+}
+
+h2{
+  margin:0 0 8px;
+  font-size:20px;
+}
+
+p{
+  margin:0 0 14px;
+}
+
+.small{
+  color:#71808a;
+  font-size:13px;
+  line-height:1.6;
+}
+
+.character-section{
+  margin-top:18px;
+}
+
+.character-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.character-title h2{
+  margin:0;
+}
+
+.costume-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+
+.costume-card{
+  position:relative;
+  border:2px solid #e1e8ed;
+  border-radius:16px;
+  background:#fff;
+  padding:10px;
+  text-align:center;
+  cursor:pointer;
+  transition:
+    border-color .15s ease,
+    transform .15s ease,
+    box-shadow .15s ease;
+}
+
+.costume-card:active{
+  transform:scale(.98);
+}
+
+.costume-card.selected{
+  border-color:#5b9bd5;
+  box-shadow:0 0 0 3px rgba(91,155,213,.14);
+}
+
+.costume-card img{
+  display:block;
+  width:100%;
+  height:150px;
+  object-fit:contain;
+  margin:0 auto 8px;
+}
+
+.costume-name{
+  font-size:14px;
+  font-weight:600;
+  line-height:1.4;
+}
+
+.selected-badge{
+  position:absolute;
+  top:8px;
+  right:8px;
+  padding:4px 7px;
+  border-radius:999px;
+  background:#5b9bd5;
+  color:#fff;
+  font-size:11px;
+  font-weight:700;
+}
+
+.locked-message{
+  padding:12px;
+  border-radius:12px;
+  background:#f5f7f9;
+  color:#71808a;
+  font-size:13px;
+  line-height:1.5;
+}
+
+.actions{
+  position:sticky;
+  bottom:10px;
+  z-index:5;
+  background:rgba(246,248,250,.94);
+  padding-top:8px;
+}
+
+button{
+  width:100%;
+  border:none;
+  border-radius:12px;
+  padding:13px 16px;
+  font-size:15px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.primary{
+  background:#3f7fb8;
+  color:#fff;
+}
+
+.secondary{
+  background:#fff;
+  color:#43545e;
+  border:1px solid #d8e1e7;
+  margin-top:9px;
+}
+
+button:disabled{
+  opacity:.55;
+  cursor:default;
+}
+
+#message{
+  min-height:20px;
+  margin-top:10px;
+  text-align:center;
+  font-size:13px;
+}
+
+#message.error{
+  color:#c84c4c;
+}
+
+@media(max-width:480px){
+  .costume-grid{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .costume-card img{
+    height:125px;
+  }
+
+  body{
+    padding:14px 10px 26px;
+  }
+
+  .card{
+    padding:14px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="page">
+
+  <div class="card">
+    <h1>👕 着替える</h1>
+    <p class="small">
+      取得済みの衣装だけ着替えに使えます。<br>
+      ベルちゃんとチャイムくんは、それぞれ別々に衣装を設定できます。
+    </p>
+  </div>
+
+  <div class="card character-section">
+    <div class="character-title">
+      <h2>🔔 ベルちゃん</h2>
+    </div>
+    <div id="bellCostumes" class="costume-grid"></div>
+  </div>
+
+  <div class="card character-section">
+    <div class="character-title">
+      <h2>🎵 チャイムくん</h2>
+    </div>
+    <div id="chimeCostumes" class="costume-grid"></div>
+  </div>
+
+  <div class="actions">
+    <button
+      id="saveButton"
+      class="primary"
+      type="button"
+      disabled
+    >
+      この衣装に着替える
+    </button>
+
+    <button
+      id="backButton"
+      class="secondary"
+      type="button"
+    >
+      ← マイページに戻る
+    </button>
+
+    <div id="message"></div>
+  </div>
+
+</div>
+
+<script type="module">
+
+import{
+  initializeApp
+}
+from
+"https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+
+import{
+  getAuth,
+  onAuthStateChanged,
+  setPersistence,
+  browserLocalPersistence
+}
+from
+"https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+
+import{
+  getDatabase,
+  ref,
+  get,
+  update
+}
+from
+"https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+
+
+/* =========================
+   Firebase設定
+========================= */
+
+const firebaseConfig = {
+
+  apiKey:
+    "AIzaSyAK9yRsSLSfYpLSyluzwRyI22Zp32KeMSA",
+
+  authDomain:
+    "seikyo-handbell-club.firebaseapp.com",
+
+  databaseURL:
+    "https://seikyo-handbell-club-default-rtdb.firebaseio.com",
+
+  projectId:
+    "seikyo-handbell-club",
+
+  storageBucket:
+    "seikyo-handbell-club.firebasestorage.app",
+
+  messagingSenderId:
+    "55435007971",
+
+  appId:
+    "1:55435007971:web:25f5c3b9dcd4324bc3f2d6"
+
+};
+
+
+const app =
+  initializeApp(firebaseConfig);
+
+const auth =
+  getAuth(app);
+
+setPersistence(
+  auth,
+  browserLocalPersistence
+).catch(
+  error =>
+    console.error(
+      "認証状態の保存設定エラー:",
+      error
+    )
+  );
+
+const db =
+  getDatabase(app);
+
+
+/* =========================
+   衣装設定
+========================= */
+
+const costumeDefinitions = {
+
+  bell:[
+    {
+      id:null,
+      name:"通常衣装",
+      src:"bell.png"
+    },
+    {
+      id:"secret_bell_rare_costume",
+      name:"ベルちゃん・レア衣装",
+      src:"costumes/bell-rare.jpg"
+    }
+  ],
+
+  chime:[
+    {
+      id:null,
+      name:"通常衣装",
+      src:"chime.png"
+    },
+    {
+      id:"secret_chime_rare_costume",
+      name:"チャイムくん・レア衣装",
+      src:"costumes/chime-rare.jpg"
+    }
+  ]
+
+};
+
+
+/* =========================
+   現在の状態
+========================= */
+
+let currentUser = null;
+
+let acquiredCollection = {};
+
+let equippedCostume = {
+  bell:null,
+  chime:null
+};
+
+let selectedCostume = {
+  bell:null,
+  chime:null
+};
+
+
+/* =========================
+   要素
+========================= */
+
+const bellCostumes =
+  document.getElementById(
+    "bellCostumes"
+  );
+
+const chimeCostumes =
+  document.getElementById(
+    "chimeCostumes"
+  );
+
+const saveButton =
+  document.getElementById(
+    "saveButton"
+  );
+
+const backButton =
+  document.getElementById(
+    "backButton"
+  );
+
+const message =
+  document.getElementById(
+    "message"
+  );
+
+
+/* =========================
+   メッセージ
+========================= */
+
+function showMessage(
+  text,
+  error=false
+){
+
+  message.textContent =
+    text;
+
+  message.classList.toggle(
+    "error",
+    error
+  );
+
+}
+
+
+/* =========================
+   コレクション取得
+========================= */
+
+async function loadMemberData(){
+
+  if(!currentUser)
+    return false;
+
+  try{
+
+    const memberRef =
+      ref(
+        db,
+        `members/${currentUser.uid}`
+      );
+
+    const snap =
+      await get(memberRef);
+
+    if(!snap.exists()){
+
+      showMessage(
+        "部員情報を取得できませんでした。",
+        true
+      );
+
+      return false;
+
+    }
+
+    const data =
+      snap.val() || {};
+
+    acquiredCollection =
+      data.collection || {};
+
+    const saved =
+      data.equippedCostume || {};
+
+    equippedCostume = {
+
+      bell:
+        saved.bell || null,
+
+      chime:
+        saved.chime || null
+
+    };
+
+    selectedCostume = {
+
+      bell:
+        equippedCostume.bell,
+
+      chime:
+        equippedCostume.chime
+
+    };
+
+    return true;
+
+  }catch(error){
+
+    console.error(
+      "着替え設定の読み込みエラー:",
+      error
+    );
+
+    showMessage(
+      "衣装情報を読み込めませんでした。",
+      true
+    );
+
+    return false;
+
+  }
+
+}
+
+
+/* =========================
+   取得済み判定
+========================= */
+
+function isAcquired(
+  costumeId
+){
+
+  if(!costumeId)
+    return true;
+
+  return !!acquiredCollection[
+    costumeId
+  ];
+
+}
+
+
+/* =========================
+   衣装カード
+========================= */
+
+function renderCostumes(
+  character,
+  container
+){
+
+  container.innerHTML = "";
+
+  const costumes =
+    costumeDefinitions[
+      character
+    ];
+
+  costumes.forEach(
+    costume=>{
+
+      if(
+        costume.id &&
+        !isAcquired(costume.id)
+      ){
+
+        return;
+
+      }
+
+      const card =
+        document.createElement(
+          "button"
+        );
+
+      card.type =
+        "button";
+
+      card.className =
+        "costume-card";
+
+      if(
+        selectedCostume[
+          character
+        ] === costume.id
+      ){
+
+        card.classList.add(
+          "selected"
+        );
+
+      }
+
+      const image =
+        document.createElement(
+          "img"
+        );
+
+      image.src =
+        costume.src;
+
+      image.alt =
+        costume.name;
+
+      const name =
+        document.createElement(
+          "div"
+        );
+
+      name.className =
+        "costume-name";
+
+      name.textContent =
+        costume.name;
+
+      card.appendChild(
+        image
+      );
+
+      card.appendChild(
+        name
+      );
+
+      if(
+        selectedCostume[
+          character
+        ] === costume.id
+      ){
+
+        const badge =
+          document.createElement(
+            "span"
+          );
+
+        badge.className =
+          "selected-badge";
+
+        badge.textContent =
+          "選択中";
+
+        card.appendChild(
+          badge
+        );
+
+      }
+
+      card.addEventListener(
+        "click",
+        ()=>{
+
+          selectedCostume[
+            character
+          ] = costume.id;
+
+          renderAll();
+
+        }
+      );
+
+      container.appendChild(
+        card
+      );
+
+    }
+  );
+
+  if(
+    !container.children.length
+  ){
+
+    const empty =
+      document.createElement(
+        "div"
+      );
+
+    empty.className =
+      "locked-message";
+
+    empty.textContent =
+      "まだ取得済みの衣装がありません。";
+
+    container.appendChild(
+      empty
+    );
+
+  }
+
+}
+
+
+/* =========================
+   表示更新
+========================= */
+
+function renderAll(){
+
+  renderCostumes(
+    "bell",
+    bellCostumes
+  );
+
+  renderCostumes(
+    "chime",
+    chimeCostumes
+  );
+
+  saveButton.disabled =
+    !currentUser;
+
+}
+
+
+/* =========================
+   保存
+========================= */
+
+async function saveCostume(){
+
+  if(!currentUser)
+    return;
+
+  saveButton.disabled =
+    true;
+
+  showMessage(
+    "衣装を保存しています……"
+  );
+
+  try{
+
+    const updates = {
+
+      [`members/${currentUser.uid}/equippedCostume/bell`]:
+        selectedCostume.bell,
+
+      [`members/${currentUser.uid}/equippedCostume/chime`]:
+        selectedCostume.chime
+
+    };
+
+    /*
+     * equippedCostumeだけを更新。
+     * collectionやプロフィールなどは上書きしない。
+     */
+
+    await update(
+      ref(db),
+      updates
+    );
+
+    equippedCostume = {
+
+      bell:
+        selectedCostume.bell,
+
+      chime:
+        selectedCostume.chime
+
+    };
+
+    showMessage(
+      "衣装を変更しました！"
+    );
+
+    setTimeout(
+      ()=>{
+        location.href =
+          "handbell.html";
+      },
+      700
+    );
+
+  }catch(error){
+
+    console.error(
+      "衣装保存エラー:",
+      error
+    );
+
+    showMessage(
+      "衣装を保存できませんでした。",
+      true
+    );
+
+    saveButton.disabled =
+      false;
+
+  }
+
+}
+
+
+/* =========================
+   戻る
+========================= */
+
+backButton.addEventListener(
+  "click",
+  ()=>{
+    location.href =
+      "handbell.html";
+  }
+);
+
+saveButton.addEventListener(
+  "click",
+  saveCostume
+);
+
+
+/* =========================
+   認証状態
+========================= */
+
+onAuthStateChanged(
+  auth,
+  async user=>{
+
+    currentUser =
+      user;
+
+    if(!user){
+
+      showMessage(
+        "ログインが必要です。",
+        true
+      );
+
+      saveButton.disabled =
+        true;
+
+      return;
+
+    }
+
+    const loaded =
+      await loadMemberData();
+
+    if(!loaded){
+
+      saveButton.disabled =
+        true;
+
+      return;
+
+    }
+
+    renderAll();
+
+  }
+);
+
+</script>
+
+</body>
+</html>
