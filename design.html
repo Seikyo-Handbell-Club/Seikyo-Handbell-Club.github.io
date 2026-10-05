@@ -453,52 +453,63 @@ body.logged-in .bubble:after{
 <script type="module">
 
 /* =====================================================
-   基本
+   ★★★ テスト日付設定 ★★★
+   
+   ここだけ変更してください。
+
+   例：
+   "2026-02-03" → 節分
+   "2026-02-14" → バレンタイン
+   "2026-03-03" → ひな祭り
+   "2026-03-14" → ホワイトデー
+   "2026-05-05" → こどもの日
+   "2026-07-07" → 七夕
+   "2026-09-25" → 十五夜
+   "2026-10-31" → ハロウィン
+   "2026-12-24" → クリスマスイブ
+   "2026-12-25" → クリスマス
+   "2026-12-31" → 大晦日
+
+   null にすると実際の今日の日付を使用します。
 ===================================================== */
 
-/*
- * =====================================================
- * ★ テスト用日付設定 ★
- *
- * 通常運用：
- * const TEST_DATE = null;
- *
- * 例：七夕をテスト
- * const TEST_DATE = "2026-07-07";
- *
- * 例：十五夜をテスト
- * const TEST_DATE = "2026-09-25";
- *
- * 例：クリスマスをテスト
- * const TEST_DATE = "2026-12-25";
- *
- * nullに戻すと実際の今日の日付になります。
- * =====================================================
- */
+const TEST_DATE = null;
 
-const TEST_DATE = "2026-12-25";
+/* =====================================================
+   ★ テスト日付を使用する現在日時
+===================================================== */
 
-/*
- * テスト日付を使うか、実際の現在日時を使うか
- */
-function getCurrentDate(){
+function getTestNow(){
 
-  if(TEST_DATE){
+  if(
+    typeof TEST_DATE === "string" &&
+    /^\d{4}-\d{2}-\d{2}$/.test(TEST_DATE)
+  ){
 
-    const testDate =
-      new Date(
-        `${TEST_DATE}T12:00:00`
-      );
+    const parts =
+      TEST_DATE.split("-");
 
-    if(
-      !Number.isNaN(
-        testDate.getTime()
-      )
-    ){
+    const year =
+      Number(parts[0]);
 
-      return testDate;
+    const month =
+      Number(parts[1]);
 
-    }
+    const day =
+      Number(parts[2]);
+
+    const now =
+      new Date();
+
+    return new Date(
+      year,
+      month-1,
+      day,
+      now.getHours(),
+      now.getMinutes(),
+      now.getSeconds(),
+      now.getMilliseconds()
+    );
 
   }
 
@@ -506,6 +517,9 @@ function getCurrentDate(){
 
 }
 
+/* =====================================================
+   基本
+===================================================== */
 
 const message =
   document.getElementById(
@@ -670,7 +684,7 @@ const jugoyaDates={
 ===================================================== */
 
 function getCostumeKey(
-  date=getCurrentDate()
+  date=getTestNow()
 ){
 
   const month =
@@ -861,7 +875,7 @@ function getCostumeKey(
 
 function getCharacterImage(
   character,
-  date=getCurrentDate()
+  date=getTestNow()
 ){
 
   const selected =
@@ -919,7 +933,8 @@ function setCharacter(
    */
   bellImage.src =
     getCharacterImage(
-      currentCharacter
+      currentCharacter,
+      getTestNow()
     );
 
   bellImage.alt =
@@ -959,7 +974,7 @@ let lastCostumeDate="";
 function getTodayKey(){
 
   const now =
-    getCurrentDate();
+    getTestNow();
 
   return `${
     now.getFullYear()
@@ -993,12 +1008,13 @@ function updateCostume(){
 
   /*
    * キャラクターはそのまま。
-   * 今日の特殊服だけ再判定。
+   * テスト日付を含めて特殊服を再判定。
    */
 
   const costumeImage =
     getCharacterImage(
-      currentCharacter
+      currentCharacter,
+      getTestNow()
     );
 
   if(
@@ -1147,7 +1163,7 @@ function buildBellMessages(
 ){
 
   const now =
-    getCurrentDate();
+    getTestNow();
 
   const values =
     Object.values(
@@ -1341,7 +1357,7 @@ function pad(n){
 }
 
 function dateString(
-  date=getCurrentDate()
+  date=getTestNow()
 ){
 
   return `${
@@ -1355,7 +1371,7 @@ function dateString(
 }
 
 function monthString(
-  date=getCurrentDate()
+  date=getTestNow()
 ){
 
   return `${
@@ -1390,7 +1406,7 @@ function timeToMinutes(
 ===================================================== */
 
 function getGreeting(
-  date=getCurrentDate()
+  date=getTestNow()
 ){
 
   const hour =
@@ -1420,7 +1436,7 @@ function getGreeting(
 
 function greetingMessage(
   text,
-  date=getCurrentDate()
+  date=getTestNow()
 ){
 
   return `${
@@ -1519,7 +1535,7 @@ function getStartTime(
 ===================================================== */
 
 function getTomorrowString(
-  date=getCurrentDate()
+  date=getTestNow()
 ){
 
   const tomorrow =
@@ -1537,7 +1553,7 @@ function getTomorrowString(
 
 function daysFromToday(
   dateStringValue,
-  today=getCurrentDate()
+  today=getTestNow()
 ){
 
   const target =
@@ -1911,6 +1927,8 @@ function buildRegularMessages(
       "こんばんは！予定を確認してみてね！",
 
       "こんばんは！今月の予定もチェックしてみてね！",
+
+      "こんばんは！今日も予定を見にきてくれてありがとう",
 
       "こんばんは！今日はどんな1日だったかな？",
 
