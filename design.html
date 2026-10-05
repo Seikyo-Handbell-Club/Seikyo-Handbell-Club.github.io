@@ -599,7 +599,7 @@ const costumeImages={
    通常の日付に戻す場合は null にしてください
 ===================================================== */
 
-const TEST_DATE = "2026-12-25";
+const TEST_DATE = null;
 
 /* =====================================================
    十五夜の日
@@ -988,6 +988,20 @@ function setCharacter(
     };
 
     testImage.onerror = function(){
+      if(costumeSrc.endsWith("bell-Christmas.png")){
+        const altImage=new Image();
+        altImage.onload=()=>{bellImage.src="costumes/bell-christmas.png";};
+        altImage.onerror=()=>{bellImage.src=normalSrc;};
+        altImage.src="costumes/bell-christmas.png";
+        return;
+      }
+      if(costumeSrc.endsWith("chime-Christmas.png")){
+        const altImage=new Image();
+        altImage.onload=()=>{bellImage.src="costumes/chime-christmas.png";};
+        altImage.onerror=()=>{bellImage.src=normalSrc;};
+        altImage.src="costumes/chime-christmas.png";
+        return;
+      }
       /* 特殊服がない場合は通常のベルちゃんを表示 */
       bellImage.src = normalSrc;
     };
@@ -1107,6 +1121,20 @@ function updateCostume(){
   };
 
   testImage.onerror = function(){
+    if(costumeImage.endsWith("bell-Christmas.png")){
+      const altImage=new Image();
+      altImage.onload=()=>{bellImage.src="costumes/bell-christmas.png";};
+      altImage.onerror=()=>{bellImage.src=normalImage;};
+      altImage.src="costumes/bell-christmas.png";
+      return;
+    }
+    if(costumeImage.endsWith("chime-Christmas.png")){
+      const altImage=new Image();
+      altImage.onload=()=>{bellImage.src="costumes/chime-christmas.png";};
+      altImage.onerror=()=>{bellImage.src=normalImage;};
+      altImage.src="costumes/chime-christmas.png";
+      return;
+    }
     /* 特殊服が存在しない場合は通常画像を維持 */
     bellImage.src = normalImage;
   };
