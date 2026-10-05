@@ -594,6 +594,14 @@ const costumeImages={
 };
 
 /* =====================================================
+   ★ コードからテスト日付を変更できます
+   例："2026-12-25" → 2026年12月25日として動作
+   通常の日付に戻す場合は null にしてください
+===================================================== */
+
+const TEST_DATE = null;
+
+/* =====================================================
    十五夜の日
    handbell.htmlの元々の設定に合わせる
 ===================================================== */
@@ -622,6 +630,25 @@ const jugoyaDates={
 ===================================================== */
 
 function getTestDate(){
+
+  /* コードで指定したテスト日付を最優先 */
+  if(TEST_DATE){
+    try{
+      if(/^\d{4}-\d{2}-\d{2}$/.test(TEST_DATE)){
+        const testDate = new Date(`${TEST_DATE}T12:00:00`);
+        if(
+          !Number.isNaN(testDate.getTime()) &&
+          testDate.getFullYear() === Number(TEST_DATE.slice(0,4)) &&
+          testDate.getMonth()+1 === Number(TEST_DATE.slice(5,7)) &&
+          testDate.getDate() === Number(TEST_DATE.slice(8,10))
+        ){
+          return testDate;
+        }
+      }
+    }catch(error){
+      console.warn("コード指定のテスト日付を読み込めませんでした",error);
+    }
+  }
 
   try{
 
