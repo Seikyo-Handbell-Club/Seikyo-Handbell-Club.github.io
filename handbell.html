@@ -2069,8 +2069,28 @@ from
    通常運用: const TEST_DATE = null;
    ※ design.html でテストする日付と同じ値にしてください。
 ===================================================== */
-const TEST_DATE = "2026-12-25";
+const TEST_DATE = null;
 
+/* テスト日付を実際のDateとして取得 */
+function getTestDate(){
+  if(!TEST_DATE) return null;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(TEST_DATE)) return null;
+
+  const d = new Date(`${TEST_DATE}T12:00:00`);
+  if(Number.isNaN(d.getTime())) return null;
+
+  if(
+    d.getFullYear() !== Number(TEST_DATE.slice(0,4)) ||
+    d.getMonth()+1 !== Number(TEST_DATE.slice(5,7)) ||
+    d.getDate() !== Number(TEST_DATE.slice(8,10))
+  ) return null;
+
+  return d;
+}
+
+function getAppDate(){
+  return getTestDate() || new Date();
+}
 
 const firebaseConfig = {
 
@@ -6441,9 +6461,11 @@ function getCollectionItemForImageInfo(imageInfo){
     return `monthly_${String(new Date().getMonth()+1).padStart(2,"0")}`;
   }
   if(imageInfo.kind === "event"){
-    const event = getEventImageInfo(getTodayString());
+    const appDate = getAppDate();
+    const appDateString = getTodayString(appDate);
+    const event = getEventImageInfo(appDateString);
     if(!event) return null;
-    const md = getTodayString().slice(5);
+    const md = appDateString.slice(5);
     const map={
       "01-01":"event_newyear_image",
       "02-03":"event_setsubun_image",
@@ -6458,7 +6480,7 @@ function getCollectionItemForImageInfo(imageInfo){
       "12-25":"event_christmas_image",
       "12-31":"event_newyearseve_image"
     };
-    const y=getTodayString().slice(0,4);
+    const y=appDateString.slice(0,4);
     if(jugoyaDates[y]===md) return "event_tsukimi_image";
     return map[md] || null;
   }
@@ -6482,7 +6504,7 @@ async function acquireCollectionForDisplayedImage(imageInfo){
 ========================= */
 function getTodayCharacterCostumeItemId(){
   const character = profile?.characterType === "chime" ? "chime" : "bell";
-  const today = new Date();
+  const today = getAppDate();
   const y = today.getFullYear();
   const md = `${String(today.getMonth()+1).padStart(2,"0")}-${String(today.getDate()).padStart(2,"0")}`;
 
@@ -6611,7 +6633,7 @@ async function showCollection(){
 async function decideLoginImage(){
   if(!currentUser) return null;
 
-  const today = new Date();
+  const today = getAppDate();
   const todayString = getTodayString(today);
   const monthKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}`;
   const memberRef = ref(db, `members/${currentUser.uid}`);
