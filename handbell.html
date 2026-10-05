@@ -1129,7 +1129,7 @@ textarea{
 
   <!-- ベルちゃん表示エリア（ベルちゃん本体のコードは design.html 側） -->
   <iframe
-    src="design.html?v=20261005-1"
+    src="design.html?v=20261005-24"
     title="ベルちゃん"
     class="bell-frame"
   ></iframe>
@@ -2019,42 +2019,6 @@ textarea{
 
 <script type="module">
 
-/* =====================================================
-   ★ テスト用の日付（ここだけ変更）
-
-   ここを書き換えると、
-   ・月替わり画像
-   ・イベント画像
-   ・ベルちゃん／チャイムくんの衣装
-   ・コレクション取得判定
-   ・ベルちゃん側の日付判定
-   を同じ日付としてテストできます。
-
-   例：
-   const TEST_DATE = null;
-
-   通常運用に戻すときは null にしてください。
-===================================================== */
-const TEST_DATE = "2027-12-25";
-
-function getAppDate(){
-  if(TEST_DATE){
-    const match = String(TEST_DATE).match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if(match){
-      const date = new Date(`${match[1]}-${match[2]}-${match[3]}T12:00:00`);
-      if(
-        !Number.isNaN(date.getTime()) &&
-        date.getFullYear() === Number(match[1]) &&
-        date.getMonth()+1 === Number(match[2]) &&
-        date.getDate() === Number(match[3])
-      ){
-        return date;
-      }
-    }
-  }
-  return new Date();
-}
-
 import{
   initializeApp
 }
@@ -2097,6 +2061,36 @@ from
 /* =========================
    Firebase設定
 ========================= */
+
+/* =====================================================
+   ★ コレクション取得テスト用の日付
+   ここを変更すると、イベント衣装の取得判定も同じ日付になります。
+   例: const TEST_DATE = "2026-12-25";
+   通常運用: const TEST_DATE = "2026-12-25";
+   ※ design.html でテストする日付と同じ値にしてください。
+===================================================== */
+const TEST_DATE = "2026-12-25";
+
+/* テスト日付を実際のDateとして取得 */
+function getTestDate(){
+  if(!TEST_DATE) return null;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(TEST_DATE)) return null;
+
+  const d = new Date(`${TEST_DATE}T12:00:00`);
+  if(Number.isNaN(d.getTime())) return null;
+
+  if(
+    d.getFullYear() !== Number(TEST_DATE.slice(0,4)) ||
+    d.getMonth()+1 !== Number(TEST_DATE.slice(5,7)) ||
+    d.getDate() !== Number(TEST_DATE.slice(8,10))
+  ) return null;
+
+  return d;
+}
+
+function getAppDate(){
+  return getTestDate() || new Date();
+}
 
 const firebaseConfig = {
 
@@ -3625,8 +3619,7 @@ function sendCharacterToBell(){
   if(!frame || !frame.contentWindow) return;
   frame.contentWindow.postMessage({
     type:"handbell-character",
-    character:profile?.characterType === "chime" ? "chime" : "bell",
-    testDate:TEST_DATE
+    character:profile?.characterType === "chime" ? "chime" : "bell"
   },"*");
 }
 
@@ -3649,8 +3642,7 @@ function sendSchedulesToBell(){
   frame.contentWindow.postMessage({
     type:"handbell-schedules",
     schedules:scheduleCache || {},
-    ready:true,
-    testDate:TEST_DATE
+    ready:true
   },"*");
 }
 
@@ -6371,7 +6363,7 @@ function getEventImageInfo(date){
   };
 }
 
-function getTodayString(date = getAppDate()){
+function getTodayString(date = new Date()){
   return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
 }
 
@@ -6414,7 +6406,7 @@ const collectionItems = [
   {id:"event_tsukimi_bell",group:"bell",name:"ベルちゃん・十五夜",src:"costumes/bell-tsukimi.png"},
   {id:"event_halloween_bell",group:"bell",name:"ベルちゃん・ハロウィン",src:"costumes/bell-halloween.png"},
   {id:"event_christmaseve_bell",group:"bell",name:"ベルちゃん・クリスマスイブ",src:"costumes/bell-christmaseve.png"},
-  {id:"event_christmas_bell",group:"bell",name:"ベルちゃん・クリスマス",src:"costumes/bell-Christmas.png"},
+  {id:"event_christmas_bell",group:"bell",name:"ベルちゃん・クリスマス",src:"costumes/bell-christmas.png"},
   {id:"event_newyearseve_bell",group:"bell",name:"ベルちゃん・大晦日",src:"costumes/bell-winter.png"},
 
   {id:"event_newyear_chime",group:"chime",name:"チャイムくん・お正月",src:"costumes/chime-newyear.png"},
@@ -6427,7 +6419,7 @@ const collectionItems = [
   {id:"event_tsukimi_chime",group:"chime",name:"チャイムくん・十五夜",src:"costumes/chime-tsukimi.png"},
   {id:"event_halloween_chime",group:"chime",name:"チャイムくん・ハロウィン",src:"costumes/chime-halloween.png"},
   {id:"event_christmaseve_chime",group:"chime",name:"チャイムくん・クリスマスイブ",src:"costumes/chime-christmaseve.png"},
-  {id:"event_christmas_chime",group:"chime",name:"チャイムくん・クリスマス",src:"costumes/chime-Christmas.png"},
+  {id:"event_christmas_chime",group:"chime",name:"チャイムくん・クリスマス",src:"costumes/chime-christmas.png"},
   {id:"event_newyearseve_chime",group:"chime",name:"チャイムくん・大晦日",src:"costumes/chime-winter.png"},
 
   {id:"secret_rare_image",group:"secret",name:"レア画像",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.rare}`},
@@ -6466,12 +6458,14 @@ async function acquireCollectionItem(itemId){
 function getCollectionItemForImageInfo(imageInfo){
   if(!imageInfo) return null;
   if(imageInfo.kind === "monthly"){
-    return `monthly_${String(getAppDate().getMonth()+1).padStart(2,"0")}`;
+    return `monthly_${String(new Date().getMonth()+1).padStart(2,"0")}`;
   }
   if(imageInfo.kind === "event"){
-    const event = getEventImageInfo(getTodayString());
+    const appDate = getAppDate();
+    const appDateString = getTodayString(appDate);
+    const event = getEventImageInfo(appDateString);
     if(!event) return null;
-    const md = getTodayString().slice(5);
+    const md = appDateString.slice(5);
     const map={
       "01-01":"event_newyear_image",
       "02-03":"event_setsubun_image",
@@ -6486,7 +6480,7 @@ function getCollectionItemForImageInfo(imageInfo){
       "12-25":"event_christmas_image",
       "12-31":"event_newyearseve_image"
     };
-    const y=getTodayString().slice(0,4);
+    const y=appDateString.slice(0,4);
     if(jugoyaDates[y]===md) return "event_tsukimi_image";
     return map[md] || null;
   }
