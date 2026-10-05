@@ -63,20 +63,95 @@ p{
   line-height:1.6;
 }
 
-.character-section{
-  margin-top:18px;
+/* =====================================================
+   キャラクター選択
+===================================================== */
+
+#characterSelect{
+  display:block;
 }
 
-.character-title{
+.character-choice{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:16px;
+}
+
+.character-button{
+  width:100%;
+  min-height:150px;
+  padding:18px 12px;
+  border:2px solid #e1e8ed;
+  border-radius:18px;
+  background:#fff;
+  color:#26343d;
+  cursor:pointer;
+  transition:
+    border-color .15s ease,
+    transform .15s ease,
+    box-shadow .15s ease;
+}
+
+.character-button:active{
+  transform:scale(.98);
+}
+
+.character-button:hover{
+  border-color:#8fb5d5;
+  box-shadow:0 4px 14px rgba(50,100,140,.08);
+}
+
+.character-icon{
+  font-size:42px;
+  margin-bottom:8px;
+}
+
+.character-name{
+  font-size:16px;
+  font-weight:700;
+}
+
+/* =====================================================
+   衣装画面
+===================================================== */
+
+#wardrobe{
+  display:none;
+}
+
+.wardrobe-header{
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:10px;
-  margin-bottom:12px;
+  margin-bottom:18px;
 }
 
-.character-title h2{
+.wardrobe-title{
   margin:0;
+}
+
+.change-character-button{
+  width:auto;
+  white-space:nowrap;
+  padding:9px 12px;
+  font-size:13px;
+  background:#fff;
+  color:#43545e;
+  border:1px solid #d8e1e7;
+}
+
+.costume-category{
+  margin-top:20px;
+}
+
+.costume-category-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:0 0 10px;
+  font-size:17px;
 }
 
 .costume-grid{
@@ -122,10 +197,20 @@ p{
   line-height:1.4;
 }
 
-.costume-type{
-  margin-top:4px;
-  font-size:11px;
-  color:#87949d;
+.costume-type-badge{
+  position:absolute;
+  top:8px;
+  left:8px;
+  padding:4px 7px;
+  border-radius:999px;
+  background:#8d72c7;
+  color:#fff;
+  font-size:10px;
+  font-weight:700;
+}
+
+.costume-type-badge.daily{
+  background:#63a56f;
 }
 
 .selected-badge{
@@ -140,95 +225,107 @@ p{
   font-weight:700;
 }
 
-.locked-message{
-  grid-column:1 / -1;
-  padding:16px;
+.empty-message{
+  padding:12px;
   border-radius:12px;
-  background:#f8f9fb;
-  color:#77818e;
+  background:#f5f7f9;
+  color:#71808a;
   font-size:13px;
+  line-height:1.5;
 }
 
-.section-note{
-  margin-bottom:12px;
-  padding:10px 12px;
-  border-radius:10px;
-  background:#f7f9fc;
-  color:#71808a;
-  font-size:12px;
-  line-height:1.6;
-}
+/* =====================================================
+   ボタン
+===================================================== */
 
 .actions{
-  margin-top:18px;
+  display:none;
+  position:sticky;
+  bottom:10px;
+  z-index:5;
+  background:rgba(246,248,250,.94);
+  padding-top:8px;
 }
 
 button{
-  font-family:inherit;
-}
-
-.primary{
   width:100%;
-  border:0;
+  border:none;
   border-radius:12px;
-  padding:13px 12px;
-  background:#5b9bd5;
-  color:#fff;
+  padding:13px 16px;
   font-size:15px;
   font-weight:700;
   cursor:pointer;
 }
 
-.primary:disabled{
-  opacity:.45;
-  cursor:default;
+.primary{
+  background:#3f7fb8;
+  color:#fff;
 }
 
 .secondary{
-  width:100%;
+  background:#fff;
+  color:#43545e;
+  border:1px solid #d8e1e7;
   margin-top:9px;
-  border:0;
-  border-radius:12px;
-  padding:12px;
-  background:#eef3f7;
-  color:#33434c;
-  font-size:14px;
-  font-weight:700;
-  cursor:pointer;
+}
+
+button:disabled{
+  opacity:.55;
+  cursor:default;
 }
 
 #message{
-  margin-top:12px;
-  padding:11px 12px;
-  border-radius:10px;
-  background:#fff8df;
-  color:#69520a;
+  min-height:20px;
+  margin-top:10px;
+  text-align:center;
   font-size:13px;
-  line-height:1.5;
-}
-
-#message:empty{
-  display:none;
 }
 
 #message.error{
-  background:#fff0f0;
-  color:#9b1c1c;
+  color:#c84c4c;
 }
 
-@media(max-width:420px){
+/* =====================================================
+   スマホ
+===================================================== */
+
+@media(max-width:480px){
+
+  .character-choice{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .character-button{
+    min-height:135px;
+  }
+
+  .character-icon{
+    font-size:36px;
+  }
 
   .costume-grid{
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:9px;
+    grid-template-columns:1fr 1fr;
   }
 
   .costume-card img{
     height:125px;
   }
 
-  .costume-name{
+  body{
+    padding:14px 10px 26px;
+  }
+
+  .card{
+    padding:14px;
+  }
+
+  .wardrobe-header{
+    align-items:flex-start;
+  }
+
+  .change-character-button{
     font-size:12px;
+    padding:8px 10px;
   }
 
 }
@@ -240,72 +337,152 @@ button{
 
 <div class="page">
 
-  <div class="card">
+  <!-- =================================================
+       キャラクター選択
+  ================================================== -->
 
-    <h1>着替える</h1>
+  <div id="characterSelect">
 
-    <p class="small">
-      取得した衣装を選んで、ベルちゃん・チャイムくんの衣装を変更できます。
-    </p>
+    <div class="card">
 
-    <div class="character-section">
+      <h1>👕 着替える</h1>
 
-      <div class="character-title">
-        <h2>ベルちゃん</h2>
+      <p class="small">
+        どちらのキャラクターを着替えますか？
+      </p>
+
+      <div class="character-choice">
+
+        <button
+          type="button"
+          class="character-button"
+          id="bellChoice"
+        >
+          <div class="character-icon">
+            🔔
+          </div>
+
+          <div class="character-name">
+            ベルちゃん
+          </div>
+        </button>
+
+        <button
+          type="button"
+          class="character-button"
+          id="chimeChoice"
+        >
+          <div class="character-icon">
+            🎵
+          </div>
+
+          <div class="character-name">
+            チャイムくん
+          </div>
+        </button>
+
       </div>
-
-      <div class="section-note">
-        ベルちゃんの衣装
-      </div>
-
-      <div
-        id="bellCostumes"
-        class="costume-grid"
-      ></div>
 
     </div>
 
+  </div>
 
-    <div class="character-section">
 
-      <div class="character-title">
-        <h2>チャイムくん</h2>
+  <!-- =================================================
+       衣装一覧
+  ================================================== -->
+
+  <div id="wardrobe">
+
+    <div class="card">
+
+      <div class="wardrobe-header">
+
+        <h1
+          id="wardrobeTitle"
+          class="wardrobe-title"
+        >
+          🔔 ベルちゃんの衣装
+        </h1>
+
+        <button
+          type="button"
+          id="changeCharacterButton"
+          class="change-character-button"
+        >
+          キャラを変更
+        </button>
+
       </div>
 
-      <div class="section-note">
-        チャイムくんの衣装
+
+      <!-- =========================
+           イベント衣装
+      ========================== -->
+
+      <div class="costume-category">
+
+        <h2 class="costume-category-title">
+          🎉 イベント衣装
+        </h2>
+
+        <div
+          id="eventCostumes"
+          class="costume-grid"
+        ></div>
+
       </div>
 
-      <div
-        id="chimeCostumes"
-        class="costume-grid"
-      ></div>
+
+      <!-- =========================
+           毎日衣装
+      ========================== -->
+
+      <div class="costume-category">
+
+        <h2 class="costume-category-title">
+          🎁 毎日衣装
+        </h2>
+
+        <div
+          id="dailyCostumes"
+          class="costume-grid"
+        ></div>
+
+      </div>
 
     </div>
 
+  </div>
 
-    <div class="actions">
 
-      <button
-        id="saveButton"
-        class="primary"
-        type="button"
-        disabled
-      >
-        この衣装に着替える
-      </button>
+  <!-- =================================================
+       操作
+  ================================================== -->
 
-      <button
-        id="backButton"
-        class="secondary"
-        type="button"
-      >
-        ← マイページに戻る
-      </button>
+  <div
+    class="actions"
+    id="actions"
+  >
 
-      <div id="message"></div>
+    <button
+      id="saveButton"
+      class="primary"
+      type="button"
+      disabled
+    >
+      この衣装に着替える
+    </button>
 
-    </div>
+    <button
+      id="backButton"
+      class="secondary"
+      type="button"
+    >
+      ← マイページに戻る
+    </button>
+
+    <div id="message"></div>
 
   </div>
 
@@ -314,12 +491,15 @@ button{
 
 <script type="module">
 
+/* =====================================================
+   Firebase
+===================================================== */
+
 import{
   initializeApp
 }
 from
 "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-
 
 import{
   getAuth,
@@ -330,7 +510,6 @@ import{
 from
 "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
-
 import{
   getDatabase,
   ref,
@@ -340,10 +519,6 @@ import{
 from
 "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
 
-
-/* =====================================================
-   Firebase
-===================================================== */
 
 const firebaseConfig = {
 
@@ -386,83 +561,134 @@ setPersistence(
       "認証状態の保存設定エラー:",
       error
     )
-  );
+);
 
 const db =
   getDatabase(app);
 
 
 /* =====================================================
-   衣装定義
+   イベント衣装
 ===================================================== */
 
-const costumeDefinitions = {
+const eventCostumeDefinitions = [
 
-  bell:[
-
-    {
-      id:null,
-      name:"通常衣装",
-      src:"bell.png",
-      type:"通常"
-    },
-
-    {
-      id:"secret_bell_rare_costume",
-      name:"ベルちゃん・レア衣装",
-      src:"costumes/bell-rare.jpg",
-      type:"レア衣装"
-    },
-
-    {
-      id:"daily-costume-01",
-      name:"毎日衣装 01",
-      src:"costumes/daily-costume-01.png",
-      type:"毎日もらえる衣装"
-    },
-
-    {
-      id:"daily-costume-02",
-      name:"毎日衣装 02",
-      src:"costumes/daily-costume-02.png",
-      type:"毎日もらえる衣装"
-    }
-
+  [
+    "newyear",
+    "お正月",
+    "bell-newyear.png",
+    "chime-newyear.png"
   ],
 
-  chime:[
+  [
+    "setsubun",
+    "節分",
+    "bell-setsubun.png",
+    "chime-setsubun.png"
+  ],
 
-    {
-      id:null,
-      name:"通常衣装",
-      src:"chime.png",
-      type:"通常"
-    },
+  [
+    "valentine",
+    "バレンタイン",
+    "bell-valentine.png",
+    "chime-valentine.png"
+  ],
 
-    {
-      id:"secret_chime_rare_costume",
-      name:"チャイムくん・レア衣装",
-      src:"costumes/chime-rare.jpg",
-      type:"レア衣装"
-    },
+  [
+    "hinamatsuri",
+    "ひな祭り",
+    "bell-hinamatsuri.png",
+    "chime-hinamatsuri.png"
+  ],
 
-    {
-      id:"daily-costume-01",
-      name:"毎日衣装 01",
-      src:"costumes/daily-costume-01.png",
-      type:"毎日もらえる衣装"
-    },
+  [
+    "whiteday",
+    "ホワイトデー",
+    "bell-whiteday.png",
+    "chime-whiteday.png"
+  ],
 
-    {
-      id:"daily-costume-02",
-      name:"毎日衣装 02",
-      src:"costumes/daily-costume-02.png",
-      type:"毎日もらえる衣装"
-    }
+  [
+    "kodomonohi",
+    "こどもの日",
+    "bell-kodomonohi.png",
+    "chime-kodomonohi.png"
+  ],
 
+  [
+    "tanabata",
+    "七夕",
+    "bell-tanabata.png",
+    "chime-tanabata.png"
+  ],
+
+  [
+    "tsukimi",
+    "十五夜",
+    "bell-tsukimi.png",
+    "chime-tsukimi.png"
+  ],
+
+  [
+    "halloween",
+    "ハロウィン",
+    "bell-halloween.png",
+    "chime-halloween.png"
+  ],
+
+  [
+    "christmaseve",
+    "クリスマスイブ",
+    "bell-christmaseve.png",
+    "chime-christmaseve.png"
+  ],
+
+  [
+    "christmas",
+    "クリスマス",
+    "bell-christmas.png",
+    "chime-christmas.png"
+  ],
+
+  [
+    "winter",
+    "大晦日",
+    "bell-winter.png",
+    "chime-winter.png"
   ]
 
-};
+];
+
+
+/* =====================================================
+   毎日衣装
+===================================================== */
+
+const dailyCostumeDefinitions = [
+
+  {
+    id:
+      "daily-costume-01",
+
+    name:
+      "毎日衣装 01",
+
+    src:
+      "costumes/daily-costume-01.png"
+  },
+
+  {
+    id:
+      "daily-costume-02",
+
+    name:
+      "毎日衣装 02",
+
+    src:
+      "costumes/daily-costume-02.png"
+  }
+
+];
 
 
 /* =====================================================
@@ -473,31 +699,80 @@ let currentUser = null;
 
 let acquiredCollection = {};
 
-let dailyCostumes = {};
+let dailyCostumes = {
+
+  bell:{},
+
+  chime:{}
+
+};
 
 let equippedCostume = {
+
   bell:null,
+
   chime:null
+
 };
 
 let selectedCostume = {
+
   bell:null,
+
   chime:null
+
 };
+
+let selectedCharacter = null;
 
 
 /* =====================================================
    要素
 ===================================================== */
 
-const bellCostumes =
+const characterSelect =
   document.getElementById(
-    "bellCostumes"
+    "characterSelect"
   );
 
-const chimeCostumes =
+const wardrobe =
   document.getElementById(
-    "chimeCostumes"
+    "wardrobe"
+  );
+
+const actions =
+  document.getElementById(
+    "actions"
+  );
+
+const bellChoice =
+  document.getElementById(
+    "bellChoice"
+  );
+
+const chimeChoice =
+  document.getElementById(
+    "chimeChoice"
+  );
+
+const wardrobeTitle =
+  document.getElementById(
+    "wardrobeTitle"
+  );
+
+const changeCharacterButton =
+  document.getElementById(
+    "changeCharacterButton"
+  );
+
+const eventCostumes =
+  document.getElementById(
+    "eventCostumes"
+  );
+
+const dailyCostumesContainer =
+  document.getElementById(
+    "dailyCostumes"
   );
 
 const saveButton =
@@ -537,13 +812,428 @@ function showMessage(
 
 
 /* =====================================================
-   部員データ取得
+   キャラクター選択
+===================================================== */
+
+function openCharacter(
+  character
+){
+
+  selectedCharacter =
+    character === "chime"
+      ? "chime"
+      : "bell";
+
+  characterSelect.style.display =
+    "none";
+
+  wardrobe.style.display =
+    "block";
+
+  actions.style.display =
+    "block";
+
+  wardrobeTitle.textContent =
+    selectedCharacter === "bell"
+      ? "🔔 ベルちゃんの衣装"
+      : "🎵 チャイムくんの衣装";
+
+  showMessage("");
+
+  renderWardrobe();
+
+}
+
+
+/* =====================================================
+   キャラクター選択画面へ戻る
+===================================================== */
+
+function backToCharacterSelect(){
+
+  selectedCharacter =
+    null;
+
+  wardrobe.style.display =
+    "none";
+
+  actions.style.display =
+    "none";
+
+  characterSelect.style.display =
+    "block";
+
+  showMessage("");
+
+}
+
+
+/* =====================================================
+   イベント衣装ID
+===================================================== */
+
+function getEventCostumeId(
+  key,
+  character
+){
+
+  return `event_${key}_${character}`;
+
+}
+
+
+/* =====================================================
+   イベント衣装一覧
+===================================================== */
+
+function getEventCostumes(
+  character
+){
+
+  return eventCostumeDefinitions.map(
+    ([key,name,bellFile,chimeFile])=>({
+
+      id:
+        getEventCostumeId(
+          key,
+          character
+        ),
+
+      name:
+
+        character === "bell"
+
+          ? `ベルちゃん・${name}`
+
+          : `チャイムくん・${name}`,
+
+      src:
+
+        character === "bell"
+
+          ? `costumes/${bellFile}`
+
+          : `costumes/${chimeFile}`
+
+    })
+  );
+
+}
+
+
+/* =====================================================
+   取得済みイベント衣装
+===================================================== */
+
+function isEventCostumeAcquired(
+  costumeId
+){
+
+  return !!(
+    acquiredCollection &&
+    acquiredCollection[costumeId]
+  );
+
+}
+
+
+/* =====================================================
+   取得済み毎日衣装
+===================================================== */
+
+function isDailyCostumeAcquired(
+  character,
+  costumeId
+){
+
+  return !!(
+    dailyCostumes &&
+    dailyCostumes[character] &&
+    dailyCostumes[character][costumeId]
+  );
+
+}
+
+
+/* =====================================================
+   衣装カード作成
+===================================================== */
+
+function createCostumeCard(
+  character,
+  costume,
+  type
+){
+
+  const card =
+    document.createElement(
+      "button"
+    );
+
+  card.type =
+    "button";
+
+  card.className =
+    "costume-card";
+
+  if(
+    selectedCostume[character] ===
+    costume.id
+  ){
+
+    card.classList.add(
+      "selected"
+    );
+
+  }
+
+
+  const image =
+    document.createElement(
+      "img"
+    );
+
+  image.src =
+    costume.src;
+
+  image.alt =
+    costume.name;
+
+
+  const name =
+    document.createElement(
+      "div"
+    );
+
+  name.className =
+    "costume-name";
+
+  name.textContent =
+    costume.name;
+
+
+  card.appendChild(
+    image
+  );
+
+  card.appendChild(
+    name
+  );
+
+
+  const typeBadge =
+    document.createElement(
+      "span"
+    );
+
+  typeBadge.className =
+    type === "daily"
+      ? "costume-type-badge daily"
+      : "costume-type-badge";
+
+  typeBadge.textContent =
+    type === "daily"
+      ? "毎日"
+      : "イベント";
+
+  card.appendChild(
+    typeBadge
+  );
+
+
+  if(
+    selectedCostume[character] ===
+    costume.id
+  ){
+
+    const selectedBadge =
+      document.createElement(
+        "span"
+      );
+
+    selectedBadge.className =
+      "selected-badge";
+
+    selectedBadge.textContent =
+      "選択中";
+
+    card.appendChild(
+      selectedBadge
+    );
+
+  }
+
+
+  card.addEventListener(
+    "click",
+    ()=>{
+
+      selectedCostume[
+        character
+      ] = costume.id;
+
+      renderWardrobe();
+
+    }
+  );
+
+
+  return card;
+
+}
+
+
+/* =====================================================
+   空表示
+===================================================== */
+
+function createEmptyMessage(
+  text
+){
+
+  const empty =
+    document.createElement(
+      "div"
+    );
+
+  empty.className =
+    "empty-message";
+
+  empty.textContent =
+    text;
+
+  return empty;
+
+}
+
+
+/* =====================================================
+   衣装一覧表示
+===================================================== */
+
+function renderWardrobe(){
+
+  if(!selectedCharacter)
+    return;
+
+
+  eventCostumes.innerHTML =
+    "";
+
+  dailyCostumesContainer.innerHTML =
+    "";
+
+
+  const character =
+    selectedCharacter;
+
+
+  /* ===================================================
+     イベント衣装
+  =================================================== */
+
+  const eventList =
+    getEventCostumes(
+      character
+    ).filter(
+      costume =>
+        isEventCostumeAcquired(
+          costume.id
+        )
+    );
+
+
+  if(
+    eventList.length === 0
+  ){
+
+    eventCostumes.appendChild(
+      createEmptyMessage(
+        "まだ取得済みのイベント衣装がありません。"
+      )
+    );
+
+  }else{
+
+    eventList.forEach(
+      costume=>{
+
+        eventCostumes.appendChild(
+          createCostumeCard(
+            character,
+            costume,
+            "event"
+          )
+        );
+
+      }
+    );
+
+  }
+
+
+  /* ===================================================
+     毎日衣装
+  =================================================== */
+
+  const dailyList =
+    dailyCostumeDefinitions.filter(
+      costume =>
+        isDailyCostumeAcquired(
+          character,
+          costume.id
+        )
+    );
+
+
+  if(
+    dailyList.length === 0
+  ){
+
+    dailyCostumesContainer.appendChild(
+      createEmptyMessage(
+        "まだ取得済みの毎日衣装がありません。"
+      )
+    );
+
+  }else{
+
+    dailyList.forEach(
+      costume=>{
+
+        dailyCostumesContainer.appendChild(
+          createCostumeCard(
+            character,
+            costume,
+            "daily"
+          )
+        );
+
+      }
+    );
+
+  }
+
+
+  saveButton.disabled =
+    !currentUser ||
+    !selectedCharacter ||
+    !selectedCostume[
+      selectedCharacter
+    ];
+
+}
+
+
+/* =====================================================
+   Firebaseから部員データ取得
 ===================================================== */
 
 async function loadMemberData(){
 
   if(!currentUser)
     return false;
+
 
   try{
 
@@ -553,8 +1243,12 @@ async function loadMemberData(){
         `members/${currentUser.uid}`
       );
 
+
     const snap =
-      await get(memberRef);
+      await get(
+        memberRef
+      );
+
 
     if(!snap.exists()){
 
@@ -567,17 +1261,57 @@ async function loadMemberData(){
 
     }
 
+
     const data =
       snap.val() || {};
+
+
+    /* ================================================
+       コレクション
+       イベント衣装はここを見る
+    ================================================= */
 
     acquiredCollection =
       data.collection || {};
 
-    dailyCostumes =
+
+    /* ================================================
+       毎日衣装
+       イベント衣装とは完全に別管理
+    ================================================= */
+
+    const daily =
       data.dailyCostumes || {};
+
+
+    dailyCostumes = {
+
+      bell:
+        daily.bell &&
+        typeof daily.bell === "object"
+
+          ? daily.bell
+
+          : {},
+
+      chime:
+        daily.chime &&
+        typeof daily.chime === "object"
+
+          ? daily.chime
+
+          : {}
+
+    };
+
+
+    /* ================================================
+       現在装備している衣装
+    ================================================= */
 
     const saved =
       data.equippedCostume || {};
+
 
     equippedCostume = {
 
@@ -589,6 +1323,7 @@ async function loadMemberData(){
 
     };
 
+
     selectedCostume = {
 
       bell:
@@ -599,7 +1334,9 @@ async function loadMemberData(){
 
     };
 
+
     return true;
+
 
   }catch(error){
 
@@ -621,274 +1358,85 @@ async function loadMemberData(){
 
 
 /* =====================================================
-   取得済み判定
-===================================================== */
-
-function isAcquired(
-  costume
-){
-
-  if(!costume.id)
-    return true;
-
-  /* 毎日衣装 */
-  if(
-    costume.id === "daily-costume-01" ||
-    costume.id === "daily-costume-02"
-  ){
-
-    return !!dailyCostumes[
-      costume.id
-    ];
-
-  }
-
-  /* 既存コレクション */
-  return !!acquiredCollection[
-    costume.id
-  ];
-
-}
-
-
-/* =====================================================
-   衣装カード
-===================================================== */
-
-function renderCostumes(
-  character,
-  container
-){
-
-  container.innerHTML = "";
-
-  const costumes =
-    costumeDefinitions[
-      character
-    ];
-
-  costumes.forEach(
-    costume=>{
-
-      if(
-        costume.id &&
-        !isAcquired(costume)
-      ){
-
-        return;
-
-      }
-
-      const card =
-        document.createElement(
-          "button"
-        );
-
-      card.type =
-        "button";
-
-      card.className =
-        "costume-card";
-
-      if(
-        selectedCostume[
-          character
-        ] === costume.id
-      ){
-
-        card.classList.add(
-          "selected"
-        );
-
-      }
-
-
-      const image =
-        document.createElement(
-          "img"
-        );
-
-      image.src =
-        costume.src;
-
-      image.alt =
-        costume.name;
-
-
-      const name =
-        document.createElement(
-          "div"
-        );
-
-      name.className =
-        "costume-name";
-
-      name.textContent =
-        costume.name;
-
-
-      const type =
-        document.createElement(
-          "div"
-        );
-
-      type.className =
-        "costume-type";
-
-      type.textContent =
-        costume.type;
-
-
-      card.appendChild(
-        image
-      );
-
-      card.appendChild(
-        name
-      );
-
-      card.appendChild(
-        type
-      );
-
-
-      if(
-        selectedCostume[
-          character
-        ] === costume.id
-      ){
-
-        const badge =
-          document.createElement(
-            "span"
-          );
-
-        badge.className =
-          "selected-badge";
-
-        badge.textContent =
-          "選択中";
-
-        card.appendChild(
-          badge
-        );
-
-      }
-
-
-      card.addEventListener(
-        "click",
-        ()=>{
-
-          selectedCostume[
-            character
-          ] = costume.id;
-
-          renderAll();
-
-        }
-      );
-
-      container.appendChild(
-        card
-      );
-
-    }
-  );
-
-
-  if(
-    !container.children.length
-  ){
-
-    const empty =
-      document.createElement(
-        "div"
-      );
-
-    empty.className =
-      "locked-message";
-
-    empty.textContent =
-      "まだ取得済みの衣装がありません。";
-
-    container.appendChild(
-      empty
-    );
-
-  }
-
-}
-
-
-/* =====================================================
-   表示
-===================================================== */
-
-function renderAll(){
-
-  renderCostumes(
-    "bell",
-    bellCostumes
-  );
-
-  renderCostumes(
-    "chime",
-    chimeCostumes
-  );
-
-  saveButton.disabled =
-    !currentUser;
-
-}
-
-
-/* =====================================================
-   保存
+   衣装保存
 ===================================================== */
 
 async function saveCostume(){
 
-  if(!currentUser)
+  if(
+    !currentUser ||
+    !selectedCharacter
+  ){
+
     return;
+
+  }
+
+
+  const costumeId =
+    selectedCostume[
+      selectedCharacter
+    ];
+
+
+  if(!costumeId){
+
+    showMessage(
+      "衣装を選択してください。",
+      true
+    );
+
+    return;
+
+  }
+
 
   saveButton.disabled =
     true;
+
 
   showMessage(
     "衣装を保存しています……"
   );
 
+
   try{
 
     const updates = {
 
-      [`members/${currentUser.uid}/equippedCostume/bell`]:
-        selectedCostume.bell,
-
-      [`members/${currentUser.uid}/equippedCostume/chime`]:
-        selectedCostume.chime
+      [`members/${currentUser.uid}/equippedCostume/${selectedCharacter}`]:
+        costumeId
 
     };
+
+
+    /*
+     * equippedCostumeの選択中キャラクターだけを更新。
+     *
+     * collection
+     * dailyCostumes
+     * profile
+     * その他の部員データ
+     *
+     * は上書きしない。
+     */
 
     await update(
       ref(db),
       updates
     );
 
-    equippedCostume = {
 
-      bell:
-        selectedCostume.bell,
+    equippedCostume[
+      selectedCharacter
+    ] =
+      costumeId;
 
-      chime:
-        selectedCostume.chime
-
-    };
 
     showMessage(
       "衣装を変更しました！"
     );
+
 
     setTimeout(
       ()=>{
@@ -898,6 +1446,7 @@ async function saveCostume(){
       700
     );
 
+
   }catch(error){
 
     console.error(
@@ -905,10 +1454,12 @@ async function saveCostume(){
       error
     );
 
+
     showMessage(
       "衣装を保存できませんでした。",
       true
     );
+
 
     saveButton.disabled =
       false;
@@ -919,8 +1470,34 @@ async function saveCostume(){
 
 
 /* =====================================================
-   戻る
+   ボタン
 ===================================================== */
+
+bellChoice.addEventListener(
+  "click",
+  ()=>{
+    openCharacter(
+      "bell"
+    );
+  }
+);
+
+
+chimeChoice.addEventListener(
+  "click",
+  ()=>{
+    openCharacter(
+      "chime"
+    );
+  }
+);
+
+
+changeCharacterButton.addEventListener(
+  "click",
+  backToCharacterSelect
+);
+
 
 backButton.addEventListener(
   "click",
@@ -948,6 +1525,7 @@ onAuthStateChanged(
     currentUser =
       user;
 
+
     if(!user){
 
       showMessage(
@@ -962,8 +1540,10 @@ onAuthStateChanged(
 
     }
 
+
     const loaded =
       await loadMemberData();
+
 
     if(!loaded){
 
@@ -974,7 +1554,20 @@ onAuthStateChanged(
 
     }
 
-    renderAll();
+
+    /*
+     * ログイン直後は
+     * キャラクター選択画面のまま。
+     */
+
+    characterSelect.style.display =
+      "block";
+
+    wardrobe.style.display =
+      "none";
+
+    actions.style.display =
+      "none";
 
   }
 );
