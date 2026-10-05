@@ -453,55 +453,6 @@ body.logged-in .bubble:after{
 <script type="module">
 
 /* =====================================================
-   ★★★ テスト日付設定 ★★★
-   
-   ""              → 実際の今日の日付
-   "2026-02-03"    → 2026年2月3日としてテスト
-   "2026-02-14"    → 2026年2月14日としてテスト
-   "2026-07-07"    → 2026年7月7日としてテスト
-   "2026-09-25"    → 2026年9月25日としてテスト
-   
-   ※ 日付を変えたらページを再読み込みしてください。
-===================================================== */
-
-const TEST_DATE = "2026-02-03";
-
-/* =====================================================
-   テスト日付を含めた現在日時
-===================================================== */
-
-function getCurrentDate(){
-
-  if(
-    typeof TEST_DATE === "string" &&
-    /^\d{4}-\d{2}-\d{2}$/.test(
-      TEST_DATE.trim()
-    )
-  ){
-
-    const parts =
-      TEST_DATE
-        .trim()
-        .split("-")
-        .map(Number);
-
-    return new Date(
-      parts[0],
-      parts[1]-1,
-      parts[2],
-      12,
-      0,
-      0,
-      0
-    );
-
-  }
-
-  return new Date();
-
-}
-
-/* =====================================================
    基本
 ===================================================== */
 
@@ -563,80 +514,80 @@ const costumeImages={
   bell:{
 
     newyear:
-      "costumes/bell-newyear.jpg",
+      "costumes/bell-newyear.png",
 
     setsubun:
-      "costumes/bell-setsubun.jpg",
+      "costumes/bell-setsubun.png",
 
     valentine:
-      "costumes/bell-valentine.jpg",
+      "costumes/bell-valentine.png",
 
     hinamatsuri:
-      "costumes/bell-hinamatsuri.jpg",
+      "costumes/bell-hinamatsuri.png",
 
     whiteday:
-      "costumes/bell-whiteday.jpg",
+      "costumes/bell-whiteday.png",
 
     kodomonohi:
-      "costumes/bell-kodomonohi.jpg",
+      "costumes/bell-kodomonohi.png",
 
     tanabata:
-      "costumes/bell-tanabata.jpg",
+      "costumes/bell-tanabata.png",
 
     tsukimi:
-      "costumes/bell-tsukimi.jpg",
+      "costumes/bell-tsukimi.png",
 
     halloween:
-      "costumes/bell-halloween.jpg",
+      "costumes/bell-halloween.png",
 
     christmaseve:
-      "costumes/bell-christmaseve.jpg",
+      "costumes/bell-christmaseve.png",
 
     christmas:
-      "costumes/bell-Christmas.jpg",
+      "costumes/bell-Christmas.png",
 
     winter:
-      "costumes/bell-winter.jpg"
+      "costumes/bell-winter.png"
 
   },
 
   chime:{
 
     newyear:
-      "costumes/chime-newyear.jpg",
+      "costumes/chime-newyear.png",
 
     setsubun:
-      "costumes/chime-setsubun.jpg",
+      "costumes/chime-setsubun.png",
 
     valentine:
-      "costumes/chime-valentine.jpg",
+      "costumes/chime-valentine.png",
 
     hinamatsuri:
-      "costumes/chime-hinamatsuri.jpg",
+      "costumes/chime-hinamatsuri.png",
 
     whiteday:
-      "costumes/chime-whiteday.jpg",
+      "costumes/chime-whiteday.png",
 
     kodomonohi:
-      "costumes/chime-kodomonohi.jpg",
+      "costumes/chime-kodomonohi.png",
 
     tanabata:
-      "costumes/chime-tanabata.jpg",
+      "costumes/chime-tanabata.png",
 
     tsukimi:
-      "costumes/chime-tsukimi.jpg",
+      "costumes/chime-tsukimi.png",
 
     halloween:
-      "costumes/chime-halloween.jpg",
+      "costumes/chime-halloween.png",
 
     christmaseve:
-      "costumes/chime-christmaseve.jpg",
+      "costumes/chime-christmaseve.png",
 
     christmas:
-      "costumes/chime-Christmas.jpg",
+      "costumes/chime-Christmas.png",
 
     winter:
-      "costumes/chime-winter.jpg"
+      "costumes/chime-winter.png"
 
   }
 
@@ -662,6 +613,72 @@ const jugoyaDates={
   2036:"10-04"
 
 };
+
+/* =====================================================
+   ★ テスト日付機能
+   URLに ?testDate=2026-12-25 のように指定すると
+   その日付として特殊服を判定する。
+   指定しない場合は通常どおり今日の日付を使用。
+===================================================== */
+
+function getTestDate(){
+
+  try{
+
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+    const value =
+      params.get("testDate");
+
+    if(
+      value &&
+      /^\d{4}-\d{2}-\d{2}$/.test(value)
+    ){
+
+      const testDate =
+        new Date(
+          `${value}T12:00:00`
+        );
+
+      if(
+        !Number.isNaN(
+          testDate.getTime()
+        ) &&
+        testDate.getFullYear() ===
+          Number(value.slice(0,4)) &&
+        testDate.getMonth()+1 ===
+          Number(value.slice(5,7)) &&
+        testDate.getDate() ===
+          Number(value.slice(8,10))
+      ){
+
+        return testDate;
+
+      }
+
+    }
+
+  }catch(error){
+
+    console.warn(
+      "テスト日付を読み込めませんでした",
+      error
+    );
+
+  }
+
+  return null;
+
+}
+
+function getCurrentDate(){
+
+  return getTestDate() || new Date();
+
+}
 
 /* =====================================================
    今日が特殊服の日か判定
@@ -917,8 +934,7 @@ function setCharacter(
    */
   bellImage.src =
     getCharacterImage(
-      currentCharacter,
-      getCurrentDate()
+      currentCharacter
     );
 
   bellImage.alt =
@@ -997,8 +1013,7 @@ function updateCostume(){
 
   const costumeImage =
     getCharacterImage(
-      currentCharacter,
-      getCurrentDate()
+      currentCharacter
     );
 
   if(
