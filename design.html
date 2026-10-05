@@ -488,6 +488,16 @@ const heartContainer =
 let currentCharacter="bell";
 
 /* =====================================================
+   ★ 装備中の衣装
+   handbell.htmlから受け取る
+===================================================== */
+
+let equippedCostume = {
+  bell:null,
+  chime:null
+};
+
+/* =====================================================
    通常キャラクター画像
 ===================================================== */
 
@@ -805,7 +815,11 @@ function getCostumeKey(
 }
 
 /* =====================================================
-   今日のキャラクター画像を取得
+   ★ キャラクター画像を取得
+   優先順位：
+   ①イベント衣装
+   ②装備衣装
+   ③通常衣装
 ===================================================== */
 
 function getCharacterImage(
@@ -822,7 +836,7 @@ function getCharacterImage(
     getCostumeKey(date);
 
   /*
-   * イベント日なら特殊服
+   * ① イベント衣装が最優先
    */
 
   if(
@@ -836,7 +850,33 @@ function getCharacterImage(
   }
 
   /*
-   * 通常日は通常画像
+   * ② イベントではない場合、
+   *    ユーザーが装備している衣装
+   */
+
+  const equippedId =
+    equippedCostume[selected];
+
+  if(
+    equippedId ===
+    "secret_bell_rare_costume"
+  ){
+
+    return "costumes/bell-rare.jpg";
+
+  }
+
+  if(
+    equippedId ===
+    "secret_chime_rare_costume"
+  ){
+
+    return "costumes/chime-rare.jpg";
+
+  }
+
+  /*
+   * ③ 装備衣装もない場合は通常画像
    */
 
   return characterImages[selected].src;
@@ -864,7 +904,9 @@ function setCharacter(
   if(!data)return;
 
   /*
-   * ★ここで特殊服を判定
+   * ★ イベント衣装
+   *    ＞ 装備衣装
+   *    ＞ 通常衣装
    */
   bellImage.src =
     getCharacterImage(
@@ -894,6 +936,71 @@ function setCharacter(
 
     characterName.textContent =
       data.name;
+
+  }
+
+}
+
+/* =====================================================
+   ★ 装備衣装更新
+===================================================== */
+
+function updateEquippedCostume(
+  data
+){
+
+  if(
+    data &&
+    typeof data === "object"
+  ){
+
+    equippedCostume = {
+
+      bell:
+        data.bell || null,
+
+      chime:
+        data.chime || null
+
+    };
+
+  }else{
+
+    equippedCostume = {
+
+      bell:null,
+
+      chime:null
+
+    };
+
+  }
+
+  /*
+   * 現在表示中のキャラクターを
+   * 装備衣装込みで再判定
+   *
+   * イベント日ならイベント衣装が
+   * 自動的に優先される。
+   */
+
+  const costumeImage =
+    getCharacterImage(
+      currentCharacter
+    );
+
+  const targetUrl =
+    new URL(
+      costumeImage,
+      window.location.href
+    ).href;
+
+  if(
+    bellImage.src !== targetUrl
+  ){
+
+    bellImage.src =
+      costumeImage;
 
   }
 
@@ -942,7 +1049,7 @@ function updateCostume(){
 
   /*
    * キャラクターはそのまま。
-   * 今日の特殊服だけ再判定。
+   * 今日の特殊服と装備衣装を再判定。
    */
 
   const costumeImage =
@@ -1252,9 +1359,27 @@ window.addEventListener(
 
       /*
        * キャラクター変更直後にも
-       * 特殊服を再判定
+       * 特殊服・装備衣装を再判定
        */
       updateCostume();
+
+      return;
+
+    }
+
+    /* =================================================
+       ★ 装備衣装
+       handbell.htmlから受信
+    ================================================= */
+
+    if(
+      event.data.type ===
+      "handbell-equipped-costume"
+    ){
+
+      updateEquippedCostume(
+        event.data.equippedCostume
+      );
 
       return;
 
