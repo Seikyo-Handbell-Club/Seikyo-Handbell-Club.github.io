@@ -2489,6 +2489,44 @@ bellImage.addEventListener(
   }
 );
 
+/* =====================================================
+   実際にイベント衣装が表示されたときだけコレクションへ記録
+   大晦日(winter)も event_newyearseve_* として保存する。
+===================================================== */
+bellImage.addEventListener(
+  "load",
+  ()=>{
+    if(!isEmbedded) return;
+
+    const costumeKey = getCostumeKey(getCurrentDate());
+    if(!costumeKey) return;
+
+    const expectedSrc = getCharacterImage(currentCharacter);
+    if(
+      !expectedSrc ||
+      !bellImage.src.endsWith(expectedSrc)
+    ){
+      return;
+    }
+
+    const eventKey =
+      costumeKey === "winter"
+        ? "newyearseve"
+        : costumeKey;
+
+    const itemId =
+      `event_${eventKey}_${currentCharacter}`;
+
+    window.parent.postMessage(
+      {
+        type:"handbell-collection-acquire",
+        itemId
+      },
+      "*"
+    );
+  }
+);
+
 setCharacter("bell");
 
 /* =====================================================

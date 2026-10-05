@@ -2065,8 +2065,8 @@ from
 /* =====================================================
    ★ コレクション取得テスト用の日付
    ここを変更すると、イベント衣装の取得判定も同じ日付になります。
-   例: const TEST_DATE = "2026-12-25";
-   通常運用: const TEST_DATE = "2026-12-25";
+   例: const TEST_DATE = "2026-12-31";
+   通常運用: const TEST_DATE = null;
    ※ design.html でテストする日付と同じ値にしてください。
 ===================================================== */
 const TEST_DATE = "2026-12-31";
@@ -3022,13 +3022,6 @@ onAuthStateChanged(
     await loadEquippedCostume();
     sendCharacterToBell();
     sendEquippedCostumeToBell();
-
-    /* =========================
-       イベント衣装のコレクション取得
-       design.html は変更せず、実際に表示される今日の衣装だけを
-       同じ日付・キャラクター条件で確認して記録する。
-    ========================= */
-    acquireTodayCharacterCostume();
 
 
     $("loggedOutLeft")
@@ -6502,51 +6495,6 @@ async function acquireCollectionForDisplayedImage(imageInfo){
    今日のイベント衣装をコレクションへ記録
    ※ design.html は変更しない
 ========================= */
-function getTodayCharacterCostumeItemId(){
-  const character = profile?.characterType === "chime" ? "chime" : "bell";
-  const today = getAppDate();
-  const y = today.getFullYear();
-  const md = `${String(today.getMonth()+1).padStart(2,"0")}-${String(today.getDate()).padStart(2,"0")}`;
-
-  let eventKey = null;
-
-  /* design.html と同じイベント衣装の表示日を使用 */
-  if(md === "01-01" || md === "01-02" || md === "01-03" || md === "01-04" || md === "01-05") eventKey = "newyear";
-  else if(md === "02-03") eventKey = "setsubun";
-  else if(md === "02-14") eventKey = "valentine";
-  else if(md === "03-03") eventKey = "hinamatsuri";
-  else if(md === "03-14") eventKey = "whiteday";
-  else if(md === "05-05") eventKey = "kodomonohi";
-  else if(md === "07-07") eventKey = "tanabata";
-  else if(jugoyaDates[y] === md) eventKey = "tsukimi";
-  else if(md === "10-31") eventKey = "halloween";
-  else if(md === "12-24") eventKey = "christmaseve";
-  else if(md === "12-25") eventKey = "christmas";
-  else if(md === "12-31") eventKey = "newyearseve";
-
-  if(!eventKey) return null;
-
-  return `event_${eventKey}_${character}`;
-}
-
-async function acquireTodayCharacterCostume(){
-  if(!currentUser || !profile) return;
-
-  const itemId = getTodayCharacterCostumeItemId();
-  if(!itemId) return;
-
-  const item = getCollectionItem(itemId);
-  if(!item) return;
-
-  /* 実際に使用される衣装画像が読み込める場合だけ取得する */
-  const image = new Image();
-  image.onload = () => {
-    acquireCollectionItem(itemId);
-  };
-  image.onerror = () => {};
-  image.src = item.src;
-}
-
 async function loadCollectionData(){
   if(!currentUser) return {};
   try{
