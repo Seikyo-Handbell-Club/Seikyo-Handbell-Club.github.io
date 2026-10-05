@@ -456,6 +456,57 @@ body.logged-in .bubble:after{
    基本
 ===================================================== */
 
+/*
+ * =====================================================
+ * ★ テスト用日付設定 ★
+ *
+ * 通常運用：
+ * const TEST_DATE = null;
+ *
+ * 例：七夕をテスト
+ * const TEST_DATE = "2026-07-07";
+ *
+ * 例：十五夜をテスト
+ * const TEST_DATE = "2026-09-25";
+ *
+ * 例：クリスマスをテスト
+ * const TEST_DATE = "2026-12-25";
+ *
+ * nullに戻すと実際の今日の日付になります。
+ * =====================================================
+ */
+
+const TEST_DATE = null;
+
+/*
+ * テスト日付を使うか、実際の現在日時を使うか
+ */
+function getCurrentDate(){
+
+  if(TEST_DATE){
+
+    const testDate =
+      new Date(
+        `${TEST_DATE}T12:00:00`
+      );
+
+    if(
+      !Number.isNaN(
+        testDate.getTime()
+      )
+    ){
+
+      return testDate;
+
+    }
+
+  }
+
+  return new Date();
+
+}
+
+
 const message =
   document.getElementById(
     "bellMessage"
@@ -480,21 +531,6 @@ const heartContainer =
   document.getElementById(
     "heartContainer"
   );
-
-/* =====================================================
-   ★ テスト用日付
-===================================================== */
-
-/*
- * null：
- * 実際の今日の日付を使用
- *
- * 例：
- * "2026-12-25"
- * → 2026年12月25日として衣装判定
- */
-
-const TEST_DATE = null;
 
 /* =====================================================
    キャラクター設定
@@ -529,80 +565,80 @@ const costumeImages={
   bell:{
 
     newyear:
-      "costumes/bell-newyear.png",
+      "costumes/bell-newyear.jpg",
 
     setsubun:
-      "costumes/bell-setsubun.png",
+      "costumes/bell-setsubun.jpg",
 
     valentine:
-      "costumes/bell-valentine.png",
+      "costumes/bell-valentine.jpg",
 
     hinamatsuri:
-      "costumes/bell-hinamatsuri.png",
+      "costumes/bell-hinamatsuri.jpg",
 
     whiteday:
-      "costumes/bell-whiteday.png",
+      "costumes/bell-whiteday.jpg",
 
     kodomonohi:
-      "costumes/bell-kodomonohi.png",
+      "costumes/bell-kodomonohi.jpg",
 
     tanabata:
-      "costumes/bell-tanabata.png",
+      "costumes/bell-tanabata.jpg",
 
     tsukimi:
-      "costumes/bell-tsukimi.png",
+      "costumes/bell-tsukimi.jpg",
 
     halloween:
-      "costumes/bell-halloween.png",
+      "costumes/bell-halloween.jpg",
 
     christmaseve:
-      "costumes/bell-christmaseve.png",
+      "costumes/bell-christmaseve.jpg",
 
     christmas:
-      "costumes/bell-Christmas.png",
+      "costumes/bell-Christmas.jpg",
 
     winter:
-      "costumes/bell-winter.png"
+      "costumes/bell-winter.jpg"
 
   },
 
   chime:{
 
     newyear:
-      "costumes/chime-newyear.png",
+      "costumes/chime-newyear.jpg",
 
     setsubun:
-      "costumes/chime-setsubun.png",
+      "costumes/chime-setsubun.jpg",
 
     valentine:
-      "costumes/chime-valentine.png",
+      "costumes/chime-valentine.jpg",
 
     hinamatsuri:
-      "costumes/chime-hinamatsuri.png",
+      "costumes/chime-hinamatsuri.jpg",
 
     whiteday:
-      "costumes/chime-whiteday.png",
+      "costumes/chime-whiteday.jpg",
 
     kodomonohi:
-      "costumes/chime-kodomonohi.png",
+      "costumes/chime-kodomonohi.jpg",
 
     tanabata:
-      "costumes/chime-tanabata.png",
+      "costumes/chime-tanabata.jpg",
 
     tsukimi:
-      "costumes/chime-tsukimi.png",
+      "costumes/chime-tsukimi.jpg",
 
     halloween:
-      "costumes/chime-halloween.png",
+      "costumes/chime-halloween.jpg",
 
     christmaseve:
-      "costumes/chime-christmaseve.png",
+      "costumes/chime-christmaseve.jpg",
 
     christmas:
-      "costumes/chime-Christmas.png",
+      "costumes/chime-Christmas.jpg",
 
     winter:
-      "costumes/chime-winter.png"
+      "costumes/chime-winter.jpg"
 
   }
 
@@ -630,58 +666,11 @@ const jugoyaDates={
 };
 
 /* =====================================================
-   ★ 判定に使用する日付
-===================================================== */
-
-function getCostumeTestDate(){
-
-  if(TEST_DATE){
-
-    const parts =
-      TEST_DATE.split("-");
-
-    if(parts.length===3){
-
-      const year =
-        Number(parts[0]);
-
-      const month =
-        Number(parts[1]);
-
-      const day =
-        Number(parts[2]);
-
-      const testDate =
-        new Date(
-          year,
-          month-1,
-          day
-        );
-
-      if(
-        !Number.isNaN(
-          testDate.getTime()
-        )
-      ){
-
-        return testDate;
-
-      }
-
-    }
-
-  }
-
-  return new Date();
-
-}
-
-/* =====================================================
    今日が特殊服の日か判定
 ===================================================== */
 
 function getCostumeKey(
-  date=getCostumeTestDate()
+  date=getCurrentDate()
 ){
 
   const month =
@@ -872,7 +861,7 @@ function getCostumeKey(
 
 function getCharacterImage(
   character,
-  date=getCostumeTestDate()
+  date=getCurrentDate()
 ){
 
   const selected =
@@ -970,7 +959,7 @@ let lastCostumeDate="";
 function getTodayKey(){
 
   const now =
-    getCostumeTestDate();
+    getCurrentDate();
 
   return `${
     now.getFullYear()
@@ -1158,7 +1147,7 @@ function buildBellMessages(
 ){
 
   const now =
-    new Date();
+    getCurrentDate();
 
   const values =
     Object.values(
@@ -1352,7 +1341,7 @@ function pad(n){
 }
 
 function dateString(
-  date=new Date()
+  date=getCurrentDate()
 ){
 
   return `${
@@ -1366,7 +1355,7 @@ function dateString(
 }
 
 function monthString(
-  date=new Date()
+  date=getCurrentDate()
 ){
 
   return `${
@@ -1401,7 +1390,7 @@ function timeToMinutes(
 ===================================================== */
 
 function getGreeting(
-  date=new Date()
+  date=getCurrentDate()
 ){
 
   const hour =
@@ -1431,7 +1420,7 @@ function getGreeting(
 
 function greetingMessage(
   text,
-  date=new Date()
+  date=getCurrentDate()
 ){
 
   return `${
@@ -1530,7 +1519,7 @@ function getStartTime(
 ===================================================== */
 
 function getTomorrowString(
-  date=new Date()
+  date=getCurrentDate()
 ){
 
   const tomorrow =
@@ -1548,7 +1537,7 @@ function getTomorrowString(
 
 function daysFromToday(
   dateStringValue,
-  today=new Date()
+  today=getCurrentDate()
 ){
 
   const target =
@@ -1922,8 +1911,6 @@ function buildRegularMessages(
       "こんばんは！予定を確認してみてね！",
 
       "こんばんは！今月の予定もチェックしてみてね！",
-
-      "こんばんは！今日も予定を見にきてくれてありがとう",
 
       "こんばんは！今日はどんな1日だったかな？",
 
