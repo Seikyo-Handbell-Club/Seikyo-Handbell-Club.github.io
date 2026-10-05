@@ -1129,7 +1129,7 @@ textarea{
 
   <!-- ベルちゃん表示エリア（ベルちゃん本体のコードは design.html 側） -->
   <iframe
-    src="design.html?v=20261004-5"
+    src="design.html?v=20261005-1"
     title="ベルちゃん"
     class="bell-frame"
   ></iframe>
@@ -3586,11 +3586,23 @@ async function render(){
 
 function sendCharacterToBell(){
   const frame=document.querySelector(".bell-frame");
-  if(!frame || !frame.contentWindow) return;
-  frame.contentWindow.postMessage({
-    type:"handbell-character",
-    character:profile?.characterType === "chime" ? "chime" : "bell"
-  },"*");
+  if(!frame) return;
+
+  const send = () => {
+    if(!frame.contentWindow) return;
+    frame.contentWindow.postMessage({
+      type:"handbell-character",
+      character:profile?.characterType === "chime" ? "chime" : "bell",
+      testDate: TEST_DATE || null
+    },"*");
+  };
+
+  send();
+
+  if(!frame.dataset.testDateSyncBound){
+    frame.dataset.testDateSyncBound = "1";
+    frame.addEventListener("load", send);
+  }
 }
 
 function sendEquippedCostumeToBell(){
@@ -6345,7 +6357,7 @@ function getEventImageInfo(date){
 
    通常運用に戻すときは null にしてください。
 ===================================================== */
-const TEST_DATE = "2026-12-25";
+const TEST_DATE = "2026-12-24";
 
 function getAppDate(){
   if(TEST_DATE){
@@ -6626,7 +6638,7 @@ async function showCollection(){
 async function decideLoginImage(){
   if(!currentUser) return null;
 
-  const today = new Date();
+  const today = getAppDate();
   const todayString = getTodayString(today);
   const monthKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}`;
   const memberRef = ref(db, `members/${currentUser.uid}`);

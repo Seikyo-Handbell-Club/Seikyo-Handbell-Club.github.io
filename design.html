@@ -629,18 +629,22 @@ const jugoyaDates={
    指定しない場合は通常どおり今日の日付を使用。
 ===================================================== */
 
+let parentTestDate = null;
+
 function getTestDate(){
 
-  /* コードで指定したテスト日付を最優先 */
-  if(TEST_DATE){
+  /* 親ページから渡されたテスト日付を最優先 */
+  const activeTestDate = parentTestDate || TEST_DATE;
+
+  if(activeTestDate){
     try{
-      if(/^\d{4}-\d{2}-\d{2}$/.test(TEST_DATE)){
-        const testDate = new Date(`${TEST_DATE}T12:00:00`);
+      if(/^\d{4}-\d{2}-\d{2}$/.test(activeTestDate)){
+        const testDate = new Date(`${activeTestDate}T12:00:00`);
         if(
           !Number.isNaN(testDate.getTime()) &&
-          testDate.getFullYear() === Number(TEST_DATE.slice(0,4)) &&
-          testDate.getMonth()+1 === Number(TEST_DATE.slice(5,7)) &&
-          testDate.getDate() === Number(TEST_DATE.slice(8,10))
+          testDate.getFullYear() === Number(activeTestDate.slice(0,4)) &&
+          testDate.getMonth()+1 === Number(activeTestDate.slice(5,7)) &&
+          testDate.getDate() === Number(activeTestDate.slice(8,10))
         ){
           return testDate;
         }
@@ -1423,6 +1427,12 @@ window.addEventListener(
       event.data.type ===
       "handbell-character"
     ){
+
+      if(typeof event.data.testDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(event.data.testDate)){
+        parentTestDate = event.data.testDate;
+      } else {
+        parentTestDate = null;
+      }
 
       setCharacter(
         event.data.character
