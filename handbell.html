@@ -1129,7 +1129,7 @@ textarea{
 
   <!-- ベルちゃん表示エリア（ベルちゃん本体のコードは design.html 側） -->
   <iframe
-    src="design.html?v=20261004-5"
+    src="design.html?v=20261005-1"
     title="ベルちゃん"
     class="bell-frame"
   ></iframe>
@@ -2018,6 +2018,42 @@ textarea{
 </div>
 
 <script type="module">
+
+/* =====================================================
+   ★ テスト用の日付（ここだけ変更）
+
+   ここを書き換えると、
+   ・月替わり画像
+   ・イベント画像
+   ・ベルちゃん／チャイムくんの衣装
+   ・コレクション取得判定
+   ・ベルちゃん側の日付判定
+   を同じ日付としてテストできます。
+
+   例：
+   const TEST_DATE = "2027-01-10";
+
+   通常運用に戻すときは null にしてください。
+===================================================== */
+const TEST_DATE = "2027-01-10";
+
+function getAppDate(){
+  if(TEST_DATE){
+    const match = String(TEST_DATE).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if(match){
+      const date = new Date(`${match[1]}-${match[2]}-${match[3]}T12:00:00`);
+      if(
+        !Number.isNaN(date.getTime()) &&
+        date.getFullYear() === Number(match[1]) &&
+        date.getMonth()+1 === Number(match[2]) &&
+        date.getDate() === Number(match[3])
+      ){
+        return date;
+      }
+    }
+  }
+  return new Date();
+}
 
 import{
   initializeApp
@@ -3589,7 +3625,8 @@ function sendCharacterToBell(){
   if(!frame || !frame.contentWindow) return;
   frame.contentWindow.postMessage({
     type:"handbell-character",
-    character:profile?.characterType === "chime" ? "chime" : "bell"
+    character:profile?.characterType === "chime" ? "chime" : "bell",
+    testDate:TEST_DATE
   },"*");
 }
 
@@ -3612,7 +3649,8 @@ function sendSchedulesToBell(){
   frame.contentWindow.postMessage({
     type:"handbell-schedules",
     schedules:scheduleCache || {},
-    ready:true
+    ready:true,
+    testDate:TEST_DATE
   },"*");
 }
 
@@ -6333,7 +6371,7 @@ function getEventImageInfo(date){
   };
 }
 
-function getTodayString(date = new Date()){
+function getTodayString(date = getAppDate()){
   return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
 }
 
@@ -6428,7 +6466,7 @@ async function acquireCollectionItem(itemId){
 function getCollectionItemForImageInfo(imageInfo){
   if(!imageInfo) return null;
   if(imageInfo.kind === "monthly"){
-    return `monthly_${new Date().getMonth()+1}`;
+    return `monthly_${String(getAppDate().getMonth()+1).padStart(2,"0")}`;
   }
   if(imageInfo.kind === "event"){
     const event = getEventImageInfo(getTodayString());
@@ -6472,7 +6510,7 @@ async function acquireCollectionForDisplayedImage(imageInfo){
 ========================= */
 function getTodayCharacterCostumeItemId(){
   const character = profile?.characterType === "chime" ? "chime" : "bell";
-  const today = new Date();
+  const today = getAppDate();
   const y = today.getFullYear();
   const md = `${String(today.getMonth()+1).padStart(2,"0")}-${String(today.getDate()).padStart(2,"0")}`;
 
@@ -6601,7 +6639,7 @@ async function showCollection(){
 async function decideLoginImage(){
   if(!currentUser) return null;
 
-  const today = new Date();
+  const today = getAppDate();
   const todayString = getTodayString(today);
   const monthKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}`;
   const memberRef = ref(db, `members/${currentUser.uid}`);

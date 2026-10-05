@@ -89,7 +89,7 @@ body:not(.logged-in) .bell.chime{
 
 body.logged-in .bell.chime{
   width:80px;
-  right:25px;
+  right:18px;
   bottom:0px;
 }
 
@@ -599,7 +599,8 @@ const costumeImages={
    通常の日付に戻す場合は null にしてください
 ===================================================== */
 
-const TEST_DATE = null;
+/* 親ページ handbell.html から共有されるテスト日付 */
+let sharedTestDate = null;
 
 /* =====================================================
    十五夜の日
@@ -631,74 +632,46 @@ const jugoyaDates={
 
 function getTestDate(){
 
-  /* コードで指定したテスト日付を最優先 */
-  if(TEST_DATE){
+  /* 親ページから受け取った日付を最優先 */
+  if(sharedTestDate){
     try{
-      if(/^\d{4}-\d{2}-\d{2}$/.test(TEST_DATE)){
-        const testDate = new Date(`${TEST_DATE}T12:00:00`);
+      if(/^\d{4}-\d{2}-\d{2}$/.test(sharedTestDate)){
+        const testDate = new Date(`${sharedTestDate}T12:00:00`);
         if(
           !Number.isNaN(testDate.getTime()) &&
-          testDate.getFullYear() === Number(TEST_DATE.slice(0,4)) &&
-          testDate.getMonth()+1 === Number(TEST_DATE.slice(5,7)) &&
-          testDate.getDate() === Number(TEST_DATE.slice(8,10))
+          testDate.getFullYear() === Number(sharedTestDate.slice(0,4)) &&
+          testDate.getMonth()+1 === Number(sharedTestDate.slice(5,7)) &&
+          testDate.getDate() === Number(sharedTestDate.slice(8,10))
         ){
           return testDate;
         }
       }
     }catch(error){
-      console.warn("コード指定のテスト日付を読み込めませんでした",error);
+      console.warn("共有テスト日付を読み込めませんでした",error);
     }
   }
 
+  /* 親ページが共有できない場合のURL指定 */
   try{
+    const params = new URLSearchParams(window.location.search);
+    const value = params.get("testDate");
 
-    const params =
-      new URLSearchParams(
-        window.location.search
-      );
-
-    const value =
-      params.get("testDate");
-
-    if(
-      value &&
-      /^\d{4}-\d{2}-\d{2}$/.test(value)
-    ){
-
-      const testDate =
-        new Date(
-          `${value}T12:00:00`
-        );
-
+    if(value && /^\d{4}-\d{2}-\d{2}$/.test(value)){
+      const testDate = new Date(`${value}T12:00:00`);
       if(
-        !Number.isNaN(
-          testDate.getTime()
-        ) &&
-        testDate.getFullYear() ===
-          Number(value.slice(0,4)) &&
-        testDate.getMonth()+1 ===
-          Number(value.slice(5,7)) &&
-        testDate.getDate() ===
-          Number(value.slice(8,10))
+        !Number.isNaN(testDate.getTime()) &&
+        testDate.getFullYear() === Number(value.slice(0,4)) &&
+        testDate.getMonth()+1 === Number(value.slice(5,7)) &&
+        testDate.getDate() === Number(value.slice(8,10))
       ){
-
         return testDate;
-
       }
-
     }
-
   }catch(error){
-
-    console.warn(
-      "テスト日付を読み込めませんでした",
-      error
-    );
-
+    console.warn("テスト日付を読み込めませんでした",error);
   }
 
   return null;
-
 }
 
 function getCurrentDate(){
@@ -1388,6 +1361,15 @@ window.addEventListener(
   event=>{
 
     if(!event.data)return;
+
+    /* 親ページのテスト日付を共有 */
+    if(Object.prototype.hasOwnProperty.call(event.data,"testDate")){
+      sharedTestDate = event.data.testDate || null;
+      updateCostume();
+      if(parentSchedules){
+        setBellMessages(buildBellMessages(parentSchedules));
+      }
+    }
 
     /* キャラクター変更 */
 
