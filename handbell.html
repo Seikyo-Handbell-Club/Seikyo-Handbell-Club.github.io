@@ -3265,8 +3265,10 @@ onAuthStateChanged(
 
     /* プロフィール取得完了後に、保存済み衣装とキャラクターをiframeへ送る */
     await loadEquippedCostume();
+    await loadEventCostumeOverride();
     sendCharacterToBell();
     sendEquippedCostumeToBell();
+    sendEventCostumeOverrideToBell();
 
     /* 今日のプレゼント（1日1着・コレクションとは別管理） */
     await acquireDailyCostume();
@@ -3862,6 +3864,25 @@ async function render(){
 }
 
 
+let eventCostumeOverride = {};
+
+async function loadEventCostumeOverride(){
+  if(!currentUser){ eventCostumeOverride={}; return; }
+  try{
+    const snap = await get(ref(db, `members/${currentUser.uid}/eventCostumeOverride`));
+    eventCostumeOverride = snap.exists() && snap.val() && typeof snap.val()==="object" ? snap.val() : {};
+  }catch(e){
+    console.error("イベント衣装変更情報の読み込みエラー:",e);
+    eventCostumeOverride={};
+  }
+}
+
+function sendEventCostumeOverrideToBell(){
+  const frame=document.querySelector(".bell-frame");
+  if(!frame || !frame.contentWindow) return;
+  frame.contentWindow.postMessage({type:"handbell-event-costume-override",overrides:eventCostumeOverride||{}},"*");
+}
+
 function sendCharacterToBell(){
   const frame=document.querySelector(".bell-frame");
   if(!frame || !frame.contentWindow) return;
@@ -3901,6 +3922,7 @@ function setupBellBridge(){
     sendSchedulesToBell();
     sendCharacterToBell();
     sendEquippedCostumeToBell();
+    sendEventCostumeOverrideToBell();
   });
   sendSchedulesToBell();
   sendCharacterToBell();
@@ -3914,6 +3936,7 @@ window.addEventListener("message",event=>{
     sendSchedulesToBell();
     sendCharacterToBell();
     sendEquippedCostumeToBell();
+    sendEventCostumeOverrideToBell();
     return;
   }
 

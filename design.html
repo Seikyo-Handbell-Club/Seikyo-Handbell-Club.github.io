@@ -487,6 +487,9 @@ const heartContainer =
 
 let currentCharacter="bell";
 
+let equippedCostumes={bell:null,chime:null};
+let eventCostumeOverrides={};
+
 /* =====================================================
    通常キャラクター画像
 ===================================================== */
@@ -599,9 +602,7 @@ const costumeImages={
    通常の日付に戻す場合は null にしてください
 ===================================================== */
 
-/* 親ページ handbell.html から共有されるテスト日付
-   null のときは「テストなし」＝実際の現在日時を使用 */
-let sharedTestDate = null;
+const TEST_DATE = "2026-12-25";
 
 /* =====================================================
    十五夜の日
@@ -633,46 +634,74 @@ const jugoyaDates={
 
 function getTestDate(){
 
-  /* 親ページから受け取った日付を最優先 */
-  if(sharedTestDate){
+  /* コードで指定したテスト日付を最優先 */
+  if(TEST_DATE){
     try{
-      if(/^\d{4}-\d{2}-\d{2}$/.test(sharedTestDate)){
-        const testDate = new Date(`${sharedTestDate}T12:00:00`);
+      if(/^\d{4}-\d{2}-\d{2}$/.test(TEST_DATE)){
+        const testDate = new Date(`${TEST_DATE}T12:00:00`);
         if(
           !Number.isNaN(testDate.getTime()) &&
-          testDate.getFullYear() === Number(sharedTestDate.slice(0,4)) &&
-          testDate.getMonth()+1 === Number(sharedTestDate.slice(5,7)) &&
-          testDate.getDate() === Number(sharedTestDate.slice(8,10))
+          testDate.getFullYear() === Number(TEST_DATE.slice(0,4)) &&
+          testDate.getMonth()+1 === Number(TEST_DATE.slice(5,7)) &&
+          testDate.getDate() === Number(TEST_DATE.slice(8,10))
         ){
           return testDate;
         }
       }
     }catch(error){
-      console.warn("共有テスト日付を読み込めませんでした",error);
+      console.warn("コード指定のテスト日付を読み込めませんでした",error);
     }
   }
 
-  /* 親ページが共有できない場合のURL指定 */
   try{
-    const params = new URLSearchParams(window.location.search);
-    const value = params.get("testDate");
 
-    if(value && /^\d{4}-\d{2}-\d{2}$/.test(value)){
-      const testDate = new Date(`${value}T12:00:00`);
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+    const value =
+      params.get("testDate");
+
+    if(
+      value &&
+      /^\d{4}-\d{2}-\d{2}$/.test(value)
+    ){
+
+      const testDate =
+        new Date(
+          `${value}T12:00:00`
+        );
+
       if(
-        !Number.isNaN(testDate.getTime()) &&
-        testDate.getFullYear() === Number(value.slice(0,4)) &&
-        testDate.getMonth()+1 === Number(value.slice(5,7)) &&
-        testDate.getDate() === Number(value.slice(8,10))
+        !Number.isNaN(
+          testDate.getTime()
+        ) &&
+        testDate.getFullYear() ===
+          Number(value.slice(0,4)) &&
+        testDate.getMonth()+1 ===
+          Number(value.slice(5,7)) &&
+        testDate.getDate() ===
+          Number(value.slice(8,10))
       ){
+
         return testDate;
+
       }
+
     }
+
   }catch(error){
-    console.warn("テスト日付を読み込めませんでした",error);
+
+    console.warn(
+      "テスト日付を読み込めませんでした",
+      error
+    );
+
   }
 
   return null;
+
 }
 
 function getCurrentDate(){
@@ -880,34 +909,39 @@ function getCharacterImage(
   date=getCurrentDate()
 ){
 
-  const selected =
-    character==="chime"
-      ? "chime"
-      : "bell";
+  const selected = character === "chime" ? "chime" : "bell";
+  const costumeKey = getCostumeKey(date);
 
-  const costumeKey =
-    getCostumeKey(date);
-
-  /*
-   * イベント日なら特殊服
-   */
-
-  if(
-    costumeKey &&
-    costumeImages[selected] &&
-    costumeImages[selected][costumeKey]
-  ){
-
-    return costumeImages[selected][costumeKey];
-
+  if(costumeKey){
+    const override = eventCostumeOverrides?.[costumeKey]?.[selected] || null;
+    if(override){
+      const overrideImage = getCostumeImageFromId(override, selected);
+      if(overrideImage) return overrideImage;
+    }
+    if(costumeImages[selected]?.[costumeKey]){
+      return costumeImages[selected][costumeKey];
+    }
   }
 
-  /*
-   * 通常日は通常画像
-   */
+  const equipped = equippedCostumes?.[selected] || null;
+  const equippedImage = getCostumeImageFromId(equipped, selected);
+  if(equippedImage) return equippedImage;
 
   return characterImages[selected].src;
+}
 
+function getCostumeImageFromId(costumeId, character){
+  if(!costumeId) return null;
+  if(costumeId === "daily-costume-01") return "costumes/daily-costume-01.png";
+  if(costumeId === "daily-costume-02") return "costumes/daily-costume-02.png";
+  if(costumeId.startsWith("event_")){
+    const suffix = character === "chime" ? "_chime" : "_bell";
+    if(!costumeId.endsWith(suffix)) return null;
+    let key = costumeId.slice(6,-suffix.length);
+    if(key === "newyearseve") key = "winter";
+    return costumeImages?.[character]?.[key] || null;
+  }
+  return null;
 }
 
 /* =====================================================
@@ -1363,50 +1397,35 @@ window.addEventListener(
 
     if(!event.data)return;
 
-    /* 親ページのテスト日付を共有 */
-    if(Object.prototype.hasOwnProperty.call(event.data,"testDate")){
-      sharedTestDate = event.data.testDate || null;
-      updateCostume();
-      if(parentSchedules){
-        setBellMessages(buildBellMessages(parentSchedules));
-      }
-    }
-
-    /* キャラクター変更 */
-
-    if(
-      event.data.type ===
-      "handbell-character"
-    ){
-
-      setCharacter(
-        event.data.character
-      );
-
-      /*
-       * キャラクター変更直後にも
-       * 特殊服を再判定
-       */
-      updateCostume();
-
+    if(event.data.type === "handbell-equipped-costume"){
+      const data = event.data.equippedCostume || {};
+      equippedCostumes = {
+        bell:data.bell || null,
+        chime:data.chime || null
+      };
+      setCharacter(currentCharacter);
       return;
-
     }
 
-    /* スケジュール */
-
-    if(
-      event.data.type !==
-      "handbell-schedules"
-    ){
-
+    if(event.data.type === "handbell-event-costume-override"){
+      eventCostumeOverrides =
+        event.data.overrides && typeof event.data.overrides === "object"
+          ? event.data.overrides
+          : {};
+      setCharacter(currentCharacter);
       return;
-
     }
 
-    receiveParentSchedules(
-      event.data.schedules
-    );
+    if(event.data.type === "handbell-character"){
+      setCharacter(event.data.character);
+      updateCostume();
+      return;
+    }
+
+    if(event.data.type === "handbell-schedules"){
+      receiveParentSchedules(event.data.schedules);
+      return;
+    }
 
   }
 );
@@ -2469,44 +2488,6 @@ bellImage.addEventListener(
     ){
       bellImage.src = fallback;
     }
-  }
-);
-
-/* =====================================================
-   実際にイベント衣装が表示されたときだけコレクションへ記録
-   大晦日(winter)も event_newyearseve_* として保存する。
-===================================================== */
-bellImage.addEventListener(
-  "load",
-  ()=>{
-    if(!isEmbedded) return;
-
-    const costumeKey = getCostumeKey(getCurrentDate());
-    if(!costumeKey) return;
-
-    const expectedSrc = getCharacterImage(currentCharacter);
-    if(
-      !expectedSrc ||
-      !bellImage.src.endsWith(expectedSrc)
-    ){
-      return;
-    }
-
-    const eventKey =
-      costumeKey === "winter"
-        ? "newyearseve"
-        : costumeKey;
-
-    const itemId =
-      `event_${eventKey}_${currentCharacter}`;
-
-    window.parent.postMessage(
-      {
-        type:"handbell-collection-acquire",
-        itemId
-      },
-      "*"
-    );
   }
 );
 
