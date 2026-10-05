@@ -1129,7 +1129,7 @@ textarea{
 
   <!-- ベルちゃん表示エリア（ベルちゃん本体のコードは design.html 側） -->
   <iframe
-    src="design.html?v=20261005-24"
+    src="design.html?v=20261004-5"
     title="ベルちゃん"
     class="bell-frame"
   ></iframe>
@@ -2062,36 +2062,6 @@ from
    Firebase設定
 ========================= */
 
-/* =====================================================
-   ★ コレクション取得テスト用の日付
-   ここを変更すると、イベント衣装の取得判定も同じ日付になります。
-   例: const TEST_DATE = "2026-12-31";
-   通常運用: const TEST_DATE = null;
-   ※ design.html でテストする日付と同じ値にしてください。
-===================================================== */
-const TEST_DATE = "2027-01-10";
-
-/* テスト日付を実際のDateとして取得 */
-function getTestDate(){
-  if(!TEST_DATE) return null;
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(TEST_DATE)) return null;
-
-  const d = new Date(`${TEST_DATE}T12:00:00`);
-  if(Number.isNaN(d.getTime())) return null;
-
-  if(
-    d.getFullYear() !== Number(TEST_DATE.slice(0,4)) ||
-    d.getMonth()+1 !== Number(TEST_DATE.slice(5,7)) ||
-    d.getDate() !== Number(TEST_DATE.slice(8,10))
-  ) return null;
-
-  return d;
-}
-
-function getAppDate(){
-  return getTestDate() || new Date();
-}
-
 const firebaseConfig = {
 
   apiKey:
@@ -3022,6 +2992,13 @@ onAuthStateChanged(
     await loadEquippedCostume();
     sendCharacterToBell();
     sendEquippedCostumeToBell();
+
+    /* =========================
+       イベント衣装のコレクション取得
+       design.html は変更せず、実際に表示される今日の衣装だけを
+       同じ日付・キャラクター条件で確認して記録する。
+    ========================= */
+    acquireTodayCharacterCostume();
 
 
     $("loggedOutLeft")
@@ -6399,7 +6376,7 @@ const collectionItems = [
   {id:"event_tsukimi_bell",group:"bell",name:"ベルちゃん・十五夜",src:"costumes/bell-tsukimi.png"},
   {id:"event_halloween_bell",group:"bell",name:"ベルちゃん・ハロウィン",src:"costumes/bell-halloween.png"},
   {id:"event_christmaseve_bell",group:"bell",name:"ベルちゃん・クリスマスイブ",src:"costumes/bell-christmaseve.png"},
-  {id:"event_christmas_bell",group:"bell",name:"ベルちゃん・クリスマス",src:"costumes/bell-christmas.png"},
+  {id:"event_christmas_bell",group:"bell",name:"ベルちゃん・クリスマス",src:"costumes/bell-Christmas.png"},
   {id:"event_newyearseve_bell",group:"bell",name:"ベルちゃん・大晦日",src:"costumes/bell-winter.png"},
 
   {id:"event_newyear_chime",group:"chime",name:"チャイムくん・お正月",src:"costumes/chime-newyear.png"},
@@ -6412,7 +6389,7 @@ const collectionItems = [
   {id:"event_tsukimi_chime",group:"chime",name:"チャイムくん・十五夜",src:"costumes/chime-tsukimi.png"},
   {id:"event_halloween_chime",group:"chime",name:"チャイムくん・ハロウィン",src:"costumes/chime-halloween.png"},
   {id:"event_christmaseve_chime",group:"chime",name:"チャイムくん・クリスマスイブ",src:"costumes/chime-christmaseve.png"},
-  {id:"event_christmas_chime",group:"chime",name:"チャイムくん・クリスマス",src:"costumes/chime-christmas.png"},
+  {id:"event_christmas_chime",group:"chime",name:"チャイムくん・クリスマス",src:"costumes/chime-Christmas.png"},
   {id:"event_newyearseve_chime",group:"chime",name:"チャイムくん・大晦日",src:"costumes/chime-winter.png"},
 
   {id:"secret_rare_image",group:"secret",name:"レア画像",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.rare}`},
@@ -6451,14 +6428,12 @@ async function acquireCollectionItem(itemId){
 function getCollectionItemForImageInfo(imageInfo){
   if(!imageInfo) return null;
   if(imageInfo.kind === "monthly"){
-    return `monthly_${String(new Date().getMonth()+1).padStart(2,"0")}`;
+    return `monthly_${new Date().getMonth()+1}`;
   }
   if(imageInfo.kind === "event"){
-    const appDate = getAppDate();
-    const appDateString = getTodayString(appDate);
-    const event = getEventImageInfo(appDateString);
+    const event = getEventImageInfo(getTodayString());
     if(!event) return null;
-    const md = appDateString.slice(5);
+    const md = getTodayString().slice(5);
     const map={
       "01-01":"event_newyear_image",
       "02-03":"event_setsubun_image",
@@ -6473,7 +6448,7 @@ function getCollectionItemForImageInfo(imageInfo){
       "12-25":"event_christmas_image",
       "12-31":"event_newyearseve_image"
     };
-    const y=appDateString.slice(0,4);
+    const y=getTodayString().slice(0,4);
     if(jugoyaDates[y]===md) return "event_tsukimi_image";
     return map[md] || null;
   }
@@ -6495,6 +6470,51 @@ async function acquireCollectionForDisplayedImage(imageInfo){
    今日のイベント衣装をコレクションへ記録
    ※ design.html は変更しない
 ========================= */
+function getTodayCharacterCostumeItemId(){
+  const character = profile?.characterType === "chime" ? "chime" : "bell";
+  const today = new Date();
+  const y = today.getFullYear();
+  const md = `${String(today.getMonth()+1).padStart(2,"0")}-${String(today.getDate()).padStart(2,"0")}`;
+
+  let eventKey = null;
+
+  /* design.html と同じイベント衣装の表示日を使用 */
+  if(md === "01-01" || md === "01-02" || md === "01-03" || md === "01-04" || md === "01-05") eventKey = "newyear";
+  else if(md === "02-03") eventKey = "setsubun";
+  else if(md === "02-14") eventKey = "valentine";
+  else if(md === "03-03") eventKey = "hinamatsuri";
+  else if(md === "03-14") eventKey = "whiteday";
+  else if(md === "05-05") eventKey = "kodomonohi";
+  else if(md === "07-07") eventKey = "tanabata";
+  else if(jugoyaDates[y] === md) eventKey = "tsukimi";
+  else if(md === "10-31") eventKey = "halloween";
+  else if(md === "12-24") eventKey = "christmaseve";
+  else if(md === "12-25") eventKey = "christmas";
+  else if(md === "12-31") eventKey = "newyearseve";
+
+  if(!eventKey) return null;
+
+  return `event_${eventKey}_${character}`;
+}
+
+async function acquireTodayCharacterCostume(){
+  if(!currentUser || !profile) return;
+
+  const itemId = getTodayCharacterCostumeItemId();
+  if(!itemId) return;
+
+  const item = getCollectionItem(itemId);
+  if(!item) return;
+
+  /* 実際に使用される衣装画像が読み込める場合だけ取得する */
+  const image = new Image();
+  image.onload = () => {
+    acquireCollectionItem(itemId);
+  };
+  image.onerror = () => {};
+  image.src = item.src;
+}
+
 async function loadCollectionData(){
   if(!currentUser) return {};
   try{
@@ -6581,7 +6601,7 @@ async function showCollection(){
 async function decideLoginImage(){
   if(!currentUser) return null;
 
-  const today = getAppDate();
+  const today = new Date();
   const todayString = getTodayString(today);
   const monthKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}`;
   const memberRef = ref(db, `members/${currentUser.uid}`);
