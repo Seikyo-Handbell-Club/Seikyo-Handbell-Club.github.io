@@ -539,16 +539,40 @@ const dailyCostumeDefinitions = [
 const secretCostumeDefinitions = {
 
   bell:{
+    /*
+     * 装備時に保存するID
+     */
     id:"secret-bell",
+
+    /*
+     * コレクション側で
+     * 取得済み判定に使うID
+     */
+    collectionId:"secret_bell_rare_costume",
+
     name:"ベルちゃん・シークレット衣装",
+
     src:"costumes/bell-secret-main.png",
+
     kind:"secret"
   },
 
   chime:{
+    /*
+     * 装備時に保存するID
+     */
     id:"secret-chime",
+
+    /*
+     * コレクション側で
+     * 取得済み判定に使うID
+     */
+    collectionId:"secret_chime_rare_costume",
+
     name:"チャイムくん・シークレット衣装",
+
     src:"costumes/chime-secret-main.png",
+
     kind:"secret"
   }
 
@@ -763,6 +787,7 @@ function getTodayEventKey(){
   /*
    * お正月
    */
+
   if(
     now.getMonth()+1 === 1 &&
     now.getDate() >= 1 &&
@@ -916,17 +941,6 @@ async function loadMemberData(){
 
     if(eventKey){
 
-      /*
-       * イベント日に手動上書きがあれば
-       * それを現在選択中にする。
-       *
-       * なければ「衣装なし」。
-       *
-       * 「衣装なし」は
-       * イベント衣装を手動で着せない
-       * という意味。
-       */
-
       selectedCostume = {
 
         bell:
@@ -1033,7 +1047,31 @@ function isAcquired(
 
 
   /*
-   * イベント衣装・シークレット衣装
+   * シークレット衣装
+   *
+   * 装備IDとコレクションIDが
+   * 異なるため、collectionIdを
+   * 優先して取得判定する。
+   */
+
+  if(
+    costume.kind === "secret"
+  ){
+
+    const collectionId =
+      costume.collectionId ||
+      costume.id;
+
+
+    return !!acquiredCollection[
+      collectionId
+    ];
+
+  }
+
+
+  /*
+   * 通常イベント衣装
    */
 
   return !!acquiredCollection[
@@ -1086,7 +1124,7 @@ function renderCostumes(){
 
   /*
    * -----------------------------------------
-   * 通常衣装以外
+   * 取得済み衣装
    * -----------------------------------------
    */
 
@@ -1122,9 +1160,6 @@ function renderCostumes(){
 
   /*
    * 何もない場合
-   *
-   * 「衣装なし」は必ずあるので
-   * 基本的にはここには来ない。
    */
 
   if(
@@ -1386,11 +1421,8 @@ function renderAll(){
 
 
   /*
-   * ここが重要。
-   *
    * null = 衣装なし
-   * なので null でも保存ボタンを
-   * 無効にしない。
+   * なので null でも保存可能。
    */
 
   saveButton.disabled =
@@ -1414,7 +1446,7 @@ async function saveCostume(){
 
 
   /*
-   * null も有効。
+   * nullも有効。
    *
    * null = 衣装なし
    */
@@ -1451,26 +1483,12 @@ async function saveCostume(){
 
       if(costumeId){
 
-        /*
-         * 手動でイベント衣装・毎日衣装・
-         * シークレット衣装などを選んだ場合。
-         */
-
         updates[
           `members/${currentUser.uid}/eventCostumeOverride/${eventKey}/${character}`
         ] =
           costumeId;
 
       }else{
-
-        /*
-         * 「衣装なし」を選んだ場合。
-         *
-         * イベント日の手動上書きを解除。
-         *
-         * Firebaseでは update() の null が
-         * 該当データの削除になる。
-         */
 
         updates[
           `members/${currentUser.uid}/eventCostumeOverride/${eventKey}/${character}`
@@ -1487,13 +1505,6 @@ async function saveCostume(){
     ================================================= */
 
     else{
-
-      /*
-       * nullなら通常衣装・衣装なし。
-       *
-       * Firebaseから equippedCostume の
-       * 該当キャラクターを削除する。
-       */
 
       updates[
         `members/${currentUser.uid}/equippedCostume/${character}`
