@@ -1241,22 +1241,13 @@ function renderSecretCostume(
         `${layerSize.height}%`;
 
       layerWrap.style.left =
-        `calc(${
-          (100-layerSize.width)/2
-        }% + ${
-          layerPosition.x
-        }px)`;
+  `${(100-layerSize.width)/2}%`;
 
-      layerWrap.style.top =
-        `calc(${
-          (100-layerSize.height)/2
-        }% + ${
-          layerPosition.y
-        }px)`;
+layerWrap.style.top =
+  `${(100-layerSize.height)/2}%`;
 
-      layerWrap.style.transform =
-        `scale(${layerSize.scale}) rotate(${layerSize.angle}deg)`;
-
+layerWrap.style.transform =
+  `translate(${layerPosition.x}px, ${layerPosition.y}px) scale(${layerSize.scale}) rotate(${layerSize.angle}deg)`;
       layerWrap.style.transformOrigin =
         "center center";
 
