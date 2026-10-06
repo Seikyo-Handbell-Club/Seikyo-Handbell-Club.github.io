@@ -417,11 +417,11 @@ body.logged-in .bubble:after{
 
 }
 
-
 /* =====================================================
    シークレット衣装（7レイヤー）
    通常のベルちゃんと同じ85px / 90pxの座標系で重ねる
 ===================================================== */
+
 .secret-costume{
   position:absolute;
   width:var(--bell-size,90px) !important;
@@ -435,59 +435,162 @@ body.logged-in .bubble:after{
   overflow:visible;
   box-sizing:border-box;
 }
-.secret-costume.show{display:block;}
+
+.secret-costume.show{
+  display:block;
+}
+
+/*
+ * レイヤー画像本体。
+ * サイズ・位置・角度はwrapper側で個別設定する。
+ */
 .secret-costume img{
   position:absolute !important;
+
   left:0 !important;
   top:0 !important;
-  width:100%;
-  height:100%;
+
+  width:100% !important;
+  height:100% !important;
+
   min-width:0 !important;
   min-height:0 !important;
+
   max-width:none !important;
   max-height:none !important;
+
   object-fit:contain !important;
   object-position:center center !important;
+
   margin:0 !important;
   padding:0 !important;
+
   border:0 !important;
   outline:0 !important;
   box-shadow:none !important;
+
   pointer-events:none;
   user-select:none;
+
   display:block;
 }
+
 body:not(.logged-in){
   --bell-size:85px;
   --bell-right:20px;
   --bell-bottom:12px;
 }
+
 body.logged-in{
   --bell-size:90px;
   --bell-right:25px;
   --bell-bottom:0px;
 }
+
 body:not(.logged-in) .secret-costume{
   right:20px !important;
   bottom:12px !important;
 }
+
 body.logged-in .secret-costume{
   right:25px !important;
   bottom:0 !important;
 }
-.secret-costume .secret-layer-main{animation:secretFloat 2.8s ease-in-out infinite;}
-.secret-costume .secret-layer-01{animation:secretWaveLeft 2.2s ease-in-out infinite;}
-.secret-costume .secret-layer-02{animation:secretWaveRight 2.4s ease-in-out infinite;}
+
+/*
+ * シークレット衣装のレイヤーごとのアニメーション。
+ * 個別のサイズ・位置・角度はwrapper側に設定するため、
+ * ここでは画像そのものを直接transformしない。
+ */
+.secret-costume .secret-layer-main{
+  animation:secretFloat 2.8s ease-in-out infinite;
+}
+
+.secret-costume .secret-layer-01{
+  animation:secretWaveLeft 2.2s ease-in-out infinite;
+}
+
+.secret-costume .secret-layer-02{
+  animation:secretWaveRight 2.4s ease-in-out infinite;
+}
+
 .secret-costume .secret-layer-03,
 .secret-costume .secret-layer-04,
-.secret-costume .secret-layer-05{animation:secretRibbon 2.6s ease-in-out infinite;}
-.secret-costume.celebrating{
-  animation:bellCelebrate 1.8s cubic-bezier(.2,.8,.25,1) both;
+.secret-costume .secret-layer-05{
+  animation:secretRibbon 2.6s ease-in-out infinite;
 }
-@keyframes secretFloat{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-2px) rotate(.8deg)}}
-@keyframes secretWaveLeft{0%,100%{transform:translateX(0) rotate(0deg)}50%{transform:translateX(-2px) rotate(-2deg)}}
-@keyframes secretWaveRight{0%,100%{transform:translateX(0) rotate(0deg)}50%{transform:translateX(2px) rotate(2deg)}}
-@keyframes secretRibbon{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(2px) rotate(-2deg)}}
+
+.secret-costume.celebrating{
+  animation:
+    bellCelebrate
+    1.8s
+    cubic-bezier(.2,.8,.25,1)
+    both;
+}
+
+@keyframes secretFloat{
+
+  0%,100%{
+    transform:
+      translateY(0)
+      rotate(0deg);
+  }
+
+  50%{
+    transform:
+      translateY(-2px)
+      rotate(.8deg);
+  }
+
+}
+
+@keyframes secretWaveLeft{
+
+  0%,100%{
+    transform:
+      translateX(0)
+      rotate(0deg);
+  }
+
+  50%{
+    transform:
+      translateX(-2px)
+      rotate(-2deg);
+  }
+
+}
+
+@keyframes secretWaveRight{
+
+  0%,100%{
+    transform:
+      translateX(0)
+      rotate(0deg);
+  }
+
+  50%{
+    transform:
+      translateX(2px)
+      rotate(2deg);
+  }
+
+}
+
+@keyframes secretRibbon{
+
+  0%,100%{
+    transform:
+      translateY(0)
+      rotate(0deg);
+  }
+
+  50%{
+    transform:
+      translateY(2px)
+      rotate(-2deg);
+  }
+
+}
 
 </style>
 </head>
@@ -520,8 +623,11 @@ body.logged-in .secret-costume{
     id="bellImage"
   >
 
-
-  <div id="secretCostume" class="secret-costume" aria-hidden="true"></div>
+  <div
+    id="secretCostume"
+    class="secret-costume"
+    aria-hidden="true">
+  </div>
 
 </div>
 
@@ -557,21 +663,40 @@ const heartContainer =
   );
 
 const secretCostume =
-  document.getElementById("secretCostume");
+  document.getElementById(
+    "secretCostume"
+  );
 
 const SECRET_COSTUME_IDS = {
-  bell:["secret-bell","secret_bell_rare_costume"],
-  chime:["secret-chime","secret_chime_rare_costume"]
+
+  bell:[
+    "secret-bell",
+    "secret_bell_rare_costume"
+  ],
+
+  chime:[
+    "secret-chime",
+    "secret_chime_rare_costume"
+  ]
+
 };
 
 const SECRET_BELL_LAYERS = [
+
   "costumes/bell-secret-base.png",
+
   "costumes/bell-secret-main.png",
+
   "costumes/bell-secret-layer-01.png",
+
   "costumes/bell-secret-layer-02.png",
+
   "costumes/bell-secret-layer-03.png",
+
   "costumes/bell-secret-layer-04.png",
+
   "costumes/bell-secret-layer-05.png"
+
 ];
 
 /* =====================================================
@@ -580,14 +705,17 @@ const SECRET_BELL_LAYERS = [
    y：下へ動かすとプラス / 上へ動かすとマイナス
    それぞれのレイヤーを個別に調整できます。
 ===================================================== */
+
 const SECRET_LAYER_POSITIONS = [
+
   {x:-20,y:-10}, // 1. base
-  {x:-20,y:10}, // 2. main
-  {x:0,y:0}, // 3. layer-01
-  {x:0,y:0}, // 4. layer-02
-  {x:0,y:0}, // 5. layer-03
-  {x:0,y:0}, // 6. layer-04
-  {x:0,y:0}  // 7. layer-05
+  {x:-20,y:10},  // 2. main
+  {x:0,y:0},     // 3. layer-01
+  {x:0,y:0},     // 4. layer-02
+  {x:0,y:0},     // 5. layer-03
+  {x:0,y:0},     // 6. layer-04
+  {x:0,y:0}      // 7. layer-05
+
 ];
 
 /* =====================================================
@@ -598,14 +726,17 @@ const SECRET_LAYER_POSITIONS = [
    angle：角度（0 = 通常 / プラスで時計回り / マイナスで反時計回り）
    それぞれのレイヤーを個別に調整できます。
 ===================================================== */
+
 const SECRET_LAYER_SIZES = [
+
   {width:100,height:100,scale:1.35,angle:10}, // 1. base
-  {width:100,height:100,scale:0:80,angle:0}, // 2. main
-  {width:100,height:100,scale:1.00,angle:0}, // 3. layer-01
-  {width:100,height:100,scale:1.00,angle:0}, // 4. layer-02
-  {width:100,height:100,scale:1.00,angle:0}, // 5. layer-03
-  {width:100,height:100,scale:1.00,angle:0}, // 6. layer-04
-  {width:100,height:100,scale:1.00,angle:0}  // 7. layer-05
+  {width:100,height:100,scale:0.80,angle:0},  // 2. main
+  {width:100,height:100,scale:1.00,angle:0},  // 3. layer-01
+  {width:100,height:100,scale:1.00,angle:0},  // 4. layer-02
+  {width:100,height:100,scale:1.00,angle:0},  // 5. layer-03
+  {width:100,height:100,scale:1.00,angle:0},  // 6. layer-04
+  {width:100,height:100,scale:1.00,angle:0}   // 7. layer-05
+
 ];
 
 /* =====================================================
@@ -614,7 +745,9 @@ const SECRET_LAYER_SIZES = [
    false = 表示しない
    PNGファイル自体はcostumesフォルダに残しておいてOK。
 ===================================================== */
+
 const SECRET_LAYER_ENABLED = [
+
   true,  // 1. base
   true,  // 2. main
   false, // 3. layer-01
@@ -622,14 +755,28 @@ const SECRET_LAYER_ENABLED = [
   false, // 5. layer-03
   false, // 6. layer-04
   false  // 7. layer-05
+
 ];
 
-function isSecretCostumeId(id,character){
-  return !!id && SECRET_COSTUME_IDS[character]?.includes(id);
+function isSecretCostumeId(
+  id,
+  character
+){
+
+  return !!id &&
+    SECRET_COSTUME_IDS[character]?.includes(id);
+
 }
 
-function isSecretEquipped(character){
-  return isSecretCostumeId(equippedCostumes?.[character] || null,character);
+function isSecretEquipped(
+  character
+){
+
+  return isSecretCostumeId(
+    equippedCostumes?.[character] || null,
+    character
+  );
+
 }
 
 let secretRenderToken=0;
@@ -639,219 +786,650 @@ let secretRenderToken=0;
  * 背景だけを、画像の外周からたどって透明化する。
  * 衣装内部の白い部分は外周とつながっていなければ残す。
  */
-async function prepareSecretLayer(src){
-  const image=new Image();
-  image.src=src;
+async function prepareSecretLayer(
+  src
+){
 
-  await new Promise((resolve,reject)=>{
-    image.onload=resolve;
-    image.onerror=reject;
-  });
+  const image =
+    new Image();
 
-  const width=image.naturalWidth;
-  const height=image.naturalHeight;
+  image.src =
+    src;
 
-  if(!width || !height){
-    throw new Error("シークレット画像のサイズを取得できません");
+  await new Promise(
+    (resolve,reject)=>{
+
+      image.onload =
+        resolve;
+
+      image.onerror =
+        reject;
+
+    }
+  );
+
+  const width =
+    image.naturalWidth;
+
+  const height =
+    image.naturalHeight;
+
+  if(
+    !width ||
+    !height
+  ){
+
+    throw new Error(
+      "シークレット画像のサイズを取得できません"
+    );
+
   }
 
-  const canvas=document.createElement("canvas");
-  canvas.width=width;
-  canvas.height=height;
+  const canvas =
+    document.createElement(
+      "canvas"
+    );
 
-  const ctx=canvas.getContext("2d",{willReadFrequently:true});
+  canvas.width =
+    width;
+
+  canvas.height =
+    height;
+
+  const ctx =
+    canvas.getContext(
+      "2d",
+      {
+        willReadFrequently:true
+      }
+    );
+
   if(!ctx)return src;
 
-  ctx.drawImage(image,0,0);
+  ctx.drawImage(
+    image,
+    0,
+    0
+  );
 
-  const imageData=ctx.getImageData(0,0,width,height);
-  const pixels=imageData.data;
-  const visited=new Uint8Array(width*height);
-  const queue=new Int32Array(width*height);
+  const imageData =
+    ctx.getImageData(
+      0,
+      0,
+      width,
+      height
+    );
+
+  const pixels =
+    imageData.data;
+
+  const visited =
+    new Uint8Array(
+      width*height
+    );
+
+  const queue =
+    new Int32Array(
+      width*height
+    );
+
   let head=0;
   let tail=0;
 
-  const isBackground=(pixelIndex)=>{
-    const p=pixelIndex*4;
-    const alpha=pixels[p+3];
+  const isBackground =
+    (pixelIndex)=>{
 
-    if(alpha===0)return true;
+      const p =
+        pixelIndex*4;
 
-    const r=pixels[p];
-    const g=pixels[p+1];
-    const b=pixels[p+2];
+      const alpha =
+        pixels[p+3];
 
-    const max=Math.max(r,g,b);
-    const min=Math.min(r,g,b);
-    const chroma=max-min;
+      if(alpha===0)return true;
 
-    /* 白〜薄い灰色の背景を対象にする */
-    return min>=215 && chroma<=28;
-  };
+      const r =
+        pixels[p];
 
-  const enqueue=(pixelIndex)=>{
-    if(pixelIndex<0 || pixelIndex>=width*height)return;
-    if(visited[pixelIndex])return;
-    if(!isBackground(pixelIndex))return;
+      const g =
+        pixels[p+1];
 
-    visited[pixelIndex]=1;
-    queue[tail++]=pixelIndex;
-  };
+      const b =
+        pixels[p+2];
+
+      const max =
+        Math.max(
+          r,
+          g,
+          b
+        );
+
+      const min =
+        Math.min(
+          r,
+          g,
+          b
+        );
+
+      const chroma =
+        max-min;
+
+      /* 白〜薄い灰色の背景を対象にする */
+      return (
+        min>=215 &&
+        chroma<=28
+      );
+
+    };
+
+  const enqueue =
+    (pixelIndex)=>{
+
+      if(
+        pixelIndex<0 ||
+        pixelIndex>=width*height
+      ){
+
+        return;
+
+      }
+
+      if(
+        visited[pixelIndex]
+      ){
+
+        return;
+
+      }
+
+      if(
+        !isBackground(
+          pixelIndex
+        )
+      ){
+
+        return;
+
+      }
+
+      visited[pixelIndex]=1;
+
+      queue[tail++]=
+        pixelIndex;
+
+    };
 
   /* 外周から背景領域を開始 */
-  for(let x=0;x<width;x++){
+
+  for(
+    let x=0;
+    x<width;
+    x++
+  ){
+
     enqueue(x);
-    enqueue((height-1)*width+x);
+
+    enqueue(
+      (height-1)*width+x
+    );
+
   }
 
-  for(let y=1;y<height-1;y++){
-    enqueue(y*width);
-    enqueue(y*width+(width-1));
+  for(
+    let y=1;
+    y<height-1;
+    y++
+  ){
+
+    enqueue(
+      y*width
+    );
+
+    enqueue(
+      y*width+(width-1)
+    );
+
   }
 
-  while(head<tail){
-    const index=queue[head++];
-    const x=index%width;
-    const y=Math.floor(index/width);
+  while(
+    head<tail
+  ){
 
-    if(x>0)enqueue(index-1);
-    if(x<width-1)enqueue(index+1);
-    if(y>0)enqueue(index-width);
-    if(y<height-1)enqueue(index+width);
-  }
+    const index =
+      queue[head++];
 
-  for(let i=0;i<visited.length;i++){
-    if(visited[i]){
-      pixels[i*4+3]=0;
+    const x =
+      index%width;
+
+    const y =
+      Math.floor(
+        index/width
+      );
+
+    if(x>0){
+
+      enqueue(
+        index-1
+      );
+
     }
+
+    if(x<width-1){
+
+      enqueue(
+        index+1
+      );
+
+    }
+
+    if(y>0){
+
+      enqueue(
+        index-width
+      );
+
+    }
+
+    if(y<height-1){
+
+      enqueue(
+        index+width
+      );
+
+    }
+
   }
 
-  ctx.putImageData(imageData,0,0);
-  return canvas.toDataURL("image/png");
+  for(
+    let i=0;
+    i<visited.length;
+    i++
+  ){
+
+    if(
+      visited[i]
+    ){
+
+      pixels[
+        i*4+3
+      ]=0;
+
+    }
+
+  }
+
+  ctx.putImageData(
+    imageData,
+    0,
+    0
+  );
+
+  return canvas.toDataURL(
+    "image/png"
+  );
+
 }
 
-function renderSecretCostume(character){
+function renderSecretCostume(
+  character
+){
+
   if(!secretCostume)return;
 
-  const renderToken=++secretRenderToken;
+  const renderToken =
+    ++secretRenderToken;
 
   secretCostume.innerHTML="";
-  secretCostume.classList.remove("show","celebrating");
-  secretCostume.setAttribute("aria-hidden","true");
+
+  secretCostume.classList.remove(
+    "show",
+    "celebrating"
+  );
+
+  secretCostume.setAttribute(
+    "aria-hidden",
+    "true"
+  );
 
   /* 通常衣装ではベルちゃん本体をそのまま表示 */
-  bellImage.style.visibility="visible";
-  bellImage.style.opacity="1";
 
-  /* 現在レイヤー画像が用意されているのはベルちゃん */
-  if(character!=="bell" || !isSecretEquipped("bell")){
+  bellImage.style.visibility =
+    "visible";
+
+  bellImage.style.opacity =
+    "1";
+
+  /*
+   * 現在レイヤー画像が用意されているのはベルちゃん
+   */
+
+  if(
+    character!=="bell" ||
+    !isSecretEquipped("bell")
+  ){
+
     return;
+
   }
 
   let loadedCount=0;
   let failed=false;
 
-  const enabledLayerCount=
+  const enabledLayerCount =
     SECRET_BELL_LAYERS.filter(
-      (_,index)=>SECRET_LAYER_ENABLED[index]===true
+      (_,index)=>
+        SECRET_LAYER_ENABLED[index]===true
     ).length;
 
-  if(enabledLayerCount===0){
-    bellImage.style.visibility="visible";
-    bellImage.style.opacity="0";
-    secretCostume.classList.add("show");
-    secretCostume.setAttribute("aria-hidden","false");
+  if(
+    enabledLayerCount===0
+  ){
+
+    bellImage.style.visibility =
+      "visible";
+
+    bellImage.style.opacity =
+      "0";
+
+    secretCostume.classList.add(
+      "show"
+    );
+
+    secretCostume.setAttribute(
+      "aria-hidden",
+      "false"
+    );
+
     return;
+
   }
 
-  SECRET_BELL_LAYERS.forEach((src,index)=>{
-    if(SECRET_LAYER_ENABLED[index]!==true)return;
+  SECRET_BELL_LAYERS.forEach(
+    (src,index)=>{
 
-    const layerWrap=document.createElement("div");
-    layerWrap.className=`secret-layer-wrap secret-layer-wrap-${index}`;
-    layerWrap.style.position="absolute";
-    layerWrap.style.width="100%";
-    layerWrap.style.height="100%";
-    layerWrap.style.left="0";
-    layerWrap.style.top="0";
-    layerWrap.style.pointerEvents="none";
-    layerWrap.style.userSelect="none";
-    layerWrap.style.overflow="visible";
+      if(
+        SECRET_LAYER_ENABLED[index]!==true
+      ){
 
-    const img=document.createElement("img");
-    img.alt="";
-    img.draggable=false;
-    img.className=`secret-layer secret-layer-${index===1 ? "main" : String(index).padStart(2,"0")}`;
+        return;
 
-    /* 必ず通常ベルちゃんと同じ座標系に固定 */
-    const layerPosition=SECRET_LAYER_POSITIONS[index] || {x:0,y:0};
-    const layerSize=SECRET_LAYER_SIZES[index] || {width:100,height:100,scale:1,angle:0};
-
-    /*
-      横幅・高さ・全体サイズ・角度は個別指定。
-      position の x/y はレイヤー本体の中心位置を基準にする。
-      scale と angle は外側ラッパーに適用するため、
-      レイヤー本体側の既存アニメーションを壊しません。
-    */
-    layerWrap.style.width=`${layerSize.width}%`;
-    layerWrap.style.height=`${layerSize.height}%`;
-    layerWrap.style.left=`calc(${(100-layerSize.width)/2}% + ${layerPosition.x}px)`;
-    layerWrap.style.top=`calc(${(100-layerSize.height)/2}% + ${layerPosition.y}px)`;
-    layerWrap.style.transform=`scale(${layerSize.scale}) rotate(${layerSize.angle}deg)`;
-    layerWrap.style.transformOrigin="center center";
-
-    img.style.width="100%";
-    img.style.height="100%";
-    img.style.maxWidth="none";
-    img.style.maxHeight="none";
-    img.style.position="absolute";
-    img.style.left="0";
-    img.style.top="0";
-    img.style.objectFit="contain";
-    img.style.objectPosition="center center";
-
-    img.onload=()=>{
-      if(renderToken!==secretRenderToken)return;
-
-      loadedCount++;
-
-      if(loadedCount===enabledLayerCount && !failed){
-        /* シークレット衣装表示中は通常ベルちゃんを透明にする */
-        /* opacity:0 にするだけなので、通常ベルちゃんのアニメーションはそのまま動きます */
-        bellImage.style.visibility="visible";
-        bellImage.style.opacity="0";
-        secretCostume.classList.add("show");
-        secretCostume.setAttribute("aria-hidden","false");
       }
-    };
 
-    img.onerror=()=>{
-      if(renderToken!==secretRenderToken)return;
+      /*
+       * wrapperをレイヤーごとに作る。
+       * サイズ・位置・角度はすべてこのwrapperで独立管理する。
+       */
+      const layerWrap =
+        document.createElement(
+          "div"
+        );
 
-      failed=true;
-      console.error("シークレット衣装画像の読み込み失敗:",src);
-      secretCostume.classList.remove("show","celebrating");
-      secretCostume.setAttribute("aria-hidden","true");
-      secretCostume.innerHTML="";
-      bellImage.style.visibility="visible";
-      bellImage.style.opacity="1";
-    };
+      layerWrap.className =
+        `secret-layer-wrap secret-layer-wrap-${index}`;
 
-    layerWrap.appendChild(img);
-    secretCostume.appendChild(layerWrap);
+      layerWrap.style.position =
+        "absolute";
 
-    /* 背景透明化後の画像を設定 */
-    prepareSecretLayer(src)
-      .then(preparedSrc=>{
-        if(renderToken!==secretRenderToken)return;
-        img.src=preparedSrc;
-      })
-      .catch(error=>{
-        if(renderToken!==secretRenderToken)return;
-        console.error("シークレット衣装画像の加工に失敗:",src,error);
-        img.src=src;
-      });
-  });
+      layerWrap.style.width =
+        "100%";
+
+      layerWrap.style.height =
+        "100%";
+
+      layerWrap.style.left =
+        "0";
+
+      layerWrap.style.top =
+        "0";
+
+      layerWrap.style.pointerEvents =
+        "none";
+
+      layerWrap.style.userSelect =
+        "none";
+
+      layerWrap.style.overflow =
+        "visible";
+
+      const img =
+        document.createElement(
+          "img"
+        );
+
+      img.alt="";
+      img.draggable=false;
+
+      img.className =
+        `secret-layer secret-layer-${
+          index===1
+            ? "main"
+            : String(index).padStart(2,"0")
+        }`;
+
+      /*
+       * 必ず通常ベルちゃんと同じ座標系に固定
+       */
+
+      const layerPosition =
+        SECRET_LAYER_POSITIONS[index] ||
+        {
+          x:0,
+          y:0
+        };
+
+      const layerSize =
+        SECRET_LAYER_SIZES[index] ||
+        {
+          width:100,
+          height:100,
+          scale:1,
+          angle:0
+        };
+
+      /*
+       * 横幅・高さ・全体サイズ・角度は個別指定。
+       *
+       * position の x/y はレイヤー本体の中心位置を基準にする。
+       *
+       * scale と angle はwrapperに適用するため、
+       * レイヤー画像側のアニメーションと分離できます。
+       */
+
+      layerWrap.style.width =
+        `${layerSize.width}%`;
+
+      layerWrap.style.height =
+        `${layerSize.height}%`;
+
+      layerWrap.style.left =
+        `calc(${
+          (100-layerSize.width)/2
+        }% + ${
+          layerPosition.x
+        }px)`;
+
+      layerWrap.style.top =
+        `calc(${
+          (100-layerSize.height)/2
+        }% + ${
+          layerPosition.y
+        }px)`;
+
+      layerWrap.style.transform =
+        `scale(${layerSize.scale}) rotate(${layerSize.angle}deg)`;
+
+      layerWrap.style.transformOrigin =
+        "center center";
+
+      img.style.width =
+        "100%";
+
+      img.style.height =
+        "100%";
+
+      img.style.maxWidth =
+        "none";
+
+      img.style.maxHeight =
+        "none";
+
+      img.style.position =
+        "absolute";
+
+      img.style.left =
+        "0";
+
+      img.style.top =
+        "0";
+
+      img.style.objectFit =
+        "contain";
+
+      img.style.objectPosition =
+        "center center";
+
+      img.onload =
+        ()=>{
+
+          if(
+            renderToken!==secretRenderToken
+          ){
+
+            return;
+
+          }
+
+          loadedCount++;
+
+          if(
+            loadedCount===
+              enabledLayerCount &&
+            !failed
+          ){
+
+            /*
+             * シークレット衣装表示中は
+             * 通常ベルちゃんを透明にする。
+             *
+             * opacity:0 にするだけなので、
+             * 通常ベルちゃんのクリックや
+             * アニメーション処理は維持される。
+             */
+
+            bellImage.style.visibility =
+              "visible";
+
+            bellImage.style.opacity =
+              "0";
+
+            secretCostume.classList.add(
+              "show"
+            );
+
+            secretCostume.setAttribute(
+              "aria-hidden",
+              "false"
+            );
+
+          }
+
+        };
+
+      img.onerror =
+        ()=>{
+
+          if(
+            renderToken!==secretRenderToken
+          ){
+
+            return;
+
+          }
+
+          failed=true;
+
+          console.error(
+            "シークレット衣装画像の読み込み失敗:",
+            src
+          );
+
+          secretCostume.classList.remove(
+            "show",
+            "celebrating"
+          );
+
+          secretCostume.setAttribute(
+            "aria-hidden",
+            "true"
+          );
+
+          secretCostume.innerHTML="";
+
+          bellImage.style.visibility =
+            "visible";
+
+          bellImage.style.opacity =
+            "1";
+
+        };
+
+      layerWrap.appendChild(
+        img
+      );
+
+      secretCostume.appendChild(
+        layerWrap
+      );
+
+      /*
+       * 背景透明化後の画像を設定
+       */
+
+      prepareSecretLayer(src)
+        .then(
+          preparedSrc=>{
+
+            if(
+              renderToken!==secretRenderToken
+            ){
+
+              return;
+
+            }
+
+            img.src =
+              preparedSrc;
+
+          }
+        )
+        .catch(
+          error=>{
+
+            if(
+              renderToken!==secretRenderToken
+            ){
+
+              return;
+
+            }
+
+            console.error(
+              "シークレット衣装画像の加工に失敗:",
+              src,
+              error
+            );
+
+            /*
+             * 加工できない場合は元画像を表示
+             */
+            img.src =
+              src;
+
+          }
+        );
+
+    }
+  );
+
 }
 
 
@@ -859,16 +1437,21 @@ function renderSecretCostume(character){
    キャラクター設定
 ===================================================== */
 
-let currentCharacter="bell";
+let currentCharacter =
+  "bell";
 
-let equippedCostumes={bell:null,chime:null};
+let equippedCostumes = {
+  bell:null,
+  chime:null
+};
+
 let eventCostumeOverrides={};
 
 /* =====================================================
    通常キャラクター画像
 ===================================================== */
 
-const characterImages={
+const characterImages = {
 
   bell:{
     src:"bell.png",
@@ -886,7 +1469,7 @@ const characterImages={
    ★ 特殊服画像
 ===================================================== */
 
-const costumeImages={
+const costumeImages = {
 
   bell:{
 
@@ -983,7 +1566,7 @@ const TEST_DATE = null;
    handbell.htmlの元々の設定に合わせる
 ===================================================== */
 
-const jugoyaDates={
+const jugoyaDates = {
 
   2026:"09-25",
   2027:"09-15",
@@ -1008,23 +1591,56 @@ const jugoyaDates={
 
 function getTestDate(){
 
-  /* コードで指定したテスト日付を最優先 */
+  /* コード指定のテスト日付を最優先 */
+
   if(TEST_DATE){
+
     try{
-      if(/^\d{4}-\d{2}-\d{2}$/.test(TEST_DATE)){
-        const testDate = new Date(`${TEST_DATE}T12:00:00`);
+
+      if(
+        /^\d{4}-\d{2}-\d{2}$/.test(
+          TEST_DATE
+        )
+      ){
+
+        const testDate =
+          new Date(
+            `${TEST_DATE}T12:00:00`
+          );
+
         if(
-          !Number.isNaN(testDate.getTime()) &&
-          testDate.getFullYear() === Number(TEST_DATE.slice(0,4)) &&
-          testDate.getMonth()+1 === Number(TEST_DATE.slice(5,7)) &&
-          testDate.getDate() === Number(TEST_DATE.slice(8,10))
+          !Number.isNaN(
+            testDate.getTime()
+          ) &&
+          testDate.getFullYear() ===
+            Number(
+              TEST_DATE.slice(0,4)
+            ) &&
+          testDate.getMonth()+1 ===
+            Number(
+              TEST_DATE.slice(5,7)
+            ) &&
+          testDate.getDate() ===
+            Number(
+              TEST_DATE.slice(8,10)
+            )
         ){
+
           return testDate;
+
         }
+
       }
+
     }catch(error){
-      console.warn("コード指定のテスト日付を読み込めませんでした",error);
+
+      console.warn(
+        "コード指定のテスト日付を読み込めませんでした",
+        error
+      );
+
     }
+
   }
 
   try{
@@ -1035,11 +1651,15 @@ function getTestDate(){
       );
 
     const value =
-      params.get("testDate");
+      params.get(
+        "testDate"
+      );
 
     if(
       value &&
-      /^\d{4}-\d{2}-\d{2}$/.test(value)
+      /^\d{4}-\d{2}-\d{2}$/.test(
+        value
+      )
     ){
 
       const testDate =
@@ -1052,11 +1672,17 @@ function getTestDate(){
           testDate.getTime()
         ) &&
         testDate.getFullYear() ===
-          Number(value.slice(0,4)) &&
+          Number(
+            value.slice(0,4)
+          ) &&
         testDate.getMonth()+1 ===
-          Number(value.slice(5,7)) &&
+          Number(
+            value.slice(5,7)
+          ) &&
         testDate.getDate() ===
-          Number(value.slice(8,10))
+          Number(
+            value.slice(8,10)
+          )
       ){
 
         return testDate;
@@ -1080,7 +1706,8 @@ function getTestDate(){
 
 function getCurrentDate(){
 
-  return getTestDate() || new Date();
+  return getTestDate() ||
+    new Date();
 
 }
 
@@ -1283,54 +1910,190 @@ function getCharacterImage(
   date=getCurrentDate()
 ){
 
-  const selected = character === "chime" ? "chime" : "bell";
+  const selected =
+    character === "chime"
+      ? "chime"
+      : "bell";
 
-  /* シークレット衣装はイベント衣装より最優先 */
-  if(isSecretEquipped(selected)){
-    return characterImages[selected].src;
+  /* ---------------------------------------------
+     ① シークレット衣装
+     シークレットは最優先
+  --------------------------------------------- */
+
+  if(
+    isSecretEquipped(
+      selected
+    )
+  ){
+
+    return characterImages[
+      selected
+    ].src;
+
   }
 
   /*
    * 衣装の優先順位
+   *
    * 1. ユーザーが「着替える」で選んだ衣装
    * 2. イベント日の衣装
    * 3. 通常のベルちゃん
    *
-   * イベント日は「強制衣装」ではありません。
-   * ユーザーが着替えている場合は、必ずその衣装を優先します。
+   * イベント日は強制衣装ではありません。
    */
-  const equipped = equippedCostumes?.[selected] || null;
-  const equippedImage = getCostumeImageFromId(equipped, selected);
-  if(equippedImage) return equippedImage;
 
-  const costumeKey = getCostumeKey(date);
+  /* ---------------------------------------------
+     ② ユーザーが選択した衣装
+  --------------------------------------------- */
+
+  const equipped =
+    equippedCostumes?.[selected] ||
+    null;
+
+  const equippedImage =
+    getCostumeImageFromId(
+      equipped,
+      selected
+    );
+
+  if(equippedImage){
+
+    return equippedImage;
+
+  }
+
+  /* ---------------------------------------------
+     ③ イベント衣装
+  --------------------------------------------- */
+
+  const costumeKey =
+    getCostumeKey(date);
 
   if(costumeKey){
-    const override = eventCostumeOverrides?.[costumeKey]?.[selected] || null;
+
+    const override =
+      eventCostumeOverrides?.[
+        costumeKey
+      ]?.[selected] ||
+      null;
+
     if(override){
-      const overrideImage = getCostumeImageFromId(override, selected);
-      if(overrideImage) return overrideImage;
+
+      const overrideImage =
+        getCostumeImageFromId(
+          override,
+          selected
+        );
+
+      if(overrideImage){
+
+        return overrideImage;
+
+      }
+
     }
-    if(costumeImages[selected]?.[costumeKey]){
-      return costumeImages[selected][costumeKey];
+
+    if(
+      costumeImages[
+        selected
+      ]?.[costumeKey]
+    ){
+
+      return costumeImages[
+        selected
+      ][costumeKey];
+
     }
+
   }
 
-  return characterImages[selected].src;
+  /* ---------------------------------------------
+     ④ 通常
+  --------------------------------------------- */
+
+  return characterImages[
+    selected
+  ].src;
+
 }
 
-function getCostumeImageFromId(costumeId, character){
-  if(!costumeId) return null;
-  if(costumeId === "daily-costume-01") return "costumes/daily-costume-01.png";
-  if(costumeId === "daily-costume-02") return "costumes/daily-costume-02.png";
-  if(costumeId.startsWith("event_")){
-    const suffix = character === "chime" ? "_chime" : "_bell";
-    if(!costumeId.endsWith(suffix)) return null;
-    let key = costumeId.slice(6,-suffix.length);
-    if(key === "newyearseve") key = "winter";
-    return costumeImages?.[character]?.[key] || null;
+function getCostumeImageFromId(
+  costumeId,
+  character
+){
+
+  if(!costumeId){
+
+    return null;
+
   }
+
+  if(
+    costumeId ===
+    "daily-costume-01"
+  ){
+
+    return "costumes/daily-costume-01.png";
+
+  }
+
+  if(
+    costumeId ===
+    "daily-costume-02"
+  ){
+
+    return "costumes/daily-costume-02.png";
+
+  }
+
+  if(
+    costumeId.startsWith(
+      "event_"
+    )
+  ){
+
+    const suffix =
+      character === "chime"
+        ? "_chime"
+        : "_bell";
+
+    if(
+      !costumeId.endsWith(
+        suffix
+      )
+    ){
+
+      return null;
+
+    }
+
+    let key =
+      costumeId.slice(
+        6,
+        -suffix.length
+      );
+
+    if(
+      key ===
+      "newyearseve"
+    ){
+
+      key =
+        "winter";
+
+    }
+
+    return (
+      costumeImages
+        ?.[character]
+        ?.[key] ||
+      null
+    );
+
+  }
+
   return null;
+
 }
 
 /* =====================================================
@@ -1360,40 +2123,85 @@ function setCharacter(
    * ブラウザの「？」表示にならないよう、
    * まず通常画像を確保してから特殊画像を読み込む。
    */
-  const normalSrc = data.src;
-  const costumeSrc = getCharacterImage(
-    currentCharacter
-  );
 
-  bellImage.alt = data.name;
+  const normalSrc =
+    data.src;
 
-  bellImage.onerror = function(){
-    /* 読み込み失敗時は必ず通常画像へ戻す */
-    if(this.src !== new URL(normalSrc, window.location.href).href){
-      this.src = normalSrc;
-    }
-  };
+  const costumeSrc =
+    getCharacterImage(
+      currentCharacter
+    );
 
-  if(costumeSrc === normalSrc){
-    bellImage.src = normalSrc;
+  bellImage.alt =
+    data.name;
+
+  bellImage.onerror =
+    function(){
+
+      /*
+       * 読み込み失敗時は必ず通常画像へ戻す
+       */
+
+      if(
+        this.src !==
+        new URL(
+          normalSrc,
+          window.location.href
+        ).href
+      ){
+
+        this.src =
+          normalSrc;
+
+      }
+
+    };
+
+  if(
+    costumeSrc ===
+    normalSrc
+  ){
+
+    bellImage.src =
+      normalSrc;
+
   }else{
-    const testImage = new Image();
 
-    testImage.onload = function(){
-      /* 読み込み成功した特殊服だけ表示 */
-      bellImage.src = costumeSrc;
-    };
+    const testImage =
+      new Image();
 
-    testImage.onerror = function(){
-      /* 特殊服がない場合は通常のベルちゃんを表示 */
-      bellImage.src = normalSrc;
-    };
+    testImage.onload =
+      function(){
 
-    testImage.src = costumeSrc;
+        /*
+         * 読み込み成功した特殊服だけ表示
+         */
+
+        bellImage.src =
+          costumeSrc;
+
+      };
+
+    testImage.onerror =
+      function(){
+
+        /*
+         * 特殊服がない場合は通常のベルちゃんを表示
+         */
+
+        bellImage.src =
+          normalSrc;
+
+      };
+
+    testImage.src =
+      costumeSrc;
+
   }
 
   if(
-    currentCharacter === "chime"
+    currentCharacter ===
+    "chime"
   ){
 
     bellImage.classList.add(
@@ -1415,7 +2223,9 @@ function setCharacter(
 
   }
 
-  renderSecretCostume(currentCharacter);
+  renderSecretCostume(
+    currentCharacter
+  );
 
 }
 
@@ -1450,7 +2260,8 @@ function updateCostume(){
     getTodayKey();
 
   if(
-    today===lastCostumeDate
+    today ===
+    lastCostumeDate
   ){
 
     return;
@@ -1461,17 +2272,28 @@ function updateCostume(){
     today;
 
   /*
+   * この処理を開始した時点のキャラクターを保存。
+   * 非同期の画像読み込み中にキャラクターが変わっても、
+   * 古い画像が新しいキャラクターへ反映されないようにする。
+   */
+
+  const characterAtStart =
+    currentCharacter;
+
+  /*
    * キャラクターはそのまま。
    * 今日の特殊服だけ再判定。
    */
 
   const costumeImage =
     getCharacterImage(
-      currentCharacter
+      characterAtStart
     );
 
   const normalImage =
-    characterImages[currentCharacter].src;
+    characterImages[
+      characterAtStart
+    ].src;
 
   const normalUrl =
     new URL(
@@ -1485,32 +2307,91 @@ function updateCostume(){
       window.location.href
     ).href;
 
-  /* 通常画像ならそのまま */
-  if(costumeUrl === normalUrl){
-    if(bellImage.src !== normalUrl){
-      bellImage.src = normalImage;
-    }
+  /*
+   * シークレットの場合は
+   * レイヤー側が表示を担当するので、
+   * 通常画像を勝手にイベント衣装へ変更しない。
+   */
+
+  if(
+    isSecretEquipped(
+      characterAtStart
+    )
+  ){
+
+    renderSecretCostume(
+      characterAtStart
+    );
+
     return;
+
   }
 
-  /* 特殊服画像は、読み込めた場合だけ切り替える */
-  const testImage = new Image();
+  /* 通常画像ならそのまま */
 
-  testImage.onload = function(){
+  if(
+    costumeUrl ===
+    normalUrl
+  ){
+
     if(
-      lastCostumeDate === today &&
-      currentCharacter === currentCharacter
+      bellImage.src !==
+      normalUrl
     ){
-      bellImage.src = costumeImage;
+
+      bellImage.src =
+        normalImage;
+
     }
-  };
 
-  testImage.onerror = function(){
-    /* 特殊服が存在しない場合は通常画像を維持 */
-    bellImage.src = normalImage;
-  };
+    return;
 
-  testImage.src = costumeImage;
+  }
+
+  /*
+   * 特殊服画像は、読み込めた場合だけ切り替える
+   */
+
+  const testImage =
+    new Image();
+
+  testImage.onload =
+    function(){
+
+      if(
+        lastCostumeDate === today &&
+        currentCharacter ===
+          characterAtStart
+      ){
+
+        bellImage.src =
+          costumeImage;
+
+      }
+
+    };
+
+  testImage.onerror =
+    function(){
+
+      /*
+       * 特殊服が存在しない場合は通常画像を維持
+       */
+
+      if(
+        currentCharacter ===
+        characterAtStart
+      ){
+
+        bellImage.src =
+          normalImage;
+
+      }
+
+    };
+
+  testImage.src =
+    costumeImage;
 
 }
 
@@ -1607,7 +2488,8 @@ setInterval(
 let bellMessages=[];
 
 const isEmbedded =
-  window.parent !== window;
+  window.parent !==
+  window;
 
 let parentSchedules={};
 
@@ -1616,26 +2498,38 @@ function setBellMessages(
   preferred=null
 ){
 
-  const cleaned=[
+  const cleaned = [
     ...new Set(
       (messages || [])
         .filter(
           v =>
-            typeof v === "string" &&
+            typeof v ===
+              "string" &&
             v.trim()
         )
     )
   ];
 
-  if(!cleaned.length)return;
+  if(
+    !cleaned.length
+  ){
 
-  bellMessages=cleaned;
+    return;
+
+  }
+
+  bellMessages =
+    cleaned;
 
   showMessage(
     preferred &&
-    cleaned.includes(preferred)
+    cleaned.includes(
+      preferred
+    )
       ? preferred
-      : pickRandom(cleaned)
+      : pickRandom(
+          cleaned
+        )
   );
 
 }
@@ -1654,10 +2548,11 @@ function buildBellMessages(
     .filter(
       s =>
         s &&
-        typeof s === "object"
+        typeof s ===
+          "object"
     );
 
-  const all=[
+  const all = [
     ...buildRegularMessages(
       values,
       now
@@ -1667,7 +2562,9 @@ function buildBellMessages(
   try{
 
     const today =
-      dateString(now);
+      dateString(
+        now
+      );
 
     all.push(
       ...getClubBeforeStartMessages(
@@ -1689,7 +2586,9 @@ function buildBellMessages(
   try{
 
     const today =
-      dateString(now);
+      dateString(
+        now
+      );
 
     getEventSchedulesForDate(
       values,
@@ -1701,7 +2600,8 @@ function buildBellMessages(
           `今日は${
             event.title ||
             (
-              event.type==="concert"
+              event.type ===
+                "concert"
                 ? "演奏会"
                 : "イベント"
             )
@@ -1723,7 +2623,9 @@ function buildBellMessages(
   try{
 
     const today =
-      dateString(now);
+      dateString(
+        now
+      );
 
     getUpcomingEvents(
       values,
@@ -1735,7 +2637,8 @@ function buildBellMessages(
           `もうすぐ${
             event.title ||
             (
-              event.type==="concert"
+              event.type ===
+                "concert"
                 ? "演奏会"
                 : "イベント"
             )
@@ -1755,7 +2658,9 @@ function buildBellMessages(
   }
 
   return [
-    ...new Set(all)
+    ...new Set(
+      all
+    )
   ];
 
 }
@@ -1766,7 +2671,8 @@ function receiveParentSchedules(
 
   parentSchedules =
     schedules &&
-    typeof schedules === "object"
+    typeof schedules ===
+      "object"
       ? schedules
       : {};
 
@@ -1786,37 +2692,93 @@ window.addEventListener(
   "message",
   event=>{
 
-    if(!event.data)return;
+    if(
+      !event.data
+    ){
 
-    if(event.data.type === "handbell-equipped-costume"){
-      const data = event.data.equippedCostume || {};
-      equippedCostumes = {
-        bell:data.bell || null,
-        chime:data.chime || null
-      };
-      setCharacter(currentCharacter);
-      renderSecretCostume(currentCharacter);
       return;
+
     }
 
-    if(event.data.type === "handbell-event-costume-override"){
+    if(
+      event.data.type ===
+      "handbell-equipped-costume"
+    ){
+
+      const data =
+        event.data.equippedCostume ||
+        {};
+
+      equippedCostumes = {
+
+        bell:
+          data.bell ||
+          null,
+
+        chime:
+          data.chime ||
+          null
+
+      };
+
+      setCharacter(
+        currentCharacter
+      );
+
+      renderSecretCostume(
+        currentCharacter
+      );
+
+      return;
+
+    }
+
+    if(
+      event.data.type ===
+      "handbell-event-costume-override"
+    ){
+
       eventCostumeOverrides =
-        event.data.overrides && typeof event.data.overrides === "object"
+        event.data.overrides &&
+        typeof event.data.overrides ===
+          "object"
           ? event.data.overrides
           : {};
-      setCharacter(currentCharacter);
+
+      setCharacter(
+        currentCharacter
+      );
+
       return;
+
     }
 
-    if(event.data.type === "handbell-character"){
-      setCharacter(event.data.character);
+    if(
+      event.data.type ===
+      "handbell-character"
+    ){
+
+      setCharacter(
+        event.data.character
+      );
+
       updateCostume();
+
       return;
+
     }
 
-    if(event.data.type === "handbell-schedules"){
-      receiveParentSchedules(event.data.schedules);
+    if(
+      event.data.type ===
+      "handbell-schedules"
+    ){
+
+      receiveParentSchedules(
+        event.data.schedules
+      );
+
       return;
+
     }
 
   }
@@ -1828,8 +2790,12 @@ window.addEventListener(
 
 function pad(n){
 
-  return String(n)
-    .padStart(2,"0");
+  return String(
+    n
+  ).padStart(
+    2,
+    "0"
+  );
 
 }
 
@@ -1840,9 +2806,13 @@ function dateString(
   return `${
     date.getFullYear()
   }-${
-    pad(date.getMonth()+1)
+    pad(
+      date.getMonth()+1
+    )
   }-${
-    pad(date.getDate())
+    pad(
+      date.getDate()
+    )
   }`;
 
 }
@@ -1854,7 +2824,9 @@ function monthString(
   return `${
     date.getFullYear()
   }-${
-    pad(date.getMonth()+1)
+    pad(
+      date.getMonth()+1
+    )
   }`;
 
 }
@@ -1864,12 +2836,18 @@ function timeToMinutes(
 ){
 
   const match =
-    String(value || "")
-      .match(
-        /^(\d{1,2}):(\d{2})$/
-      );
+    String(
+      value || ""
+    )
+    .match(
+      /^(\d{1,2}):(\d{2})$/
+    );
 
-  if(!match)return null;
+  if(!match){
+
+    return null;
+
+  }
 
   return (
     Number(match[1])*60 +
@@ -1917,7 +2895,9 @@ function greetingMessage(
 ){
 
   return `${
-    getGreeting(date)
+    getGreeting(
+      date
+    )
   }${text}`;
 
 }
@@ -1931,10 +2911,12 @@ function formatJapaneseTime(
 ){
 
   const match =
-    String(value || "")
-      .match(
-        /^(\d{1,2}):(\d{2})$/
-      );
+    String(
+      value || ""
+    )
+    .match(
+      /^(\d{1,2}):(\d{2})$/
+    );
 
   if(!match){
 
@@ -1945,7 +2927,9 @@ function formatJapaneseTime(
   }
 
   return `${
-    Number(match[1])
+    Number(
+      match[1]
+    )
   }時${
     match[2]
   }分`;
@@ -1957,12 +2941,14 @@ function formatTimeRange(
 ){
 
   const value =
-    String(time || "")
-      .trim();
+    String(
+      time || ""
+    ).trim();
 
   if(
     !value ||
-    value==="終日"
+    value ===
+      "終日"
   ){
 
     return "";
@@ -1981,9 +2967,13 @@ function formatTimeRange(
   }
 
   return `${
-    formatJapaneseTime(match[1])
+    formatJapaneseTime(
+      match[1]
+    )
   }〜${
-    formatJapaneseTime(match[2])
+    formatJapaneseTime(
+      match[2]
+    )
   }`;
 
 }
@@ -1993,8 +2983,9 @@ function getStartTime(
 ){
 
   const value =
-    String(time || "")
-      .trim();
+    String(
+      time || ""
+    ).trim();
 
   const match =
     value.match(
@@ -2002,7 +2993,9 @@ function getStartTime(
     );
 
   return match
-    ? timeToMinutes(match[1])
+    ? timeToMinutes(
+        match[1]
+      )
     : null;
 
 }
@@ -2059,7 +3052,11 @@ function isUpcomingWithinDays(
   days
 ){
 
-  if(!dateValue)return false;
+  if(!dateValue){
+
+    return false;
+
+  }
 
   const diff =
     daysFromToday(
@@ -2086,8 +3083,10 @@ function getNormalSchedulesForDate(
   return values.filter(
     s =>
       s &&
-      s.type==="normal" &&
-      s.date===date
+      s.type ===
+        "normal" &&
+      s.date ===
+        date
   );
 
 }
@@ -2101,10 +3100,13 @@ function getEventSchedulesForDate(
     s =>
       s &&
       (
-        s.type==="concert" ||
-        s.type==="event"
+        s.type ===
+          "concert" ||
+        s.type ===
+          "event"
       ) &&
-      s.date===date
+      s.date ===
+        date
   );
 
 }
@@ -2119,8 +3121,10 @@ function getUpcomingEvents(
       s =>
         s &&
         (
-          s.type==="concert" ||
-          s.type==="event"
+          s.type ===
+            "concert" ||
+          s.type ===
+            "event"
         ) &&
         isUpcomingWithinDays(
           s.date,
@@ -2130,10 +3134,14 @@ function getUpcomingEvents(
     )
     .sort(
       (a,b)=>
-        String(a.date)
-          .localeCompare(
-            String(b.date)
+        String(
+          a.date
+        )
+        .localeCompare(
+          String(
+            b.date
           )
+        )
     );
 
 }
@@ -2144,17 +3152,23 @@ function getMonthlyClubCount(
 ){
 
   const month =
-    monthString(today);
+    monthString(
+      today
+    );
 
   return values.filter(
     s =>
       s &&
       (
-        s.type==="normal" ||
+        s.type ===
+          "normal" ||
         !s.type
       ) &&
-      typeof s.date === "string" &&
-      s.date.startsWith(month)
+      typeof s.date ===
+        "string" &&
+      s.date.startsWith(
+        month
+      )
   ).length;
 
 }
@@ -2175,7 +3189,13 @@ function getClubBeforeStartMessages(
       today
     )[0];
 
-  if(!todayNormal)return [];
+  if(
+    !todayNormal
+  ){
+
+    return [];
+
+  }
 
   const start =
     getStartTime(
@@ -2433,7 +3453,9 @@ function buildRegularMessages(
     if(
       getNormalSchedulesForDate(
         values,
-        getTomorrowString(dateNow)
+        getTomorrowString(
+          dateNow
+        )
       ).length>0
     ){
 
@@ -2468,7 +3490,9 @@ function pickRandom(
   list
 ){
 
-  if(!list.length){
+  if(
+    !list.length
+  ){
 
     return "予定を確認してみてね！";
 
@@ -2476,7 +3500,8 @@ function pickRandom(
 
   return list[
     Math.floor(
-      Math.random()*list.length
+      Math.random()*
+      list.length
     )
   ];
 
@@ -2497,7 +3522,13 @@ function showMessage(
 
 function changeBellMessage(){
 
-  if(!bellMessages.length)return;
+  if(
+    !bellMessages.length
+  ){
+
+    return;
+
+  }
 
   let next =
     pickRandom(
@@ -2506,22 +3537,27 @@ function changeBellMessage(){
 
   if(
     bellMessages.length>1 &&
-    next===message.textContent
+    next ===
+      message.textContent
   ){
 
     const other =
       bellMessages.filter(
         item =>
           item !==
-          message.textContent
+            message.textContent
       );
 
     next =
-      pickRandom(other);
+      pickRandom(
+        other
+      );
 
   }
 
-  showMessage(next);
+  showMessage(
+    next
+  );
 
 }
 
@@ -2531,11 +3567,21 @@ function changeBellMessage(){
 
 function startHearts(){
 
-  if(!heartContainer)return;
+  if(
+    !heartContainer
+  ){
+
+    return;
+
+  }
 
   const hearts=[];
 
-  for(let i=0;i<14;i++){
+  for(
+    let i=0;
+    i<14;
+    i++
+  ){
 
     hearts.push({
 
@@ -2559,7 +3605,11 @@ function startHearts(){
 
   }
 
-  for(let i=0;i<10;i++){
+  for(
+    let i=0;
+    i<10;
+    i++
+  ){
 
     hearts.push({
 
@@ -2583,7 +3633,11 @@ function startHearts(){
 
   }
 
-  for(let i=0;i<10;i++){
+  for(
+    let i=0;
+    i<10;
+    i++
+  ){
 
     hearts.push({
 
@@ -2607,7 +3661,10 @@ function startHearts(){
 
   }
 
-  for(let i=12;i--;){
+  for(
+    let i=12;
+    i--;
+  ){
 
     hearts.push({
 
@@ -2631,7 +3688,10 @@ function startHearts(){
 
   }
 
-  for(let i=12;i--;){
+  for(
+    let i=12;
+    i--;
+  ){
 
     hearts.push({
 
@@ -2655,7 +3715,10 @@ function startHearts(){
 
   }
 
-  for(let i=8;i--;){
+  for(
+    let i=8;
+    i--;
+  ){
 
     hearts.push({
 
@@ -2679,7 +3742,10 @@ function startHearts(){
 
   }
 
-  for(let i=8;i--;){
+  for(
+    let i=8;
+    i--;
+  ){
 
     hearts.push({
 
@@ -2789,7 +3855,13 @@ let isAnimating=false;
 
 function celebrate(){
 
-  if(isAnimating)return;
+  if(
+    isAnimating
+  ){
+
+    return;
+
+  }
 
   isAnimating=true;
 
@@ -2807,14 +3879,35 @@ function celebrate(){
     "celebrating"
   );
 
-  /* シークレット衣装もベルちゃん本体と同じジャンプをする */
-  if(secretCostume && secretCostume.classList.contains("show")){
-    secretCostume.classList.remove("celebrating");
+  /*
+   * シークレット衣装も
+   * ベルちゃん本体と同じジャンプをする
+   */
+
+  if(
+    secretCostume &&
+    secretCostume.classList.contains(
+      "show"
+    )
+  ){
+
+    secretCostume.classList.remove(
+      "celebrating"
+    );
+
     void secretCostume.offsetWidth;
-    secretCostume.classList.add("celebrating");
+
+    secretCostume.classList.add(
+      "celebrating"
+    );
+
   }
 
-  if(!isSecretEquipped("bell")){
+  if(
+    !isSecretEquipped(
+      "bell"
+    )
+  ){
 
     setTimeout(
       ()=>{
@@ -2856,9 +3949,11 @@ bellImage.addEventListener(
     );
 
     if(secretCostume){
+
       secretCostume.classList.remove(
         "celebrating"
       );
+
     }
 
     changeBellMessage();
@@ -2867,11 +3962,13 @@ bellImage.addEventListener(
       "bubble-hidden"
     );
 
-    bubble.style.animation="none";
+    bubble.style.animation =
+      "none";
 
     void bubble.offsetWidth;
 
-    bubble.style.animation="";
+    bubble.style.animation =
+      "";
 
     isAnimating=false;
 
@@ -2883,42 +3980,60 @@ bellImage.addEventListener(
 ===================================================== */
 
 /*
- * 初期表示でも画像エラーを「？」のままにしない。
+ * 初期表示でも画像エラーを
+ * 「？」のままにしない。
  */
+
 bellImage.addEventListener(
   "error",
   ()=>{
+
     const fallback =
-      characterImages[currentCharacter]?.src ||
+      characterImages[
+        currentCharacter
+      ]?.src ||
       "bell.png";
 
     if(
-      !bellImage.src.endsWith(fallback)
+      !bellImage.src.endsWith(
+        fallback
+      )
     ){
-      bellImage.src = fallback;
+
+      bellImage.src =
+        fallback;
+
     }
+
   }
 );
 
-setCharacter("bell");
+setCharacter(
+  "bell"
+);
 
 /* =====================================================
    初期メッセージ
 ===================================================== */
 
 setBellMessages(
-  buildBellMessages({})
+  buildBellMessages(
+    {}
+  )
 );
 
 /* =====================================================
    親ページへ準備完了を通知
 ===================================================== */
 
-if(isEmbedded){
+if(
+  isEmbedded
+){
 
   window.parent.postMessage(
     {
-      type:"handbell-ready"
+      type:
+        "handbell-ready"
     },
     "*"
   );
