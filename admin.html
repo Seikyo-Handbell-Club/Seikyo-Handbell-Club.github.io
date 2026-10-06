@@ -1366,11 +1366,6 @@ import{
 from
 "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
 
-import{
-  getStorage
-}
-from
-"https://www.gstatic.com/firebasejs/12.19.0/firebase-storage.js";
 
 
 const firebaseConfig={
@@ -1404,7 +1399,6 @@ function isCalendarMonthAllowed(date){
 
 
 const db=getDatabase(app);
-const storage=getStorage(app);
 
 await setPersistence(
   auth,
