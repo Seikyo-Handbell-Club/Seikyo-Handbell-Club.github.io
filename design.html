@@ -419,9 +419,8 @@ body.logged-in .bubble:after{
 
 
 /* =====================================================
-   ★ シークレット衣装（レイヤー表示）
+   シークレット衣装（7レイヤー）
 ===================================================== */
-
 .secret-costume{
   position:absolute;
   width:90px;
@@ -432,11 +431,7 @@ body.logged-in .bubble:after{
   pointer-events:none;
   display:none;
 }
-
-.secret-costume.show{
-  display:block;
-}
-
+.secret-costume.show{display:block;}
 .secret-costume img{
   position:absolute;
   left:0;
@@ -447,58 +442,16 @@ body.logged-in .bubble:after{
   pointer-events:none;
   user-select:none;
 }
-
-body:not(.logged-in) .secret-costume{
-  width:85px;
-  height:85px;
-  right:20px;
-  bottom:12px;
-}
-
-body.logged-in .bell.chime ~ .secret-costume{
-  width:80px;
-  height:80px;
-  right:18px;
-  bottom:0;
-}
-
-.secret-costume .secret-layer-main{
-  animation:secretFloat 2.8s ease-in-out infinite;
-}
-
-.secret-costume .secret-layer-01{
-  animation:secretWaveLeft 2.2s ease-in-out infinite;
-}
-
-.secret-costume .secret-layer-02{
-  animation:secretWaveRight 2.4s ease-in-out infinite;
-}
-
+.secret-costume .secret-layer-main{animation:secretFloat 2.8s ease-in-out infinite;}
+.secret-costume .secret-layer-01{animation:secretWaveLeft 2.2s ease-in-out infinite;}
+.secret-costume .secret-layer-02{animation:secretWaveRight 2.4s ease-in-out infinite;}
 .secret-costume .secret-layer-03,
 .secret-costume .secret-layer-04,
-.secret-costume .secret-layer-05{
-  animation:secretRibbon 2.6s ease-in-out infinite;
-}
-
-@keyframes secretFloat{
-  0%,100%{transform:translateY(0) rotate(0deg)}
-  50%{transform:translateY(-2px) rotate(.8deg)}
-}
-
-@keyframes secretWaveLeft{
-  0%,100%{transform:translateX(0) rotate(0deg)}
-  50%{transform:translateX(-2px) rotate(-2deg)}
-}
-
-@keyframes secretWaveRight{
-  0%,100%{transform:translateX(0) rotate(0deg)}
-  50%{transform:translateX(2px) rotate(2deg)}
-}
-
-@keyframes secretRibbon{
-  0%,100%{transform:translateY(0) rotate(0deg)}
-  50%{transform:translateY(2px) rotate(-2deg)}
-}
+.secret-costume .secret-layer-05{animation:secretRibbon 2.6s ease-in-out infinite;}
+@keyframes secretFloat{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-2px) rotate(.8deg)}}
+@keyframes secretWaveLeft{0%,100%{transform:translateX(0) rotate(0deg)}50%{transform:translateX(-2px) rotate(-2deg)}}
+@keyframes secretWaveRight{0%,100%{transform:translateX(0) rotate(0deg)}50%{transform:translateX(2px) rotate(2deg)}}
+@keyframes secretRibbon{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(2px) rotate(-2deg)}}
 
 </style>
 </head>
@@ -531,11 +484,8 @@ body.logged-in .bell.chime ~ .secret-costume{
     id="bellImage"
   >
 
-  <div
-    id="secretCostume"
-    class="secret-costume"
-    aria-hidden="true">
-  </div>
+
+  <div id="secretCostume" class="secret-costume" aria-hidden="true"></div>
 
 </div>
 
@@ -555,11 +505,6 @@ const bellImage =
     "bellImage"
   );
 
-const secretCostume =
-  document.getElementById(
-    "secretCostume"
-  );
-
 const characterName =
   document.getElementById(
     "characterName"
@@ -574,6 +519,60 @@ const heartContainer =
   document.getElementById(
     "heartContainer"
   );
+
+const secretCostume =
+  document.getElementById("secretCostume");
+
+const SECRET_COSTUME_IDS = {
+  bell:["secret-bell","secret_bell_rare_costume"],
+  chime:["secret-chime","secret_chime_rare_costume"]
+};
+
+const SECRET_BELL_LAYERS = [
+  "costumes/bell-secret-base.png",
+  "costumes/bell-secret-main.png",
+  "costumes/bell-secret-layer-01.png",
+  "costumes/bell-secret-layer-02.png",
+  "costumes/bell-secret-layer-03.png",
+  "costumes/bell-secret-layer-04.png",
+  "costumes/bell-secret-layer-05.png"
+];
+
+function isSecretCostumeId(id,character){
+  return !!id && SECRET_COSTUME_IDS[character]?.includes(id);
+}
+
+function isSecretEquipped(character){
+  return isSecretCostumeId(equippedCostumes?.[character] || null,character);
+}
+
+function renderSecretCostume(character){
+  if(!secretCostume) return;
+  secretCostume.innerHTML="";
+  secretCostume.classList.remove("show");
+  secretCostume.setAttribute("aria-hidden","true");
+
+  /* 現在レイヤー画像が用意されているのはベルちゃん */
+  if(character !== "bell" || !isSecretEquipped("bell")) return;
+
+  SECRET_BELL_LAYERS.forEach((src,index)=>{
+    const img=document.createElement("img");
+    img.src=src;
+    img.alt="";
+    img.draggable=false;
+    img.className=`secret-layer secret-layer-${index===1 ? "main" : String(index).padStart(2,"0")}`;
+    img.onerror=()=>{
+      console.error("シークレット衣装画像の読み込み失敗:",src);
+      secretCostume.classList.remove("show");
+      secretCostume.innerHTML="";
+    };
+    secretCostume.appendChild(img);
+  });
+
+  secretCostume.classList.add("show");
+  secretCostume.setAttribute("aria-hidden","false");
+}
+
 
 /* =====================================================
    キャラクター設定
@@ -995,72 +994,6 @@ function getCostumeKey(
 }
 
 /* =====================================================
-   ★ シークレット衣装
-===================================================== */
-
-const SECRET_COSTUME_IDS={
-  bell:["secret-bell","secret_bell_rare_costume"],
-  chime:["secret-chime","secret_chime_rare_costume"]
-};
-
-const SECRET_BELL_LAYERS=[
-  "costumes/bell-secret-base.png",
-  "costumes/bell-secret-main.png",
-  "costumes/bell-secret-layer-01.png",
-  "costumes/bell-secret-layer-02.png",
-  "costumes/bell-secret-layer-03.png",
-  "costumes/bell-secret-layer-04.png",
-  "costumes/bell-secret-layer-05.png"
-];
-
-function isSecretCostumeId(costumeId,character){
-  return SECRET_COSTUME_IDS[character]?.includes(costumeId);
-}
-
-function isSecretEquipped(character){
-  return isSecretCostumeId(
-    equippedCostumes?.[character] || null,
-    character
-  );
-}
-
-function renderSecretCostume(character){
-  if(!secretCostume) return;
-
-  secretCostume.innerHTML="";
-  secretCostume.classList.remove("show");
-  secretCostume.setAttribute("aria-hidden","true");
-
-  if(character !== "bell" || !isSecretEquipped(character)){
-    return;
-  }
-
-  SECRET_BELL_LAYERS.forEach((src,index)=>{
-    const img=document.createElement("img");
-    img.src=src;
-    img.alt="";
-    img.draggable=false;
-    img.className=`secret-layer secret-layer-${index===1?"main":String(index).padStart(2,"0")}`;
-    img.onerror=()=>{
-      /* 1枚でも欠けた場合は壊れた表示を残さない */
-      renderSecretCostumeFallback();
-    };
-    secretCostume.appendChild(img);
-  });
-
-  secretCostume.classList.add("show");
-  secretCostume.setAttribute("aria-hidden","false");
-}
-
-function renderSecretCostumeFallback(){
-  if(!secretCostume) return;
-  secretCostume.classList.remove("show");
-  secretCostume.innerHTML="";
-  secretCostume.setAttribute("aria-hidden","true");
-  bellImage.src=characterImages[currentCharacter]?.src || "bell.png";
-}
-
-/* =====================================================
    今日のキャラクター画像を取得
 ===================================================== */
 
@@ -1071,7 +1004,7 @@ function getCharacterImage(
 
   const selected = character === "chime" ? "chime" : "bell";
 
-  /* シークレット衣装はイベント衣装より優先 */
+  /* シークレット衣装はイベント衣装より最優先 */
   if(isSecretEquipped(selected)){
     return characterImages[selected].src;
   }
@@ -1081,9 +1014,6 @@ function getCharacterImage(
   if(costumeKey){
     const override = eventCostumeOverrides?.[costumeKey]?.[selected] || null;
     if(override){
-      if(isSecretCostumeId(override,selected)){
-        return characterImages[selected].src;
-      }
       const overrideImage = getCostumeImageFromId(override, selected);
       if(overrideImage) return overrideImage;
     }
@@ -1101,9 +1031,6 @@ function getCharacterImage(
 
 function getCostumeImageFromId(costumeId, character){
   if(!costumeId) return null;
-  if(isSecretCostumeId(costumeId,character)){
-    return characterImages[character].src;
-  }
   if(costumeId === "daily-costume-01") return "costumes/daily-costume-01.png";
   if(costumeId === "daily-costume-02") return "costumes/daily-costume-02.png";
   if(costumeId.startsWith("event_")){
