@@ -608,6 +608,22 @@ const SECRET_LAYER_SIZES = [
   {width:100,height:100,scale:1.00,angle:0}  // 7. layer-05
 ];
 
+/* =====================================================
+   ★ シークレット衣装 7レイヤー ON / OFF ★
+   true  = 表示する
+   false = 表示しない
+   PNGファイル自体はcostumesフォルダに残しておいてOK。
+===================================================== */
+const SECRET_LAYER_ENABLED = [
+  true,  // 1. base
+  true,  // 2. main
+  false, // 3. layer-01
+  false, // 4. layer-02
+  false, // 5. layer-03
+  false, // 6. layer-04
+  false  // 7. layer-05
+];
+
 function isSecretCostumeId(id,character){
   return !!id && SECRET_COSTUME_IDS[character]?.includes(id);
 }
@@ -735,7 +751,22 @@ function renderSecretCostume(character){
   let loadedCount=0;
   let failed=false;
 
+  const enabledLayerCount=
+    SECRET_BELL_LAYERS.filter(
+      (_,index)=>SECRET_LAYER_ENABLED[index]===true
+    ).length;
+
+  if(enabledLayerCount===0){
+    bellImage.style.visibility="visible";
+    bellImage.style.opacity="0";
+    secretCostume.classList.add("show");
+    secretCostume.setAttribute("aria-hidden","false");
+    return;
+  }
+
   SECRET_BELL_LAYERS.forEach((src,index)=>{
+    if(SECRET_LAYER_ENABLED[index]!==true)return;
+
     const layerWrap=document.createElement("div");
     layerWrap.className=`secret-layer-wrap secret-layer-wrap-${index}`;
     layerWrap.style.position="absolute";
@@ -784,7 +815,7 @@ function renderSecretCostume(character){
 
       loadedCount++;
 
-      if(loadedCount===SECRET_BELL_LAYERS.length && !failed){
+      if(loadedCount===enabledLayerCount && !failed){
         /* シークレット衣装表示中は通常ベルちゃんを透明にする */
         /* opacity:0 にするだけなので、通常ベルちゃんのアニメーションはそのまま動きます */
         bellImage.style.visibility="visible";
