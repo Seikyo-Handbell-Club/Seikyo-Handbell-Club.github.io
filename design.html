@@ -595,16 +595,17 @@ const SECRET_LAYER_POSITIONS = [
    width：横幅（100 = 通常）
    height：高さ（100 = 通常）
    scale：全体サイズ（1.00 = 通常）
+   angle：角度（0 = 通常 / プラスで時計回り / マイナスで反時計回り）
    それぞれのレイヤーを個別に調整できます。
 ===================================================== */
 const SECRET_LAYER_SIZES = [
-  {width:100,height:100,scale:1.00}, // 1. base
-  {width:100,height:100,scale:1.00}, // 2. main
-  {width:100,height:100,scale:1.00}, // 3. layer-01
-  {width:100,height:100,scale:1.00}, // 4. layer-02
-  {width:100,height:100,scale:1.00}, // 5. layer-03
-  {width:100,height:100,scale:1.00}, // 6. layer-04
-  {width:100,height:100,scale:1.00}  // 7. layer-05
+  {width:100,height:100,scale:1.00,angle:0}, // 1. base
+  {width:100,height:100,scale:1.00,angle:0}, // 2. main
+  {width:100,height:100,scale:1.00,angle:0}, // 3. layer-01
+  {width:100,height:100,scale:1.00,angle:0}, // 4. layer-02
+  {width:100,height:100,scale:1.00,angle:0}, // 5. layer-03
+  {width:100,height:100,scale:1.00,angle:0}, // 6. layer-04
+  {width:100,height:100,scale:1.00,angle:0}  // 7. layer-05
 ];
 
 function isSecretCostumeId(id,character){
@@ -752,18 +753,19 @@ function renderSecretCostume(character){
 
     /* 必ず通常ベルちゃんと同じ座標系に固定 */
     const layerPosition=SECRET_LAYER_POSITIONS[index] || {x:0,y:0};
-    const layerSize=SECRET_LAYER_SIZES[index] || {width:100,height:100,scale:1};
+    const layerSize=SECRET_LAYER_SIZES[index] || {width:100,height:100,scale:1,angle:0};
 
     /*
-      横幅・高さは個別指定。
+      横幅・高さ・全体サイズ・角度は個別指定。
       position の x/y はレイヤー本体の中心位置を基準にする。
-      scale は横幅・高さを設定した後の全体サイズ調整。
+      scale と angle は外側ラッパーに適用するため、
+      レイヤー本体側の既存アニメーションを壊しません。
     */
     layerWrap.style.width=`${layerSize.width}%`;
     layerWrap.style.height=`${layerSize.height}%`;
     layerWrap.style.left=`calc(${(100-layerSize.width)/2}% + ${layerPosition.x}px)`;
     layerWrap.style.top=`calc(${(100-layerSize.height)/2}% + ${layerPosition.y}px)`;
-    layerWrap.style.transform=`scale(${layerSize.scale})`;
+    layerWrap.style.transform=`scale(${layerSize.scale}) rotate(${layerSize.angle}deg)`;
     layerWrap.style.transformOrigin="center center";
 
     img.style.width="100%";
