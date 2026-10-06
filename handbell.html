@@ -1204,7 +1204,7 @@ textarea{
 
   <!-- ベルちゃん表示エリア（ベルちゃん本体のコードは design.html 側） -->
   <iframe
-    src="design.html?v=20261006-25"
+    src="design.html?v=20261006-26"
     title="ベルちゃん"
     class="bell-frame"
   ></iframe>
@@ -6922,7 +6922,7 @@ async function showCollection(){
    ・月別画像／イベント画像の表示処理とは完全に別
 ===================================================== */
 
-const SECRET_COSTUME_PROBABILITY = 0.0025;
+const SECRET_COSTUME_PROBABILITY = 1.0;
 
 const SECRET_COSTUME_IDS = {
   bell:"secret_bell_rare_costume",
@@ -6999,8 +6999,12 @@ async function trySecretCostumeDraw(){
 
     equippedCostume[targetCharacter] = costumeId;
 
-    /* 右上のキャラクターへ即時反映 */
+    /*
+     * 獲得した瞬間に右上へ即時反映。
+     * iframeの準備状態に関係なく、現在の装備をもう一度送る。
+     */
     sendEquippedCostumeToBell();
+    sendCharacterToBell();
 
     return {
       character:targetCharacter,
