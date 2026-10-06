@@ -440,8 +440,8 @@ body.logged-in .bubble:after{
   position:absolute !important;
   left:0 !important;
   top:0 !important;
-  width:100% !important;
-  height:100% !important;
+  width:100%;
+  height:100%;
   min-width:0 !important;
   min-height:0 !important;
   max-width:none !important;
@@ -581,13 +581,30 @@ const SECRET_BELL_LAYERS = [
    それぞれのレイヤーを個別に調整できます。
 ===================================================== */
 const SECRET_LAYER_POSITIONS = [
-  {x:-10,y:0}, // 1. base
+  {x:0,y:0}, // 1. base
   {x:0,y:0}, // 2. main
   {x:0,y:0}, // 3. layer-01
   {x:0,y:0}, // 4. layer-02
   {x:0,y:0}, // 5. layer-03
   {x:0,y:0}, // 6. layer-04
   {x:0,y:0}  // 7. layer-05
+];
+
+/* =====================================================
+   ★ シークレット衣装 7レイヤー大きさ設定 ★
+   width：横幅（100 = 通常）
+   height：高さ（100 = 通常）
+   scale：全体サイズ（1.00 = 通常）
+   それぞれのレイヤーを個別に調整できます。
+===================================================== */
+const SECRET_LAYER_SIZES = [
+  {width:100,height:100,scale:1.00}, // 1. base
+  {width:100,height:100,scale:1.00}, // 2. main
+  {width:100,height:100,scale:1.00}, // 3. layer-01
+  {width:100,height:100,scale:1.00}, // 4. layer-02
+  {width:100,height:100,scale:1.00}, // 5. layer-03
+  {width:100,height:100,scale:1.00}, // 6. layer-04
+  {width:100,height:100,scale:1.00}  // 7. layer-05
 ];
 
 function isSecretCostumeId(id,character){
@@ -705,10 +722,9 @@ function renderSecretCostume(character){
   secretCostume.classList.remove("show","celebrating");
   secretCostume.setAttribute("aria-hidden","true");
 
-/* 通常衣装ではベルちゃん本体を表示 */
-bellImage.style.visibility="visible";
-bellImage.style.opacity="1";
-   
+  /* 通常衣装ではベルちゃん本体をそのまま表示 */
+  bellImage.style.visibility="visible";
+
   /* 現在レイヤー画像が用意されているのはベルちゃん */
   if(character!=="bell" || !isSecretEquipped("bell")){
     return;
@@ -718,20 +734,45 @@ bellImage.style.opacity="1";
   let failed=false;
 
   SECRET_BELL_LAYERS.forEach((src,index)=>{
+    const layerWrap=document.createElement("div");
+    layerWrap.className=`secret-layer-wrap secret-layer-wrap-${index}`;
+    layerWrap.style.position="absolute";
+    layerWrap.style.width="100%";
+    layerWrap.style.height="100%";
+    layerWrap.style.left="0";
+    layerWrap.style.top="0";
+    layerWrap.style.pointerEvents="none";
+    layerWrap.style.userSelect="none";
+    layerWrap.style.overflow="visible";
+
     const img=document.createElement("img");
     img.alt="";
     img.draggable=false;
     img.className=`secret-layer secret-layer-${index===1 ? "main" : String(index).padStart(2,"0")}`;
 
     /* 必ず通常ベルちゃんと同じ座標系に固定 */
+    const layerPosition=SECRET_LAYER_POSITIONS[index] || {x:0,y:0};
+    const layerSize=SECRET_LAYER_SIZES[index] || {width:100,height:100,scale:1};
+
+    /*
+      横幅・高さは個別指定。
+      position の x/y はレイヤー本体の中心位置を基準にする。
+      scale は横幅・高さを設定した後の全体サイズ調整。
+    */
+    layerWrap.style.width=`${layerSize.width}%`;
+    layerWrap.style.height=`${layerSize.height}%`;
+    layerWrap.style.left=`calc(${(100-layerSize.width)/2}% + ${layerPosition.x}px)`;
+    layerWrap.style.top=`calc(${(100-layerSize.height)/2}% + ${layerPosition.y}px)`;
+    layerWrap.style.transform=`scale(${layerSize.scale})`;
+    layerWrap.style.transformOrigin="center center";
+
     img.style.width="100%";
     img.style.height="100%";
     img.style.maxWidth="none";
     img.style.maxHeight="none";
     img.style.position="absolute";
-    const layerPosition=SECRET_LAYER_POSITIONS[index] || {x:0,y:0};
-    img.style.left=`${layerPosition.x}px`;
-    img.style.top=`${layerPosition.y}px`;
+    img.style.left="0";
+    img.style.top="0";
     img.style.objectFit="contain";
     img.style.objectPosition="center center";
 
@@ -741,11 +782,8 @@ bellImage.style.opacity="1";
       loadedCount++;
 
       if(loadedCount===SECRET_BELL_LAYERS.length && !failed){
-
-         /* シークレット衣装中は通常ベルちゃんを透明にする */
-　　　　　bellImage.style.visibility="visible";
-　　　　　bellImage.style.opacity="0";
-         
+        /* 通常のベルちゃんは消さず、その上にシークレットを重ねる */
+        bellImage.style.visibility="visible";
         secretCostume.classList.add("show");
         secretCostume.setAttribute("aria-hidden","false");
       }
@@ -760,10 +798,10 @@ bellImage.style.opacity="1";
       secretCostume.setAttribute("aria-hidden","true");
       secretCostume.innerHTML="";
       bellImage.style.visibility="visible";
-　　　　bellImage.style.opacity="1";
     };
 
-    secretCostume.appendChild(img);
+    layerWrap.appendChild(img);
+    secretCostume.appendChild(layerWrap);
 
     /* 背景透明化後の画像を設定 */
     prepareSecretLayer(src)
