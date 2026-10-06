@@ -503,114 +503,6 @@ button{
 
 
 /* =====================================================
-   衣装管理
-===================================================== */
-
-.costume-admin-member-info{
-  padding:10px 12px;
-  border-radius:10px;
-  background:#f7f9fc;
-  color:#4d5661;
-  font-size:13px;
-  margin-top:10px
-}
-
-.costume-admin-tabs{
-  display:flex;
-  gap:8px;
-  margin-top:14px
-}
-
-.costume-admin-tab{
-  flex:1;
-  background:#eef3fb;
-  color:#20242a;
-  border:1px solid #dfe5ee
-}
-
-.costume-admin-tab.active{
-  background:#1f6feb;
-  color:#fff;
-  border-color:#1f6feb
-}
-
-.costume-admin-list{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:10px;
-  margin-top:12px
-}
-
-.costume-admin-item{
-  border:1px solid #e1e5ea;
-  border-radius:14px;
-  padding:10px;
-  background:#fff
-}
-
-.costume-admin-item.acquired{
-  border-color:#b9d2f7;
-  background:#f7faff
-}
-
-.costume-admin-image{
-  width:100%;
-  aspect-ratio:1/1;
-  object-fit:contain;
-  display:block;
-  border-radius:10px;
-  background:#f7f8fa
-}
-
-.costume-admin-name{
-  font-size:13px;
-  font-weight:700;
-  margin-top:8px;
-  line-height:1.45
-}
-
-.costume-admin-status{
-  margin-top:5px;
-  font-size:11px;
-  color:#6f7882
-}
-
-.costume-admin-status.acquired{
-  color:#1f6feb;
-  font-weight:700
-}
-
-.costume-admin-actions{
-  display:flex;
-  gap:6px;
-  margin-top:8px
-}
-
-.costume-admin-actions button{
-  flex:1;
-  padding:7px 8px;
-  font-size:12px
-}
-
-.costume-grant-button{
-  background:#e8f0ff;
-  color:#1f6feb
-}
-
-.costume-revoke-button{
-  background:#fff;
-  color:#a06a6a;
-  border:1px solid #ead6d6
-}
-
-@media(max-width:600px){
-  .costume-admin-list{
-    grid-template-columns:1fr 1fr
-  }
-}
-
-
-/* =====================================================
    部員編集
 ===================================================== */
 
@@ -1375,50 +1267,42 @@ PDFを読み込む
 
 
 <!-- =====================================================
-     衣装管理
+     毎日ログイン衣装管理
 ===================================================== -->
 
-<div class="card" id="costumeAdminCard">
+<div class="card">
 
 <h2 class="section-title">
-着せ替え衣装管理
+毎日ログイン衣装を登録
 </h2>
 
 <p class="sub-title">
-部員のコレクションに衣装を付与・削除できます。
+登録済み衣装の一覧は別ページで管理します。
 </p>
 
-<label for="costumeAdminMember">
-部員
-</label>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
 
-<select id="costumeAdminMember">
-  <option value="">部員を選択してください</option>
-</select>
+<button
+  class="secondary"
+  type="button"
+  onclick="location.href='admin_daily_costumes.html?character=bell'"
+>
+🔔 ベルちゃんを登録
+</button>
 
-<div id="costumeAdminMemberInfo" class="costume-admin-member-info hidden"></div>
+<button
+  class="secondary"
+  type="button"
+  onclick="location.href='admin_daily_costumes.html?character=chime'"
+>
+🎵 チャイムくんを登録
+</button>
 
-<div id="costumeAdminCharacterTabs" class="costume-admin-tabs hidden">
-  <button
-    type="button"
-    class="costume-admin-tab active"
-    data-costume-character="bell"
-  >
-    ベルちゃん
-  </button>
-
-  <button
-    type="button"
-    class="costume-admin-tab"
-    data-costume-character="chime"
-  >
-    チャイムくん
-  </button>
 </div>
 
-<div id="costumeAdminList" class="costume-admin-list"></div>
-
-<div id="costumeAdminMsg"></div>
+<p class="small" style="margin-bottom:0">
+選択したキャラクターの毎日ログイン衣装を登録できます。
+</p>
 
 </div>
 
@@ -1482,6 +1366,12 @@ import{
 from
 "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
 
+import{
+  getStorage
+}
+from
+"https://www.gstatic.com/firebasejs/12.19.0/firebase-storage.js";
+
 
 const firebaseConfig={
   apiKey:"AIzaSyAK9yRsSLSfYpLSyluzwRyI22Zp32KeMSA",
@@ -1514,6 +1404,7 @@ function isCalendarMonthAllowed(date){
 
 
 const db=getDatabase(app);
+const storage=getStorage(app);
 
 await setPersistence(
   auth,
@@ -1639,7 +1530,6 @@ onAuthStateChanged(
       $("password").value="";
 
       await loadMembers();
-      await loadCostumeAdminMembers();
       await loadSchedules();
 
     }catch(e){
@@ -1769,223 +1659,6 @@ const classOrder={
 
 
 let editingMemberId=null;
-
-
-/* =====================================================
-   衣装管理
-===================================================== */
-
-const adminCostumeDefinitions={
-
-  bell:[
-    {id:"event_newyear_bell",name:"お正月",src:"costumes/bell-newyear.png"},
-    {id:"event_setsubun_bell",name:"節分",src:"costumes/bell-setsubun.png"},
-    {id:"event_valentine_bell",name:"バレンタイン",src:"costumes/bell-valentine.png"},
-    {id:"event_hinamatsuri_bell",name:"ひな祭り",src:"costumes/bell-hinamatsuri.png"},
-    {id:"event_whiteday_bell",name:"ホワイトデー",src:"costumes/bell-whiteday.png"},
-    {id:"event_kodomonohi_bell",name:"こどもの日",src:"costumes/bell-kodomonohi.png"},
-    {id:"event_tanabata_bell",name:"七夕",src:"costumes/bell-tanabata.png"},
-    {id:"event_tsukimi_bell",name:"十五夜",src:"costumes/bell-tsukimi.png"},
-    {id:"event_halloween_bell",name:"ハロウィン",src:"costumes/bell-halloween.png"},
-    {id:"event_christmaseve_bell",name:"クリスマスイブ",src:"costumes/bell-christmaseve.png"},
-    {id:"event_christmas_bell",name:"クリスマス",src:"costumes/bell-christmas.png"},
-    {id:"event_newyearseve_bell",name:"大晦日",src:"costumes/bell-winter.png"},
-    {id:"secret_bell_rare_costume",name:"レア衣装（0.25%）",src:"costumes/bell-rare.jpg",rare:true}
-  ],
-
-  chime:[
-    {id:"event_newyear_chime",name:"お正月",src:"costumes/chime-newyear.png"},
-    {id:"event_setsubun_chime",name:"節分",src:"costumes/chime-setsubun.png"},
-    {id:"event_valentine_chime",name:"バレンタイン",src:"costumes/chime-valentine.png"},
-    {id:"event_hinamatsuri_chime",name:"ひな祭り",src:"costumes/chime-hinamatsuri.png"},
-    {id:"event_whiteday_chime",name:"ホワイトデー",src:"costumes/chime-whiteday.png"},
-    {id:"event_kodomonohi_chime",name:"こどもの日",src:"costumes/chime-kodomonohi.png"},
-    {id:"event_tanabata_chime",name:"七夕",src:"costumes/chime-tanabata.png"},
-    {id:"event_tsukimi_chime",name:"十五夜",src:"costumes/chime-tsukimi.png"},
-    {id:"event_halloween_chime",name:"ハロウィン",src:"costumes/chime-halloween.png"},
-    {id:"event_christmaseve_chime",name:"クリスマスイブ",src:"costumes/chime-christmaseve.png"},
-    {id:"event_christmas_chime",name:"クリスマス",src:"costumes/chime-christmas.png"},
-    {id:"event_newyearseve_chime",name:"大晦日",src:"costumes/chime-winter.png"},
-    {id:"secret_chime_rare_costume",name:"レア衣装（0.25%）",src:"costumes/chime-rare.jpg",rare:true}
-  ]
-};
-
-let costumeAdminCharacter="bell";
-let costumeAdminCollection={};
-
-function populateCostumeAdminMembers(data){
-
-  const select=$("costumeAdminMember");
-  if(!select)return;
-
-  const current=select.value;
-
-  const members=Object.entries(data||{});
-
-  members.sort(
-    ([,a],[,b])=>
-      (gradeOrder[a.grade]??99)-(gradeOrder[b.grade]??99)||
-      (classOrder[a.className]??99)-(classOrder[b.className]??99)||
-      String(a.name||"").localeCompare(String(b.name||""),"ja")
-  );
-
-  select.innerHTML=
-    '<option value="">部員を選択してください</option>'+
-    members.map(([id,x])=>
-      `<option value="${esc(id)}">${esc(x.name)}（${esc(x.grade)}・${esc(x.className)}組）</option>`
-    ).join("");
-
-  if(current && data && data[current]){
-    select.value=current;
-  }
-}
-
-async function loadCostumeAdminMembers(){
-  const s=await get(ref(db,"memberRegistrations"));
-  const data=s.exists()?s.val():{};
-  populateCostumeAdminMembers(data);
-}
-
-async function loadCostumeAdminCollection(){
-
-  const memberId=$("costumeAdminMember").value;
-
-  if(!memberId){
-    costumeAdminCollection={};
-    $("costumeAdminMemberInfo").classList.add("hidden");
-    $("costumeAdminCharacterTabs").classList.add("hidden");
-    $("costumeAdminList").innerHTML="";
-    message("costumeAdminMsg","");
-    return;
-  }
-
-  try{
-    const s=await get(ref(db,`members/${memberId}/collection`));
-    costumeAdminCollection=s.exists()&&s.val()&&typeof s.val()==="object"?s.val():{};
-
-    const memberSnap=await get(ref(db,`memberRegistrations/${memberId}`));
-    const member=memberSnap.exists()?memberSnap.val():{};
-
-    const info=$("costumeAdminMemberInfo");
-    info.textContent=`${member.name||""}（${member.grade||""}・${member.className||""}組）`;
-    info.classList.remove("hidden");
-
-    $("costumeAdminCharacterTabs").classList.remove("hidden");
-    renderCostumeAdminList();
-    message("costumeAdminMsg","");
-
-  }catch(e){
-    console.error("衣装管理読み込みエラー:",e);
-    message("costumeAdminMsg","衣装情報を読み込めませんでした。\n\n"+(e.message||"不明"),"error");
-  }
-}
-
-function renderCostumeAdminList(){
-
-  const list=$("costumeAdminList");
-  if(!list)return;
-
-  if(!$("costumeAdminMember").value){
-    list.innerHTML="";
-    return;
-  }
-
-  list.innerHTML=adminCostumeDefinitions[costumeAdminCharacter].map(costume=>{
-    const acquired=costumeAdminCollection[costume.id]===true;
-
-    return `
-      <div class="costume-admin-item ${acquired?"acquired":""}">
-        <img
-          class="costume-admin-image"
-          src="${esc(costume.src)}"
-          alt="${esc(costume.name)}"
-          loading="lazy"
-        >
-
-        <div class="costume-admin-name">
-          ${esc(costume.name)}
-        </div>
-
-        <div class="costume-admin-status ${acquired?"acquired":""}">
-          ${acquired?"取得済み":"未取得"}
-        </div>
-
-        <div class="costume-admin-actions">
-          <button
-            type="button"
-            class="costume-grant-button"
-            data-costume-action="grant"
-            data-costume-id="${esc(costume.id)}"
-            ${acquired?"disabled":""}
-          >
-            付与
-          </button>
-
-          <button
-            type="button"
-            class="costume-revoke-button"
-            data-costume-action="revoke"
-            data-costume-id="${esc(costume.id)}"
-            ${acquired?"":"disabled"}
-          >
-            削除
-          </button>
-        </div>
-      </div>
-    `;
-  }).join("");
-}
-
-async function changeCostumeAdminItem(action,itemId){
-
-  if(!(await isAdmin()))return;
-
-  const memberId=$("costumeAdminMember").value;
-  if(!memberId||!itemId)return;
-
-  const path=`members/${memberId}/collection/${itemId}`;
-  const button=document.querySelector(`[data-costume-action="${action}"][data-costume-id="${CSS.escape(itemId)}"]`);
-  if(button)button.disabled=true;
-
-  try{
-
-    if(action==="grant"){
-      await update(ref(db),{[path]:true});
-      costumeAdminCollection[itemId]=true;
-      message("costumeAdminMsg","衣装を付与しました。","success");
-    }else{
-      const character=costumeAdminCharacter;
-      const equippedSnap=await get(
-        ref(db,`members/${memberId}/equippedCostume/${character}`)
-      );
-
-      const updates={
-        [path]:null
-      };
-
-      if(equippedSnap.exists() && equippedSnap.val()===itemId){
-        updates[`members/${memberId}/equippedCostume/${character}`]=null;
-      }
-
-      await update(ref(db),updates);
-      delete costumeAdminCollection[itemId];
-      message(
-        "costumeAdminMsg",
-        equippedSnap.exists() && equippedSnap.val()===itemId
-          ? "衣装を削除し、装備も解除しました。"
-          : "衣装を削除しました。",
-        "success"
-      );
-    }
-
-    renderCostumeAdminList();
-
-  }catch(e){
-    console.error("衣装管理更新エラー:",e);
-    message("costumeAdminMsg","衣装情報を変更できませんでした。\n\n"+(e.message||"不明"),"error");
-    renderCostumeAdminList();
-  }
-}
 
 
 async function addMember(){
@@ -2146,13 +1819,6 @@ async function loadMembers(){
             </button>
 
             <button
-              type="button"
-              data-costume-member="${esc(id)}"
-            >
-              衣装
-            </button>
-
-            <button
               class="delete-button"
               onclick="deleteMember('${esc(id)}')"
             >
@@ -2276,53 +1942,6 @@ async function deleteMember(id){
 
   await loadMembers();
 }
-
-
-/* =====================================================
-   衣装管理イベント
-===================================================== */
-
-$("costumeAdminMember")?.addEventListener("change",loadCostumeAdminCollection);
-
-$("costumeAdminCharacterTabs")?.addEventListener("click",event=>{
-  const button=event.target.closest("[data-costume-character]");
-  if(!button)return;
-
-  costumeAdminCharacter=button.dataset.costumeCharacter;
-
-  document.querySelectorAll(".costume-admin-tab").forEach(tab=>{
-    tab.classList.toggle("active",tab===button);
-  });
-
-  renderCostumeAdminList();
-});
-
-$("costumeAdminList")?.addEventListener("click",event=>{
-  const button=event.target.closest("[data-costume-action]");
-  if(!button)return;
-
-  changeCostumeAdminItem(
-    button.dataset.costumeAction,
-    button.dataset.costumeId
-  );
-});
-
-$("members")?.addEventListener("click",event=>{
-  const button=event.target.closest("[data-costume-member]");
-  if(!button)return;
-
-  const memberId=button.dataset.costumeMember;
-  const select=$("costumeAdminMember");
-  if(!select)return;
-
-  select.value=memberId;
-  $("costumeAdminCard").scrollIntoView({
-    behavior:"smooth",
-    block:"start"
-  });
-
-  loadCostumeAdminCollection();
-});
 
 
 /* =====================================================

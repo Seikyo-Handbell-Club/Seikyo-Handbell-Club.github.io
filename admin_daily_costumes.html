@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>毎日ログイン衣装管理｜清教学園ハンドベル部</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f7fb;color:#20242a;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif}
+header{background:#fff;padding:20px;border-bottom:1px solid #e5e8ed}
+h1{margin:0;text-align:center;font-size:21px}
+main{max-width:900px;margin:auto;padding:18px}
+.card{background:#fff;border-radius:18px;padding:16px;margin-bottom:16px;box-shadow:0 2px 12px #0000000b}
+.hidden{display:none!important}
+button{border:0;border-radius:10px;padding:11px 14px;font-weight:700;cursor:pointer;font-size:14px}
+.primary{background:#1f6feb;color:#fff;width:100%;margin-top:12px}
+.secondary{background:#eef3fb;color:#20242a}
+.danger{background:#fff0f0;color:#9b1c1c;border:1px solid #ead6d6}
+input{width:100%;padding:11px;border:1px solid #d9dee7;border-radius:10px;font-size:16px;background:#fff}
+label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}
+.small{font-size:12px;color:#6f7882}
+.msg{padding:12px;border-radius:10px;background:#fff8df;color:#69520a;margin-top:10px;font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere}
+.error{background:#fff0f0;color:#9b1c1c}
+.success{background:#effaf1;color:#176b2c}
+.topbar{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:16px}
+.back{background:#eef3fb;color:#20242a}
+.logout{background:#f5f7fa;color:#68717d;border:1px solid #dfe4eb;padding:7px 11px;font-size:13px}
+.character-tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.character-tab{background:#f3f5f8;color:#68717d;border:2px solid transparent}
+.character-tab.active{background:#eaf2ff;color:#1f6feb;border-color:#1f6feb}
+.upload-box{border:2px dashed #cfd7e3;border-radius:14px;padding:16px;background:#fafbfd;margin-top:14px}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:14px}
+.costume{border:1px solid #e1e5ea;border-radius:14px;padding:10px;background:#fff;overflow:hidden}
+.costume img{width:100%;aspect-ratio:1;object-fit:contain;background:#f7f8fa;border-radius:10px;display:block}
+.costume-name{font-weight:800;font-size:13px;margin-top:8px;word-break:break-word}
+.costume-id{font-size:11px;color:#7a838d;margin-top:3px;word-break:break-all}
+.costume-actions{margin-top:8px;display:flex;gap:6px}
+.costume-actions button{padding:7px 9px;font-size:12px;flex:1}
+.count{display:inline-block;background:#e8f0ff;color:#1f6feb;border-radius:999px;padding:4px 8px;font-size:12px;font-weight:700}
+.empty{padding:18px;border-radius:12px;background:#f7f8fa;color:#68717d;text-align:center}
+@media(max-width:700px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:420px){.character-tabs{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<header><h1>毎日ログイン衣装管理</h1></header>
+<main>
+<section id="login" class="card">
+<h2>管理者ログイン</h2>
+<p class="small">管理者用パスワードを入力してください。</p>
+<label for="password">パスワード</label>
+<input id="password" type="password" autocomplete="current-password" placeholder="パスワード">
+<button id="loginButton" class="primary" type="button">ログイン</button>
+<div id="loginMsg"></div>
+</section>
+
+<section id="app" class="hidden">
+<div class="topbar">
+<button class="back" type="button" onclick="location.href='admin.html'">← 管理者設定へ戻る</button>
+<button id="logoutButton" class="logout" type="button">ログアウト</button>
+</div>
+
+<div class="card">
+<h2>登録するキャラクター</h2>
+<p class="small">どちらかを選んで、そのキャラクターの毎日ログイン衣装を登録します。</p>
+<div class="character-tabs">
+<button id="bellButton" class="character-tab" type="button">🔔 ベルちゃん</button>
+<button id="chimeButton" class="character-tab" type="button">🎵 チャイムくん</button>
+</div>
+<div id="characterMsg"></div>
+</div>
+
+<div class="card">
+<h2 id="uploadTitle">ベルちゃんの衣装を登録</h2>
+<p class="small">複数枚をまとめて選択できます。画像はFirebase Storageへ保存されます。</p>
+<div class="upload-box">
+<label for="costumeFiles">衣装画像</label>
+<input id="costumeFiles" type="file" accept="image/png,image/jpeg,image/webp,image/heic,.png,.jpg,.jpeg,.webp,.heic" multiple>
+<p class="small">PNG推奨。登録時に連番IDが自動で付与されます。</p>
+<button id="uploadButton" class="primary" type="button">選択した衣装を登録</button>
+<div id="uploadMsg"></div>
+</div>
+</div>
+
+<div class="card">
+<h2>登録済み衣装</h2>
+<p class="small"><span id="listCharacterName">ベルちゃん</span>：<span id="costumeCount" class="count">0着</span></p>
+<div id="costumeGrid" class="grid"></div>
+</div>
+</section>
+</main>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import{getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut,setPersistence,browserLocalPersistence}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import{getDatabase,ref,get,set,remove}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+import{getStorage,ref as storageRef,uploadBytes,getDownloadURL,deleteObject}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-storage.js";
+
+const firebaseConfig={
+  apiKey:"AIzaSyAK9yRsSLSfYpLSyluzwRyI22Zp32KeMSA",
+  authDomain:"seikyo-handbell-club.firebaseapp.com",
+  databaseURL:"https://seikyo-handbell-club-default-rtdb.firebaseio.com",
+  projectId:"seikyo-handbell-club",
+  storageBucket:"seikyo-handbell-club.firebasestorage.app",
+  messagingSenderId:"55435007971",
+  appId:"1:55435007971:web:25f5c3b9dcd4324bc3f2d6"
+};
+const ADMIN_EMAIL="kazuma.cosmos@gmail.com";
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getDatabase(app);
+const storage=getStorage(app);
+await setPersistence(auth,browserLocalPersistence);
+const $=id=>document.getElementById(id);
+
+let currentCharacter="bell";
+let costumes={bell:{},chime:{}};
+
+function message(id,text,type=""){
+  const el=$(id); el.className=text?("msg "+type):""; el.textContent=text||"";
+}
+function characterName(){return currentCharacter==="bell"?"ベルちゃん":"チャイムくん";}
+function sanitizeName(name){return String(name||"").replace(/[\\/:*?"<>|#%{}]/g,"_").trim()||"衣装";}
+async function isAdmin(){
+  if(!auth.currentUser)return false;
+  const s=await get(ref(db,"admins/"+auth.currentUser.uid));
+  return s.exists()&&s.val()===true;
+}
+function setCharacter(character){
+  currentCharacter=character==="chime"?"chime":"bell";
+  $("bellButton").classList.toggle("active",currentCharacter==="bell");
+  $("chimeButton").classList.toggle("active",currentCharacter==="chime");
+  $("uploadTitle").textContent=characterName()+"の衣装を登録";
+  $("listCharacterName").textContent=characterName();
+  message("characterMsg","");
+  renderList();
+}
+
+async function loadCostumes(){
+  const snap=await get(ref(db,"dailyCostumes"));
+  const data=snap.exists()&&snap.val()?snap.val():{};
+  costumes={bell:data.bell||{},chime:data.chime||{}};
+  renderList();
+}
+
+function sortEntries(obj){
+  return Object.entries(obj||{}).sort((a,b)=>{
+    const na=Number((a[0].match(/(\\d+)$/)||[,999999])[1]);
+    const nb=Number((b[0].match(/(\\d+)$/)||[,999999])[1]);
+    return na-nb||a[0].localeCompare(b[0]);
+  });
+}
+
+function renderList(){
+  const grid=$("costumeGrid"); grid.innerHTML="";
+  const entries=sortEntries(costumes[currentCharacter]);
+  $("costumeCount").textContent=entries.length+"着";
+  if(!entries.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1">まだ衣装が登録されていません。</div>';return;}
+  for(const [id,item] of entries){
+    const card=document.createElement("div");card.className="costume";
+    const img=document.createElement("img");img.src=item.imageUrl||"";img.alt=item.name||id;img.loading="lazy";
+    const name=document.createElement("div");name.className="costume-name";name.textContent=item.name||id;
+    const cid=document.createElement("div");cid.className="costume-id";cid.textContent=id;
+    const actions=document.createElement("div");actions.className="costume-actions";
+    const del=document.createElement("button");del.className="danger";del.textContent="削除";del.onclick=()=>deleteCostume(id,item);
+    actions.appendChild(del);card.append(img,name,cid,actions);grid.appendChild(card);
+  }
+}
+
+async function uploadSelected(){
+  if(!(await isAdmin()))return;
+  const input=$("costumeFiles");
+  const files=[...input.files||[]];
+  if(!files.length){message("uploadMsg","画像を選択してください。","error");return;}
+  const button=$("uploadButton");button.disabled=true;message("uploadMsg","登録しています……");
+  try{
+    const current=costumes[currentCharacter]||{};
+    let next=1;
+    while(current[`daily-costume-${String(next).padStart(2,"0")}`])next++;
+    for(const file of files){
+      const id=`daily-costume-${String(next).padStart(2,"0")}`;next++;
+      const safe=sanitizeName(file.name.replace(/\.[^.]+$/,""));
+      const path=`daily-costumes/${currentCharacter}/${id}.png`;
+      const sref=storageRef(storage,path);
+      await uploadBytes(sref,file,{contentType:file.type||"image/png",customMetadata:{character:currentCharacter,costumeId:id}});
+      const imageUrl=await getDownloadURL(sref);
+      await set(ref(db,`dailyCostumes/${currentCharacter}/${id}`),{id,name:safe,imageUrl,storagePath:path,createdAt:Date.now()});
+    }
+    input.value="";
+    await loadCostumes();
+    message("uploadMsg",`${files.length}着登録しました。`,"success");
+  }catch(e){
+    console.error(e);message("uploadMsg","衣装の登録に失敗しました。\n\n"+(e.message||"不明"),"error");
+  }finally{button.disabled=false;}
+}
+
+async function deleteCostume(id,item){
+  if(!(await isAdmin()))return;
+  if(!confirm(`${item.name||id}を削除しますか？`))return;
+  try{
+    await remove(ref(db,`dailyCostumes/${currentCharacter}/${id}`));
+    if(item.storagePath){try{await deleteObject(storageRef(storage,item.storagePath));}catch(e){console.warn(e);}}
+    await loadCostumes();
+    message("uploadMsg","衣装を削除しました。","success");
+  }catch(e){console.error(e);message("uploadMsg","衣装の削除に失敗しました。\n\n"+(e.message||"不明"),"error");}
+}
+
+async function adminLogin(){
+  const password=$("password").value;if(!password){message("loginMsg","パスワードを入力してください。","error");return;}
+  const b=$("loginButton");b.disabled=true;b.textContent="ログイン中...";
+  try{
+    const c=await signInWithEmailAndPassword(auth,ADMIN_EMAIL,password);
+    const s=await get(ref(db,"admins/"+c.user.uid));
+    if(!s.exists()||s.val()!==true){await signOut(auth);message("loginMsg","管理者として登録されていません。","error");}
+  }catch(e){message("loginMsg","ログインできませんでした。\n\nエラーコード: "+(e.code||"不明")+"\n詳細: "+(e.message||"不明"),"error");}
+  finally{b.disabled=false;b.textContent="ログイン";}
+}
+
+$("bellButton").onclick=()=>setCharacter("bell");
+$("chimeButton").onclick=()=>setCharacter("chime");
+$("uploadButton").onclick=uploadSelected;
+$("logoutButton").onclick=()=>signOut(auth);
+$("password").onkeydown=e=>{if(e.key==="Enter")adminLogin()};
+$("loginButton").onclick=adminLogin;
+
+const params=new URLSearchParams(location.search);
+setCharacter(params.get("character")==="chime"?"chime":"bell");
+
+onAuthStateChanged(auth,async user=>{
+  if(!user){$("login").classList.remove("hidden");$("app").classList.add("hidden");return;}
+  try{
+    if(!(await isAdmin())){await signOut(auth);return;}
+    $("login").classList.add("hidden");$("app").classList.remove("hidden");
+    await loadCostumes();
+  }catch(e){console.error(e);message("loginMsg","管理者権限の確認に失敗しました。\n\n"+(e.message||"不明"),"error");}
+});
+</script>
+</body>
+</html>
