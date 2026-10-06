@@ -22,8 +22,8 @@ body{
 
 .bell-area{
   position:absolute;
-  width:clamp(220px, 42vw, 360px);
-  height:clamp(190px, 38vw, 280px);
+  width:220px;
+  height:140px;
   right:0;
   bottom:0;
   font-family:
@@ -153,7 +153,7 @@ body:not(.logged-in) .bubble{
   max-width:198px;
   box-sizing:border-box;
   right:4px;
-  bottom:112px;
+  bottom:92px;
 }
 
 body:not(.logged-in) .bubble:after{
@@ -186,7 +186,7 @@ body.logged-in .bubble{
   max-width:198px;
   box-sizing:border-box;
   right:6px;
-  bottom:108px;
+  bottom:88px;
 }
 
 body.logged-in .bubble:after{
@@ -265,7 +265,7 @@ body.logged-in .bubble:after{
 
   color:#ff7eb9;
 
-  font-size:clamp(20px, 5vw, 28px);
+  font-size:18px;
 
   line-height:1;
 
@@ -420,20 +420,19 @@ body.logged-in .bubble:after{
 
 /* =====================================================
    シークレット衣装（7レイヤー）
-   ★ 第1段階：まず通常のベルちゃんと同じ
-   サイズ・位置に完全に合わせる
+   通常のベルちゃんと同じ85px / 90pxの座標系で重ねる
 ===================================================== */
 .secret-costume{
   position:absolute;
-  width:var(--secret-bell-size);
-  height:var(--secret-bell-size);
-  right:var(--secret-bell-right);
-  bottom:var(--secret-bell-bottom);
+  width:var(--bell-size,90px) !important;
+  height:var(--bell-size,90px) !important;
+  right:var(--bell-right,25px) !important;
+  bottom:var(--bell-bottom,0px) !important;
   z-index:11;
   pointer-events:none;
   user-select:none;
   display:none;
-  overflow:visible;
+  overflow:hidden;
   box-sizing:border-box;
 }
 .secret-costume.show{display:block;}
@@ -459,24 +458,57 @@ body.logged-in .bubble:after{
   display:block;
 }
 body:not(.logged-in){
-  --secret-bell-size:100px;
-  --secret-bell-right:30px;
-  --secret-bell-bottom:12px;
+  --bell-size:85px;
+  --bell-right:20px;
+  --bell-bottom:12px;
 }
 body.logged-in{
-  --secret-bell-size:100px;
-  --secret-bell-right:40px;
-  --secret-bell-bottom:0px;
+  --bell-size:90px;
+  --bell-right:25px;
+  --bell-bottom:0px;
 }
-.secret-costume .secret-layer-main,
-.secret-costume .secret-layer-01,
-.secret-costume .secret-layer-02,
-.secret-costume .secret-layer-03,
-.secret-costume .secret-layer-04,
+body:not(.logged-in) .secret-costume{
+  right:20px !important;
+  bottom:12px !important;
+}
+body.logged-in .secret-costume{
+  right:25px !important;
+  bottom:0 !important;
+}
+/* =====================================================
+   シークレット衣装・個別位置調整
+   ★ 位置を変えるときは、この1か所だけ編集
+===================================================== */
+.secret-costume .secret-layer-main{
+  left:4.8% !important;
+  top:-5.6% !important;
+}
+
+.secret-costume .secret-layer-01{
+  left:4.8% !important;
+  top:-5.6% !important;
+}
+
+.secret-costume .secret-layer-02{
+  left:4.8% !important;
+  top:-5.6% !important;
+}
+
+.secret-costume .secret-layer-03{
+  left:4.8% !important;
+  top:-5.6% !important;
+}
+
+.secret-costume .secret-layer-04{
+  left:4.8% !important;
+  top:-5.6% !important;
+}
+
 .secret-costume .secret-layer-05{
   left:4.8% !important;
   top:-5.6% !important;
 }
+
 .secret-costume .secret-layer-main{animation:secretFloat 2.8s ease-in-out infinite;}
 .secret-costume .secret-layer-01{animation:secretWaveLeft 2.2s ease-in-out infinite;}
 .secret-costume .secret-layer-02{animation:secretWaveRight 2.4s ease-in-out infinite;}
@@ -690,8 +722,11 @@ function renderSecretCostume(character){
   secretCostume.innerHTML="";
   secretCostume.classList.remove("show","celebrating");
   secretCostume.setAttribute("aria-hidden","true");
+
+  /* 通常衣装ではベルちゃん本体をそのまま表示 */
   bellImage.style.visibility="visible";
 
+  /* 現在レイヤー画像が用意されているのはベルちゃん */
   if(character!=="bell" || !isSecretEquipped("bell")){
     return;
   }
@@ -701,16 +736,29 @@ function renderSecretCostume(character){
 
   SECRET_BELL_LAYERS.forEach((src,index)=>{
     const img=document.createElement("img");
-    img.src=src;
     img.alt="";
     img.draggable=false;
     img.className=`secret-layer secret-layer-${index===1 ? "main" : String(index).padStart(2,"0")}`;
 
+    /* 必ず通常ベルちゃんと同じ座標系に固定 */
+    img.style.width="100%";
+    img.style.height="100%";
+    img.style.maxWidth="none";
+    img.style.maxHeight="none";
+    img.style.position="absolute";
+    img.style.left="0";
+    img.style.top="0";
+    img.style.objectFit="contain";
+    img.style.objectPosition="center center";
+
     img.onload=()=>{
       if(renderToken!==secretRenderToken)return;
+
       loadedCount++;
+
       if(loadedCount===SECRET_BELL_LAYERS.length && !failed){
-        bellImage.style.visibility="hidden";
+        /* 通常のベルちゃんは消さず、その上にシークレットを重ねる */
+        bellImage.style.visibility="visible";
         secretCostume.classList.add("show");
         secretCostume.setAttribute("aria-hidden","false");
       }
@@ -718,6 +766,7 @@ function renderSecretCostume(character){
 
     img.onerror=()=>{
       if(renderToken!==secretRenderToken)return;
+
       failed=true;
       console.error("シークレット衣装画像の読み込み失敗:",src);
       secretCostume.classList.remove("show","celebrating");
@@ -727,6 +776,18 @@ function renderSecretCostume(character){
     };
 
     secretCostume.appendChild(img);
+
+    /* 背景透明化後の画像を設定 */
+    prepareSecretLayer(src)
+      .then(preparedSrc=>{
+        if(renderToken!==secretRenderToken)return;
+        img.src=preparedSrc;
+      })
+      .catch(error=>{
+        if(renderToken!==secretRenderToken)return;
+        console.error("シークレット衣装画像の加工に失敗:",src,error);
+        img.src=src;
+      });
   });
 }
 
