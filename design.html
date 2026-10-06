@@ -94,366 +94,6 @@ body.logged-in .bell.chime{
 }
 
 /* =====================================================
-   ★ シークレット衣装・7レイヤー ★
-===================================================== */
-
-.secret-bell{
-  position:absolute;
-
-  width:90px;
-  height:90px;
-
-  right:25px;
-  bottom:0px;
-
-  display:none;
-
-  cursor:pointer;
-  user-select:none;
-
-  z-index:10;
-
-  transform-origin:center bottom;
-}
-
-.secret-bell.visible{
-  display:block;
-}
-
-/*
- * シークレット衣装の各レイヤー
- *
- * 7枚すべて同じ1536×1536キャンバスなので、
- * 同じ場所に完全に重ねる。
- */
-
-.secret-layer{
-  position:absolute;
-
-  left:0;
-  top:0;
-
-  width:100%;
-  height:100%;
-
-  object-fit:contain;
-
-  border:none;
-  outline:none;
-  box-shadow:none;
-
-  pointer-events:none;
-  user-select:none;
-
-  transform-origin:center center;
-}
-
-/* -----------------------------------------------------
-   レイヤー順
------------------------------------------------------ */
-
-.secret-layer.layer-base{
-  z-index:10;
-}
-
-.secret-layer.layer-wide{
-  z-index:20;
-}
-
-.secret-layer.layer-cloth-left{
-  z-index:30;
-}
-
-.secret-layer.layer-cloth-right{
-  z-index:40;
-}
-
-.secret-layer.layer-main{
-  z-index:50;
-}
-
-.secret-layer.layer-ribbon{
-  z-index:60;
-}
-
-.secret-layer.layer-ribbon-extra{
-  z-index:70;
-}
-
-/* =====================================================
-   ★ シークレット衣装・常時ひらひら ★
-===================================================== */
-
-/*
- * 後ろの大きな布
- */
-
-.secret-layer.layer-wide{
-  animation:
-    secretWideFlutter
-    3.4s
-    ease-in-out
-    infinite
-    alternate;
-}
-
-/*
- * 左側の布
- */
-
-.secret-layer.layer-cloth-left{
-  animation:
-    secretLeftFlutter
-    2.45s
-    ease-in-out
-    infinite
-    alternate;
-}
-
-/*
- * 右側の布
- */
-
-.secret-layer.layer-cloth-right{
-  animation:
-    secretRightFlutter
-    2.75s
-    ease-in-out
-    infinite
-    alternate;
-}
-
-/*
- * リボン
- */
-
-.secret-layer.layer-ribbon{
-  animation:
-    secretRibbonFlutter
-    2.05s
-    ease-in-out
-    infinite
-    alternate;
-}
-
-/*
- * リボン追加部分
- */
-
-.secret-layer.layer-ribbon-extra{
-  animation:
-    secretRibbonExtraFlutter
-    2.35s
-    ease-in-out
-    infinite
-    alternate;
-}
-
-/* -----------------------------------------------------
-   大きな布
------------------------------------------------------ */
-
-@keyframes secretWideFlutter{
-
-  0%{
-    transform:
-      translate(-1px,0px)
-      rotate(-0.5deg);
-  }
-
-  25%{
-    transform:
-      translate(1px,1px)
-      rotate(0.6deg);
-  }
-
-  50%{
-    transform:
-      translate(2px,-1px)
-      rotate(1deg);
-  }
-
-  75%{
-    transform:
-      translate(-1px,1px)
-      rotate(-0.8deg);
-  }
-
-  100%{
-    transform:
-      translate(-2px,-1px)
-      rotate(-1.2deg);
-  }
-
-}
-
-/* -----------------------------------------------------
-   左側の布
------------------------------------------------------ */
-
-@keyframes secretLeftFlutter{
-
-  0%{
-    transform:
-      translate(0px,0px)
-      rotate(-0.5deg);
-  }
-
-  25%{
-    transform:
-      translate(-2px,1px)
-      rotate(-1.5deg);
-  }
-
-  50%{
-    transform:
-      translate(-4px,0px)
-      rotate(-2.2deg);
-  }
-
-  75%{
-    transform:
-      translate(-2px,-1px)
-      rotate(-0.8deg);
-  }
-
-  100%{
-    transform:
-      translate(1px,1px)
-      rotate(1deg);
-  }
-
-}
-
-/* -----------------------------------------------------
-   右側の布
------------------------------------------------------ */
-
-@keyframes secretRightFlutter{
-
-  0%{
-    transform:
-      translate(0px,0px)
-      rotate(0.5deg);
-  }
-
-  25%{
-    transform:
-      translate(2px,1px)
-      rotate(1.3deg);
-  }
-
-  50%{
-    transform:
-      translate(4px,0px)
-      rotate(2deg);
-  }
-
-  75%{
-    transform:
-      translate(2px,-1px)
-      rotate(0.7deg);
-  }
-
-  100%{
-    transform:
-      translate(-1px,1px)
-      rotate(-1deg);
-  }
-
-}
-
-/* -----------------------------------------------------
-   リボン
------------------------------------------------------ */
-
-@keyframes secretRibbonFlutter{
-
-  0%{
-    transform:
-      translate(0px,0px)
-      rotate(-1deg);
-  }
-
-  25%{
-    transform:
-      translate(-1px,1px)
-      rotate(1deg);
-  }
-
-  50%{
-    transform:
-      translate(1px,2px)
-      rotate(2.5deg);
-  }
-
-  75%{
-    transform:
-      translate(2px,0px)
-      rotate(0deg);
-  }
-
-  100%{
-    transform:
-      translate(-1px,-1px)
-      rotate(-2deg);
-  }
-
-}
-
-/* -----------------------------------------------------
-   リボン追加部分
------------------------------------------------------ */
-
-@keyframes secretRibbonExtraFlutter{
-
-  0%{
-    transform:
-      translate(0px,0px)
-      rotate(0deg);
-  }
-
-  25%{
-    transform:
-      translate(1px,1px)
-      rotate(1.5deg);
-  }
-
-  50%{
-    transform:
-      translate(2px,2px)
-      rotate(3deg);
-  }
-
-  75%{
-    transform:
-      translate(-1px,1px)
-      rotate(-1deg);
-  }
-
-  100%{
-    transform:
-      translate(-2px,-1px)
-      rotate(-2deg);
-  }
-
-}
-
-/* =====================================================
-   ★ シークレット衣装の喜びアニメーション
-===================================================== */
-
-.secret-bell.celebrating{
-
-  animation:
-    bellCelebrate
-    1.8s
-    cubic-bezier(.2,.8,.25,1)
-    both;
-
-}
-
-/* =====================================================
    吹き出し
 ===================================================== */
 
@@ -801,79 +441,6 @@ body.logged-in .bubble:after{
     id="heartContainer">
   </div>
 
-  <!-- =================================================
-       ★ シークレット衣装
-       7枚を同じ位置に重ねる
-  ================================================== -->
-
-  <div
-    class="secret-bell"
-    id="secretBell"
-    aria-label="ベルちゃん シークレット衣装"
-  >
-
-    <!-- 一番後ろ：ベルちゃん本体 -->
-    <img
-      class="secret-layer layer-base"
-      src="costumes/secret/01_bell-secret_base.png"
-      alt=""
-      draggable="false"
-    >
-
-    <!-- 後ろ側の大きな布 -->
-    <img
-      class="secret-layer layer-wide"
-      src="costumes/secret/07_bell-secret_cloth-wide.png"
-      alt=""
-      draggable="false"
-    >
-
-    <!-- 左側の布 -->
-    <img
-      class="secret-layer layer-cloth-left"
-      src="costumes/secret/03_bell-secret_cloth-left.png"
-      alt=""
-      draggable="false"
-    >
-
-    <!-- 右側の布 -->
-    <img
-      class="secret-layer layer-cloth-right"
-      src="costumes/secret/04_bell-secret_cloth-right.png"
-      alt=""
-      draggable="false"
-    >
-
-    <!-- メイン衣装 -->
-    <img
-      class="secret-layer layer-main"
-      src="costumes/secret/02_bell-secret_main-costume.png"
-      alt=""
-      draggable="false"
-    >
-
-    <!-- リボン -->
-    <img
-      class="secret-layer layer-ribbon"
-      src="costumes/secret/05_bell-secret_ribbon.png"
-      alt=""
-      draggable="false"
-    >
-
-    <!-- リボン追加部分 -->
-    <img
-      class="secret-layer layer-ribbon-extra"
-      src="costumes/secret/06_bell-secret_ribbon-extra.png"
-      alt=""
-      draggable="false"
-    >
-
-  </div>
-
-  <!-- =================================================
-       通常キャラクター
-  ================================================== -->
-
   <img
     class="bell"
     src="bell.png"
@@ -899,11 +466,6 @@ const bellImage =
     "bellImage"
   );
 
-const secretBell =
-  document.getElementById(
-    "secretBell"
-  );
-
 const characterName =
   document.getElementById(
     "characterName"
@@ -925,65 +487,12 @@ const heartContainer =
 
 let currentCharacter="bell";
 
-let equippedCostumes={
-  bell:null,
-  chime:null
-};
-
+let equippedCostumes={bell:null,chime:null};
 let eventCostumeOverrides={};
 
-/* =====================================================
-   ★ シークレット衣装設定
-===================================================== */
-
-/*
- * 今回登録するシークレット衣装ID
- *
- * Bell側：
- * secret-bell
- *
- * Chime側は今後追加できるように
- * secret-chime も予約しておく。
- */
-
-const SECRET_COSTUME_IDS={
-
-  bell:"secret-bell",
-
-  chime:"secret-chime"
-
-};
-
-/*
- * 現在はベルちゃんの7レイヤーを実装。
- *
- * チャイムくんのシークレット衣装素材を追加したら、
- * ここに同じ形式で追加できる。
- */
-
-const secretBellLayerImages=[
-
-  "costumes/secret/01_bell-secret_base.png",
-
-  "costumes/secret/02_bell-secret_main-costume.png",
-
-  "costumes/secret/03_bell-secret_cloth-left.png",
-
-  "costumes/secret/04_bell-secret_cloth-right.png",
-
-  "costumes/secret/05_bell-secret_ribbon.png",
-
-  "costumes/secret/06_bell-secret_ribbon-extra.png",
-
-  "costumes/secret/07_bell-secret_cloth-wide.png"
-
-];
-
-/*
- * シークレット衣装の読み込み競合を防ぐための番号。
- */
-
-let secretRenderToken=0;
+/* ページを開いたときに当選したレア衣装。
+   当選したキャラクターを、選択中キャラクターに関係なく一時表示する。 */
+let forcedRareCostume=null;
 
 /* =====================================================
    通常キャラクター画像
@@ -1122,59 +631,30 @@ const jugoyaDates={
 
 /* =====================================================
    ★ テスト日付機能
+   URLに ?testDate=2026-12-25 のように指定すると
+   その日付として特殊服を判定する。
+   指定しない場合は通常どおり今日の日付を使用。
 ===================================================== */
 
 function getTestDate(){
 
   /* コードで指定したテスト日付を最優先 */
   if(TEST_DATE){
-
     try{
-
-      if(
-        /^\d{4}-\d{2}-\d{2}$/.test(
-          TEST_DATE
-        )
-      ){
-
-        const testDate =
-          new Date(
-            `${TEST_DATE}T12:00:00`
-          );
-
+      if(/^\d{4}-\d{2}-\d{2}$/.test(TEST_DATE)){
+        const testDate = new Date(`${TEST_DATE}T12:00:00`);
         if(
-          !Number.isNaN(
-            testDate.getTime()
-          ) &&
-          testDate.getFullYear() ===
-            Number(
-              TEST_DATE.slice(0,4)
-            ) &&
-          testDate.getMonth()+1 ===
-            Number(
-              TEST_DATE.slice(5,7)
-            ) &&
-          testDate.getDate() ===
-            Number(
-              TEST_DATE.slice(8,10)
-            )
+          !Number.isNaN(testDate.getTime()) &&
+          testDate.getFullYear() === Number(TEST_DATE.slice(0,4)) &&
+          testDate.getMonth()+1 === Number(TEST_DATE.slice(5,7)) &&
+          testDate.getDate() === Number(TEST_DATE.slice(8,10))
         ){
-
           return testDate;
-
         }
-
       }
-
     }catch(error){
-
-      console.warn(
-        "コード指定のテスト日付を読み込めませんでした",
-        error
-      );
-
+      console.warn("コード指定のテスト日付を読み込めませんでした",error);
     }
-
   }
 
   try{
@@ -1189,9 +669,7 @@ function getTestDate(){
 
     if(
       value &&
-      /^\d{4}-\d{2}-\d{2}$/.test(
-        value
-      )
+      /^\d{4}-\d{2}-\d{2}$/.test(value)
     ){
 
       const testDate =
@@ -1204,17 +682,11 @@ function getTestDate(){
           testDate.getTime()
         ) &&
         testDate.getFullYear() ===
-          Number(
-            value.slice(0,4)
-          ) &&
+          Number(value.slice(0,4)) &&
         testDate.getMonth()+1 ===
-          Number(
-            value.slice(5,7)
-          ) &&
+          Number(value.slice(5,7)) &&
         testDate.getDate() ===
-          Number(
-            value.slice(8,10)
-          )
+          Number(value.slice(8,10))
       ){
 
         return testDate;
@@ -1270,6 +742,11 @@ function getCostumeKey(
     return "newyear";
 
   }
+
+  /*
+   * 1月6日〜1月31日は
+   * 通常衣装のまま
+   */
 
   /* ---------------------------------------------
      節分
@@ -1428,314 +905,6 @@ function getCostumeKey(
 }
 
 /* =====================================================
-   ★ シークレット衣装判定
-===================================================== */
-
-function isSecretCostumeId(
-  costumeId,
-  character
-){
-
-  return (
-    !!costumeId &&
-    costumeId ===
-      SECRET_COSTUME_IDS[
-        character
-      ]
-  );
-
-}
-
-/* =====================================================
-   ★ シークレット衣装を表示
-===================================================== */
-
-function showSecretBell(){
-
-  /*
-   * ベルちゃん以外では表示しない。
-   */
-
-  if(
-    currentCharacter !== "bell"
-  ){
-
-    hideSecretBell();
-
-    return;
-
-  }
-
-  const token =
-    ++secretRenderToken;
-
-  /*
-   * 7枚すべて読み込めることを確認してから表示。
-   *
-   * 途中で1枚だけ失敗して
-   * 「？」や中途半端な衣装になるのを防ぐ。
-   */
-
-  Promise.all(
-
-    secretBellLayerImages.map(
-      src =>
-        new Promise(
-          resolve=>{
-
-            const image =
-              new Image();
-
-            image.onload=()=>{
-              resolve(true);
-            };
-
-            image.onerror=()=>{
-              resolve(false);
-            };
-
-            image.src=src;
-
-          }
-        )
-    )
-
-  ).then(
-    results=>{
-
-      /*
-       * 途中でキャラクターが
-       * 切り替わっていたら何もしない。
-       */
-
-      if(
-        token !==
-        secretRenderToken
-      ){
-
-        return;
-
-      }
-
-      /*
-       * 全部読み込めなかった場合は
-       * 通常ベルちゃんへ戻す。
-       */
-
-      if(
-        !results.every(
-          value=>value===true
-        )
-      ){
-
-        hideSecretBell();
-
-        bellImage.style.display =
-          "";
-
-        return;
-
-      }
-
-      /*
-       * シークレット表示
-       */
-
-      bellImage.style.display =
-        "none";
-
-      secretBell.classList.add(
-        "visible"
-      );
-
-    }
-  );
-
-}
-
-/* =====================================================
-   ★ シークレット衣装を非表示
-===================================================== */
-
-function hideSecretBell(){
-
-  /*
-   * 現在進行中の読み込みを無効化
-   */
-
-  secretRenderToken++;
-
-  secretBell.classList.remove(
-    "visible"
-  );
-
-  secretBell.classList.remove(
-    "celebrating"
-  );
-
-  bellImage.style.display =
-    "";
-
-}
-
-/* =====================================================
-   今日表示する衣装状態を取得
-===================================================== */
-
-function getCharacterDisplayState(
-  character,
-  date=getCurrentDate()
-){
-
-  const selected =
-    character === "chime"
-      ? "chime"
-      : "bell";
-
-  const costumeKey =
-    getCostumeKey(date);
-
-  /*
-   * ---------------------------------------------------
-   * ① イベント日の手動衣装
-   * ---------------------------------------------------
-   */
-
-  if(costumeKey){
-
-    const override =
-      eventCostumeOverrides?.[
-        costumeKey
-      ]?.[
-        selected
-      ] || null;
-
-    if(override){
-
-      /*
-       * イベント中に手動で
-       * シークレットを指定した場合。
-       *
-       * ただし現在はイベント衣装の通常画像を優先する。
-       * シークレットは通常日で装備している場合に表示。
-       */
-
-      if(
-        isSecretCostumeId(
-          override,
-          selected
-        )
-      ){
-
-        return {
-          type:"secret",
-          id:override
-        };
-
-      }
-
-      const overrideImage =
-        getCostumeImageFromId(
-          override,
-          selected
-        );
-
-      if(overrideImage){
-
-        return {
-          type:"image",
-          src:overrideImage
-        };
-
-      }
-
-    }
-
-    /*
-     * -------------------------------------------------
-     * ② 通常のイベント衣装
-     * -------------------------------------------------
-     */
-
-    if(
-      costumeImages[
-        selected
-      ]?.[
-        costumeKey
-      ]
-    ){
-
-      return {
-        type:"image",
-        src:
-          costumeImages[
-            selected
-          ][
-            costumeKey
-          ]
-      };
-
-    }
-
-  }
-
-  /*
-   * ---------------------------------------------------
-   * ③ 装備中の衣装
-   * ---------------------------------------------------
-   */
-
-  const equipped =
-    equippedCostumes?.[
-      selected
-    ] || null;
-
-  if(
-    isSecretCostumeId(
-      equipped,
-      selected
-    )
-  ){
-
-    return {
-      type:"secret",
-      id:equipped
-    };
-
-  }
-
-  const equippedImage =
-    getCostumeImageFromId(
-      equipped,
-      selected
-    );
-
-  if(equippedImage){
-
-    return {
-      type:"image",
-      src:equippedImage
-    };
-
-  }
-
-  /*
-   * ---------------------------------------------------
-   * ④ 通常キャラクター
-   * ---------------------------------------------------
-   */
-
-  return {
-    type:"normal",
-    src:
-      characterImages[
-        selected
-      ].src
-  };
-
-}
-
-/* =====================================================
    今日のキャラクター画像を取得
 ===================================================== */
 
@@ -1744,133 +913,81 @@ function getCharacterImage(
   date=getCurrentDate()
 ){
 
-  const state =
-    getCharacterDisplayState(
-      character,
-      date
-    );
+  const selected = character === "chime" ? "chime" : "bell";
 
-  if(
-    state.type === "secret"
-  ){
-
-    return null;
-
+  /* 当選直後のレア衣装は、選択中キャラクターより優先して表示 */
+  if(forcedRareCostume && forcedRareCostume.character === selected){
+    return forcedRareCostume.src;
   }
 
-  return state.src;
+  const costumeKey = getCostumeKey(date);
 
+  if(costumeKey){
+    const override = eventCostumeOverrides?.[costumeKey]?.[selected] || null;
+    if(override){
+      const overrideImage = getCostumeImageFromId(override, selected);
+      if(overrideImage) return overrideImage;
+    }
+    if(costumeImages[selected]?.[costumeKey]){
+      return costumeImages[selected][costumeKey];
+    }
+  }
+
+  const equipped = equippedCostumes?.[selected] || null;
+  const equippedImage = getCostumeImageFromId(equipped, selected);
+  if(equippedImage) return equippedImage;
+
+  return characterImages[selected].src;
+}
+
+function getCostumeImageFromId(costumeId, character){
+  if(!costumeId) return null;
+  if(costumeId === "daily-costume-01") return "costumes/daily-costume-01.png";
+  if(costumeId === "daily-costume-02") return "costumes/daily-costume-02.png";
+  if(costumeId.startsWith("event_")){
+    const suffix = character === "chime" ? "_chime" : "_bell";
+    if(!costumeId.endsWith(suffix)) return null;
+    let key = costumeId.slice(6,-suffix.length);
+    if(key === "newyearseve") key = "winter";
+    return costumeImages?.[character]?.[key] || null;
+  }
+  return null;
 }
 
 /* =====================================================
-   衣装IDから画像を取得
+   当選したレア衣装を即時表示
 ===================================================== */
 
-function getCostumeImageFromId(
-  costumeId,
-  character
-){
+function showRareCostume(character,src,name){
 
-  if(!costumeId){
+  const selected = character === "chime" ? "chime" : "bell";
+  if(!src) return;
 
-    return null;
+  forcedRareCostume={
+    character:selected,
+    src,
+    name:name || (selected === "chime" ? "チャイムくん・レア衣装" : "ベルちゃん・レア衣装")
+  };
 
-  }
+  const testImage = new Image();
 
-  /* ---------------------------------------------------
-     毎日ログイン衣装
-  --------------------------------------------------- */
+  testImage.onload = function(){
+    currentCharacter=selected;
+    bellImage.classList.toggle("chime",selected === "chime");
+    bellImage.alt=forcedRareCostume.name;
+    bellImage.src=forcedRareCostume.src;
 
-  if(
-    costumeId ===
-    "daily-costume-01"
-  ){
-
-    return "costumes/daily-costume-01.png";
-
-  }
-
-  if(
-    costumeId ===
-    "daily-costume-02"
-  ){
-
-    return "costumes/daily-costume-02.png";
-
-  }
-
-  /* ---------------------------------------------------
-     シークレット衣装
-     
-     ※シークレットは通常の1枚画像ではなく、
-       7レイヤーで表示するのでここではnull。
-  --------------------------------------------------- */
-
-  if(
-    isSecretCostumeId(
-      costumeId,
-      character
-    )
-  ){
-
-    return null;
-
-  }
-
-  /* ---------------------------------------------------
-     イベント衣装
-  --------------------------------------------------- */
-
-  if(
-    costumeId.startsWith(
-      "event_"
-    )
-  ){
-
-    const suffix =
-      character === "chime"
-        ? "_chime"
-        : "_bell";
-
-    if(
-      !costumeId.endsWith(
-        suffix
-      )
-    ){
-
-      return null;
-
+    if(characterName){
+      characterName.textContent=forcedRareCostume.name;
     }
+  };
 
-    let key =
-      costumeId.slice(
-        6,
-        -suffix.length
-      );
+  testImage.onerror = function(){
+    forcedRareCostume=null;
+    setCharacter(currentCharacter);
+  };
 
-    if(
-      key ===
-      "newyearseve"
-    ){
-
-      key =
-        "winter";
-
-    }
-
-    return (
-      costumeImages?.[
-        character
-      ]?.[
-        key
-      ] ||
-      null
-    );
-
-  }
-
-  return null;
-
+  testImage.src=src;
 }
 
 /* =====================================================
@@ -1886,6 +1003,9 @@ function setCharacter(
       ? "chime"
       : "bell";
 
+  /* マイページでキャラクターを変更したら、当選時の一時表示を解除 */
+  forcedRareCostume=null;
+
   const data =
     characterImages[
       currentCharacter
@@ -1894,167 +1014,46 @@ function setCharacter(
   if(!data)return;
 
   /*
-   * シークレット衣装をいったん停止。
-   * 通常キャラやイベント衣装へ切り替える場合に
-   * 前のシークレット衣装が残らないようにする。
+   * ★ここで特殊服を判定
+   *
+   * 特殊服画像が存在しない場合に
+   * ブラウザの「？」表示にならないよう、
+   * まず通常画像を確保してから特殊画像を読み込む。
    */
+  const normalSrc = data.src;
+  const costumeSrc = getCharacterImage(
+    currentCharacter
+  );
 
-  hideSecretBell();
+  bellImage.alt = data.name;
 
-  /*
-   * 今日表示する衣装状態を取得
-   */
-
-  const displayState =
-    getCharacterDisplayState(
-      currentCharacter
-    );
-
-  bellImage.alt =
-    data.name;
-
-  /*
-   * ---------------------------------------------------
-   * シークレット衣装
-   * ---------------------------------------------------
-   */
-
-  if(
-    displayState.type ===
-    "secret"
-  ){
-
-    /*
-     * 現在はベルちゃん用の
-     * 7レイヤー素材のみ実装。
-     */
-
-    if(
-      currentCharacter ===
-      "bell" &&
-      displayState.id ===
-        SECRET_COSTUME_IDS.bell
-    ){
-
-      showSecretBell();
-
-    }else{
-
-      /*
-       * チャイムくんのシークレット素材が
-       * まだない場合は通常画像。
-       */
-
-      bellImage.src =
-        data.src;
-
-      bellImage.style.display =
-        "";
-
+  bellImage.onerror = function(){
+    /* 読み込み失敗時は必ず通常画像へ戻す */
+    if(this.src !== new URL(normalSrc, window.location.href).href){
+      this.src = normalSrc;
     }
+  };
 
+  if(costumeSrc === normalSrc){
+    bellImage.src = normalSrc;
+  }else{
+    const testImage = new Image();
+
+    testImage.onload = function(){
+      /* 読み込み成功した特殊服だけ表示 */
+      bellImage.src = costumeSrc;
+    };
+
+    testImage.onerror = function(){
+      /* 特殊服がない場合は通常のベルちゃんを表示 */
+      bellImage.src = normalSrc;
+    };
+
+    testImage.src = costumeSrc;
   }
 
-  /*
-   * ---------------------------------------------------
-   * 通常画像 / イベント衣装 / 毎日衣装
-   * ---------------------------------------------------
-   */
-
-  else{
-
-    const normalSrc =
-      data.src;
-
-    const costumeSrc =
-      displayState.src;
-
-    bellImage.style.display =
-      "";
-
-    bellImage.onerror =
-      function(){
-
-        /*
-         * 読み込み失敗時は必ず通常画像へ戻す。
-         */
-
-        if(
-          this.src !==
-          new URL(
-            normalSrc,
-            window.location.href
-          ).href
-        ){
-
-          this.src =
-            normalSrc;
-
-        }
-
-      };
-
-    if(
-      costumeSrc ===
-      normalSrc
-    ){
-
-      bellImage.src =
-        normalSrc;
-
-    }else{
-
-      /*
-       * 特殊服画像は、
-       * 読み込めた場合だけ表示。
-       */
-
-      const testImage =
-        new Image();
-
-      testImage.onload =
-        function(){
-
-          /*
-           * キャラクターが変わっていないことを確認。
-           */
-
-          if(
-            currentCharacter ===
-            character
-          ){
-
-            bellImage.src =
-              costumeSrc;
-
-          }
-
-        };
-
-      testImage.onerror =
-        function(){
-
-          bellImage.src =
-            normalSrc;
-
-        };
-
-      testImage.src =
-        costumeSrc;
-
-    }
-
-  }
-
-  /*
-   * ---------------------------------------------------
-   * チャイムくん用サイズ
-   * ---------------------------------------------------
-   */
-
   if(
-    currentCharacter ===
-    "chime"
+    currentCharacter === "chime"
   ){
 
     bellImage.classList.add(
@@ -2109,8 +1108,7 @@ function updateCostume(){
     getTodayKey();
 
   if(
-    today ===
-    lastCostumeDate
+    today===lastCostumeDate
   ){
 
     return;
@@ -2122,24 +1120,61 @@ function updateCostume(){
 
   /*
    * キャラクターはそのまま。
-   *
-   * 今日のイベント衣装・装備衣装・
-   * シークレット衣装をまとめて再判定。
+   * 今日の特殊服だけ再判定。
    */
 
-  setCharacter(
-    currentCharacter
-  );
+  const costumeImage =
+    getCharacterImage(
+      currentCharacter
+    );
+
+  const normalImage =
+    characterImages[currentCharacter].src;
+
+  const normalUrl =
+    new URL(
+      normalImage,
+      window.location.href
+    ).href;
+
+  const costumeUrl =
+    new URL(
+      costumeImage,
+      window.location.href
+    ).href;
+
+  /* 通常画像ならそのまま */
+  if(costumeUrl === normalUrl){
+    if(bellImage.src !== normalUrl){
+      bellImage.src = normalImage;
+    }
+    return;
+  }
+
+  /* 特殊服画像は、読み込めた場合だけ切り替える */
+  const testImage = new Image();
+
+  testImage.onload = function(){
+    if(
+      lastCostumeDate === today &&
+      currentCharacter === currentCharacter
+    ){
+      bellImage.src = costumeImage;
+    }
+  };
+
+  testImage.onerror = function(){
+    /* 特殊服が存在しない場合は通常画像を維持 */
+    bellImage.src = normalImage;
+  };
+
+  testImage.src = costumeImage;
 
 }
 
 /*
  * 初回判定
  */
-
-setCharacter(
-  currentCharacter
-);
 
 updateCostume();
 
@@ -2411,97 +1446,43 @@ window.addEventListener(
 
     if(!event.data)return;
 
-    /* -----------------------------------------------
-       装備衣装
-    ----------------------------------------------- */
-
-    if(
-      event.data.type ===
-      "handbell-equipped-costume"
-    ){
-
-      const data =
-        event.data.equippedCostume ||
-        {};
-
-      equippedCostumes={
-
-        bell:
-          data.bell ||
-          null,
-
-        chime:
-          data.chime ||
-          null
-
-      };
-
-      setCharacter(
-        currentCharacter
+    if(event.data.type === "handbell-rare-costume"){
+      showRareCostume(
+        event.data.character,
+        event.data.src,
+        event.data.name
       );
-
       return;
-
     }
 
-    /* -----------------------------------------------
-       イベント衣装の手動変更
-    ----------------------------------------------- */
+    if(event.data.type === "handbell-equipped-costume"){
+      const data = event.data.equippedCostume || {};
+      equippedCostumes = {
+        bell:data.bell || null,
+        chime:data.chime || null
+      };
+      setCharacter(currentCharacter);
+      return;
+    }
 
-    if(
-      event.data.type ===
-      "handbell-event-costume-override"
-    ){
-
+    if(event.data.type === "handbell-event-costume-override"){
       eventCostumeOverrides =
-        event.data.overrides &&
-        typeof event.data.overrides ===
-          "object"
+        event.data.overrides && typeof event.data.overrides === "object"
           ? event.data.overrides
           : {};
-
-      setCharacter(
-        currentCharacter
-      );
-
+      setCharacter(currentCharacter);
       return;
-
     }
 
-    /* -----------------------------------------------
-       キャラクター変更
-    ----------------------------------------------- */
-
-    if(
-      event.data.type ===
-      "handbell-character"
-    ){
-
-      setCharacter(
-        event.data.character
-      );
-
+    if(event.data.type === "handbell-character"){
+      setCharacter(event.data.character);
       updateCostume();
-
       return;
-
     }
 
-    /* -----------------------------------------------
-       スケジュール
-    ----------------------------------------------- */
-
-    if(
-      event.data.type ===
-      "handbell-schedules"
-    ){
-
-      receiveParentSchedules(
-        event.data.schedules
-      );
-
+    if(event.data.type === "handbell-schedules"){
+      receiveParentSchedules(event.data.schedules);
       return;
-
     }
 
   }
@@ -3469,26 +2450,6 @@ function startHearts(){
 let isAnimating=false;
 
 /* =====================================================
-   ★ 現在の喜びアニメーション対象
-===================================================== */
-
-function getCelebrationTarget(){
-
-  if(
-    secretBell.classList.contains(
-      "visible"
-    )
-  ){
-
-    return secretBell;
-
-  }
-
-  return bellImage;
-
-}
-
-/* =====================================================
    キャラクターをクリック
 ===================================================== */
 
@@ -3502,42 +2463,15 @@ function celebrate(){
     "bubble-hidden"
   );
 
-  const target =
-    getCelebrationTarget();
-
-  /*
-   * 通常ベルちゃん
-   */
-
   bellImage.classList.remove(
     "celebrating"
   );
 
-  /*
-   * シークレットベルちゃん
-   */
+  void bellImage.offsetWidth;
 
-  secretBell.classList.remove(
+  bellImage.classList.add(
     "celebrating"
   );
-
-  /*
-   * アニメーションを強制リセット
-   */
-
-  void target.offsetWidth;
-
-  /*
-   * 喜びアニメーション開始
-   */
-
-  target.classList.add(
-    "celebrating"
-  );
-
-  /*
-   * 1回目のハート
-   */
 
   setTimeout(
     ()=>{
@@ -3545,10 +2479,6 @@ function celebrate(){
     },
     150
   );
-
-  /*
-   * 2回目のハート
-   */
 
   setTimeout(
     ()=>{
@@ -3563,67 +2493,38 @@ function celebrate(){
    アニメーション終了
 ===================================================== */
 
-function finishCelebration(
-  event
-){
-
-  /*
-   * 子レイヤーのひらひらアニメーションが
-   * animationendを発生させても無視する。
-   */
-
-  if(
-    event.target !==
-      bellImage &&
-    event.target !==
-      secretBell
-  ){
-
-    return;
-
-  }
-
-  if(
-    event.animationName !==
-    "bellCelebrate"
-  ){
-
-    return;
-
-  }
-
-  bellImage.classList.remove(
-    "celebrating"
-  );
-
-  secretBell.classList.remove(
-    "celebrating"
-  );
-
-  changeBellMessage();
-
-  bubble.classList.remove(
-    "bubble-hidden"
-  );
-
-  bubble.style.animation="none";
-
-  void bubble.offsetWidth;
-
-  bubble.style.animation="";
-
-  isAnimating=false;
-
-}
-
 bellImage.addEventListener(
   "animationend",
-  finishCelebration
-);
+  event=>{
 
-secretBell.addEventListener(
-  "animationend",
-  finishCelebration
+    if(
+      event.animationName !==
+      "bellCelebrate"
+    ){
+
+      return;
+
+    }
+
+    bellImage.classList.remove(
+      "celebrating"
+    );
+
+    changeBellMessage();
+
+    bubble.classList.remove(
+      "bubble-hidden"
+    );
+
+    bubble.style.animation="none";
+
+    void bubble.offsetWidth;
+
+    bubble.style.animation="";
+
+    isAnimating=false;
+
+  }
 );
 
 /* =====================================================
@@ -3631,37 +2532,24 @@ secretBell.addEventListener(
 ===================================================== */
 
 /*
- * 初期表示でも画像エラーを
- * 「？」のままにしない。
+ * 初期表示でも画像エラーを「？」のままにしない。
  */
-
 bellImage.addEventListener(
   "error",
   ()=>{
-
     const fallback =
-      characterImages[
-        currentCharacter
-      ]?.src ||
+      characterImages[currentCharacter]?.src ||
       "bell.png";
 
     if(
-      !bellImage.src.endsWith(
-        fallback
-      )
+      !bellImage.src.endsWith(fallback)
     ){
-
-      bellImage.src =
-        fallback;
-
+      bellImage.src = fallback;
     }
-
   }
 );
 
-setCharacter(
-  "bell"
-);
+setCharacter("bell");
 
 /* =====================================================
    初期メッセージ
@@ -3691,11 +2579,6 @@ if(isEmbedded){
 ===================================================== */
 
 bellImage.addEventListener(
-  "click",
-  celebrate
-);
-
-secretBell.addEventListener(
   "click",
   celebrate
 );

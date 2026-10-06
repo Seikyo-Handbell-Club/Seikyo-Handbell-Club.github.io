@@ -3905,6 +3905,26 @@ function sendEquippedCostumeToBell(){
   },"*");
 }
 
+let pendingRareCostume=null;
+
+function sendRareCostumeToBell(character,src,name){
+  pendingRareCostume={
+    character:character === "chime" ? "chime" : "bell",
+    src:src || null,
+    name:name || (character === "chime" ? "チャイムくん・レア衣装" : "ベルちゃん・レア衣装")
+  };
+
+  const frame=document.querySelector(".bell-frame");
+  if(!frame || !frame.contentWindow) return;
+
+  frame.contentWindow.postMessage({
+    type:"handbell-rare-costume",
+    character:character === "chime" ? "chime" : "bell",
+    src:src || null,
+    name:name || (character === "chime" ? "チャイムくん・レア衣装" : "ベルちゃん・レア衣装")
+  },"*");
+}
+
 function sendSchedulesToBell(){
   const frame=document.querySelector(".bell-frame");
   if(!frame || !frame.contentWindow || scheduleCache === null) return;
@@ -3923,6 +3943,13 @@ function setupBellBridge(){
     sendCharacterToBell();
     sendEquippedCostumeToBell();
     sendEventCostumeOverrideToBell();
+    if(pendingRareCostume){
+      sendRareCostumeToBell(
+        pendingRareCostume.character,
+        pendingRareCostume.src,
+        pendingRareCostume.name
+      );
+    }
   });
   sendSchedulesToBell();
   sendCharacterToBell();
@@ -3937,6 +3964,13 @@ window.addEventListener("message",event=>{
     sendCharacterToBell();
     sendEquippedCostumeToBell();
     sendEventCostumeOverrideToBell();
+    if(pendingRareCostume){
+      sendRareCostumeToBell(
+        pendingRareCostume.character,
+        pendingRareCostume.src,
+        pendingRareCostume.name
+      );
+    }
     return;
   }
 
@@ -6901,6 +6935,68 @@ async function showCollection(){
   await renderCollection();
 }
 
+async function loadRareCostumeOwnership(){
+
+  if(!currentUser){
+    return {bell:false,chime:false};
+  }
+
+  try{
+
+    const snap = await get(
+      ref(
+        db,
+        `members/${currentUser.uid}/collection`
+      )
+    );
+
+    const data =
+      snap.exists() && snap.val() && typeof snap.val()==="object"
+        ? snap.val()
+        : {};
+
+    return {
+      bell: !!data.secret_bell_rare_costume,
+      chime: !!data.secret_chime_rare_costume
+    };
+
+  }catch(e){
+
+    console.error("レア衣装所持状況の取得エラー:",e);
+
+    return {bell:false,chime:false};
+
+  }
+
+}
+
+async function getRareCostumeTarget(){
+
+  if(!currentUser || !profile){
+    return null;
+  }
+
+  const owned =
+    await loadRareCostumeOwnership();
+
+  if(owned.bell && owned.chime){
+    return null;
+  }
+
+  if(owned.bell && !owned.chime){
+    return "chime";
+  }
+
+  if(!owned.bell && owned.chime){
+    return "bell";
+  }
+
+  return profile.characterType === "chime"
+    ? "chime"
+    : "bell";
+
+}
+
 async function decideLoginImage(){
   if(!currentUser) return null;
 
@@ -6942,17 +7038,39 @@ async function decideLoginImage(){
     };
   }
 
-  /* ②.5 レア衣装：ページを開くたびに0.25%で抽選。
-     現在選択しているキャラクターの衣装だけを対象にする。 */
-  const rareCostumeRandom = Math.random();
-  if(rareCostumeRandom < 0.0025){
-    const character = profile?.characterType === "chime" ? "chime" : "bell";
-    return {
-      kind: "rareCostume",
-      character,
-      src: `costumes/${rareCostumeFiles[character]}`,
-      name: character === "chime" ? "チャイムくん・レア衣装" : "ベルちゃん・レア衣装"
-    };
+  /* =====================================================
+     ②.5 レア衣装
+     ページを開くたびに0.25%で抽選。
+
+     ・まだ両方未獲得 → 現在選択中のキャラクター
+     ・ベルちゃん獲得済み → チャイムくん固定
+     ・チャイムくん獲得済み → ベルちゃん固定
+     ・両方獲得済み → 抽選しない
+  ===================================================== */
+
+  const rareCostumeTarget =
+    await getRareCostumeTarget();
+
+  if(rareCostumeTarget){
+
+    const rareCostumeRandom = Math.random();
+
+    if(rareCostumeRandom < 0.0025){
+
+      const character = rareCostumeTarget;
+
+      return {
+        kind: "rareCostume",
+        character,
+        src: `costumes/${rareCostumeFiles[character]}`,
+        name:
+          character === "chime"
+            ? "チャイムくん・レア衣装"
+            : "ベルちゃん・レア衣装"
+      };
+
+    }
+
   }
 
   /* ③ イベント：幸運画像・レア衣装に当選しなかった場合だけ判定する */
@@ -7008,6 +7126,14 @@ function showWelcomeOverlay(imageInfo){
   /* 画像が本当に読み込まれて表示可能になった時点で取得 */
   image.onload = () => {
     acquireCollectionForDisplayedImage(imageInfo);
+
+    if(imageInfo.kind === "rareCostume"){
+      sendRareCostumeToBell(
+        imageInfo.character,
+        imageInfo.src,
+        imageInfo.name
+      );
+    }
   };
 
   image.onerror = () => {
@@ -7022,6 +7148,14 @@ function showWelcomeOverlay(imageInfo){
   /* キャッシュ済み画像でもonloadが発火しない場合に備える */
   if(image.complete && image.naturalWidth > 0){
     acquireCollectionForDisplayedImage(imageInfo);
+
+    if(imageInfo.kind === "rareCostume"){
+      sendRareCostumeToBell(
+        imageInfo.character,
+        imageInfo.src,
+        imageInfo.name
+      );
+    }
   }
 
   requestAnimationFrame(() => {
