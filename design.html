@@ -725,6 +725,7 @@ function renderSecretCostume(character){
 
   /* 通常衣装ではベルちゃん本体をそのまま表示 */
   bellImage.style.visibility="visible";
+  bellImage.style.opacity="1";
 
   /* 現在レイヤー画像が用意されているのはベルちゃん */
   if(character!=="bell" || !isSecretEquipped("bell")){
@@ -784,8 +785,10 @@ function renderSecretCostume(character){
       loadedCount++;
 
       if(loadedCount===SECRET_BELL_LAYERS.length && !failed){
-        /* 通常のベルちゃんは消さず、その上にシークレットを重ねる */
+        /* シークレット衣装表示中は通常ベルちゃんを透明にする */
+        /* opacity:0 にするだけなので、通常ベルちゃんのアニメーションはそのまま動きます */
         bellImage.style.visibility="visible";
+        bellImage.style.opacity="0";
         secretCostume.classList.add("show");
         secretCostume.setAttribute("aria-hidden","false");
       }
@@ -800,6 +803,7 @@ function renderSecretCostume(character){
       secretCostume.setAttribute("aria-hidden","true");
       secretCostume.innerHTML="";
       bellImage.style.visibility="visible";
+      bellImage.style.opacity="1";
     };
 
     layerWrap.appendChild(img);
