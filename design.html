@@ -420,16 +420,15 @@ body.logged-in .bubble:after{
 
 /* =====================================================
    シークレット衣装（7レイヤー）
-   通常のベルちゃんと同じ85px / 90pxの座標系で重ねる
+   ★ 第1段階：まず通常のベルちゃんと同じ
+   サイズ・位置に完全に合わせる
 ===================================================== */
 .secret-costume{
   position:absolute;
-  left:auto;
-  top:auto;
-  width:clamp(120px, 30vw, 190px);
-  height:clamp(120px, 30vw, 190px);
-  right:clamp(4px, 2vw, 18px);
-  bottom:-22px;
+  width:var(--secret-bell-size);
+  height:var(--secret-bell-size);
+  right:var(--secret-bell-right);
+  bottom:var(--secret-bell-bottom);
   z-index:11;
   pointer-events:none;
   user-select:none;
@@ -459,13 +458,24 @@ body.logged-in .bubble:after{
   user-select:none;
   display:block;
 }
-body:not(.logged-in) .secret-costume{
-  right:clamp(4px, 2vw, 16px);
-  bottom:0px;
+body:not(.logged-in){
+  --secret-bell-size:85px;
+  --secret-bell-right:20px;
+  --secret-bell-bottom:12px;
 }
-body.logged-in .secret-costume{
-  right:clamp(4px, 2vw, 18px);
-  bottom:0px;
+body.logged-in{
+  --secret-bell-size:90px;
+  --secret-bell-right:25px;
+  --secret-bell-bottom:0px;
+}
+.secret-costume .secret-layer-main,
+.secret-costume .secret-layer-01,
+.secret-costume .secret-layer-02,
+.secret-costume .secret-layer-03,
+.secret-costume .secret-layer-04,
+.secret-costume .secret-layer-05{
+  left:4.8% !important;
+  top:-5.6% !important;
 }
 .secret-costume .secret-layer-main{animation:secretFloat 2.8s ease-in-out infinite;}
 .secret-costume .secret-layer-01{animation:secretWaveLeft 2.2s ease-in-out infinite;}
