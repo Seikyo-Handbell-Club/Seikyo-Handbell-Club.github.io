@@ -574,6 +574,22 @@ const SECRET_BELL_LAYERS = [
   "costumes/bell-secret-layer-05.png"
 ];
 
+/* =====================================================
+   ★ シークレット衣装 7レイヤー位置設定 ★
+   x：右へ動かすとプラス / 左へ動かすとマイナス
+   y：下へ動かすとプラス / 上へ動かすとマイナス
+   それぞれのレイヤーを個別に調整できます。
+===================================================== */
+const SECRET_LAYER_POSITIONS = [
+  {x:0,y:0}, // 1. base
+  {x:0,y:0}, // 2. main
+  {x:0,y:0}, // 3. layer-01
+  {x:0,y:0}, // 4. layer-02
+  {x:0,y:0}, // 5. layer-03
+  {x:0,y:0}, // 6. layer-04
+  {x:0,y:0}  // 7. layer-05
+];
+
 function isSecretCostumeId(id,character){
   return !!id && SECRET_COSTUME_IDS[character]?.includes(id);
 }
@@ -691,7 +707,6 @@ function renderSecretCostume(character){
 
   /* 通常衣装ではベルちゃん本体をそのまま表示 */
   bellImage.style.visibility="visible";
-  bellImage.style.opacity="1";
 
   /* 現在レイヤー画像が用意されているのはベルちゃん */
   if(character!=="bell" || !isSecretEquipped("bell")){
@@ -713,8 +728,9 @@ function renderSecretCostume(character){
     img.style.maxWidth="none";
     img.style.maxHeight="none";
     img.style.position="absolute";
-    img.style.left="0";
-    img.style.top="0";
+    const layerPosition=SECRET_LAYER_POSITIONS[index] || {x:0,y:0};
+    img.style.left=`${layerPosition.x}px`;
+    img.style.top=`${layerPosition.y}px`;
     img.style.objectFit="contain";
     img.style.objectPosition="center center";
 
@@ -724,13 +740,8 @@ function renderSecretCostume(character){
       loadedCount++;
 
       if(loadedCount===SECRET_BELL_LAYERS.length && !failed){
-        /* シークレット表示中は通常のベルちゃんを完全に見えなくする */
+        /* 通常のベルちゃんは消さず、その上にシークレットを重ねる */
         bellImage.style.visibility="visible";
-        bellImage.style.opacity="0";
-
-        /* 直前に出ていた通常のハートも残さない */
-        heartContainer.innerHTML="";
-
         secretCostume.classList.add("show");
         secretCostume.setAttribute("aria-hidden","false");
       }
@@ -745,7 +756,6 @@ function renderSecretCostume(character){
       secretCostume.setAttribute("aria-hidden","true");
       secretCostume.innerHTML="";
       bellImage.style.visibility="visible";
-      bellImage.style.opacity="1";
     };
 
     secretCostume.appendChild(img);
