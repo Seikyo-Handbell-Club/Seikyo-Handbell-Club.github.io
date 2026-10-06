@@ -475,40 +475,6 @@ body.logged-in .secret-costume{
   right:25px !important;
   bottom:0 !important;
 }
-/* =====================================================
-   シークレット衣装・個別位置調整
-   ★ 位置を変えるときは、この1か所だけ編集
-===================================================== */
-.secret-costume .secret-layer-main{
-  left:4.8% !important;
-  top:-5.6% !important;
-}
-
-.secret-costume .secret-layer-01{
-  left:4.8% !important;
-  top:-5.6% !important;
-}
-
-.secret-costume .secret-layer-02{
-  left:4.8% !important;
-  top:-5.6% !important;
-}
-
-.secret-costume .secret-layer-03{
-  left:4.8% !important;
-  top:-5.6% !important;
-}
-
-.secret-costume .secret-layer-04{
-  left:4.8% !important;
-  top:-5.6% !important;
-}
-
-.secret-costume .secret-layer-05{
-  left:4.8% !important;
-  top:-5.6% !important;
-}
-
 .secret-costume .secret-layer-main{animation:secretFloat 2.8s ease-in-out infinite;}
 .secret-costume .secret-layer-01{animation:secretWaveLeft 2.2s ease-in-out infinite;}
 .secret-costume .secret-layer-02{animation:secretWaveRight 2.4s ease-in-out infinite;}
@@ -2751,19 +2717,23 @@ function celebrate(){
     secretCostume.classList.add("celebrating");
   }
 
-  setTimeout(
-    ()=>{
-      startHearts();
-    },
-    150
-  );
+  if(!isSecretEquipped("bell")){
 
-  setTimeout(
-    ()=>{
-      startHearts();
-    },
-    950
-  );
+    setTimeout(
+      ()=>{
+        startHearts();
+      },
+      150
+    );
+
+    setTimeout(
+      ()=>{
+        startHearts();
+      },
+      950
+    );
+
+  }
 
 }
 
