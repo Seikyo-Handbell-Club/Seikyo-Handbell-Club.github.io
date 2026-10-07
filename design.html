@@ -805,7 +805,7 @@ const SECRET_LAYER_ENABLED = [
  */
 const SECRET_COSTUME_GLOBAL = {
   x: 0,
-  y: -100,
+  y: 0,
   scale: 1,
   angle: 0
 };
@@ -3872,6 +3872,34 @@ function startHearts(){
       endY:
         50 +
         Math.random()*100
+
+    });
+
+  }
+
+  /* 下：中央へまっすぐ落ちる */
+  for(
+    let i=10;
+    i--;
+  ){
+
+    hearts.push({
+
+      startX:
+        -20 +
+        Math.random()*40,
+
+      startY:
+        25 +
+        Math.random()*25,
+
+      endX:
+        -45 +
+        Math.random()*90,
+
+      endY:
+        95 +
+        Math.random()*105
 
     });
 
