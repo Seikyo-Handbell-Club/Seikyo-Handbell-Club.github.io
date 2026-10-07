@@ -739,13 +739,15 @@ const SECRET_BELL_LAYERS = [
 ===================================================== */
 
 const SECRET_LAYER_POSITIONS = [
-  {x:-10,y:-10}, // 1
-  {x:-6,y:32}, // 2
-  {x:1,y:47}, // 3
-  {x:35,y:36}, // 4
-  {x:-56,y:35}, // 5
-  {x:-1,y:46}, // 6
-  {x:22,y:-8} // 7
+
+  {x:-20,y:-10}, // 1. base
+  {x:-15,y:30},  // 2. main
+  {x:0,y:0},     // 3. layer-01
+  {x:0,y:0},     // 4. layer-02
+  {x:0,y:0},     // 5. layer-03
+  {x:0,y:0},     // 6. layer-04
+  {x:0,y:0}      // 7. layer-05
+
 ];
 
 /* =====================================================
@@ -758,13 +760,15 @@ const SECRET_LAYER_POSITIONS = [
 ===================================================== */
 
 const SECRET_LAYER_SIZES = [
-  {width:100,height:100,scale:1.35,angle:-10}, // 1
-  {width:100,height:100,scale:1.5,angle:0}, // 2
-  {width:100,height:100,scale:1.25,angle:0}, // 3
-  {width:100,height:100,scale:1,angle:0}, // 4
-  {width:100,height:100,scale:1,angle:0}, // 5
-  {width:100,height:100,scale:1.25,angle:0}, // 6
-  {width:100,height:100,scale:1,angle:15} // 7
+
+  {width:100,height:100,scale:1.35,angle:-10}, // 1. base
+  {width:100,height:100,scale:1.5,angle:0},  // 2. main
+  {width:100,height:100,scale:1.00,angle:0},  // 3. layer-01
+  {width:100,height:100,scale:1.00,angle:0},  // 4. layer-02
+  {width:100,height:100,scale:1.00,angle:0},  // 5. layer-03
+  {width:100,height:100,scale:1.00,angle:0},  // 6. layer-04
+  {width:100,height:100,scale:1.00,angle:0}   // 7. layer-05
+
 ];
 
 /* =====================================================
@@ -775,13 +779,15 @@ const SECRET_LAYER_SIZES = [
 ===================================================== */
 
 const SECRET_LAYER_ENABLED = [
-  true, // 1
-  true, // 2
-  false, // 3
-  true, // 4
-  true, // 5
-  false, // 6
-  true // 7
+
+  true,  // 1. base
+  true,  // 2. main
+  true,  // 3. layer-01
+  true, // 4. layer-02
+  true, // 5. layer-03
+  true, // 6. layer-04
+  true  // 7. layer-05
+
 ];
 
 function isSecretCostumeId(
@@ -1365,6 +1371,8 @@ layerWrap.style.transform =
               "false"
             );
 
+            requestAnimationFrame(sendBellHitBounds);
+
           }
 
         };
@@ -1404,6 +1412,8 @@ layerWrap.style.transform =
 
           bellImage.style.opacity =
             "1";
+
+          requestAnimationFrame(sendBellHitBounds);
 
         };
 
@@ -2719,6 +2729,30 @@ function receiveParentSchedules(
 
 }
 
+function sendBellHitBounds(){
+  if(!isEmbedded || !bellImage || !secretCostume) return;
+
+  const targets=[];
+  if(secretCostume.classList.contains("show")){
+    secretCostume.querySelectorAll(".secret-layer-wrap").forEach(el=>targets.push(el));
+  }else{
+    targets.push(bellImage);
+  }
+
+  const rects=targets.map(el=>el.getBoundingClientRect()).filter(rect=>rect.width>0 && rect.height>0);
+  if(!rects.length) return;
+
+  const left=Math.min(...rects.map(r=>r.left));
+  const top=Math.min(...rects.map(r=>r.top));
+  const right=Math.max(...rects.map(r=>r.right));
+  const bottom=Math.max(...rects.map(r=>r.bottom));
+
+  window.parent.postMessage({
+    type:"handbell-bell-hit-bounds",
+    bounds:{left,top,width:right-left,height:bottom-top}
+  },"*");
+}
+
 /* =====================================================
    親ページからのメッセージ
 ===================================================== */
@@ -2733,6 +2767,14 @@ window.addEventListener(
 
       return;
 
+    }
+
+    if(
+      event.data.type ===
+      "handbell-parent-click"
+    ){
+      celebrate();
+      return;
     }
 
     if(
@@ -4047,6 +4089,10 @@ setCharacter(
   "bell"
 );
 
+if(isEmbedded){
+  requestAnimationFrame(sendBellHitBounds);
+}
+
 /* =====================================================
    初期メッセージ
 ===================================================== */
@@ -4083,6 +4129,8 @@ bellImage.addEventListener(
   "click",
   celebrate
 );
+
+window.addEventListener("resize",sendBellHitBounds);
 
 
 /* =====================================================
