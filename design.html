@@ -25,7 +25,7 @@ body{
   width:220px;
   height:140px;
   right:0;
-  top:3;
+  top:3px;
   font-family:
     -apple-system,
     BlinkMacSystemFont,
@@ -427,7 +427,7 @@ body.logged-in .bubble:after{
   width:var(--bell-size,90px) !important;
   height:var(--bell-size,90px) !important;
   right:var(--bell-right,25px) !important;
-  top:var(--bell-top,0px) !important;
+  bottom:var(--bell-bottom,0px) !important;
   z-index:11;
   pointer-events:none;
   user-select:none;
@@ -478,23 +478,23 @@ body.logged-in .bubble:after{
 body:not(.logged-in){
   --bell-size:85px;
   --bell-right:20px;
-  --bell-top:12px;
+  --bell-bottom:0px;
 }
 
 body.logged-in{
   --bell-size:90px;
   --bell-right:25px;
-  --bell-top:0px;
+  --bell-bottom:0px;
 }
 
 body:not(.logged-in) .secret-costume{
   right:20px !important;
-  top:12px !important;
+  bottom:0px !important;
 }
 
 body.logged-in .secret-costume{
   right:25px !important;
-  bottom:0 !important;
+  bottom:0px !important;
 }
 
 /* =====================================================
@@ -805,7 +805,7 @@ const SECRET_LAYER_ENABLED = [
  */
 const SECRET_COSTUME_GLOBAL = {
   x: 0,
-  y: -100,
+  y: 0,
   scale: 1,
   angle: 0
 };
@@ -3871,6 +3871,33 @@ function startHearts(){
 
       endY:
         50 +
+        Math.random()*100
+
+    });
+
+  }
+
+  for(
+    let i=10;
+    i--;
+  ){
+
+    hearts.push({
+
+      startX:
+        -25 +
+        Math.random()*50,
+
+      startY:
+        20 +
+        Math.random()*25,
+
+      endX:
+        -35 +
+        Math.random()*70,
+
+      endY:
+        110 +
         Math.random()*100
 
     });
