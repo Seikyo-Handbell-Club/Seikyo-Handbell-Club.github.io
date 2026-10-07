@@ -21,21 +21,17 @@ body{
 }
 
 .bell-area{
-  position:fixed;
-  width:100vw;
-  height:100vh;
-  top:0;
-  left:0;
-  right:auto;
-  bottom:auto;
+  position:absolute;
+  width:220px;
+  height:140px;
+  right:0;
+  bottom:0;
   font-family:
     -apple-system,
     BlinkMacSystemFont,
     "Hiragino Sans",
     "Yu Gothic",
     sans-serif;
-  pointer-events:none;
-  z-index:20;
 }
 
 /* =====================================================
@@ -244,9 +240,8 @@ body.logged-in .bubble:after{
 .heart-container{
   position:absolute;
 
-  /* ベルちゃんの中心をハートの発射地点にする */
-  right:70px;
-  top:45px;
+  left:50%;
+  top:50%;
 
   width:0;
   height:0;
@@ -256,29 +251,6 @@ body.logged-in .bubble:after{
   z-index:20;
 
   overflow:visible;
-}
-
-/* ログイン前のベルちゃん（85px / right:20px / top:12px） */
-body:not(.logged-in) .heart-container{
-  right:62px;
-  top:54px;
-}
-
-/* ログイン後のベルちゃん（90px / right:25px / top:0px） */
-body.logged-in .heart-container{
-  right:70px;
-  top:45px;
-}
-
-/* チャイムくん */
-body:not(.logged-in) .bell.chime ~ .heart-container{
-  right:58px;
-  top:50px;
-}
-
-body.logged-in .bell.chime ~ .heart-container{
-  right:58px;
-  top:40px;
 }
 
 /* =====================================================
@@ -455,7 +427,7 @@ body.logged-in .bell.chime ~ .heart-container{
   width:var(--bell-size,90px) !important;
   height:var(--bell-size,90px) !important;
   right:var(--bell-right,25px) !important;
-  bottom:var(--bell-bottom,0px) !important;
+  top:var(--bell-top,0px) !important;
   z-index:11;
   pointer-events:none;
   user-select:none;
@@ -506,23 +478,23 @@ body.logged-in .bell.chime ~ .heart-container{
 body:not(.logged-in){
   --bell-size:85px;
   --bell-right:20px;
-  --bell-bottom:12px;
+  --bell-top:12px;
 }
 
 body.logged-in{
   --bell-size:90px;
   --bell-right:25px;
-  --bell-bottom:0px;
+  --bell-top:0px;
 }
 
 body:not(.logged-in) .secret-costume{
   right:20px !important;
-  bottom:12px !important;
+  top:12px !important;
 }
 
 body.logged-in .secret-costume{
   right:25px !important;
-  bottom:0 !important;
+  top:0 !important;
 }
 
 /* =====================================================
@@ -833,7 +805,7 @@ const SECRET_LAYER_ENABLED = [
  */
 const SECRET_COSTUME_GLOBAL = {
   x: 0,
-  y: -100,
+  y: 0,
   scale: 1,
   angle: 0
 };
@@ -3904,33 +3876,6 @@ function startHearts(){
     });
 
   }
-
-   for(
-  let i=8;
-  i--;
-){
-
-  hearts.push({
-
-    startX:
-      -25 +
-      Math.random()*50,
-
-    startY:
-      30 +
-      Math.random()*25,
-
-    endX:
-      -40 +
-      Math.random()*80,
-
-    endY:
-      120 +
-      Math.random()*100
-
-  });
-
-}
 
   hearts.forEach(
     (data,index)=>{
