@@ -500,59 +500,48 @@ body.logged-in .secret-costume{
 /* =====================================================
  * シークレット衣装：常時アニメーション
  *
- * 位置・大きさ・角度は wrapper 側の transform で管理しているので、
- * ここでは画像(img)に「translate / rotate / scale / filter」を個別に
- * 指定して、重ねがけしても互いに打ち消し合わないようにしている。
+ * ★ 位置がずれない仕組み
+ *   各レイヤーのwrapperは拡大率・角度が違うため、
+ *   レイヤー個別に translate / scale を動かすとズレる。
+ *   そこで全体の動き（呼吸・光）は、全レイヤーをまとめた
+ *   .secret-body に1回だけ付ける。
+ *   レイヤー個別に付けるのは「小さな回転のゆれ」だけ。
  *
- *  ① 呼吸    … 全レイヤー共通。ゆっくり上下＋ほんの少し拡大
- *  ② ゆれ    … レイヤーごとに左右へ揺れる（リボン・髪などに）
- *  ③ 光      … main に金色の光が脈打つ
+ *  ① 呼吸    … 全体が上下＋ほんの少し拡大（.secret-body）
+ *  ② 光      … 全体に金色の光が脈打つ（.secret-body）
+ *  ③ ゆれ    … リボンなどの別パーツだけ左右に揺れる
  *  ④ きらめき … 衣装の周りで星が交互に瞬く
  *
  * クラス名の対応（SECRET_BELL_LAYERSの順番）
  *   0=base→secret-layer-00 / 1=main→secret-layer-main
  *   2=layer-01→secret-layer-02 / 3→03 / 4→04 / 5→05
- *   ※ index と画像ファイル名が1つずれている点に注意
 ===================================================== */
 
-.secret-costume .secret-layer{
-  transform-origin:50% 88%;
-  will-change:translate,rotate,scale,filter;
-  animation:secretBreath 3s ease-in-out infinite;
-}
-
-/* main：呼吸＋小さなゆれ＋光 */
-.secret-costume .secret-layer-main{
+.secret-costume .secret-body{
+  transform-origin:50% 90%;
   animation:
     secretBreath 3s ease-in-out infinite,
-    secretSwayMain 4.2s ease-in-out infinite,
     secretGlow 2.6s ease-in-out infinite;
 }
 
-/* 右側のパーツ（layer-01 = 画像index 2） */
+/* base と main は動かさない（全体と一緒に動く） */
+
+/* 別パーツのゆれ（回転だけ。ズレないよう小さめ） */
 .secret-costume .secret-layer-02{
   transform-origin:50% 30%;
-  animation:
-    secretBreath 3s ease-in-out infinite,
-    secretSwayR 2.2s ease-in-out infinite;
+  animation:secretSwayR 2.2s ease-in-out infinite;
 }
 
-/* 左側のパーツ（使う場合） */
 .secret-costume .secret-layer-01{
   transform-origin:50% 30%;
-  animation:
-    secretBreath 3s ease-in-out infinite,
-    secretSwayL 2.4s ease-in-out infinite;
+  animation:secretSwayL 2.4s ease-in-out infinite;
 }
 
-/* リボン系（使う場合） */
 .secret-costume .secret-layer-03,
 .secret-costume .secret-layer-04,
 .secret-costume .secret-layer-05{
   transform-origin:50% 20%;
-  animation:
-    secretBreath 3s ease-in-out infinite,
-    secretRibbon 2.6s ease-in-out infinite;
+  animation:secretRibbon 2.6s ease-in-out infinite;
 }
 
 /* きらめき（衣装が表示されている間だけ） */
@@ -599,17 +588,12 @@ body.logged-in .secret-costume{
 
 @keyframes secretBreath{
   0%,100%{translate:0 0;scale:1;}
-  50%{translate:0 -3px;scale:1.025;}
-}
-
-@keyframes secretSwayMain{
-  0%,100%{rotate:-1deg;}
-  50%{rotate:1.2deg;}
+  50%{translate:0 -3px;scale:1.02;}
 }
 
 @keyframes secretSwayR{
   0%,100%{rotate:0deg;}
-  50%{rotate:3.5deg;}
+  50%{rotate:2.5deg;}
 }
 
 @keyframes secretSwayL{
@@ -636,6 +620,7 @@ body.logged-in .secret-costume{
 @media (prefers-reduced-motion:reduce){
   .secret-costume::before,
   .secret-costume::after{display:none;}
+  .secret-costume .secret-body,
   .secret-costume .secret-layer{animation:none;}
 }
 
@@ -1161,6 +1146,24 @@ function renderSecretCostume(
   let loadedCount=0;
   let failed=false;
 
+  /*
+   * 全レイヤーをまとめる「本体グループ」。
+   * 呼吸・光などの全体の動きはここに付けるので、
+   * 7枚のレイヤーが同じ量・同じ向きで動き、位置がずれない。
+   */
+  const secretBody =
+    document.createElement("div");
+
+  secretBody.className =
+    "secret-body";
+
+  secretBody.style.cssText =
+    "position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible;";
+
+  secretCostume.appendChild(
+    secretBody
+  );
+
   const enabledLayerCount =
     SECRET_BELL_LAYERS.filter(
       (_,index)=>
@@ -1414,7 +1417,7 @@ layerWrap.style.transform =
         img
       );
 
-      secretCostume.appendChild(
+      secretBody.appendChild(
         layerWrap
       );
 
