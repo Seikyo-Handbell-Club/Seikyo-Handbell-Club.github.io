@@ -21,17 +21,21 @@ body{
 }
 
 .bell-area{
-  position:absolute;
+  position:fixed;
   width:100vw;
   height:100vh;
-  right:0;
-  bottom:0;
+  top:0;
+  left:0;
+  right:auto;
+  bottom:auto;
   font-family:
     -apple-system,
     BlinkMacSystemFont,
     "Hiragino Sans",
     "Yu Gothic",
     sans-serif;
+  pointer-events:none;
+  z-index:20;
 }
 
 /* =====================================================
