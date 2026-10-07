@@ -244,8 +244,9 @@ body.logged-in .bubble:after{
 .heart-container{
   position:absolute;
 
-  left:50%;
-  top:50%;
+  /* ベルちゃんの中心をハートの発射地点にする */
+  right:70px;
+  top:45px;
 
   width:0;
   height:0;
@@ -255,6 +256,29 @@ body.logged-in .bubble:after{
   z-index:20;
 
   overflow:visible;
+}
+
+/* ログイン前のベルちゃん（85px / right:20px / top:12px） */
+body:not(.logged-in) .heart-container{
+  right:62px;
+  top:54px;
+}
+
+/* ログイン後のベルちゃん（90px / right:25px / top:0px） */
+body.logged-in .heart-container{
+  right:70px;
+  top:45px;
+}
+
+/* チャイムくん */
+body:not(.logged-in) .bell.chime ~ .heart-container{
+  right:58px;
+  top:50px;
+}
+
+body.logged-in .bell.chime ~ .heart-container{
+  right:58px;
+  top:40px;
 }
 
 /* =====================================================
