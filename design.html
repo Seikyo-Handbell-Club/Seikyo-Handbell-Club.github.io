@@ -4120,8 +4120,9 @@ function startSecretMoon(){
   frame.id =
     "secretMoonFrame";
 
+  /* 古い版が残らないよう、毎回URLを変えて読み込む */
   frame.src =
-    "secret_moon.html";
+    "secret_moon.html?v=" + Date.now();
 
   frame.title =
     "シークレット月夜演出";
