@@ -3877,34 +3877,6 @@ function startHearts(){
 
   }
 
-  /* 下：中央へまっすぐ落ちる */
-  for(
-    let i=10;
-    i--;
-  ){
-
-    hearts.push({
-
-      startX:
-        -20 +
-        Math.random()*40,
-
-      startY:
-        25 +
-        Math.random()*25,
-
-      endX:
-        -45 +
-        Math.random()*90,
-
-      endY:
-        95 +
-        Math.random()*105
-
-    });
-
-  }
-
   hearts.forEach(
     (data,index)=>{
 
@@ -4014,7 +3986,7 @@ function startSecretMoon(){
     "secretMoonFrame";
 
   frame.src =
-    "secret_moon.html";
+    "secret_moon_7s.html";
 
   frame.title =
     "シークレット月夜演出";
