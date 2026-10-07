@@ -3877,6 +3877,68 @@ function startHearts(){
 
   }
 
+  /* =====================================================
+     ★ 下中央：はっきり下へ飛ぶハート
+  ===================================================== */
+
+  for(
+    let i=10;
+    i--;
+  ){
+
+    hearts.push({
+
+      startX:
+        -20 +
+        Math.random()*40,
+
+      startY:
+        25 +
+        Math.random()*25,
+
+      endX:
+        -45 +
+        Math.random()*90,
+
+      endY:
+        95 +
+        Math.random()*105
+
+    });
+
+  }
+
+  /* =====================================================
+     ★ 右下：下へ飛びながら右へ広がるハート
+  ===================================================== */
+
+  for(
+    let i=10;
+    i--;
+  ){
+
+    hearts.push({
+
+      startX:
+        5 +
+        Math.random()*25,
+
+      startY:
+        20 +
+        Math.random()*30,
+
+      endX:
+        75 +
+        Math.random()*75,
+
+      endY:
+        75 +
+        Math.random()*105
+
+    });
+
+  }
+
   hearts.forEach(
     (data,index)=>{
 
@@ -3986,7 +4048,7 @@ function startSecretMoon(){
     "secretMoonFrame";
 
   frame.src =
-    "secret_moon_7s.html";
+    "secret_moon.html";
 
   frame.title =
     "シークレット月夜演出";
