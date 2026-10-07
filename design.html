@@ -25,7 +25,7 @@ body{
   width:220px;
   height:140px;
   right:0;
-  top:3;
+  top:3px;
   font-family:
     -apple-system,
     BlinkMacSystemFont,
@@ -526,22 +526,38 @@ body.logged-in .secret-costume{
 
 /* base と main は動かさない（全体と一緒に動く） */
 
-/* 別パーツのゆれ（回転だけ。ズレないよう小さめ） */
+/* 別パーツのゆれ（回転だけ）。
+   transform-origin は各画像の「付け根」の位置（画像全体を100%とした割合）。
+   画像から計算した値なので、パーツが浮かず付け根を支点に揺れる。 */
+
+/* layer-01（スカートのフリル）= secret-layer-02 */
 .secret-costume .secret-layer-02{
-  transform-origin:50% 30%;
+  transform-origin:17% 32%;
   animation:secretSwayR 2.2s ease-in-out infinite;
 }
 
-.secret-costume .secret-layer-01{
-  transform-origin:50% 30%;
-  animation:secretSwayL 2.4s ease-in-out infinite;
+/* layer-02（右上のリボン）= secret-layer-03 */
+.secret-costume .secret-layer-03{
+  transform-origin:18% 13%;
+  animation:secretRibbon 2.6s ease-in-out infinite;
 }
 
-.secret-costume .secret-layer-03,
-.secret-costume .secret-layer-04,
+/* layer-03（長いリボン）= secret-layer-04 */
+.secret-costume .secret-layer-04{
+  transform-origin:88% 12%;
+  animation:secretSwayL 2.8s ease-in-out infinite;
+}
+
+/* layer-04（光るフリル）= secret-layer-05 */
 .secret-costume .secret-layer-05{
-  transform-origin:50% 20%;
-  animation:secretRibbon 2.6s ease-in-out infinite;
+  transform-origin:18% 28%;
+  animation:secretSwayR 2.4s ease-in-out .3s infinite;
+}
+
+/* layer-05（大きな蝶結び）= secret-layer-06：付け根を支点に、ゆっくり揺れる */
+.secret-costume .secret-layer-06{
+  transform-origin:30% 20%;
+  animation:secretRibbon 3.2s ease-in-out infinite;
 }
 
 /* きらめき（衣装が表示されている間だけ） */
@@ -739,13 +755,13 @@ const SECRET_BELL_LAYERS = [
 ===================================================== */
 
 const SECRET_LAYER_POSITIONS = [
-  {x:-20,y:-10}, // 1
-  {x:-15,y:30}, // 2
+  {x:-5.1,y:-9.9}, // 1 base（完成形の絵に合わせた値）
+  {x:-4,y:30}, // 2 main（完成形の絵に合わせた値）
   {x:0,y:0}, // 3
   {x:25,y:35}, // 4
   {x:-62,y:35}, // 5
   {x:0,y:0}, // 6
-  {x:21,y:0} // 7
+  {x:32.5,y:4.9} // 7 layer-05 蝶結び（完成形の絵に合わせた値）
 ];
 
 /* =====================================================
@@ -758,13 +774,13 @@ const SECRET_LAYER_POSITIONS = [
 ===================================================== */
 
 const SECRET_LAYER_SIZES = [
-  {width:100,height:100,scale:1.35,angle:-10}, // 1
-  {width:100,height:100,scale:1.5,angle:0}, // 2
+  {width:100,height:100,scale:1.1,angle:-3.9}, // 1 base
+  {width:100,height:100,scale:1.45,angle:0}, // 2 main
   {width:100,height:100,scale:1,angle:0}, // 3
   {width:100,height:100,scale:1,angle:0}, // 4
   {width:100,height:100,scale:1,angle:0}, // 5
   {width:100,height:100,scale:1,angle:0}, // 6
-  {width:100,height:100,scale:1,angle:10} // 7
+  {width:100,height:100,scale:0.96,angle:10.3} // 7 layer-05
 ];
 
 /* =====================================================
@@ -4035,6 +4051,69 @@ function startSecretMoon(){
 
   }
 
+  /*
+   * 月夜の最後に衣装が「戻る場所」を、広げる前に測っておく。
+   * 外側のページ（画面全体）基準の中心座標と大きさを渡す。
+   */
+  try{
+
+    const homeEl =
+      document.getElementById(
+        "secretCostume"
+      );
+
+    const homeRect =
+      homeEl.getBoundingClientRect();
+
+    const outer =
+      window.frameElement
+        ? window.frameElement.getBoundingClientRect()
+        : {left:0,top:0};
+
+    window.__secretMoonHome = {
+      cx:outer.left+homeRect.left+homeRect.width/2,
+      cy:outer.top+homeRect.top+homeRect.height/2,
+      size:homeRect.width
+    };
+
+  }catch(e){
+
+    window.__secretMoonHome = null;
+
+  }
+
+  /*
+   * design.html は handbell.html の小さなiframe（202×160）の中にある。
+   * このままだと 100vw×100vh が202×160になり、月夜が小さく切れてしまう。
+   * そこで月夜の間だけ、自分を包んでいるiframeを画面全体に広げる。
+   * （すでに大きい場合は何もしない）
+   */
+  const hostFrame = window.frameElement;
+
+  if(
+    hostFrame &&
+    window.innerWidth < 600 &&
+    hostFrame.dataset.secretMoonSaved === undefined
+  ){
+
+    hostFrame.dataset.secretMoonSaved =
+      hostFrame.style.cssText;
+
+    [
+      ["position","fixed"],
+      ["left","0"],
+      ["top","0"],
+      ["right","auto"],
+      ["bottom","auto"],
+      ["width","100vw"],
+      ["height","100vh"],
+      ["z-index","99999"]
+    ].forEach(([k,v])=>{
+      hostFrame.style.setProperty(k,v,"important");
+    });
+
+  }
+
   const frame =
     document.createElement("iframe");
 
@@ -4087,6 +4166,13 @@ function startSecretMoon(){
 
   frame.style.display =
     "block";
+
+  /* 月夜のあいだ、本物のベルちゃんは隠す（終わったら戻す） */
+  frame.style.visibility =
+    "visible";
+
+  document.body.style.visibility =
+    "hidden";
 
   document.body.appendChild(
     frame
@@ -4333,6 +4419,26 @@ window.addEventListener(
     if(frame){
       frame.remove();
     }
+
+    /* 広げていた外側のiframeを元の大きさに戻す */
+    const hostFrame = window.frameElement;
+
+    if(
+      hostFrame &&
+      hostFrame.dataset.secretMoonSaved !== undefined
+    ){
+
+      hostFrame.style.cssText =
+        hostFrame.dataset.secretMoonSaved;
+
+      delete hostFrame.dataset.secretMoonSaved;
+
+    }
+
+    document.body.style.visibility =
+      "";
+
+    window.__secretMoonHome = null;
 
     changeBellMessage();
 
