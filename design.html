@@ -782,13 +782,33 @@ const SECRET_LAYER_ENABLED = [
 
   true,  // 1. base
   true,  // 2. main
-  false,  // 3. layer-01
+  true,  // 3. layer-01
   true, // 4. layer-02
   true, // 5. layer-03
-  false, // 6. layer-04
+  true, // 6. layer-04
   true  // 7. layer-05
 
 ];
+
+/*
+ * =====================================================
+ * シークレット衣装 全体調整
+ * =====================================================
+ * 7枚のレイヤーをまとめて移動・拡大縮小・回転できます。
+ *
+ * x / y     : 全体の位置
+ * scale     : 全体の大きさ
+ * angle     : 全体の回転角度
+ *
+ * 各レイヤーの個別調整は、これまで通り
+ * SECRET_LAYER_POSITIONS / SECRET_LAYER_SIZES で行います。
+ */
+const SECRET_COSTUME_GLOBAL = {
+  x: 0,
+  y: 0,
+  scale: 1,
+  angle: 0
+};
 
 function isSecretCostumeId(
   id,
@@ -1159,6 +1179,17 @@ function renderSecretCostume(
 
   secretBody.style.cssText =
     "position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible;";
+
+  /*
+   * 7レイヤーをまとめて動かすための全体Transform。
+   * 個別レイヤーのTransformとは独立しているので、
+   * SECRET_LAYER_POSITIONS / SECRET_LAYER_SIZES を壊しません。
+   */
+  secretBody.style.transform =
+    `translate(${SECRET_COSTUME_GLOBAL.x}px, ${SECRET_COSTUME_GLOBAL.y}px) scale(${SECRET_COSTUME_GLOBAL.scale}) rotate(${SECRET_COSTUME_GLOBAL.angle}deg)`;
+
+  secretBody.style.transformOrigin =
+    "center center";
 
   secretCostume.appendChild(
     secretBody
