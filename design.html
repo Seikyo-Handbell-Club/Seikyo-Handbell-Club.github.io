@@ -739,70 +739,35 @@ const SECRET_BELL_LAYERS = [
 ===================================================== */
 
 const SECRET_LAYER_POSITIONS = [
-
-  {x:-20,y:-10}, // 1. base
-  {x:-15,y:30},  // 2. main
-  {x:0,y:0},     // 3. layer-01
-  {x:0,y:0},     // 4. layer-02
-  {x:0,y:0},     // 5. layer-03
-  {x:0,y:0},     // 6. layer-04
-  {x:0,y:0}      // 7. layer-05
-
+  {x:-20,y:-10}, // 1
+  {x:-15,y:30}, // 2
+  {x:0,y:0}, // 3
+  {x:0,y:0}, // 4
+  {x:0,y:0}, // 5
+  {x:0,y:0}, // 6
+  {x:20,y:-6} // 7
 ];
-
-/* =====================================================
-   ★ シークレット衣装 7レイヤー大きさ設定 ★
-   width：横幅（100 = 通常）
-   height：高さ（100 = 通常）
-   scale：全体サイズ（1.00 = 通常）
-   angle：角度（0 = 通常 / プラスで時計回り / マイナスで反時計回り）
-   それぞれのレイヤーを個別に調整できます。
-===================================================== */
 
 const SECRET_LAYER_SIZES = [
-
-  {width:100,height:100,scale:1.35,angle:-10}, // 1. base
-  {width:100,height:100,scale:1.5,angle:0},  // 2. main
-  {width:100,height:100,scale:1.00,angle:0},  // 3. layer-01
-  {width:100,height:100,scale:1.00,angle:0},  // 4. layer-02
-  {width:100,height:100,scale:1.00,angle:0},  // 5. layer-03
-  {width:100,height:100,scale:1.00,angle:0},  // 6. layer-04
-  {width:100,height:100,scale:1.00,angle:0}   // 7. layer-05
-
+  {width:100,height:100,scale:1.35,angle:-10}, // 1
+  {width:100,height:100,scale:1.5,angle:0}, // 2
+  {width:100,height:100,scale:1,angle:0}, // 3
+  {width:100,height:100,scale:1,angle:0}, // 4
+  {width:100,height:100,scale:1,angle:0}, // 5
+  {width:100,height:100,scale:1,angle:0}, // 6
+  {width:100,height:100,scale:1,angle:3} // 7
 ];
-
-/* =====================================================
-   ★ シークレット衣装 7レイヤー ON / OFF ★
-   true  = 表示する
-   false = 表示しない
-   PNGファイル自体はcostumesフォルダに残しておいてOK。
-===================================================== */
 
 const SECRET_LAYER_ENABLED = [
-
-  true,  // 1. base
-  true,  // 2. main
-  false,  // 3. layer-01
-  true, // 4. layer-02
-  true, // 5. layer-03
-  false, // 6. layer-04
-  true  // 7. layer-05
-
+  true, // 1
+  true, // 2
+  false, // 3
+  false, // 4
+  false, // 5
+  false, // 6
+  true // 7
 ];
 
-/*
- * =====================================================
- * シークレット衣装 全体調整
- * =====================================================
- * 7枚のレイヤーをまとめて移動・拡大縮小・回転できます。
- *
- * x / y     : 全体の位置
- * scale     : 全体の大きさ
- * angle     : 全体の回転角度
- *
- * 各レイヤーの個別調整は、これまで通り
- * SECRET_LAYER_POSITIONS / SECRET_LAYER_SIZES で行います。
- */
 const SECRET_COSTUME_GLOBAL = {
   x: 0,
   y: 0,
@@ -3823,60 +3788,7 @@ function startHearts(){
 
   }
 
-  for(
-    let i=8;
-    i--;
-  ){
-
-    hearts.push({
-
-      startX:
-        -40 -
-        Math.random()*25,
-
-      startY:
-        30 +
-        Math.random()*25,
-
-      endX:
-        -100 -
-        Math.random()*130,
-
-      endY:
-        50 +
-        Math.random()*100
-
-    });
-
-  }
-
-  for(
-    let i=8;
-    i--;
-  ){
-
-    hearts.push({
-
-      startX:
-        40 +
-        Math.random()*25,
-
-      startY:
-        30 +
-        Math.random()*25,
-
-      endX:
-        100 +
-        Math.random()*130,
-
-      endY:
-        50 +
-        Math.random()*100
-
-    });
-
-  }
-
+  /* 左下：下方向へ広がりながら左へ */
   for(
     let i=10;
     i--;
@@ -3885,20 +3797,76 @@ function startHearts(){
     hearts.push({
 
       startX:
-        -25 +
-        Math.random()*50,
+        -30 +
+        Math.random()*25,
 
       startY:
         20 +
+        Math.random()*30,
+
+      endX:
+        -75 -
+        Math.random()*75,
+
+      endY:
+        75 +
+        Math.random()*105
+
+    });
+
+  }
+
+  /* 下：中央にも均等に広がる */
+  for(
+    let i=10;
+    i--;
+  ){
+
+    hearts.push({
+
+      startX:
+        -20 +
+        Math.random()*40,
+
+      startY:
+        25 +
         Math.random()*25,
 
       endX:
-        -35 +
-        Math.random()*70,
+        -45 +
+        Math.random()*90,
 
       endY:
-        110 +
-        Math.random()*100
+        95 +
+        Math.random()*105
+
+    });
+
+  }
+
+  /* 右下：下方向へ広がりながら右へ */
+  for(
+    let i=10;
+    i--;
+  ){
+
+    hearts.push({
+
+      startX:
+        5 +
+        Math.random()*25,
+
+      startY:
+        20 +
+        Math.random()*30,
+
+      endX:
+        75 +
+        Math.random()*75,
+
+      endY:
+        75 +
+        Math.random()*105
 
     });
 
