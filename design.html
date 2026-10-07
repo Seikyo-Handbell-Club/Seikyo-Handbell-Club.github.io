@@ -3905,6 +3905,33 @@ function startHearts(){
 
   }
 
+   for(
+  let i=8;
+  i--;
+){
+
+  hearts.push({
+
+    startX:
+      -25 +
+      Math.random()*50,
+
+    startY:
+      30 +
+      Math.random()*25,
+
+    endX:
+      -40 +
+      Math.random()*80,
+
+    endY:
+      120 +
+      Math.random()*100
+
+  });
+
+}
+
   hearts.forEach(
     (data,index)=>{
 
