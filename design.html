@@ -4090,6 +4090,172 @@ bellImage.addEventListener(
   celebrate
 );
 
+
+/* =====================================================
+   位置調整モード：design.html?edit=1 で直接開くと使える
+   画面を見ながら7レイヤーの位置・大きさ・角度を調整し、
+   最後に「コピー」で数値をそのまま貼り付けられる。
+   通常表示（iframe）には一切影響しない。
+===================================================== */
+if(new URLSearchParams(location.search).get("edit")==="1"){
+(function(){
+
+  const NAMES=["1 base","2 main","3 layer-01","4 layer-02","5 layer-03","6 layer-04","7 layer-05"];
+
+  /* 全レイヤーを表示して、ベルちゃんのシークレット衣装を出す */
+  for(let i=0;i<7;i++) SECRET_LAYER_ENABLED[i]=true;
+  document.body.classList.add("logged-in","edit-static");
+  equippedCostumes={bell:"secret-bell",chime:null};
+  currentCharacter="bell";
+
+  const css=document.createElement("style");
+  css.textContent=`
+    .bell-area{transform:scale(3);transform-origin:right bottom}
+    body.edit-static .secret-body,
+    body.edit-static .secret-layer,
+    body.edit-static .secret-costume::before,
+    body.edit-static .secret-costume::after{animation:none!important}
+    #editPanel{position:fixed;left:8px;top:8px;width:290px;max-height:calc(100% - 16px);
+      overflow:auto;background:rgba(255,255,255,.96);border:1px solid #cfd5df;border-radius:14px;
+      padding:10px;z-index:99999;font:13px/1.5 -apple-system,"Hiragino Sans",sans-serif;color:#20242a}
+    #editPanel button{border:1px solid #cfd5df;background:#f3f6fb;border-radius:8px;
+      min-height:38px;padding:0 8px;font-size:13px;font-weight:700;color:#20242a}
+    #editPanel button.on{background:#1f6feb;color:#fff;border-color:#1f6feb}
+    #editPanel .row{display:flex;gap:4px;align-items:center;margin:5px 0}
+    #editPanel .row b{width:46px;flex:none}
+    #editPanel .row button{flex:1}
+    #editPanel .layers{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+    #editPanel textarea{width:100%;height:150px;font:11px/1.4 monospace;box-sizing:border-box}
+  `;
+  document.head.appendChild(css);
+
+  /* 元の値を控える（リセット用） */
+  const snap=JSON.stringify({
+    pos:SECRET_LAYER_POSITIONS,size:SECRET_LAYER_SIZES,en:SECRET_LAYER_ENABLED
+  });
+
+  let cur=0, solo=false;
+
+  function apply(){
+    for(let i=0;i<7;i++){
+      const w=secretCostume.querySelector(".secret-layer-wrap-"+i);
+      if(!w) continue;
+      const p=SECRET_LAYER_POSITIONS[i], z=SECRET_LAYER_SIZES[i];
+      w.style.transform=`translate(${p.x}px, ${p.y}px) scale(${z.scale}) rotate(${z.angle}deg)`;
+      w.style.display=SECRET_LAYER_ENABLED[i]?"":"none";
+      w.style.opacity=(solo && i!==cur)?"0.15":"1";
+      const img=w.querySelector("img");
+      if(img) img.style.filter=(i===cur)?"drop-shadow(0 0 2px #e0218a)":"";
+    }
+  }
+
+  function fmt(){
+    const L=(arr,f)=>arr.map((v,i)=>"  "+f(v)+(i<6?",":"")+" // "+(i+1)).join("\n");
+    return "const SECRET_LAYER_POSITIONS = [\n"+
+      L(SECRET_LAYER_POSITIONS,v=>`{x:${v.x},y:${v.y}}`)+"\n];\n\n"+
+      "const SECRET_LAYER_SIZES = [\n"+
+      L(SECRET_LAYER_SIZES,v=>`{width:${v.width},height:${v.height},scale:${v.scale},angle:${v.angle}}`)+"\n];\n\n"+
+      "const SECRET_LAYER_ENABLED = [\n"+
+      L(SECRET_LAYER_ENABLED,v=>String(v))+"\n];";
+  }
+
+  const panel=document.createElement("div");
+  panel.id="editPanel";
+  document.body.appendChild(panel);
+
+  const round=v=>Math.round(v*100)/100;
+
+  function build(){
+    panel.innerHTML="";
+    const title=document.createElement("div");
+    title.innerHTML="<b>位置調整モード</b>（動きは停止中）";
+    panel.appendChild(title);
+
+    const layers=document.createElement("div");
+    layers.className="layers";
+    NAMES.forEach((n,i)=>{
+      const b=document.createElement("button");
+      b.textContent=(SECRET_LAYER_ENABLED[i]?"":"✕ ")+n;
+      if(i===cur) b.className="on";
+      b.onclick=()=>{cur=i;build();apply();};
+      layers.appendChild(b);
+    });
+    panel.appendChild(layers);
+
+    const tog=document.createElement("div");
+    tog.className="row";
+    const vis=document.createElement("button");
+    vis.textContent=SECRET_LAYER_ENABLED[cur]?"このレイヤーを隠す":"このレイヤーを表示";
+    vis.onclick=()=>{SECRET_LAYER_ENABLED[cur]=!SECRET_LAYER_ENABLED[cur];build();apply();};
+    const so=document.createElement("button");
+    so.textContent="他を薄くする"; if(solo) so.className="on";
+    so.onclick=()=>{solo=!solo;build();apply();};
+    tog.append(vis,so);
+    panel.appendChild(tog);
+
+    const defs=[
+      ["x（右＋）",SECRET_LAYER_POSITIONS[cur],"x",[-5,-1,1,5]],
+      ["y（下＋）",SECRET_LAYER_POSITIONS[cur],"y",[-5,-1,1,5]],
+      ["大きさ",SECRET_LAYER_SIZES[cur],"scale",[-0.05,-0.01,0.01,0.05]],
+      ["角度",SECRET_LAYER_SIZES[cur],"angle",[-5,-1,1,5]]
+    ];
+    defs.forEach(([label,obj,key,steps])=>{
+      const row=document.createElement("div");
+      row.className="row";
+      const name=document.createElement("b");
+      name.textContent=label;
+      row.appendChild(name);
+      const val=document.createElement("span");
+      val.style.cssText="width:44px;text-align:center;flex:none";
+      val.textContent=obj[key];
+      steps.forEach(st=>{
+        const b=document.createElement("button");
+        b.textContent=(st>0?"+":"")+st;
+        b.onclick=()=>{obj[key]=round(obj[key]+st);val.textContent=obj[key];apply();out.value=fmt();};
+        row.appendChild(b);
+        if(st===-1||st===-0.01) row.appendChild(val);
+      });
+      panel.appendChild(row);
+    });
+
+    const out=document.createElement("textarea");
+    out.readOnly=true; out.value=fmt();
+
+    const act=document.createElement("div");
+    act.className="row";
+    const cp=document.createElement("button");
+    cp.textContent="数値をコピー";
+    cp.onclick=()=>{
+      out.value=fmt();
+      (navigator.clipboard?navigator.clipboard.writeText(out.value):Promise.reject())
+        .catch(()=>{out.select();document.execCommand("copy");});
+      cp.textContent="コピーしました";
+      setTimeout(()=>cp.textContent="数値をコピー",1500);
+    };
+    const rs=document.createElement("button");
+    rs.textContent="最初に戻す";
+    rs.onclick=()=>{
+      const o=JSON.parse(snap);
+      o.pos.forEach((v,i)=>Object.assign(SECRET_LAYER_POSITIONS[i],v));
+      o.size.forEach((v,i)=>Object.assign(SECRET_LAYER_SIZES[i],v));
+      o.en.forEach((v,i)=>SECRET_LAYER_ENABLED[i]=v);
+      build();apply();
+    };
+    act.append(cp,rs);
+    panel.appendChild(act);
+    panel.appendChild(out);
+  }
+
+  /* 衣装を描画してからパネルを出す */
+  setCharacter("bell");
+  build();
+  apply();
+  setTimeout(apply,600);
+  setTimeout(apply,1500);
+
+})();
+}
+
 </script>
 
 </body>
