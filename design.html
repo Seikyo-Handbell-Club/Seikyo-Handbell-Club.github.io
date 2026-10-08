@@ -54,11 +54,6 @@ body{
 
   transition:transform .15s ease;
 
-  /* 小さく表示したときもブラウザ標準の滑らかな補間を使う */
-  image-rendering:auto;
-  -webkit-backface-visibility:hidden;
-  backface-visibility:hidden;
-
   z-index:10;
 }
 
@@ -96,6 +91,19 @@ body.logged-in .bell.chime{
   width:80px;
   right:18px;
   top:0px;
+}
+
+/* =====================================================
+   ★ チャイムくん：小さく表示したときの輪郭を少しシャープにする ★
+   元画像は変更せず、表示時のWebKit/Safari側の補間だけを調整。
+===================================================== */
+.bell.chime{
+  image-rendering:-webkit-optimize-contrast;
+  image-rendering:auto;
+  -webkit-backface-visibility:hidden;
+  backface-visibility:hidden;
+  -webkit-transform:translateZ(0);
+  transform:translateZ(0);
 }
 
 /* =====================================================
@@ -709,7 +717,6 @@ body.logged-in .secret-costume{
     src="bell.png"
     alt="ベルちゃん"
     id="bellImage"
-    decoding="sync"
   >
 
   <div
@@ -831,7 +838,7 @@ const CHIME_LAYER_ENABLED = [
 
 const CHIME_SECRET_GLOBAL = {
   x:15,
-  y:-35,
+  y:-25,
   scale:0.85,
   angle:0
 };
@@ -1395,7 +1402,6 @@ function renderSecretCostume(
 
       img.alt="";
       img.draggable=false;
-      img.decoding="sync";
 
       img.className =
         `secret-layer secret-layer-${String(index).padStart(2,"0")}`;
@@ -1452,14 +1458,6 @@ function renderSecretCostume(
 
       img.style.objectPosition =
         "center center";
-
-      /* 小さい表示サイズでも補間を安定させる */
-      img.style.imageRendering =
-        "auto";
-      img.style.webkitBackfaceVisibility =
-        "hidden";
-      img.style.backfaceVisibility =
-        "hidden";
 
       img.onload =
         ()=>{
@@ -4036,6 +4034,9 @@ function startHearts(type="heart"){
           "span"
         );
 
+      const isSunFlower =
+        type === "sunflower";
+
       heart.className =
         type === "crescent"
           ? "crescent-moon"
@@ -4044,9 +4045,11 @@ function startHearts(type="heart"){
       heart.textContent =
         type === "crescent"
           ? "☾"
-          : (index % 4 === 0
-              ? "♡"
-              : "♥");
+          : isSunFlower
+            ? (index % 2 === 0 ? "☀️" : "🌸")
+            : (index % 4 === 0
+                ? "♡"
+                : "♥");
 
       heart.style.setProperty(
         "--start-x",
@@ -4311,16 +4314,21 @@ function celebrate(){
       "celebrating"
     );
 
+    const secretEffect =
+      currentCharacter === "chime"
+        ? "sunflower"
+        : "crescent";
+
     setTimeout(
       ()=>{
-        startHearts("crescent");
+        startHearts(secretEffect);
       },
       150
     );
 
     setTimeout(
       ()=>{
-        startHearts("crescent");
+        startHearts(secretEffect);
       },
       950
     );
