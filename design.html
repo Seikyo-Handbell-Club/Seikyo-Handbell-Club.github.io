@@ -783,6 +783,62 @@ const SECRET_BELL_LAYERS = [
 ];
 
 /* =====================================================
+   ★ チャイムくん シークレット衣装 6レイヤー ★
+   位置調整モード（?edit=chime）で出力した値を
+   ここへ反映して本番表示にも使用します。
+===================================================== */
+
+const CHIME_SECRET_LAYERS = [
+
+  "costumes/chime-secret-base.png",
+
+  "costumes/chime-secret-layer-02.png",
+
+  "costumes/chime-secret-layer-03.png",
+
+  "costumes/chime-secret-layer-01.png",
+
+  "costumes/chime-secret-layer-04.png",
+
+  "costumes/chime-secret-layer-05.png"
+
+];
+
+const CHIME_LAYER_POSITIONS = [
+  {x:0,y:18},
+  {x:0,y:22},
+  {x:0,y:4},
+  {x:0,y:4},
+  {x:0,y:16},
+  {x:24,y:-8}
+];
+
+const CHIME_LAYER_SIZES = [
+  {width:100,height:100,scale:1.6,angle:0},
+  {width:100,height:100,scale:1.09,angle:0},
+  {width:100,height:100,scale:1,angle:0},
+  {width:100,height:100,scale:1.2,angle:0},
+  {width:100,height:100,scale:1,angle:0},
+  {width:100,height:100,scale:1.09,angle:0}
+];
+
+const CHIME_LAYER_ENABLED = [
+  true,
+  true,
+  true,
+  true,
+  true,
+  true
+];
+
+const CHIME_SECRET_GLOBAL = {
+  x:0,
+  y:0,
+  scale:1,
+  angle:0
+};
+
+/* =====================================================
    ★ シークレット衣装 7レイヤー位置設定 ★
    x：右へ動かすとプラス / 左へ動かすとマイナス
    y：下へ動かすとプラス / 上へ動かすとマイナス
@@ -1187,7 +1243,7 @@ function renderSecretCostume(
     "true"
   );
 
-  /* 通常衣装ではベルちゃん本体をそのまま表示 */
+  /* 通常衣装では通常キャラクター画像を表示 */
 
   bellImage.style.visibility =
     "visible";
@@ -1195,13 +1251,41 @@ function renderSecretCostume(
   bellImage.style.opacity =
     "1";
 
-  /*
-   * 現在レイヤー画像が用意されているのはベルちゃん
-   */
+  /* =====================================================
+     ベルちゃん / チャイムくんで
+     シークレット衣装の設定を切り替える
+  ===================================================== */
+
+  const isChime =
+    character === "chime";
+
+  const layers =
+    isChime
+      ? CHIME_SECRET_LAYERS
+      : SECRET_BELL_LAYERS;
+
+  const positions =
+    isChime
+      ? CHIME_LAYER_POSITIONS
+      : SECRET_LAYER_POSITIONS;
+
+  const sizes =
+    isChime
+      ? CHIME_LAYER_SIZES
+      : SECRET_LAYER_SIZES;
+
+  const enabled =
+    isChime
+      ? CHIME_LAYER_ENABLED
+      : SECRET_LAYER_ENABLED;
+
+  const global =
+    isChime
+      ? CHIME_SECRET_GLOBAL
+      : SECRET_COSTUME_GLOBAL;
 
   if(
-    character!=="bell" ||
-    !isSecretEquipped("bell")
+    !isSecretEquipped(character)
   ){
 
     return;
@@ -1212,9 +1296,8 @@ function renderSecretCostume(
   let failed=false;
 
   /*
-   * 全レイヤーをまとめる「本体グループ」。
-   * 呼吸・光などの全体の動きはここに付けるので、
-   * 7枚のレイヤーが同じ量・同じ向きで動き、位置がずれない。
+   * 全レイヤーをまとめる本体グループ。
+   * ベルちゃん・チャイムくんとも、ここに全体移動を適用する。
    */
   const secretBody =
     document.createElement("div");
@@ -1225,13 +1308,8 @@ function renderSecretCostume(
   secretBody.style.cssText =
     "position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible;";
 
-  /*
-   * 7レイヤーをまとめて動かすための全体Transform。
-   * 個別レイヤーのTransformとは独立しているので、
-   * SECRET_LAYER_POSITIONS / SECRET_LAYER_SIZES を壊しません。
-   */
   secretBody.style.transform =
-    `translate(${SECRET_COSTUME_GLOBAL.x}px, ${SECRET_COSTUME_GLOBAL.y}px) scale(${SECRET_COSTUME_GLOBAL.scale}) rotate(${SECRET_COSTUME_GLOBAL.angle}deg)`;
+    `translate(${global.x}px, ${global.y}px) scale(${global.scale}) rotate(${global.angle}deg)`;
 
   secretBody.style.transformOrigin =
     "center center";
@@ -1241,9 +1319,9 @@ function renderSecretCostume(
   );
 
   const enabledLayerCount =
-    SECRET_BELL_LAYERS.filter(
+    layers.filter(
       (_,index)=>
-        SECRET_LAYER_ENABLED[index]===true
+        enabled[index]===true
     ).length;
 
   if(
@@ -1269,21 +1347,17 @@ function renderSecretCostume(
 
   }
 
-  SECRET_BELL_LAYERS.forEach(
+  layers.forEach(
     (src,index)=>{
 
       if(
-        SECRET_LAYER_ENABLED[index]!==true
+        enabled[index]!==true
       ){
 
         return;
 
       }
 
-      /*
-       * wrapperをレイヤーごとに作る。
-       * サイズ・位置・角度はすべてこのwrapperで独立管理する。
-       */
       const layerWrap =
         document.createElement(
           "div"
@@ -1325,40 +1399,15 @@ function renderSecretCostume(
       img.draggable=false;
 
       img.className =
-        `secret-layer secret-layer-${
-          index===1
-            ? "main"
-            : String(index).padStart(2,"0")
-        }`;
-
-      /*
-       * 必ず通常ベルちゃんと同じ座標系に固定
-       */
+        `secret-layer secret-layer-${String(index).padStart(2,"0")}`;
 
       const layerPosition =
-        SECRET_LAYER_POSITIONS[index] ||
-        {
-          x:0,
-          y:0
-        };
+        positions[index] ||
+        {x:0,y:0};
 
       const layerSize =
-        SECRET_LAYER_SIZES[index] ||
-        {
-          width:100,
-          height:100,
-          scale:1,
-          angle:0
-        };
-
-      /*
-       * 横幅・高さ・全体サイズ・角度は個別指定。
-       *
-       * position の x/y はレイヤー本体の中心位置を基準にする。
-       *
-       * scale と angle はwrapperに適用するため、
-       * レイヤー画像側のアニメーションと分離できます。
-       */
+        sizes[index] ||
+        {width:100,height:100,scale:1,angle:0};
 
       layerWrap.style.width =
         `${layerSize.width}%`;
@@ -1367,13 +1416,14 @@ function renderSecretCostume(
         `${layerSize.height}%`;
 
       layerWrap.style.left =
-  `${(100-layerSize.width)/2}%`;
+        `${(100-layerSize.width)/2}%`;
 
-layerWrap.style.top =
-  `${(100-layerSize.height)/2}%`;
+      layerWrap.style.top =
+        `${(100-layerSize.height)/2}%`;
 
-layerWrap.style.transform =
-  `translate(${layerPosition.x}px, ${layerPosition.y}px) scale(${layerSize.scale}) rotate(${layerSize.angle}deg)`;
+      layerWrap.style.transform =
+        `translate(${layerPosition.x}px, ${layerPosition.y}px) scale(${layerSize.scale}) rotate(${layerSize.angle}deg)`;
+
       layerWrap.style.transformOrigin =
         "center center";
 
@@ -1423,15 +1473,6 @@ layerWrap.style.transform =
             !failed
           ){
 
-            /*
-             * シークレット衣装表示中は
-             * 通常ベルちゃんを透明にする。
-             *
-             * opacity:0 にするだけなので、
-             * 通常ベルちゃんのクリックや
-             * アニメーション処理は維持される。
-             */
-
             bellImage.style.visibility =
               "visible";
 
@@ -1468,6 +1509,7 @@ layerWrap.style.transform =
 
           console.error(
             "シークレット衣装画像の読み込み失敗:",
+            character,
             src
           );
 
@@ -1501,10 +1543,6 @@ layerWrap.style.transform =
         layerWrap
       );
 
-      /*
-       * 背景透明化後の画像を設定
-       */
-
       prepareSecretLayer(src)
         .then(
           preparedSrc=>{
@@ -1535,13 +1573,12 @@ layerWrap.style.transform =
 
             console.error(
               "シークレット衣装画像の加工に失敗:",
+              character,
               src,
               error
             );
 
-            /*
-             * 加工できない場合は元画像を表示
-             */
+            /* 加工できない場合は元画像を表示 */
             img.src =
               src;
 
@@ -4702,6 +4739,264 @@ if(new URLSearchParams(location.search).get("edit")==="1"){
   apply();
   setTimeout(apply,600);
   setTimeout(apply,1500);
+
+})();
+
+}
+
+/* =====================================================
+   チャイムくん シークレット衣装 位置調整モード
+   design.html?edit=chime で開くと使える（通常表示には影響しない）
+
+   ★ 6レイヤーを画面上で動かして、
+      CHIME_SECRET_LAYERS / CHIME_LAYER_* の数値を出力します。
+===================================================== */
+if(new URLSearchParams(location.search).get("edit")==="chime"){
+(function(){
+
+  /* 通常の表示を隠して、調整画面を全面に出す */
+  const ba=document.querySelector(".bell-area");
+  if(ba)ba.style.display="none";
+  document.body.style.visibility="visible";
+
+  const style=document.createElement("style");
+  style.textContent=`
+#ceRoot{position:fixed;left:0;top:0;right:0;bottom:0;z-index:100000;display:flex;background:#eef1f6;color:#20242a;font:13px/1.5 -apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;-webkit-text-size-adjust:100%;overscroll-behavior:none}
+#ceRoot *{box-sizing:border-box}
+#cePanel{width:300px;flex:none;height:100%;overflow:auto;background:#fff;border-right:1px solid #d9dee7;padding:10px}
+#cePanel h1{font-size:15px;margin:0 0 4px}
+#cePanel .note{font-size:11px;color:#68717d;margin:2px 0 8px}
+#cePanel button{border:1px solid #cfd5df;background:#f3f6fb;border-radius:8px;min-height:38px;padding:0 6px;font-size:13px;font-weight:700;color:#20242a;touch-action:manipulation}
+#cePanel button.on{background:#1f6feb;color:#fff;border-color:#1f6feb}
+#cePanel button.off{opacity:.5}
+#cePanel .row{display:flex;gap:4px;align-items:center;margin:5px 0}
+#cePanel .row b{width:50px;flex:none;font-size:12px}
+#cePanel .row button{flex:1;min-width:0}
+#cePanel .row .val{width:46px;text-align:center;flex:none;font-size:12px}
+#cePanel .layers{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:6px 0}
+#cePanel .layers button{text-align:left;line-height:1.25;padding:4px 6px;min-height:42px}
+#cePanel .layers button small{display:block;font-weight:400;opacity:.8;font-size:10px}
+#cePanel textarea{width:100%;height:170px;font:11px/1.4 ui-monospace,Menlo,monospace;margin-top:6px}
+#cePanel hr{border:0;border-top:1px solid #e3e7ee;margin:8px 0}
+#cePanel label.file{display:block;margin-top:6px;font-size:11px;color:#68717d}
+#ceStage{flex:1;min-width:0;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;background:linear-gradient(#e4e8ef 1px,transparent 1px) 0 0/20px 20px,linear-gradient(90deg,#e4e8ef 1px,transparent 1px) 0 0/20px 20px,#f5f7fb}
+#ceStage.drag{cursor:grabbing}
+#ceHolder{position:relative}
+#ceFrame{position:absolute;left:0;top:0;width:202px;height:160px;transform-origin:0 0;background:#fff;outline:1px dashed #1f6feb}
+#ceCostume{position:absolute;pointer-events:none;overflow:visible}
+#ceCostume::before{content:"";position:absolute;inset:0;outline:1px solid rgba(31,111,235,.55);pointer-events:none;z-index:50}
+#ceBody{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;transform-origin:50% 50%}
+.ceWrap{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;transform-origin:50% 50%;pointer-events:none}
+.ceWrap img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;object-position:center;max-width:none;max-height:none;display:block;pointer-events:none;-webkit-user-drag:none}
+#ceShade{position:absolute;left:0;top:0;width:202px;height:160px;pointer-events:none;z-index:60;box-shadow:0 0 0 4000px rgba(238,241,246,.62)}
+#ceHint{position:absolute;left:12px;bottom:10px;right:12px;font-size:11px;color:#68717d;pointer-events:none;text-align:center}
+#ceWarn{position:absolute;left:12px;right:12px;top:10px;background:#fff4e5;color:#79500a;border-radius:10px;padding:8px 10px;font-size:12px;display:none}
+@media (max-width:760px){#ceRoot{flex-direction:column-reverse}#cePanel{width:100%;height:52%;border-right:0;border-top:1px solid #d9dee7}#ceStage{height:48%;flex:none}}
+  `;
+  document.head.appendChild(style);
+
+  const root=document.createElement("div");
+  root.id="ceRoot";
+  root.innerHTML=`<div id="cePanel"></div><div id="ceStage"><div id="ceWarn"></div><div id="ceHolder"><div id="ceFrame"><div id="ceCostume"><div id="ceBody"></div></div><div id="ceShade"></div></div></div><div id="ceHint">画面をドラッグすると、選んでいるレイヤーが動きます（点線の外は、実際には切れて見えません）</div></div>`;
+  document.body.appendChild(root);
+
+  const FRAME={size:80,right:18,top:0};
+  const AREA={w:220,h:140,top:3,iframeW:202,iframeH:160};
+  const BOX_X=(AREA.w-FRAME.right-FRAME.size)-(AREA.w-AREA.iframeW);
+  const BOX_Y=AREA.top+FRAME.top;
+
+  const LAYERS=[
+    {key:"base",name:"base",sub:"本体＋ドレス",file:"costumes/chime-secret-base.png",w:512,h:768},
+    {key:"layer-01",name:"layer-01",sub:"大きなリボン",file:"costumes/chime-secret-layer-01.png",w:868,h:920},
+    {key:"layer-02",name:"layer-02",sub:"裾のヒラヒラ",file:"costumes/chime-secret-layer-02.png",w:1230,h:828},
+    {key:"layer-03",name:"layer-03",sub:"雲のフリル",file:"costumes/chime-secret-layer-03.png",w:840,h:596},
+    {key:"layer-04",name:"layer-04",sub:"星のチャーム",file:"costumes/chime-secret-layer-04.png",w:438,h:770},
+    {key:"layer-05",name:"layer-05",sub:"太陽＋花の飾り",file:"costumes/chime-secret-layer-05.png",w:760,h:834}
+  ];
+  const BASE_LONG=768;
+
+  function defaults(){
+    const pos={
+      "base":{x:0,y:0},
+      "layer-01":{x:0,y:4},
+      "layer-02":{x:0,y:18},
+      "layer-03":{x:0,y:22},
+      "layer-04":{x:0,y:16},
+      "layer-05":{x:24,y:-8}
+    };
+    const st={};
+    LAYERS.forEach(L=>{
+      st[L.key]={x:pos[L.key].x,y:pos[L.key].y,scale:Math.round(Math.max(L.w,L.h)/BASE_LONG*100)/100,angle:0,on:true};
+    });
+    return {layers:st,order:["layer-02","layer-03","base","layer-01","layer-04","layer-05"],global:{x:0,y:0,scale:1,angle:0}};
+  }
+
+  let S=defaults();
+  const STORE="chimeSecretEditV1";
+  try{const saved=JSON.parse(localStorage.getItem(STORE)||"null");if(saved&&saved.layers&&saved.order&&saved.global&&saved.order.length===LAYERS.length)S=saved;}catch(e){}
+  function save(){try{localStorage.setItem(STORE,JSON.stringify(S))}catch(e){}}
+
+  let sel="base";
+  let solo=false;
+  const $=id=>document.getElementById(id);
+  const round=(v,n)=>{const k=Math.pow(10,n);return Math.round(v*k)/k};
+  const byKey=k=>LAYERS.find(L=>L.key===k);
+
+  const bodyEl=$("ceBody"),costumeEl=$("ceCostume");
+  costumeEl.style.left=BOX_X+"px";
+  costumeEl.style.top=BOX_Y+"px";
+  costumeEl.style.width=FRAME.size+"px";
+  costumeEl.style.height=FRAME.size+"px";
+  const customSrc={};
+  let loadFail=0;
+
+  function buildLayers(){
+    bodyEl.innerHTML="";
+    S.order.forEach(k=>{
+      const L=byKey(k);
+      const w=document.createElement("div");
+      w.className="ceWrap";
+      w.dataset.key=k;
+      const img=document.createElement("img");
+      img.alt="";
+      img.draggable=false;
+      img.onerror=()=>{loadFail++;checkWarn()};
+      img.src=customSrc[k]||L.file;
+      w.appendChild(img);
+      bodyEl.appendChild(w);
+    });
+    apply();
+  }
+  function checkWarn(){
+    const el=$("ceWarn");
+    if(loadFail>=LAYERS.length-1){
+      el.style.display="block";
+      el.textContent="画像が見つかりません。costumes/ フォルダに chime-secret-*.png を入れるか、左下の「画像を選ぶ」から6枚を選んでください。";
+    }
+  }
+  function apply(){
+    const g=S.global;
+    bodyEl.style.transform="translate("+g.x+"px,"+g.y+"px) scale("+g.scale+") rotate("+g.angle+"deg)";
+    bodyEl.querySelectorAll(".ceWrap").forEach(w=>{
+      const k=w.dataset.key,d=S.layers[k];
+      w.style.transform="translate("+d.x+"px,"+d.y+"px) scale("+d.scale+") rotate("+d.angle+"deg)";
+      w.style.display=d.on?"":"none";
+      w.style.opacity=(solo&&sel!=="all"&&k!==sel)?"0.15":"1";
+      const img=w.querySelector("img");
+      img.style.filter=(sel===k)?"drop-shadow(0 0 2px #e0218a)":"";
+    });
+  }
+
+  let Z=3;
+  function layout(){
+    const stage=$("ceStage");
+    const aw=stage.clientWidth-16,ah=stage.clientHeight-40;
+    Z=Math.max(1.2,Math.min(4,aw/AREA.iframeW,ah/AREA.iframeH));
+    const holder=$("ceHolder");
+    holder.style.width=(AREA.iframeW*Z)+"px";
+    holder.style.height=(AREA.iframeH*Z)+"px";
+    $("ceFrame").style.transform="scale("+Z+")";
+  }
+
+  let drag=null;
+  const stageEl=$("ceStage");
+  stageEl.addEventListener("pointerdown",e=>{
+    const target=(sel==="all")?S.global:S.layers[sel];
+    drag={id:e.pointerId,sx:e.clientX,sy:e.clientY,x0:target.x,y0:target.y};
+    stageEl.classList.add("drag");
+    try{stageEl.setPointerCapture(e.pointerId)}catch(_){}
+    e.preventDefault();
+  });
+  stageEl.addEventListener("pointermove",e=>{
+    if(!drag||e.pointerId!==drag.id)return;
+    let dx=(e.clientX-drag.sx)/Z,dy=(e.clientY-drag.sy)/Z;
+    const target=(sel==="all")?S.global:S.layers[sel];
+    if(sel!=="all"){
+      const g=S.global,r=-g.angle*Math.PI/180,c=Math.cos(r),s=Math.sin(r);
+      const rx=dx*c-dy*s,ry=dx*s+dy*c;
+      dx=rx/(g.scale||1);dy=ry/(g.scale||1);
+    }
+    target.x=round(drag.x0+dx,1);target.y=round(drag.y0+dy,1);
+    apply();updatePanelValues();
+  });
+  function endDrag(e){if(!drag||(e&&e.pointerId!==drag.id))return;drag=null;stageEl.classList.remove("drag");save()}
+  stageEl.addEventListener("pointerup",endDrag);
+  stageEl.addEventListener("pointercancel",endDrag);
+
+  function fmt(){
+    const ord=S.order;
+    const line=(arr,f)=>arr.map((k,i)=>"  "+f(k)+(i<arr.length-1?",":"")+" // "+(i+1)+" "+byKey(k).name+"（"+byKey(k).sub+"）").join("\n");
+    const L=S.layers,g=S.global;
+    return "/* チャイムくん シークレット衣装（奥 → 手前の順） */\n"+
+      "const CHIME_SECRET_LAYERS = [\n"+line(ord,k=>JSON.stringify(byKey(k).file))+"\n];\n\n"+
+      "const CHIME_LAYER_POSITIONS = [\n"+line(ord,k=>"{x:"+L[k].x+",y:"+L[k].y+"}")+"\n];\n\n"+
+      "const CHIME_LAYER_SIZES = [\n"+line(ord,k=>"{width:100,height:100,scale:"+L[k].scale+",angle:"+L[k].angle+"}")+"\n];\n\n"+
+      "const CHIME_LAYER_ENABLED = [\n"+line(ord,k=>String(L[k].on))+"\n];\n\n"+
+      "const CHIME_SECRET_GLOBAL = {x:"+g.x+",y:"+g.y+",scale:"+g.scale+",angle:"+g.angle+"};";
+  }
+
+  const panel=$("cePanel");
+  let outEl=null;
+  const valEls={};
+  function targetObj(){return sel==="all"?S.global:S.layers[sel]}
+  function updatePanelValues(){
+    const t=targetObj();
+    ["x","y","scale","angle"].forEach(k=>{if(valEls[k])valEls[k].textContent=t[k]});
+    if(outEl)outEl.value=fmt();
+  }
+  function mkBtn(text,fn,cls){const b=document.createElement("button");b.textContent=text;if(cls)b.className=cls;b.onclick=fn;return b}
+
+  function build(){
+    panel.innerHTML="";
+    const h=document.createElement("h1");h.textContent="チャイムくん 位置調整";panel.appendChild(h);
+    const n=document.createElement("div");n.className="note";n.textContent="レイヤーを選んで、画面をドラッグ。細かい調整はボタンで。";panel.appendChild(n);
+
+    const grid=document.createElement("div");grid.className="layers";
+    [...S.order].reverse().forEach(k=>{
+      const L=byKey(k);const b=document.createElement("button");
+      b.innerHTML=(S.layers[k].on?"":"✕ ")+L.name+"<small>"+L.sub+"</small>";
+      if(sel===k)b.classList.add("on");
+      if(!S.layers[k].on)b.classList.add("off");
+      b.onclick=()=>{sel=k;build();apply()};grid.appendChild(b);
+    });
+    const allB=document.createElement("button");allB.innerHTML="全体<small>まとめて動かす</small>";
+    if(sel==="all")allB.classList.add("on");
+    allB.onclick=()=>{sel="all";build();apply()};grid.appendChild(allB);panel.appendChild(grid);
+    const order=document.createElement("div");order.className="note";order.textContent="↑ 上ほど手前、下ほど奥に表示されます";panel.appendChild(order);
+
+    if(sel!=="all"){
+      const r1=document.createElement("div");r1.className="row";
+      r1.appendChild(mkBtn(S.layers[sel].on?"隠す":"表示する",()=>{S.layers[sel].on=!S.layers[sel].on;save();build();apply()}));
+      r1.appendChild(mkBtn("他を薄く",()=>{solo=!solo;build();apply()},solo?"on":""));panel.appendChild(r1);
+      const r2=document.createElement("div");r2.className="row";
+      r2.appendChild(mkBtn("◀ 奥へ",()=>move(-1)));r2.appendChild(mkBtn("手前へ ▶",()=>move(1)));panel.appendChild(r2);
+    }
+
+    const t=targetObj();
+    const defs=[["x（右＋）","x",[-5,-1,1,5],1],["y（下＋）","y",[-5,-1,1,5],1],["大きさ","scale",[-0.05,-0.01,0.01,0.05],2],["角度","angle",[-5,-1,1,5],1]];
+    defs.forEach(([label,key,steps,prec])=>{
+      const row=document.createElement("div");row.className="row";const nm=document.createElement("b");nm.textContent=label;row.appendChild(nm);
+      steps.forEach((st,i)=>{row.appendChild(mkBtn((st>0?"+":"")+st,()=>{const o=targetObj();o[key]=round(o[key]+st,prec);if(key==="scale"&&o[key]<0.05)o[key]=0.05;apply();updatePanelValues();save()}));if(i===1){const v=document.createElement("span");v.className="val";v.textContent=t[key];valEls[key]=v;row.appendChild(v)}});
+      panel.appendChild(row);
+    });
+
+    const act=document.createElement("div");act.className="row";
+    const cp=mkBtn("数値をコピー",()=>{outEl.value=fmt();const done=()=>{cp.textContent="コピーしました";setTimeout(()=>cp.textContent="数値をコピー",1500)};if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(outEl.value).then(done).catch(()=>{outEl.select();document.execCommand("copy");done()})}else{outEl.select();document.execCommand("copy");done()}});
+    const rs=mkBtn("最初に戻す",()=>{if(!confirm("調整した内容をすべて最初に戻しますか？"))return;S=defaults();save();sel="base";build();buildLayers()});
+    act.append(cp,rs);panel.appendChild(act);
+
+    outEl=document.createElement("textarea");outEl.readOnly=true;outEl.value=fmt();panel.appendChild(outEl);
+
+    const lab=document.createElement("label");lab.className="file";lab.textContent="画像を選ぶ（6枚まとめて・costumes/にまだ無いとき用）";
+    const inp=document.createElement("input");inp.type="file";inp.multiple=true;inp.accept="image/png,image/*";
+    inp.onchange=()=>{[...inp.files].forEach(f=>{const m=f.name.match(/(base|layer-0[1-5])/i);if(m)customSrc[m[1].toLowerCase()]=URL.createObjectURL(f)});loadFail=0;$("ceWarn").style.display="none";buildLayers()};
+    lab.appendChild(document.createElement("br"));lab.appendChild(inp);panel.appendChild(lab);updatePanelValues();
+  }
+
+  function move(dir){const i=S.order.indexOf(sel),j=i+dir;if(i<0||j<0||j>=S.order.length)return;const a=S.order;[a[i],a[j]]=[a[j],a[i]];save();build();buildLayers()}
+
+  window.addEventListener("resize",layout);
+  layout();build();buildLayers();setTimeout(layout,300);
 
 })();
 }
