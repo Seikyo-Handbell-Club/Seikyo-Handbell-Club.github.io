@@ -286,6 +286,77 @@ body.logged-in .bubble:after{
 }
 
 /* =====================================================
+   シークレット用・三日月
+===================================================== */
+
+.crescent-moon{
+  position:absolute;
+
+  left:0;
+  top:0;
+
+  color:#fff3a6;
+
+  font-size:18px;
+
+  line-height:1;
+
+  opacity:0;
+
+  transform:
+    translate(
+      var(--start-x),
+      var(--start-y)
+    )
+    scale(.3);
+
+  animation:
+    crescentFly
+    1.8s
+    cubic-bezier(.2,.75,.25,1)
+    forwards;
+
+  text-shadow:
+    0 0 5px rgba(255,235,150,.9);
+}
+
+@keyframes crescentFly{
+
+  0%{
+    opacity:0;
+
+    transform:
+      translate(
+        var(--start-x),
+        var(--start-y)
+      )
+      scale(.3)
+      rotate(0deg);
+  }
+
+  12%{
+    opacity:1;
+  }
+
+  45%{
+    opacity:1;
+  }
+
+  100%{
+    opacity:0;
+
+    transform:
+      translate(
+        var(--end-x),
+        var(--end-y)
+      )
+      scale(1)
+      rotate(var(--rotate));
+  }
+
+}
+
+/* =====================================================
    ハートが飛び散る
 ===================================================== */
 
@@ -815,7 +886,7 @@ const SECRET_LAYER_ENABLED = [
  */
 const SECRET_COSTUME_GLOBAL = {
   x: 0,
-  y: 40,
+  y: 0,
   scale: 1,
   angle: 0
 };
@@ -3680,6 +3751,112 @@ function changeBellMessage(){
 }
 
 /* =====================================================
+   シークレット用・三日月
+===================================================== */
+
+function startCrescentMoon(){
+
+  if(
+    !heartContainer
+  ){
+
+    return;
+
+  }
+
+  const moonPositions=[];
+
+  for(
+    let i=0;
+    i<34;
+    i++
+  ){
+
+    moonPositions.push({
+
+      startX:
+        -55 +
+        Math.random()*110,
+
+      startY:
+        -10 +
+        Math.random()*25,
+
+      endX:
+        -130 +
+        Math.random()*260,
+
+      endY:
+        -120 -
+        Math.random()*150
+
+    });
+
+  }
+
+  moonPositions.forEach(
+    moon=>{
+
+      const el =
+        document.createElement(
+          "span"
+        );
+
+      el.className =
+        "crescent-moon";
+
+      el.textContent =
+        "☾";
+
+      el.style.setProperty(
+        "--start-x",
+        `${moon.startX}px`
+      );
+
+      el.style.setProperty(
+        "--start-y",
+        `${moon.startY}px`
+      );
+
+      el.style.setProperty(
+        "--end-x",
+        `${moon.endX}px`
+      );
+
+      el.style.setProperty(
+        "--end-y",
+        `${moon.endY}px`
+      );
+
+      el.style.setProperty(
+        "--rotate",
+        `${-90+Math.random()*180}deg`
+      );
+
+      el.style.fontSize =
+        `${13+Math.random()*10}px`;
+
+      el.style.animationDuration =
+        `${1.55+Math.random()*.35}s`;
+
+      heartContainer.appendChild(
+        el
+      );
+
+      el.addEventListener(
+        "animationend",
+        ()=>{
+          el.remove();
+        },
+        {once:true}
+      );
+
+    }
+  );
+
+}
+
+/* =====================================================
    大量のハート
 ===================================================== */
 
@@ -4033,206 +4210,6 @@ let isAnimating=false;
    キャラクターをクリック
 ===================================================== */
 
-const SECRET_MOON_HTML = `<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>シークレット月夜</title>
-<style>
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#071329}
-#scene{position:fixed;inset:0;overflow:hidden;background:linear-gradient(#050d21 0%,#0b1733 58%,#101c32 100%);opacity:0;animation:sceneIn .45s ease forwards}
-#stars{position:absolute;inset:0}
-.star{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;opacity:.55;animation:twinkle 2.8s ease-in-out infinite}
-.star.cross:before,.star.cross:after{content:"";position:absolute;background:#fff;left:50%;top:50%;transform:translate(-50%,-50%)}
-.star.cross:before{width:8px;height:1px}.star.cross:after{width:1px;height:8px}
-#ground{position:absolute;left:-5%;right:-5%;bottom:-4%;height:27%;background:linear-gradient(180deg,#10192b,#050a14 72%);clip-path:polygon(0 22%,12% 17%,24% 21%,38% 13%,51% 19%,65% 10%,78% 18%,90% 13%,100% 19%,100% 100%,0 100%);box-shadow:0 -12px 35px rgba(103,137,190,.12)}
-#moon{position:absolute;width:105px;height:105px;border-radius:50%;right:13%;top:10%;background:radial-gradient(circle at 34% 30%,#fff 0 8%,#eaf0ff 34%,#c7d6f4 72%,#9aadd4 100%);box-shadow:0 0 20px rgba(213,228,255,.65),0 0 65px rgba(151,184,255,.38);opacity:0;transform:scale(.72);animation:moonIn 1.7s cubic-bezier(.2,.8,.2,1) .15s forwards}
-#moon:before,#moon:after{content:"";position:absolute;border-radius:50%;background:rgba(128,145,181,.18)}
-#moon:before{width:20px;height:13px;left:22px;top:27px}.#moon:after{width:14px;height:9px;left:61px;top:58px}
-#moonGlow{position:absolute;width:420px;height:620px;left:50%;top:4%;transform:translateX(-50%);background:conic-gradient(from 180deg at 50% 0%,transparent 37%,rgba(211,226,255,.16) 48%,rgba(232,240,255,.33) 50%,rgba(211,226,255,.16) 52%,transparent 63%);filter:blur(8px);opacity:0;animation:lightIn 1.8s ease .65s forwards;pointer-events:none}
-#landingGlow{position:absolute;left:50%;top:55%;width:270px;height:120px;transform:translate(-50%,-50%) scale(.7);background:radial-gradient(ellipse,rgba(223,235,255,.38),rgba(163,193,255,.15) 35%,transparent 72%);filter:blur(5px);opacity:0;animation:landingIn 1.8s ease 1.05s forwards}
-#silhouette{position:absolute;left:50%;top:-150px;width:105px;height:105px;transform:translateX(-50%);opacity:.055;filter:brightness(0);animation:fall 3.65s linear .55s forwards;z-index:8;will-change:left,top,transform,filter}
-#silhouette img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:brightness(0)}
-#sparkles{position:absolute;inset:0;pointer-events:none;z-index:20}
-.spark{position:absolute;font-size:16px;color:#fff;opacity:0;animation:sparkFly .95s ease forwards;text-shadow:0 0 8px rgba(255,244,190,.95)}
-#white{position:absolute;inset:0;background:#fff;opacity:0;z-index:50;pointer-events:none;animation:whiteout .85s ease 6.65s forwards}
-@keyframes sceneIn{to{opacity:1}}
-@keyframes twinkle{0%,100%{opacity:.25;transform:scale(.7)}50%{opacity:1;transform:scale(1.25)}}
-@keyframes moonIn{0%{opacity:0;transform:scale(.72)}60%{opacity:1;transform:scale(1.05)}100%{opacity:1;transform:scale(1)}}
-@keyframes lightIn{to{opacity:1}}
-@keyframes landingIn{to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
-@keyframes fall{0%{top:-150px;opacity:.035;transform:translateX(-50%) scale(.82)}100%{top:55%;opacity:1;transform:translateX(-50%) scale(1)}}
-@keyframes landingBounce{0%{transform:translate(-50%,-50%) scale(1)}38%{transform:translate(-50%,-50%) scale(1.045)}72%{transform:translate(-50%,-50%) scale(.978)}100%{transform:translate(-50%,-50%) scale(1)}}
-@keyframes sparkFly{0%{opacity:0;transform:translate(0,0) scale(.35) rotate(0deg)}22%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1.15) rotate(var(--rot))}}
-@keyframes whiteout{0%{opacity:0}72%{opacity:.72}100%{opacity:1}}
-</style>
-</head>
-<body>
-<div id="scene"><div id="stars"></div><div id="moonGlow"></div><div id="moon"></div><div id="ground"></div><div id="landingGlow"></div><div id="silhouette"></div><div id="sparkles"></div><div id="white"></div></div>
-<script>
-const stars=document.getElementById('stars');
-for(let i=0;i<72;i++){
-  const s=document.createElement('i');
-  s.className='star'+(Math.random()<.16?' cross':'');
-  s.style.left=(3+Math.random()*94)+'%';
-  s.style.top=(4+Math.random()*67)+'%';
-  s.style.animationDelay=(Math.random()*2.5)+'s';
-  stars.appendChild(s);
-}
-
-function getHome(){
-  try{
-    const h=parent.__secretMoonHome;
-    if(h && Number.isFinite(h.cx) && Number.isFinite(h.cy)){
-      return {x:h.cx,y:h.cy,size:Number(h.size)||90};
-    }
-  }catch(e){}
-  return {x:innerWidth-60,y:70,size:90};
-}
-
-function getSecretClone(){
-  try{
-    const src=parent.document.getElementById('secretCostume');
-    if(!src || !src.classList.contains('show')) return null;
-    const clone=src.cloneNode(true);
-    clone.removeAttribute('id');
-    clone.classList.remove('show','celebrating');
-    clone.style.display='block';
-    clone.style.position='absolute';
-    clone.style.left='50%';
-    clone.style.top='0';
-    clone.style.right='auto';
-    clone.style.bottom='auto';
-    clone.style.width='120px';
-    clone.style.height='120px';
-    clone.style.zIndex='8';
-    clone.style.transform='translateX(-50%)';
-    clone.style.filter='brightness(0)';
-    clone.style.opacity='1';
-    clone.style.overflow='visible';
-    clone.querySelectorAll('.secret-body').forEach(x=>{x.style.animation='none';x.style.transform='none'});
-    clone.querySelectorAll('.secret-layer-wrap').forEach(x=>{x.style.animation='none'});
-    return clone;
-  }catch(e){return null}
-}
-
-function makeSpark(x,y,dx,dy,size,delay,rot){
-  const p=document.createElement('span');
-  p.className='spark';
-  p.textContent=Math.random()<.34?'✦':Math.random()<.55?'✧':'·';
-  p.style.left=x+'px';
-  p.style.top=y+'px';
-  p.style.fontSize=size+'px';
-  p.style.setProperty('--dx',dx+'px');
-  p.style.setProperty('--dy',dy+'px');
-  p.style.setProperty('--rot',rot+'deg');
-  p.style.animationDelay=delay+'ms';
-  document.getElementById('sparkles').appendChild(p);
-  p.addEventListener('animationend',()=>p.remove(),{once:true});
-}
-
-function landingSparkles(){
-  for(let i=0;i<44;i++){
-    const x=innerWidth*.39+Math.random()*innerWidth*.22;
-    const y=innerHeight*.47+Math.random()*innerHeight*.16;
-    makeSpark(x,y,-145+Math.random()*290,-95+Math.random()*150,9+Math.random()*16,Math.random()*360,-80+Math.random()*160);
-  }
-}
-
-function returnSparkles(from,to){
-  const count=48;
-  for(let i=0;i<count;i++){
-    const t=i/count;
-    const x=from.x+(to.x-from.x)*t+(Math.random()*42-21);
-    const y=from.y+(to.y-from.y)*t+(Math.random()*42-21);
-    const dx=(to.x-from.x)*(.16+Math.random()*.28)+(Math.random()*70-35);
-    const dy=(to.y-from.y)*(.16+Math.random()*.28)+(Math.random()*70-35);
-    makeSpark(x,y,dx,dy,8+Math.random()*15,i*10,-100+Math.random()*200);
-  }
-}
-
-const sil=document.getElementById('silhouette');
-const clone=getSecretClone();
-if(clone){
-  sil.appendChild(clone);
-}else{
-  const fallback=document.createElement('div');
-  fallback.style.cssText='position:absolute;inset:12%;background:#02040a;border-radius:45% 45% 35% 35%;';
-  sil.appendChild(fallback);
-}
-
-const LAND=4250;
-
-/* 落下は今までと同じ3.65秒。ただし最後まで一定速度で落とす。 */
-setTimeout(()=>{
-  sil.style.animation='landingBounce .42s cubic-bezier(.2,.9,.3,1) forwards';
-  sil.style.top='55%';
-  sil.style.opacity='1';
-  sil.style.filter='none';
-  if(clone){
-    clone.style.filter='brightness(0)';
-    clone.style.opacity='1';
-    clone.style.transition='filter .72s ease';
-  }
-  landingSparkles();
-},LAND);
-
-/* シルエットから色がじわっと浮かぶ。 */
-setTimeout(()=>{if(clone)clone.style.filter='brightness(.10) drop-shadow(0 0 3px rgba(255,235,170,.25))';},4340);
-setTimeout(()=>{if(clone)clone.style.filter='brightness(.28) drop-shadow(0 0 5px rgba(255,235,170,.35))';},4490);
-setTimeout(()=>{if(clone)clone.style.filter='brightness(.58) drop-shadow(0 0 7px rgba(255,235,170,.55))';},4660);
-setTimeout(()=>{if(clone)clone.style.filter='brightness(.82) drop-shadow(0 0 9px rgba(255,235,170,.75))';},4830);
-setTimeout(()=>{if(clone)clone.style.filter='brightness(1) drop-shadow(0 0 11px rgba(255,235,170,.95))';},5000);
-
-/* 着地の光 */
-setTimeout(()=>{
-  document.getElementById('moonGlow').style.animation='lightIn .9s ease forwards';
-  document.getElementById('landingGlow').style.animation='landingIn .9s ease forwards';
-},4550);
-
-/* 定位置へ戻る。実際の現在位置→保存しておいた右上の定位置へ移動。 */
-setTimeout(()=>{
-  const home=getHome();
-  const start={x:innerWidth/2,y:innerHeight*.55};
-  const duration=1150;
-  const startTime=performance.now();
-  sil.style.animation='none';
-  sil.style.left=start.x+'px';
-  sil.style.top=start.y+'px';
-  sil.style.width='105px';
-  sil.style.height='105px';
-  sil.style.transform='translate(-50%,-50%) scale(1)';
-  sil.style.filter='none';
-  returnSparkles(start,home);
-
-  function frame(now){
-    const t=Math.min(1,(now-startTime)/duration);
-    const e=1-Math.pow(1-t,3);
-    const x=start.x+(home.x-start.x)*e;
-    const y=start.y+(home.y-start.y)*e;
-    const scale=1+(home.size/105-1)*e;
-    sil.style.left=x+'px';
-    sil.style.top=y+'px';
-    sil.style.width='105px';
-    sil.style.height='105px';
-    sil.style.transform='translate(-50%,-50%) scale('+scale+')';
-    if(t<1){requestAnimationFrame(frame);return;}
-    sil.style.left=home.x+'px';
-    sil.style.top=home.y+'px';
-    sil.style.width=home.size+'px';
-    sil.style.height=home.size+'px';
-    sil.style.transform='translate(-50%,-50%) scale(1)';
-    if(clone)clone.style.filter='brightness(1) drop-shadow(0 0 8px rgba(255,235,170,.75))';
-  }
-  requestAnimationFrame(frame);
-},5150);
-
-setTimeout(()=>{parent.postMessage({type:'secret-moon-finished'},'*')},7100);
-<\/script>
-</body>
-</html>`;
-
 function startSecretMoon(){
 
   /*
@@ -4320,10 +4297,9 @@ function startSecretMoon(){
   frame.id =
     "secretMoonFrame";
 
-  /* 月夜本体をこの design.html に埋め込む。
-     * 別HTMLのキャッシュに影響されず、今回の演出が確実に反映される。 */
-  frame.srcdoc =
-    SECRET_MOON_HTML;
+  /* 古い版が残らないよう、毎回URLを変えて読み込む */
+  frame.src =
+    "secret_moon.html?v=" + Date.now();
 
   frame.title =
     "シークレット月夜演出";
@@ -4418,16 +4394,30 @@ function celebrate(){
       "bubble-hidden"
     );
 
-    /* 念のため既存のジャンプ状態を完全に解除 */
+    /* シークレットも通常と同じ2回ジャンプ */
     bellImage.classList.remove(
       "celebrating"
     );
 
-    secretCostume.classList.remove(
+    void bellImage.offsetWidth;
+
+    bellImage.classList.add(
       "celebrating"
     );
 
-    startSecretMoon();
+    setTimeout(
+      ()=>{
+        startCrescentMoon();
+      },
+      150
+    );
+
+    setTimeout(
+      ()=>{
+        startCrescentMoon();
+      },
+      950
+    );
 
     return;
 
