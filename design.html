@@ -1,0 +1,5047 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ベルちゃん</title>
+
+<style>
+
+/* =====================================================
+   共通設定
+===================================================== */
+
+html,
+body{
+  margin:0;
+  width:100%;
+  height:100%;
+  background:transparent;
+  overflow:visible;
+}
+
+.bell-area{
+  position:absolute;
+  width:220px;
+  height:140px;
+  right:0;
+  top:3px;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Hiragino Sans",
+    "Yu Gothic",
+    sans-serif;
+}
+
+/* =====================================================
+   キャラクター共通
+===================================================== */
+
+.bell{
+  position:absolute;
+  max-width:62%;
+  height:auto;
+
+  border:none;
+  outline:none;
+  box-shadow:none;
+
+  filter:none;
+
+  /* 元画像の補間をブラウザ標準に固定。pixelated等は使わない。 */
+  image-rendering:auto;
+
+  cursor:pointer;
+  user-select:none;
+
+  transition:transform .15s ease;
+
+  z-index:10;
+}
+
+.bell:active{
+  transform:scale(.96);
+}
+
+/* =====================================================
+   ベルちゃん
+===================================================== */
+
+body:not(.logged-in) .bell{
+  width:85px;
+  right:20px;
+  bottom:0px;
+}
+
+body.logged-in .bell{
+  width:90px;
+  right:25px;
+  bottom:0px;
+}
+
+/* =====================================================
+   ★ チャイムくん専用設定 ★
+===================================================== */
+
+body:not(.logged-in) .bell.chime{
+  width:80px;
+  right:18px;
+  top:10px;
+}
+
+body.logged-in .bell.chime{
+  width:80px;
+  right:18px;
+  top:0px;
+}
+
+/* =====================================================
+   吹き出し
+===================================================== */
+
+.bubble{
+  position:absolute;
+
+  max-width:calc(100vw - 8px);
+
+  background:#fff;
+
+  border:2px solid #d9e5ed;
+  border-radius:18px;
+
+  padding:7px 8px;
+
+  box-shadow:none;
+
+  font-size:10px;
+  line-height:1.55;
+
+  animation:
+    bubbleAppear
+    .55s
+    cubic-bezier(.2,.9,.25,1.2)
+    both;
+
+  z-index:30;
+}
+
+.bubble small{
+  display:block;
+
+  color:#84939d;
+
+  font-size:8px;
+
+  margin-bottom:2px;
+}
+
+/* =====================================================
+   アニメーション中は吹き出しを消す
+===================================================== */
+
+.bubble.bubble-hidden{
+  visibility:hidden;
+  opacity:0;
+  pointer-events:none;
+}
+
+/* =====================================================
+   ログイン前 吹き出し
+===================================================== */
+
+body:not(.logged-in) .bubble{
+  min-width:105px;
+  width:176px;
+  max-width:198px;
+  box-sizing:border-box;
+  right:4px;
+  top:10px;
+}
+
+body:not(.logged-in) .bubble:after{
+  content:"";
+
+  position:absolute;
+
+  width:12px;
+  height:12px;
+
+  right:20px;
+  bottom:-7px;
+
+  background:#fff;
+
+  border-top:0;
+  border-right:2px solid #d9e5ed;
+  border-bottom:2px solid #d9e5ed;
+
+  transform:rotate(45deg);
+}
+
+/* =====================================================
+   ログイン後 吹き出し
+===================================================== */
+
+body.logged-in .bubble{
+  min-width:105px;
+  width:176px;
+  max-width:198px;
+  box-sizing:border-box;
+  right:6px;
+  top:-4px;
+}
+
+body.logged-in .bubble:after{
+  content:"";
+
+  position:absolute;
+
+  width:12px;
+  height:12px;
+
+  right:20px;
+  bottom:-7px;
+
+  background:#fff;
+
+  border-top:0;
+  border-right:2px solid #d9e5ed;
+  border-bottom:2px solid #d9e5ed;
+
+  transform:rotate(45deg);
+}
+
+/* =====================================================
+   吹き出し登場
+===================================================== */
+
+@keyframes bubbleAppear{
+
+  from{
+    opacity:0;
+
+    transform:
+      scale(.9)
+      translateY(7px);
+  }
+
+  to{
+    opacity:1;
+
+    transform:
+      scale(1)
+      translateY(0);
+  }
+
+}
+
+/* =====================================================
+   ハートを出す場所
+===================================================== */
+
+.heart-container{
+  position:absolute;
+
+  left:50%;
+  top:50%;
+
+  width:0;
+  height:0;
+
+  pointer-events:none;
+
+  z-index:20;
+
+  overflow:visible;
+}
+
+/* =====================================================
+   ハート
+===================================================== */
+
+.heart{
+  position:absolute;
+
+  left:0;
+  top:0;
+
+  color:#ff7eb9;
+
+  font-size:18px;
+
+  line-height:1;
+
+  opacity:0;
+
+  transform:
+    translate(
+      var(--start-x),
+      var(--start-y)
+    )
+    scale(.4);
+
+  animation:
+    heartFly
+    1.8s
+    cubic-bezier(.2,.75,.25,1)
+    forwards;
+}
+
+/* =====================================================
+   シークレット用：三日月
+   ハートとまったく同じ飛び方・タイミングを使用
+===================================================== */
+
+.crescent-moon{
+  position:absolute;
+
+  left:0;
+  top:0;
+
+  color:#FFD700;
+
+  text-shadow:
+    0 0 5px #FFD700;
+
+  font-size:18px;
+
+  line-height:1;
+
+  opacity:0;
+
+  transform:
+    translate(
+      var(--start-x),
+      var(--start-y)
+    )
+    scale(.4);
+
+  animation:
+    heartFly
+    1.8s
+    cubic-bezier(.2,.75,.25,1)
+    forwards;
+}
+
+/* =====================================================
+   シークレット用：チャイムくんの太陽・花
+   三日月と同じ飛び方・タイミング
+===================================================== */
+
+.sun-effect,
+.flower-effect{
+  position:absolute;
+  left:0;
+  top:0;
+  font-size:18px;
+  line-height:1;
+  opacity:0;
+  transform:
+    translate(var(--start-x),var(--start-y))
+    scale(.4);
+  animation:
+    heartFly
+    1.8s
+    cubic-bezier(.2,.75,.25,1)
+    forwards;
+}
+
+.sun-effect{
+  filter:drop-shadow(0 0 3px rgba(255,190,0,.8));
+}
+
+.flower-effect{
+  filter:drop-shadow(0 0 3px rgba(255,120,180,.55));
+}
+/* =====================================================
+   ハートが飛び散る
+===================================================== */
+
+@keyframes heartFly{
+
+  0%{
+    opacity:0;
+
+    transform:
+      translate(
+        var(--start-x),
+        var(--start-y)
+      )
+      scale(.3)
+      rotate(0deg);
+  }
+
+  12%{
+    opacity:1;
+  }
+
+  45%{
+    opacity:1;
+  }
+
+  100%{
+    opacity:0;
+
+    transform:
+      translate(
+        var(--end-x),
+        var(--end-y)
+      )
+      scale(1)
+      rotate(var(--rotate));
+  }
+
+}
+
+/* =====================================================
+   キャラクター喜びアニメーション
+===================================================== */
+
+.bell.celebrating{
+
+  animation:
+    bellCelebrate
+    1.8s
+    cubic-bezier(.2,.8,.25,1)
+    both;
+
+}
+
+/* =====================================================
+   2回ジャンプ
+===================================================== */
+
+@keyframes bellCelebrate{
+
+  0%{
+    transform:
+      translateY(0)
+      rotate(0deg)
+      scale(1);
+  }
+
+  12%{
+    transform:
+      translateY(-18px)
+      rotate(-8deg)
+      scale(1.04);
+  }
+
+  24%{
+    transform:
+      translateY(-25px)
+      rotate(8deg)
+      scale(1.05);
+  }
+
+  38%{
+    transform:
+      translateY(0)
+      rotate(-4deg)
+      scale(1);
+  }
+
+  45%{
+    transform:
+      translateY(-6px)
+      rotate(3deg)
+      scale(1.02);
+  }
+
+  57%{
+    transform:
+      translateY(-22px)
+      rotate(-9deg)
+      scale(1.05);
+  }
+
+  69%{
+    transform:
+      translateY(-30px)
+      rotate(9deg)
+      scale(1.06);
+  }
+
+  83%{
+    transform:
+      translateY(0)
+      rotate(-3deg)
+      scale(1);
+  }
+
+  92%{
+    transform:
+      translateY(-3px)
+      rotate(2deg)
+      scale(1.01);
+  }
+
+  100%{
+    transform:
+      translateY(0)
+      rotate(0deg)
+      scale(1);
+  }
+
+}
+
+/* =====================================================
+   シークレット衣装（7レイヤー）
+   通常のベルちゃんと同じ85px / 90pxの座標系で重ねる
+===================================================== */
+
+.secret-costume{
+  position:absolute;
+  width:var(--bell-size,90px) !important;
+  height:var(--bell-size,90px) !important;
+  right:var(--bell-right,25px) !important;
+  top:var(--bell-top,30px) !important;
+  z-index:11;
+  pointer-events:none;
+  user-select:none;
+  display:none;
+  overflow:visible;
+  box-sizing:border-box;
+}
+
+.secret-costume.show{
+  display:block;
+}
+
+/*
+ * レイヤー画像本体。
+ * サイズ・位置・角度はwrapper側で個別設定する。
+ */
+.secret-costume img{
+  position:absolute !important;
+
+  left:0 !important;
+  top:0 !important;
+
+  width:100% !important;
+  height:100% !important;
+
+  min-width:0 !important;
+  min-height:0 !important;
+
+  max-width:none !important;
+  max-height:none !important;
+
+  object-fit:contain !important;
+  object-position:center center !important;
+
+  margin:0 !important;
+  padding:0 !important;
+
+  border:0 !important;
+  outline:0 !important;
+  box-shadow:none !important;
+
+  pointer-events:none;
+  user-select:none;
+
+  display:block;
+}
+
+body:not(.logged-in){
+  --bell-size:85px;
+  --bell-right:20px;
+  --bell-top:12px;
+}
+
+body.logged-in{
+  --bell-size:90px;
+  --bell-right:25px;
+  --bell-top:0px;
+}
+
+body:not(.logged-in) .secret-costume{
+  right:20px !important;
+  top:12px !important;
+}
+
+body.logged-in .secret-costume{
+  right:25px !important;
+  bottom:-30 !important;
+}
+
+/* =====================================================
+ * シークレット衣装：常時アニメーション
+ *
+ * ★ 位置がずれない仕組み
+ *   各レイヤーのwrapperは拡大率・角度が違うため、
+ *   レイヤー個別に translate / scale を動かすとズレる。
+ *   そこで全体の動き（呼吸・光）は、全レイヤーをまとめた
+ *   .secret-body に1回だけ付ける。
+ *   レイヤー個別に付けるのは「小さな回転のゆれ」だけ。
+ *
+ *  ① 呼吸    … 全体が上下＋ほんの少し拡大（.secret-body）
+ *  ② 光      … 全体に金色の光が脈打つ（.secret-body）
+ *  ③ ゆれ    … リボンなどの別パーツだけ左右に揺れる
+ *  ④ きらめき … 衣装の周りで星が交互に瞬く
+ *
+ * クラス名の対応（SECRET_BELL_LAYERSの順番）
+ *   0=base→secret-layer-00 / 1=main→secret-layer-main
+ *   2=layer-01→secret-layer-02 / 3→03 / 4→04 / 5→05
+===================================================== */
+
+.secret-costume .secret-body{
+  transform-origin:50% 90%;
+  animation:
+    secretBreath 3s ease-in-out infinite,
+    secretGlow 2.6s ease-in-out infinite;
+}
+
+/* base と main は動かさない（全体と一緒に動く） */
+
+/* 別パーツのゆれ（回転だけ）。
+   transform-origin は各画像の「付け根」の位置（画像全体を100%とした割合）。
+   画像から計算した値なので、パーツが浮かず付け根を支点に揺れる。 */
+
+/* layer-01（スカートのフリル）= secret-layer-02 */
+.secret-costume .secret-layer-02{
+  transform-origin:17% 32%;
+  animation:secretSwayR 2.2s ease-in-out infinite;
+}
+
+/* layer-02（右上のリボン）= secret-layer-03 */
+.secret-costume .secret-layer-03{
+  transform-origin:18% 13%;
+  animation:secretRibbon 2.6s ease-in-out infinite;
+}
+
+/* layer-03（長いリボン）= secret-layer-04 */
+.secret-costume .secret-layer-04{
+  transform-origin:88% 12%;
+  animation:secretSwayL 2.8s ease-in-out infinite;
+}
+
+/* layer-04（光るフリル）= secret-layer-05 */
+.secret-costume .secret-layer-05{
+  transform-origin:18% 28%;
+  animation:secretSwayR 2.4s ease-in-out .3s infinite;
+}
+
+/* layer-05（大きな蝶結び）= secret-layer-06：付け根を支点に、ゆっくり揺れる */
+.secret-costume .secret-layer-06{
+  transform-origin:30% 20%;
+  animation:secretRibbon 3.2s ease-in-out infinite;
+}
+
+/* きらめき（衣装が表示されている間だけ） */
+.secret-costume::before,
+.secret-costume::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:3px;
+  height:3px;
+  border-radius:50%;
+  background:#fff;
+  opacity:0;
+  pointer-events:none;
+  z-index:5;
+}
+
+.secret-costume::before{
+  box-shadow:
+    -40px -30px 3px 1px #ffe08a,
+    30px -42px 3px 0 #fff,
+    42px -4px 3px 1px #ffd1e8,
+    -42px 14px 3px 0 #fff;
+  animation:secretTwinkle 2.4s ease-in-out infinite;
+}
+
+.secret-costume::after{
+  box-shadow:
+    -24px -44px 3px 0 #fff,
+    44px -26px 3px 1px #ffe08a,
+    -44px -6px 3px 0 #bfe6ff,
+    34px 20px 3px 1px #fff;
+  animation:secretTwinkle 2.4s ease-in-out 1.2s infinite;
+}
+
+.secret-costume.celebrating{
+  animation:
+    bellCelebrate
+    1.8s
+    cubic-bezier(.2,.8,.25,1)
+    both;
+}
+
+@keyframes secretBreath{
+  0%,100%{translate:0 0;scale:1;}
+  50%{translate:0 -3px;scale:1.02;}
+}
+
+@keyframes secretSwayR{
+  0%,100%{rotate:0deg;}
+  50%{rotate:2.5deg;}
+}
+
+@keyframes secretSwayL{
+  0%,100%{rotate:0deg;}
+  50%{rotate:-3.5deg;}
+}
+
+@keyframes secretRibbon{
+  0%,100%{rotate:0deg;}
+  50%{rotate:-3deg;}
+}
+
+@keyframes secretGlow{
+  0%,100%{filter:drop-shadow(0 0 0 rgba(255,214,102,0));}
+  50%{filter:drop-shadow(0 0 6px rgba(255,214,102,.9));}
+}
+
+@keyframes secretTwinkle{
+  0%,100%{opacity:0;}
+  50%{opacity:1;}
+}
+
+/* 動きを減らす設定の端末では、きらめきと光を止める */
+@media (prefers-reduced-motion:reduce){
+  .secret-costume::before,
+  .secret-costume::after{display:none;}
+  .secret-costume .secret-body,
+  .secret-costume .secret-layer{animation:none;}
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="bell-area">
+
+  <div class="bubble">
+
+    <small id="characterName">
+      ベルちゃん
+    </small>
+
+    <span id="bellMessage">
+      予定を確認してるよ！
+    </span>
+
+  </div>
+
+  <div
+    class="heart-container"
+    id="heartContainer">
+  </div>
+
+  <img
+    class="bell"
+    src="bell.png"
+    alt="ベルちゃん"
+    id="bellImage"
+  >
+
+  <div
+    id="secretCostume"
+    class="secret-costume"
+    aria-hidden="true">
+  </div>
+
+</div>
+
+<script type="module">
+
+/* =====================================================
+   基本
+===================================================== */
+
+const message =
+  document.getElementById(
+    "bellMessage"
+  );
+
+const bellImage =
+  document.getElementById(
+    "bellImage"
+  );
+
+const characterName =
+  document.getElementById(
+    "characterName"
+  );
+
+const bubble =
+  document.querySelector(
+    ".bubble"
+  );
+
+const heartContainer =
+  document.getElementById(
+    "heartContainer"
+  );
+
+const secretCostume =
+  document.getElementById(
+    "secretCostume"
+  );
+
+const SECRET_COSTUME_IDS = {
+
+  bell:[
+    "secret-bell",
+    "secret_bell_rare_costume"
+  ],
+
+  chime:[
+    "secret-chime",
+    "secret_chime_rare_costume"
+  ]
+
+};
+
+const SECRET_BELL_LAYERS = [
+
+  "costumes/bell-secret-base.png",
+
+  "costumes/bell-secret-main.png",
+
+  "costumes/bell-secret-layer-01.png",
+
+  "costumes/bell-secret-layer-02.png",
+
+  "costumes/bell-secret-layer-03.png",
+
+  "costumes/bell-secret-layer-04.png",
+
+  "costumes/bell-secret-layer-05.png"
+
+];
+
+/* =====================================================
+   ★ チャイムくん シークレット衣装 6レイヤー ★
+   位置調整モード（?edit=chime）で出力した値
+===================================================== */
+
+const CHIME_SECRET_LAYERS = [
+  "costumes/chime-secret-layer-03.png", // 1 layer-03（雲のフリル）
+  "costumes/chime-secret-layer-02.png", // 2 layer-02（裾のヒラヒラ）
+  "costumes/chime-secret-base.png",     // 3 base（本体＋ドレス）
+  "costumes/chime-secret-layer-05.png", // 4 layer-05（太陽＋花の飾り）
+  "costumes/chime-secret-layer-01.png", // 5 layer-01（大きなリボン）
+  "costumes/chime-secret-layer-04.png"  // 6 layer-04（星のチャーム）
+];
+
+const CHIME_LAYER_POSITIONS = [
+  {x:-64,   y:44.9},  // 1 layer-03
+  {x:-65.6, y:108},   // 2 layer-02
+  {x:-60.7, y:60.6},  // 3 base
+  {x:-25.1, y:29.4},  // 4 layer-05
+  {x:-65.3, y:84.4},  // 5 layer-01
+  {x:-121.7,y:44.4}   // 6 layer-04
+];
+
+const CHIME_LAYER_SIZES = [
+  {width:100,height:100,scale:1.99,angle:0}, // 1 layer-03
+  {width:100,height:100,scale:1.75,angle:0}, // 2 layer-02
+  {width:100,height:100,scale:2.25,angle:0}, // 3 base
+  {width:100,height:100,scale:1.09,angle:0}, // 4 layer-05
+  {width:100,height:100,scale:0.9,angle:0},  // 5 layer-01
+  {width:100,height:100,scale:1,angle:0}     // 6 layer-04
+];
+
+const CHIME_LAYER_ENABLED = [
+  false, // 1 layer-03
+  true,  // 2 layer-02
+  true,  // 3 base
+  true,  // 4 layer-05
+  true,  // 5 layer-01
+  false  // 6 layer-04
+];
+
+const CHIME_SECRET_GLOBAL = {
+  x:15,
+  y:-25,
+  scale:0.85,
+  angle:0
+};
+
+/* =====================================================
+   ★ シークレット衣装 7レイヤー位置設定 ★
+   x：右へ動かすとプラス / 左へ動かすとマイナス
+   y：下へ動かすとプラス / 上へ動かすとマイナス
+   それぞれのレイヤーを個別に調整できます。
+===================================================== */
+
+const SECRET_LAYER_POSITIONS = [
+  {x:-5.1,y:-9.9}, // 1 base（完成形の絵に合わせた値）
+  {x:-4,y:30}, // 2 main（完成形の絵に合わせた値）
+  {x:0,y:0}, // 3
+  {x:25,y:35}, // 4
+  {x:-62,y:35}, // 5
+  {x:0,y:0}, // 6
+  {x:32.5,y:4.9} // 7 layer-05 蝶結び（完成形の絵に合わせた値）
+];
+
+/* =====================================================
+   ★ シークレット衣装 7レイヤー大きさ設定 ★
+   width：横幅（100 = 通常）
+   height：高さ（100 = 通常）
+   scale：全体サイズ（1.00 = 通常）
+   angle：角度（0 = 通常 / プラスで時計回り / マイナスで反時計回り）
+   それぞれのレイヤーを個別に調整できます。
+===================================================== */
+
+const SECRET_LAYER_SIZES = [
+  {width:100,height:100,scale:1.1,angle:-3.9}, // 1 base
+  {width:100,height:100,scale:1.45,angle:0}, // 2 main
+  {width:100,height:100,scale:1,angle:0}, // 3
+  {width:100,height:100,scale:1,angle:0}, // 4
+  {width:100,height:100,scale:1,angle:0}, // 5
+  {width:100,height:100,scale:1,angle:0}, // 6
+  {width:100,height:100,scale:0.96,angle:10.3} // 7 layer-05
+];
+
+/* =====================================================
+   ★ シークレット衣装 7レイヤー ON / OFF ★
+   true  = 表示する
+   false = 表示しない
+   PNGファイル自体はcostumesフォルダに残しておいてOK。
+===================================================== */
+
+const SECRET_LAYER_ENABLED = [
+  true, // 1
+  true, // 2
+  false, // 3
+  true, // 4
+  true, // 5
+  false, // 6
+  true // 7
+];
+
+/*
+ * =====================================================
+ * シークレット衣装 全体調整
+ * =====================================================
+ * 7枚のレイヤーをまとめて移動・拡大縮小・回転できます。
+ *
+ * x / y     : 全体の位置
+ * scale     : 全体の大きさ
+ * angle     : 全体の回転角度
+ *
+ * 各レイヤーの個別調整は、これまで通り
+ * SECRET_LAYER_POSITIONS / SECRET_LAYER_SIZES で行います。
+ */
+const SECRET_COSTUME_GLOBAL = {
+  x: 0,
+  y: 50,
+  scale: 0.9,
+  angle: 0
+};
+
+function isSecretCostumeId(
+  id,
+  character
+){
+
+  return !!id &&
+    SECRET_COSTUME_IDS[character]?.includes(id);
+
+}
+
+function isSecretEquipped(
+  character
+){
+
+  return isSecretCostumeId(
+    equippedCostumes?.[character] || null,
+    character
+  );
+
+}
+
+let secretRenderToken=0;
+
+/*
+ * シークレット画像の周囲に残っている白・薄灰色・チェック柄系の
+ * 背景だけを、画像の外周からたどって透明化する。
+ * 衣装内部の白い部分は外周とつながっていなければ残す。
+ */
+async function prepareSecretLayer(
+  src
+){
+
+  const image =
+    new Image();
+
+  image.src =
+    src;
+
+  await new Promise(
+    (resolve,reject)=>{
+
+      image.onload =
+        resolve;
+
+      image.onerror =
+        reject;
+
+    }
+  );
+
+  const width =
+    image.naturalWidth;
+
+  const height =
+    image.naturalHeight;
+
+  if(
+    !width ||
+    !height
+  ){
+
+    throw new Error(
+      "シークレット画像のサイズを取得できません"
+    );
+
+  }
+
+  const canvas =
+    document.createElement(
+      "canvas"
+    );
+
+  canvas.width =
+    width;
+
+  canvas.height =
+    height;
+
+  const ctx =
+    canvas.getContext(
+      "2d",
+      {
+        willReadFrequently:true
+      }
+    );
+
+  if(!ctx)return src;
+
+  ctx.drawImage(
+    image,
+    0,
+    0
+  );
+
+  const imageData =
+    ctx.getImageData(
+      0,
+      0,
+      width,
+      height
+    );
+
+  const pixels =
+    imageData.data;
+
+  const visited =
+    new Uint8Array(
+      width*height
+    );
+
+  const queue =
+    new Int32Array(
+      width*height
+    );
+
+  let head=0;
+  let tail=0;
+
+  const isBackground =
+    (pixelIndex)=>{
+
+      const p =
+        pixelIndex*4;
+
+      const alpha =
+        pixels[p+3];
+
+      if(alpha===0)return true;
+
+      const r =
+        pixels[p];
+
+      const g =
+        pixels[p+1];
+
+      const b =
+        pixels[p+2];
+
+      const max =
+        Math.max(
+          r,
+          g,
+          b
+        );
+
+      const min =
+        Math.min(
+          r,
+          g,
+          b
+        );
+
+      const chroma =
+        max-min;
+
+      /* 白〜薄い灰色の背景を対象にする */
+      return (
+        min>=215 &&
+        chroma<=28
+      );
+
+    };
+
+  const enqueue =
+    (pixelIndex)=>{
+
+      if(
+        pixelIndex<0 ||
+        pixelIndex>=width*height
+      ){
+
+        return;
+
+      }
+
+      if(
+        visited[pixelIndex]
+      ){
+
+        return;
+
+      }
+
+      if(
+        !isBackground(
+          pixelIndex
+        )
+      ){
+
+        return;
+
+      }
+
+      visited[pixelIndex]=1;
+
+      queue[tail++]=
+        pixelIndex;
+
+    };
+
+  /* 外周から背景領域を開始 */
+
+  for(
+    let x=0;
+    x<width;
+    x++
+  ){
+
+    enqueue(x);
+
+    enqueue(
+      (height-1)*width+x
+    );
+
+  }
+
+  for(
+    let y=1;
+    y<height-1;
+    y++
+  ){
+
+    enqueue(
+      y*width
+    );
+
+    enqueue(
+      y*width+(width-1)
+    );
+
+  }
+
+  while(
+    head<tail
+  ){
+
+    const index =
+      queue[head++];
+
+    const x =
+      index%width;
+
+    const y =
+      Math.floor(
+        index/width
+      );
+
+    if(x>0){
+
+      enqueue(
+        index-1
+      );
+
+    }
+
+    if(x<width-1){
+
+      enqueue(
+        index+1
+      );
+
+    }
+
+    if(y>0){
+
+      enqueue(
+        index-width
+      );
+
+    }
+
+    if(y<height-1){
+
+      enqueue(
+        index+width
+      );
+
+    }
+
+  }
+
+  for(
+    let i=0;
+    i<visited.length;
+    i++
+  ){
+
+    if(
+      visited[i]
+    ){
+
+      pixels[
+        i*4+3
+      ]=0;
+
+    }
+
+  }
+
+  ctx.putImageData(
+    imageData,
+    0,
+    0
+  );
+
+  return canvas.toDataURL(
+    "image/png"
+  );
+
+}
+
+function renderSecretCostume(
+  character
+){
+
+  if(!secretCostume)return;
+
+  const renderToken =
+    ++secretRenderToken;
+
+  secretCostume.innerHTML="";
+
+  secretCostume.classList.remove(
+    "show",
+    "celebrating"
+  );
+
+  secretCostume.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+  /* 通常衣装では通常キャラクター画像を表示 */
+
+  bellImage.style.visibility =
+    "visible";
+
+  bellImage.style.opacity =
+    "1";
+
+  /* =====================================================
+     ベルちゃん / チャイムくんで
+     シークレット衣装の設定を切り替える
+  ===================================================== */
+
+  const isChime =
+    character === "chime";
+
+  const layers =
+    isChime
+      ? CHIME_SECRET_LAYERS
+      : SECRET_BELL_LAYERS;
+
+  const positions =
+    isChime
+      ? CHIME_LAYER_POSITIONS
+      : SECRET_LAYER_POSITIONS;
+
+  const sizes =
+    isChime
+      ? CHIME_LAYER_SIZES
+      : SECRET_LAYER_SIZES;
+
+  const enabled =
+    isChime
+      ? CHIME_LAYER_ENABLED
+      : SECRET_LAYER_ENABLED;
+
+  const global =
+    isChime
+      ? CHIME_SECRET_GLOBAL
+      : SECRET_COSTUME_GLOBAL;
+
+  if(
+    !isSecretEquipped(character)
+  ){
+
+    return;
+
+  }
+
+  let loadedCount=0;
+  let failed=false;
+
+  /*
+   * 全レイヤーをまとめる本体グループ。
+   * ベルちゃん・チャイムくんとも、ここに全体移動を適用する。
+   */
+  const secretBody =
+    document.createElement("div");
+
+  secretBody.className =
+    "secret-body";
+
+  secretBody.style.cssText =
+    "position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible;";
+
+  secretBody.style.transform =
+    `translate(${global.x}px, ${global.y}px) scale(${global.scale}) rotate(${global.angle}deg)`;
+
+  secretBody.style.transformOrigin =
+    "center center";
+
+  secretCostume.appendChild(
+    secretBody
+  );
+
+  const enabledLayerCount =
+    layers.filter(
+      (_,index)=>
+        enabled[index]===true
+    ).length;
+
+  if(
+    enabledLayerCount===0
+  ){
+
+    bellImage.style.visibility =
+      "visible";
+
+    bellImage.style.opacity =
+      "0";
+
+    secretCostume.classList.add(
+      "show"
+    );
+
+    secretCostume.setAttribute(
+      "aria-hidden",
+      "false"
+    );
+
+    return;
+
+  }
+
+  layers.forEach(
+    (src,index)=>{
+
+      if(
+        enabled[index]!==true
+      ){
+
+        return;
+
+      }
+
+      const layerWrap =
+        document.createElement(
+          "div"
+        );
+
+      layerWrap.className =
+        `secret-layer-wrap secret-layer-wrap-${index}`;
+
+      layerWrap.style.position =
+        "absolute";
+
+      layerWrap.style.width =
+        "100%";
+
+      layerWrap.style.height =
+        "100%";
+
+      layerWrap.style.left =
+        "0";
+
+      layerWrap.style.top =
+        "0";
+
+      layerWrap.style.pointerEvents =
+        "none";
+
+      layerWrap.style.userSelect =
+        "none";
+
+      layerWrap.style.overflow =
+        "visible";
+
+      const img =
+        document.createElement(
+          "img"
+        );
+
+      img.alt="";
+      img.draggable=false;
+
+      img.className =
+        `secret-layer secret-layer-${String(index).padStart(2,"0")}`;
+
+      const layerPosition =
+        positions[index] ||
+        {x:0,y:0};
+
+      const layerSize =
+        sizes[index] ||
+        {width:100,height:100,scale:1,angle:0};
+
+      layerWrap.style.width =
+        `${layerSize.width}%`;
+
+      layerWrap.style.height =
+        `${layerSize.height}%`;
+
+      layerWrap.style.left =
+        `${(100-layerSize.width)/2}%`;
+
+      layerWrap.style.top =
+        `${(100-layerSize.height)/2}%`;
+
+      layerWrap.style.transform =
+        `translate(${layerPosition.x}px, ${layerPosition.y}px) scale(${layerSize.scale}) rotate(${layerSize.angle}deg)`;
+
+      layerWrap.style.transformOrigin =
+        "center center";
+
+      img.style.width =
+        "100%";
+
+      img.style.height =
+        "100%";
+
+      img.style.maxWidth =
+        "none";
+
+      img.style.maxHeight =
+        "none";
+
+      img.style.position =
+        "absolute";
+
+      img.style.left =
+        "0";
+
+      img.style.top =
+        "0";
+
+      img.style.objectFit =
+        "contain";
+
+      img.style.objectPosition =
+        "center center";
+
+      img.onload =
+        ()=>{
+
+          if(
+            renderToken!==secretRenderToken
+          ){
+
+            return;
+
+          }
+
+          loadedCount++;
+
+          if(
+            loadedCount===
+              enabledLayerCount &&
+            !failed
+          ){
+
+            bellImage.style.visibility =
+              "visible";
+
+            bellImage.style.opacity =
+              "0";
+
+            secretCostume.classList.add(
+              "show"
+            );
+
+            secretCostume.setAttribute(
+              "aria-hidden",
+              "false"
+            );
+
+            requestAnimationFrame(sendBellHitBounds);
+
+          }
+
+        };
+
+      img.onerror =
+        ()=>{
+
+          if(
+            renderToken!==secretRenderToken
+          ){
+
+            return;
+
+          }
+
+          failed=true;
+
+          console.error(
+            "シークレット衣装画像の読み込み失敗:",
+            character,
+            src
+          );
+
+          secretCostume.classList.remove(
+            "show",
+            "celebrating"
+          );
+
+          secretCostume.setAttribute(
+            "aria-hidden",
+            "true"
+          );
+
+          secretCostume.innerHTML="";
+
+          bellImage.style.visibility =
+            "visible";
+
+          bellImage.style.opacity =
+            "1";
+
+          requestAnimationFrame(sendBellHitBounds);
+
+        };
+
+      layerWrap.appendChild(
+        img
+      );
+
+      secretBody.appendChild(
+        layerWrap
+      );
+
+      prepareSecretLayer(src)
+        .then(
+          preparedSrc=>{
+
+            if(
+              renderToken!==secretRenderToken
+            ){
+
+              return;
+
+            }
+
+            img.src =
+              preparedSrc;
+
+          }
+        )
+        .catch(
+          error=>{
+
+            if(
+              renderToken!==secretRenderToken
+            ){
+
+              return;
+
+            }
+
+            console.error(
+              "シークレット衣装画像の加工に失敗:",
+              character,
+              src,
+              error
+            );
+
+            /* 加工できない場合は元画像を表示 */
+            img.src =
+              src;
+
+          }
+        );
+
+    }
+  );
+
+}
+
+
+/* =====================================================
+   キャラクター設定
+===================================================== */
+
+let currentCharacter =
+  "bell";
+
+let equippedCostumes = {
+  bell:null,
+  chime:null
+};
+
+let eventCostumeOverrides={};
+
+/* =====================================================
+   通常キャラクター画像
+===================================================== */
+
+const characterImages = {
+
+  bell:{
+    src:"bell.png",
+    name:"ベルちゃん"
+  },
+
+  chime:{
+    src:"chime.png",
+    name:"チャイムくん"
+  }
+
+};
+
+/* =====================================================
+   ★ 特殊服画像
+===================================================== */
+
+const costumeImages = {
+
+  bell:{
+
+    newyear:
+      "costumes/bell-newyear.png",
+
+    setsubun:
+      "costumes/bell-setsubun.png",
+
+    valentine:
+      "costumes/bell-valentine.png",
+
+    hinamatsuri:
+      "costumes/bell-hinamatsuri.png",
+
+    whiteday:
+      "costumes/bell-whiteday.png",
+
+    kodomonohi:
+      "costumes/bell-kodomonohi.png",
+
+    tanabata:
+      "costumes/bell-tanabata.png",
+
+    tsukimi:
+      "costumes/bell-tsukimi.png",
+
+    halloween:
+      "costumes/bell-halloween.png",
+
+    christmaseve:
+      "costumes/bell-christmaseve.png",
+
+    christmas:
+      "costumes/bell-christmas.png",
+
+    winter:
+      "costumes/bell-winter.png"
+
+  },
+
+  chime:{
+
+    newyear:
+      "costumes/chime-newyear.png",
+
+    setsubun:
+      "costumes/chime-setsubun.png",
+
+    valentine:
+      "costumes/chime-valentine.png",
+
+    hinamatsuri:
+      "costumes/chime-hinamatsuri.png",
+
+    whiteday:
+      "costumes/chime-whiteday.png",
+
+    kodomonohi:
+      "costumes/chime-kodomonohi.png",
+
+    tanabata:
+      "costumes/chime-tanabata.png",
+
+    tsukimi:
+      "costumes/chime-tsukimi.png",
+
+    halloween:
+      "costumes/chime-halloween.png",
+
+    christmaseve:
+      "costumes/chime-christmaseve.png",
+
+    christmas:
+      "costumes/chime-christmas.png",
+
+    winter:
+      "costumes/chime-winter.png"
+
+  }
+
+};
+
+/* =====================================================
+   ★ コードからテスト日付を変更できます
+   例："2026-12-25" → 2026年12月25日として動作
+   通常の日付に戻す場合は null にしてください
+===================================================== */
+
+const TEST_DATE = null;
+
+/* =====================================================
+   十五夜の日
+   handbell.htmlの元々の設定に合わせる
+===================================================== */
+
+const jugoyaDates = {
+
+  2026:"09-25",
+  2027:"09-15",
+  2028:"10-03",
+  2029:"09-22",
+  2030:"09-12",
+  2031:"10-01",
+  2032:"09-19",
+  2033:"09-08",
+  2034:"09-27",
+  2035:"09-16",
+  2036:"10-04"
+
+};
+
+/* =====================================================
+   ★ テスト日付機能
+   URLに ?testDate=2026-12-25 のように指定すると
+   その日付として特殊服を判定する。
+   指定しない場合は通常どおり今日の日付を使用。
+===================================================== */
+
+function getTestDate(){
+
+  /* コード指定のテスト日付を最優先 */
+
+  if(TEST_DATE){
+
+    try{
+
+      if(
+        /^\d{4}-\d{2}-\d{2}$/.test(
+          TEST_DATE
+        )
+      ){
+
+        const testDate =
+          new Date(
+            `${TEST_DATE}T12:00:00`
+          );
+
+        if(
+          !Number.isNaN(
+            testDate.getTime()
+          ) &&
+          testDate.getFullYear() ===
+            Number(
+              TEST_DATE.slice(0,4)
+            ) &&
+          testDate.getMonth()+1 ===
+            Number(
+              TEST_DATE.slice(5,7)
+            ) &&
+          testDate.getDate() ===
+            Number(
+              TEST_DATE.slice(8,10)
+            )
+        ){
+
+          return testDate;
+
+        }
+
+      }
+
+    }catch(error){
+
+      console.warn(
+        "コード指定のテスト日付を読み込めませんでした",
+        error
+      );
+
+    }
+
+  }
+
+  try{
+
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+    const value =
+      params.get(
+        "testDate"
+      );
+
+    if(
+      value &&
+      /^\d{4}-\d{2}-\d{2}$/.test(
+        value
+      )
+    ){
+
+      const testDate =
+        new Date(
+          `${value}T12:00:00`
+        );
+
+      if(
+        !Number.isNaN(
+          testDate.getTime()
+        ) &&
+        testDate.getFullYear() ===
+          Number(
+            value.slice(0,4)
+          ) &&
+        testDate.getMonth()+1 ===
+          Number(
+            value.slice(5,7)
+          ) &&
+        testDate.getDate() ===
+          Number(
+            value.slice(8,10)
+          )
+      ){
+
+        return testDate;
+
+      }
+
+    }
+
+  }catch(error){
+
+    console.warn(
+      "テスト日付を読み込めませんでした",
+      error
+    );
+
+  }
+
+  return null;
+
+}
+
+function getCurrentDate(){
+
+  return getTestDate() ||
+    new Date();
+
+}
+
+/* =====================================================
+   今日が特殊服の日か判定
+===================================================== */
+
+function getCostumeKey(
+  date=getCurrentDate()
+){
+
+  const month =
+    date.getMonth()+1;
+
+  const day =
+    date.getDate();
+
+  /* ---------------------------------------------
+     お正月
+     1月1日〜1月5日
+  --------------------------------------------- */
+
+  if(
+    month===1 &&
+    day>=1 &&
+    day<=5
+  ){
+
+    return "newyear";
+
+  }
+
+  /*
+   * 1月6日〜1月31日は
+   * 通常衣装のまま
+   */
+
+  /* ---------------------------------------------
+     節分
+  --------------------------------------------- */
+
+  if(
+    month===2 &&
+    day===3
+  ){
+
+    return "setsubun";
+
+  }
+
+  /* ---------------------------------------------
+     バレンタイン
+  --------------------------------------------- */
+
+  if(
+    month===2 &&
+    day===14
+  ){
+
+    return "valentine";
+
+  }
+
+  /* ---------------------------------------------
+     ひな祭り
+  --------------------------------------------- */
+
+  if(
+    month===3 &&
+    day===3
+  ){
+
+    return "hinamatsuri";
+
+  }
+
+  /* ---------------------------------------------
+     ホワイトデー
+  --------------------------------------------- */
+
+  if(
+    month===3 &&
+    day===14
+  ){
+
+    return "whiteday";
+
+  }
+
+  /* ---------------------------------------------
+     こどもの日
+  --------------------------------------------- */
+
+  if(
+    month===5 &&
+    day===5
+  ){
+
+    return "kodomonohi";
+
+  }
+
+  /* ---------------------------------------------
+     七夕
+  --------------------------------------------- */
+
+  if(
+    month===7 &&
+    day===7
+  ){
+
+    return "tanabata";
+
+  }
+
+  /* ---------------------------------------------
+     十五夜
+  --------------------------------------------- */
+
+  const monthDay =
+    `${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+
+  const jugoya =
+    jugoyaDates[
+      date.getFullYear()
+    ];
+
+  if(
+    jugoya &&
+    jugoya===monthDay
+  ){
+
+    return "tsukimi";
+
+  }
+
+  /* ---------------------------------------------
+     ハロウィン
+  --------------------------------------------- */
+
+  if(
+    month===10 &&
+    day===31
+  ){
+
+    return "halloween";
+
+  }
+
+  /* ---------------------------------------------
+     クリスマスイブ
+  --------------------------------------------- */
+
+  if(
+    month===12 &&
+    day===24
+  ){
+
+    return "christmaseve";
+
+  }
+
+  /* ---------------------------------------------
+     クリスマス
+  --------------------------------------------- */
+
+  if(
+    month===12 &&
+    day===25
+  ){
+
+    return "christmas";
+
+  }
+
+  /* ---------------------------------------------
+     大晦日
+     → winter衣装
+  --------------------------------------------- */
+
+  if(
+    month===12 &&
+    day===31
+  ){
+
+    return "winter";
+
+  }
+
+  return null;
+
+}
+
+/* =====================================================
+   今日のキャラクター画像を取得
+===================================================== */
+
+function getCharacterImage(
+  character,
+  date=getCurrentDate()
+){
+
+  const selected =
+    character === "chime"
+      ? "chime"
+      : "bell";
+
+  /* ---------------------------------------------
+     ① シークレット衣装
+     シークレットは最優先
+  --------------------------------------------- */
+
+  if(
+    isSecretEquipped(
+      selected
+    )
+  ){
+
+    return characterImages[
+      selected
+    ].src;
+
+  }
+
+  /*
+   * 衣装の優先順位
+   *
+   * 1. ユーザーが「着替える」で選んだ衣装
+   * 2. イベント日の衣装
+   * 3. 通常のベルちゃん
+   *
+   * イベント日は強制衣装ではありません。
+   */
+
+  /* ---------------------------------------------
+     ② ユーザーが選択した衣装
+  --------------------------------------------- */
+
+  const equipped =
+    equippedCostumes?.[selected] ||
+    null;
+
+  const equippedImage =
+    getCostumeImageFromId(
+      equipped,
+      selected
+    );
+
+  if(equippedImage){
+
+    return equippedImage;
+
+  }
+
+  /* ---------------------------------------------
+     ③ イベント衣装
+  --------------------------------------------- */
+
+  const costumeKey =
+    getCostumeKey(date);
+
+  if(costumeKey){
+
+    const override =
+      eventCostumeOverrides?.[
+        costumeKey
+      ]?.[selected] ||
+      null;
+
+    if(override){
+
+      const overrideImage =
+        getCostumeImageFromId(
+          override,
+          selected
+        );
+
+      if(overrideImage){
+
+        return overrideImage;
+
+      }
+
+    }
+
+    if(
+      costumeImages[
+        selected
+      ]?.[costumeKey]
+    ){
+
+      return costumeImages[
+        selected
+      ][costumeKey];
+
+    }
+
+  }
+
+  /* ---------------------------------------------
+     ④ 通常
+  --------------------------------------------- */
+
+  return characterImages[
+    selected
+  ].src;
+
+}
+
+function getCostumeImageFromId(
+  costumeId,
+  character
+){
+
+  if(!costumeId){
+
+    return null;
+
+  }
+
+  if(
+    costumeId ===
+    "daily-costume-01"
+  ){
+
+    return "costumes/daily-costume-01.png";
+
+  }
+
+  if(
+    costumeId ===
+    "daily-costume-02"
+  ){
+
+    return "costumes/daily-costume-02.png";
+
+  }
+
+  if(
+    costumeId.startsWith(
+      "event_"
+    )
+  ){
+
+    const suffix =
+      character === "chime"
+        ? "_chime"
+        : "_bell";
+
+    if(
+      !costumeId.endsWith(
+        suffix
+      )
+    ){
+
+      return null;
+
+    }
+
+    let key =
+      costumeId.slice(
+        6,
+        -suffix.length
+      );
+
+    if(
+      key ===
+      "newyearseve"
+    ){
+
+      key =
+        "winter";
+
+    }
+
+    return (
+      costumeImages
+        ?.[character]
+        ?.[key] ||
+      null
+    );
+
+  }
+
+  return null;
+
+}
+
+/* =====================================================
+   キャラクター切り替え
+===================================================== */
+
+function setCharacter(
+  character
+){
+
+  currentCharacter =
+    character === "chime"
+      ? "chime"
+      : "bell";
+
+  const data =
+    characterImages[
+      currentCharacter
+    ];
+
+  if(!data)return;
+
+  /*
+   * ★ここで特殊服を判定
+   *
+   * 特殊服画像が存在しない場合に
+   * ブラウザの「？」表示にならないよう、
+   * まず通常画像を確保してから特殊画像を読み込む。
+   */
+
+  const normalSrc =
+    data.src;
+
+  const costumeSrc =
+    getCharacterImage(
+      currentCharacter
+    );
+
+  bellImage.alt =
+    data.name;
+
+  bellImage.onerror =
+    function(){
+
+      /*
+       * 読み込み失敗時は必ず通常画像へ戻す
+       */
+
+      if(
+        this.src !==
+        new URL(
+          normalSrc,
+          window.location.href
+        ).href
+      ){
+
+        this.src =
+          normalSrc;
+
+      }
+
+    };
+
+  if(
+    costumeSrc ===
+    normalSrc
+  ){
+
+    bellImage.src =
+      normalSrc;
+
+  }else{
+
+    const testImage =
+      new Image();
+
+    testImage.onload =
+      function(){
+
+        /*
+         * 読み込み成功した特殊服だけ表示
+         */
+
+        bellImage.src =
+          costumeSrc;
+
+      };
+
+    testImage.onerror =
+      function(){
+
+        /*
+         * 特殊服がない場合は通常のベルちゃんを表示
+         */
+
+        bellImage.src =
+          normalSrc;
+
+      };
+
+    testImage.src =
+      costumeSrc;
+
+  }
+
+  if(
+    currentCharacter ===
+    "chime"
+  ){
+
+    bellImage.classList.add(
+      "chime"
+    );
+
+  }else{
+
+    bellImage.classList.remove(
+      "chime"
+    );
+
+  }
+
+  if(characterName){
+
+    characterName.textContent =
+      data.name;
+
+  }
+
+  renderSecretCostume(
+    currentCharacter
+  );
+
+}
+
+/* =====================================================
+   日付が変わったら特殊服も切り替える
+===================================================== */
+
+let lastCostumeDate="";
+
+function getTodayKey(){
+
+  const now =
+    getCurrentDate();
+
+  return `${
+    now.getFullYear()
+  }-${
+    String(
+      now.getMonth()+1
+    ).padStart(2,"0")
+  }-${
+    String(
+      now.getDate()
+    ).padStart(2,"0")
+  }`;
+
+}
+
+function updateCostume(){
+
+  const today =
+    getTodayKey();
+
+  if(
+    today ===
+    lastCostumeDate
+  ){
+
+    return;
+
+  }
+
+  lastCostumeDate =
+    today;
+
+  /*
+   * この処理を開始した時点のキャラクターを保存。
+   * 非同期の画像読み込み中にキャラクターが変わっても、
+   * 古い画像が新しいキャラクターへ反映されないようにする。
+   */
+
+  const characterAtStart =
+    currentCharacter;
+
+  /*
+   * キャラクターはそのまま。
+   * 今日の特殊服だけ再判定。
+   */
+
+  const costumeImage =
+    getCharacterImage(
+      characterAtStart
+    );
+
+  const normalImage =
+    characterImages[
+      characterAtStart
+    ].src;
+
+  const normalUrl =
+    new URL(
+      normalImage,
+      window.location.href
+    ).href;
+
+  const costumeUrl =
+    new URL(
+      costumeImage,
+      window.location.href
+    ).href;
+
+  /*
+   * シークレットの場合は
+   * レイヤー側が表示を担当するので、
+   * 通常画像を勝手にイベント衣装へ変更しない。
+   */
+
+  if(
+    isSecretEquipped(
+      characterAtStart
+    )
+  ){
+
+    renderSecretCostume(
+      characterAtStart
+    );
+
+    return;
+
+  }
+
+  /* 通常画像ならそのまま */
+
+  if(
+    costumeUrl ===
+    normalUrl
+  ){
+
+    if(
+      bellImage.src !==
+      normalUrl
+    ){
+
+      bellImage.src =
+        normalImage;
+
+    }
+
+    return;
+
+  }
+
+  /*
+   * 特殊服画像は、読み込めた場合だけ切り替える
+   */
+
+  const testImage =
+    new Image();
+
+  testImage.onload =
+    function(){
+
+      if(
+        lastCostumeDate === today &&
+        currentCharacter ===
+          characterAtStart
+      ){
+
+        bellImage.src =
+          costumeImage;
+
+      }
+
+    };
+
+  testImage.onerror =
+    function(){
+
+      /*
+       * 特殊服が存在しない場合は通常画像を維持
+       */
+
+      if(
+        currentCharacter ===
+        characterAtStart
+      ){
+
+        bellImage.src =
+          normalImage;
+
+      }
+
+    };
+
+  testImage.src =
+    costumeImage;
+
+}
+
+/*
+ * 初回判定
+ */
+
+updateCostume();
+
+/*
+ * ページを開いたまま日付が変わっても
+ * 1分以内に切り替える
+ */
+
+setInterval(
+  updateCostume,
+  60000
+);
+
+/* =====================================================
+   ログイン状態によるサイズ調整
+===================================================== */
+
+function updateLoginSize(){
+
+  try{
+
+    const parentDocument =
+      window.parent.document;
+
+    const loggedInElement =
+      parentDocument.getElementById(
+        "loggedInLeft"
+      );
+
+    const isLoggedIn =
+      !!loggedInElement &&
+      !loggedInElement.classList.contains(
+        "hidden"
+      );
+
+    document.body.classList.toggle(
+      "logged-in",
+      isLoggedIn
+    );
+
+  }catch(error){
+
+    document.body.classList.remove(
+      "logged-in"
+    );
+
+  }
+
+}
+
+updateLoginSize();
+
+try{
+
+  const parentDocument =
+    window.parent.document;
+
+  const loggedInElement =
+    parentDocument.getElementById(
+      "loggedInLeft"
+    );
+
+  if(loggedInElement){
+
+    new MutationObserver(
+      updateLoginSize
+    ).observe(
+      loggedInElement,
+      {
+        attributes:true,
+        attributeFilter:["class"]
+      }
+    );
+
+  }
+
+}catch(error){}
+
+setInterval(
+  updateLoginSize,
+  500
+);
+
+/* =====================================================
+   メッセージ関連
+===================================================== */
+
+let bellMessages=[];
+
+const isEmbedded =
+  window.parent !==
+  window;
+
+let parentSchedules={};
+
+function setBellMessages(
+  messages,
+  preferred=null
+){
+
+  const cleaned = [
+    ...new Set(
+      (messages || [])
+        .filter(
+          v =>
+            typeof v ===
+              "string" &&
+            v.trim()
+        )
+    )
+  ];
+
+  if(
+    !cleaned.length
+  ){
+
+    return;
+
+  }
+
+  bellMessages =
+    cleaned;
+
+  showMessage(
+    preferred &&
+    cleaned.includes(
+      preferred
+    )
+      ? preferred
+      : pickRandom(
+          cleaned
+        )
+  );
+
+}
+
+function buildBellMessages(
+  schedules
+){
+
+  const now =
+    getCurrentDate();
+
+  const values =
+    Object.values(
+      schedules || {}
+    )
+    .filter(
+      s =>
+        s &&
+        typeof s ===
+          "object"
+    );
+
+  const all = [
+    ...buildRegularMessages(
+      values,
+      now
+    )
+  ];
+
+  try{
+
+    const today =
+      dateString(
+        now
+      );
+
+    all.push(
+      ...getClubBeforeStartMessages(
+        values,
+        today,
+        now
+      )
+    );
+
+  }catch(error){
+
+    console.warn(
+      "ベルちゃんの部活前メッセージを作成できませんでした",
+      error
+    );
+
+  }
+
+  try{
+
+    const today =
+      dateString(
+        now
+      );
+
+    getEventSchedulesForDate(
+      values,
+      today
+    ).forEach(
+      event=>{
+
+        all.push(
+          `今日は${
+            event.title ||
+            (
+              event.type ===
+                "concert"
+                ? "演奏会"
+                : "イベント"
+            )
+          }だね！`
+        );
+
+      }
+    );
+
+  }catch(error){
+
+    console.warn(
+      "ベルちゃんの当日イベントメッセージを作成できませんでした",
+      error
+    );
+
+  }
+
+  try{
+
+    const today =
+      dateString(
+        now
+      );
+
+    getUpcomingEvents(
+      values,
+      today
+    ).forEach(
+      event=>{
+
+        all.push(
+          `もうすぐ${
+            event.title ||
+            (
+              event.type ===
+                "concert"
+                ? "演奏会"
+                : "イベント"
+            )
+          }だね！`
+        );
+
+      }
+    );
+
+  }catch(error){
+
+    console.warn(
+      "ベルちゃんの予定メッセージを作成できませんでした",
+      error
+    );
+
+  }
+
+  return [
+    ...new Set(
+      all
+    )
+  ];
+
+}
+
+function receiveParentSchedules(
+  schedules
+){
+
+  parentSchedules =
+    schedules &&
+    typeof schedules ===
+      "object"
+      ? schedules
+      : {};
+
+  setBellMessages(
+    buildBellMessages(
+      parentSchedules
+    )
+  );
+
+}
+
+function sendBellHitBounds(){
+  if(!isEmbedded || !bellImage || !secretCostume) return;
+
+  const targets=[];
+  if(secretCostume.classList.contains("show")){
+    secretCostume.querySelectorAll(".secret-layer-wrap").forEach(el=>targets.push(el));
+  }else{
+    targets.push(bellImage);
+  }
+
+  const rects=targets.map(el=>el.getBoundingClientRect()).filter(rect=>rect.width>0 && rect.height>0);
+  if(!rects.length) return;
+
+  const left=Math.min(...rects.map(r=>r.left));
+  const top=Math.min(...rects.map(r=>r.top));
+  const right=Math.max(...rects.map(r=>r.right));
+  const bottom=Math.max(...rects.map(r=>r.bottom));
+
+  window.parent.postMessage({
+    type:"handbell-bell-hit-bounds",
+    bounds:{left,top,width:right-left,height:bottom-top}
+  },"*");
+}
+
+/* =====================================================
+   親ページからのメッセージ
+===================================================== */
+
+window.addEventListener(
+  "message",
+  event=>{
+
+    if(
+      !event.data
+    ){
+
+      return;
+
+    }
+
+    if(
+      event.data.type ===
+      "handbell-parent-click"
+    ){
+      celebrate();
+      return;
+    }
+
+    if(
+      event.data.type ===
+      "handbell-equipped-costume"
+    ){
+
+      const data =
+        event.data.equippedCostume ||
+        {};
+
+      equippedCostumes = {
+
+        bell:
+          data.bell ||
+          null,
+
+        chime:
+          data.chime ||
+          null
+
+      };
+
+      setCharacter(
+        currentCharacter
+      );
+
+      renderSecretCostume(
+        currentCharacter
+      );
+
+      return;
+
+    }
+
+    if(
+      event.data.type ===
+      "handbell-event-costume-override"
+    ){
+
+      eventCostumeOverrides =
+        event.data.overrides &&
+        typeof event.data.overrides ===
+          "object"
+          ? event.data.overrides
+          : {};
+
+      setCharacter(
+        currentCharacter
+      );
+
+      return;
+
+    }
+
+    if(
+      event.data.type ===
+      "handbell-character"
+    ){
+
+      setCharacter(
+        event.data.character
+      );
+
+      updateCostume();
+
+      return;
+
+    }
+
+    if(
+      event.data.type ===
+      "handbell-schedules"
+    ){
+
+      receiveParentSchedules(
+        event.data.schedules
+      );
+
+      return;
+
+    }
+
+  }
+);
+
+/* =====================================================
+   日付・時間
+===================================================== */
+
+function pad(n){
+
+  return String(
+    n
+  ).padStart(
+    2,
+    "0"
+  );
+
+}
+
+function dateString(
+  date=getCurrentDate()
+){
+
+  return `${
+    date.getFullYear()
+  }-${
+    pad(
+      date.getMonth()+1
+    )
+  }-${
+    pad(
+      date.getDate()
+    )
+  }`;
+
+}
+
+function monthString(
+  date=getCurrentDate()
+){
+
+  return `${
+    date.getFullYear()
+  }-${
+    pad(
+      date.getMonth()+1
+    )
+  }`;
+
+}
+
+function timeToMinutes(
+  value
+){
+
+  const match =
+    String(
+      value || ""
+    )
+    .match(
+      /^(\d{1,2}):(\d{2})$/
+    );
+
+  if(!match){
+
+    return null;
+
+  }
+
+  return (
+    Number(match[1])*60 +
+    Number(match[2])
+  );
+
+}
+
+/* =====================================================
+   挨拶
+===================================================== */
+
+function getGreeting(
+  date=getCurrentDate()
+){
+
+  const hour =
+    date.getHours();
+
+  if(
+    hour>=4 &&
+    hour<10
+  ){
+
+    return "おはよう！";
+
+  }
+
+  if(
+    hour>=10 &&
+    hour<17
+  ){
+
+    return "こんにちは！";
+
+  }
+
+  return "こんばんは!";
+
+}
+
+function greetingMessage(
+  text,
+  date=getCurrentDate()
+){
+
+  return `${
+    getGreeting(
+      date
+    )
+  }${text}`;
+
+}
+
+/* =====================================================
+   時刻表示
+===================================================== */
+
+function formatJapaneseTime(
+  value
+){
+
+  const match =
+    String(
+      value || ""
+    )
+    .match(
+      /^(\d{1,2}):(\d{2})$/
+    );
+
+  if(!match){
+
+    return String(
+      value || ""
+    );
+
+  }
+
+  return `${
+    Number(
+      match[1]
+    )
+  }時${
+    match[2]
+  }分`;
+
+}
+
+function formatTimeRange(
+  time
+){
+
+  const value =
+    String(
+      time || ""
+    ).trim();
+
+  if(
+    !value ||
+    value ===
+      "終日"
+  ){
+
+    return "";
+
+  }
+
+  const match =
+    value.match(
+      /^(\d{1,2}:\d{2})\s*[〜~\-－]\s*(\d{1,2}:\d{2})$/
+    );
+
+  if(!match){
+
+    return value;
+
+  }
+
+  return `${
+    formatJapaneseTime(
+      match[1]
+    )
+  }〜${
+    formatJapaneseTime(
+      match[2]
+    )
+  }`;
+
+}
+
+function getStartTime(
+  time
+){
+
+  const value =
+    String(
+      time || ""
+    ).trim();
+
+  const match =
+    value.match(
+      /^(\d{1,2}:\d{2})\s*[〜~\-－]/
+    );
+
+  return match
+    ? timeToMinutes(
+        match[1]
+      )
+    : null;
+
+}
+
+/* =====================================================
+   日付計算
+===================================================== */
+
+function getTomorrowString(
+  date=getCurrentDate()
+){
+
+  const tomorrow =
+    new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate()+1
+    );
+
+  return dateString(
+    tomorrow
+  );
+
+}
+
+function daysFromToday(
+  dateStringValue,
+  today=getCurrentDate()
+){
+
+  const target =
+    new Date(
+      `${dateStringValue}T00:00:00`
+    );
+
+  const base =
+    new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+
+  return Math.round(
+    (
+      target-base
+    ) / 86400000
+  );
+
+}
+
+function isUpcomingWithinDays(
+  dateValue,
+  today,
+  days
+){
+
+  if(!dateValue){
+
+    return false;
+
+  }
+
+  const diff =
+    daysFromToday(
+      dateValue,
+      today
+    );
+
+  return (
+    diff>0 &&
+    diff<=days
+  );
+
+}
+
+/* =====================================================
+   スケジュール
+===================================================== */
+
+function getNormalSchedulesForDate(
+  values,
+  date
+){
+
+  return values.filter(
+    s =>
+      s &&
+      s.type ===
+        "normal" &&
+      s.date ===
+        date
+  );
+
+}
+
+function getEventSchedulesForDate(
+  values,
+  date
+){
+
+  return values.filter(
+    s =>
+      s &&
+      (
+        s.type ===
+          "concert" ||
+        s.type ===
+          "event"
+      ) &&
+      s.date ===
+        date
+  );
+
+}
+
+function getUpcomingEvents(
+  values,
+  today
+){
+
+  return values
+    .filter(
+      s =>
+        s &&
+        (
+          s.type ===
+            "concert" ||
+          s.type ===
+            "event"
+        ) &&
+        isUpcomingWithinDays(
+          s.date,
+          today,
+          7
+        )
+    )
+    .sort(
+      (a,b)=>
+        String(
+          a.date
+        )
+        .localeCompare(
+          String(
+            b.date
+          )
+        )
+    );
+
+}
+
+function getMonthlyClubCount(
+  values,
+  today
+){
+
+  const month =
+    monthString(
+      today
+    );
+
+  return values.filter(
+    s =>
+      s &&
+      (
+        s.type ===
+          "normal" ||
+        !s.type
+      ) &&
+      typeof s.date ===
+        "string" &&
+      s.date.startsWith(
+        month
+      )
+  ).length;
+
+}
+
+/* =====================================================
+   部活前メッセージ
+===================================================== */
+
+function getClubBeforeStartMessages(
+  values,
+  today,
+  dateNow
+){
+
+  const todayNormal =
+    getNormalSchedulesForDate(
+      values,
+      today
+    )[0];
+
+  if(
+    !todayNormal
+  ){
+
+    return [];
+
+  }
+
+  const start =
+    getStartTime(
+      todayNormal.time
+    );
+
+  const nowMinutes =
+    dateNow.getHours()*60 +
+    dateNow.getMinutes();
+
+  if(
+    start===null ||
+    nowMinutes>=start
+  ){
+
+    return [];
+
+  }
+
+  const range =
+    formatTimeRange(
+      todayNormal.time
+    );
+
+  const result=[];
+
+  if(range){
+
+    result.push(
+      greetingMessage(
+        `今日の部活は${range}だよ`,
+        dateNow
+      )
+    );
+
+  }
+
+  result.push(
+
+    greetingMessage(
+      "今日の部活、頑張ろうね！",
+      dateNow
+    ),
+
+    greetingMessage(
+      "今日もみんなでハンドベル頑張ろうね！",
+      dateNow
+    ),
+
+    greetingMessage(
+      "今日の部活も楽しみだね！",
+      dateNow
+    ),
+
+    greetingMessage(
+      "今日はどんな曲を練習するのかな？",
+      dateNow
+    ),
+
+    greetingMessage(
+      "今日の部活も一緒に頑張ろうね！",
+      dateNow
+    )
+
+  );
+
+  return result;
+
+}
+
+/* =====================================================
+   通常メッセージ
+===================================================== */
+
+function buildRegularMessages(
+  values,
+  dateNow
+){
+
+  const result=[];
+
+  const hour =
+    dateNow.getHours();
+
+  const monthCount =
+    getMonthlyClubCount(
+      values,
+      dateNow
+    );
+
+  if(
+    hour>=0 &&
+    hour<4
+  ){
+
+    result.push(
+
+      "もう寝る時間だよ〜",
+
+      "そろそろ寝ようね！",
+
+      "夜更かししすぎないでね〜",
+
+      "明日に備えてゆっくり休もうね！",
+
+      "おやすみ！いい夢見てね！",
+
+      "こんな時間までお疲れ様！",
+
+      "ベルちゃんもそろそろ寝ようかな〜",
+
+      "明日も元気に頑張ろうね！"
+
+    );
+
+    return result;
+
+  }
+
+  if(
+    hour>=4 &&
+    hour<10
+  ){
+
+    result.push(
+
+      "おはよう！",
+
+      "おはよう！今日も一日頑張ろうね！",
+
+      "おはよう！無理せず頑張ろうね！",
+
+      "おはよう！今日も楽しく過ごそうね！",
+
+      "おはよう！予定を確認してみてね！",
+
+      "おはよう！今月の予定もチェックしてみてね！",
+
+      "おはよう！みんなで楽しく活動しようね！",
+
+      "おはよう！今日も素敵な一日にしようね！",
+
+      "おはよう！今日も予定を見にきてくれてありがとう",
+
+      `おはよう！今月の部活は${monthCount}回だよ`
+
+    );
+
+    if(
+      hour>=4 &&
+      hour<6.5
+    ){
+
+      result.push(
+        "おはよう〜まだ眠いよ〜"
+      );
+
+    }
+
+    if(
+      hour>=5 &&
+      hour<7
+    ){
+
+      result.push(
+        "おはよう！朝はやいね"
+      );
+
+    }
+
+  }else if(
+    hour>=10 &&
+    hour<17
+  ){
+
+    result.push(
+
+      "こんにちは！",
+
+      "こんにちは！無理せず頑張ろうね！",
+
+      "こんにちは！今日も楽しく過ごそうね！",
+
+      "こんにちは！予定を確認してみてね！",
+
+      "こんにちは！今月の予定もチェックしてみてね！",
+
+      "こんにちは！みんなで楽しく活動しようね！",
+
+      "こんにちは！今日も素敵な一日にしようね！",
+
+      "こんにちは！今日も予定を見にきてくれてありがとう",
+
+      `こんにちは！今月の部活は${monthCount}回だよ`
+
+    );
+
+    if(
+      hour>=12 &&
+      hour<13
+    ){
+
+      result.push(
+        "こんにちは！お昼ご飯はもう食べたかな？"
+      );
+
+    }
+
+    if(
+      hour>=12 &&
+      hour<15
+    ){
+
+      result.push(
+        "こんにちは！今日のお昼ご飯なんだった？"
+      );
+
+    }
+
+  }else{
+
+    result.push(
+
+      "こんばんは！",
+
+      "こんばんは！予定を確認してみてね！",
+
+      "こんばんは！今月の予定もチェックしてみてね！",
+
+      "こんばんは！今日も予定を見にきてくれてありがとう",
+
+      "こんばんは！今日はどんな1日だったかな？",
+
+      "こんばんは！1日お疲れ様！",
+
+      "こんばんは！明日も1日頑張ろう！",
+
+      "こんばんは！自主練はもうやった？",
+
+      `こんばんは！今月の部活は${monthCount}回だよ`
+
+    );
+
+    if(
+      hour>=22 &&
+      hour<24
+    ){
+
+      result.push(
+        "こんばんは〜。そろそろ眠たくなっちゃった、、、"
+      );
+
+    }
+
+    if(
+      getNormalSchedulesForDate(
+        values,
+        getTomorrowString(
+          dateNow
+        )
+      ).length>0
+    ){
+
+      result.push(
+        "こんばんは！明日も部活頑張ろう！"
+      );
+
+    }
+
+    if(
+      hour>=22 &&
+      hour<24
+    ){
+
+      result.push(
+        "こんばんは！夜遅くまでお疲れ様"
+      );
+
+    }
+
+  }
+
+  return result;
+
+}
+
+/* =====================================================
+   ランダム
+===================================================== */
+
+function pickRandom(
+  list
+){
+
+  if(
+    !list.length
+  ){
+
+    return "予定を確認してみてね！";
+
+  }
+
+  return list[
+    Math.floor(
+      Math.random()*
+      list.length
+    )
+  ];
+
+}
+
+/* =====================================================
+   メッセージ表示
+===================================================== */
+
+function showMessage(
+  text
+){
+
+  message.textContent =
+    text;
+
+}
+
+function changeBellMessage(){
+
+  if(
+    !bellMessages.length
+  ){
+
+    return;
+
+  }
+
+  let next =
+    pickRandom(
+      bellMessages
+    );
+
+  if(
+    bellMessages.length>1 &&
+    next ===
+      message.textContent
+  ){
+
+    const other =
+      bellMessages.filter(
+        item =>
+          item !==
+            message.textContent
+      );
+
+    next =
+      pickRandom(
+        other
+      );
+
+  }
+
+  showMessage(
+    next
+  );
+
+}
+
+/* =====================================================
+   大量のハート
+===================================================== */
+
+function startHearts(type="heart"){
+
+  if(
+    !heartContainer
+  ){
+
+    return;
+
+  }
+
+  const hearts=[];
+
+  for(
+    let i=0;
+    i<14;
+    i++
+  ){
+
+    hearts.push({
+
+      startX:
+        -55 +
+        Math.random()*110,
+
+      startY:
+        -10 +
+        Math.random()*25,
+
+      endX:
+        -130 +
+        Math.random()*260,
+
+      endY:
+        -120 -
+        Math.random()*150
+
+    });
+
+  }
+
+  for(
+    let i=0;
+    i<10;
+    i++
+  ){
+
+    hearts.push({
+
+      startX:
+        -35 -
+        Math.random()*35,
+
+      startY:
+        -10 -
+        Math.random()*35,
+
+      endX:
+        -100 -
+        Math.random()*120,
+
+      endY:
+        -70 -
+        Math.random()*120
+
+    });
+
+  }
+
+  for(
+    let i=0;
+    i<10;
+    i++
+  ){
+
+    hearts.push({
+
+      startX:
+        35 +
+        Math.random()*35,
+
+      startY:
+        -10 -
+        Math.random()*35,
+
+      endX:
+        100 +
+        Math.random()*120,
+
+      endY:
+        -70 -
+        Math.random()*120
+
+    });
+
+  }
+
+  for(
+    let i=12;
+    i--;
+  ){
+
+    hearts.push({
+
+      startX:
+        -45 -
+        Math.random()*20,
+
+      startY:
+        -40 +
+        Math.random()*90,
+
+      endX:
+        -130 -
+        Math.random()*140,
+
+      endY:
+        -70 +
+        Math.random()*160
+
+    });
+
+  }
+
+  for(
+    let i=12;
+    i--;
+  ){
+
+    hearts.push({
+
+      startX:
+        45 +
+        Math.random()*20,
+
+      startY:
+        -40 +
+        Math.random()*90,
+
+      endX:
+        130 +
+        Math.random()*140,
+
+      endY:
+        -70 +
+        Math.random()*160
+
+    });
+
+  }
+
+  for(
+    let i=8;
+    i--;
+  ){
+
+    hearts.push({
+
+      startX:
+        -40 -
+        Math.random()*25,
+
+      startY:
+        30 +
+        Math.random()*25,
+
+      endX:
+        -100 -
+        Math.random()*130,
+
+      endY:
+        50 +
+        Math.random()*100
+
+    });
+
+  }
+
+  for(
+    let i=8;
+    i--;
+  ){
+
+    hearts.push({
+
+      startX:
+        40 +
+        Math.random()*25,
+
+      startY:
+        30 +
+        Math.random()*25,
+
+      endX:
+        100 +
+        Math.random()*130,
+
+      endY:
+        50 +
+        Math.random()*100
+
+    });
+
+  }
+
+  /* =====================================================
+     ★ 下中央：はっきり下へ飛ぶハート
+  ===================================================== */
+
+  for(
+    let i=10;
+    i--;
+  ){
+
+    hearts.push({
+
+      startX:
+        -20 +
+        Math.random()*40,
+
+      startY:
+        25 +
+        Math.random()*25,
+
+      endX:
+        -45 +
+        Math.random()*90,
+
+      endY:
+        95 +
+        Math.random()*105
+
+    });
+
+  }
+
+  /* =====================================================
+     ★ 右下：下へ飛びながら右へ広がるハート
+  ===================================================== */
+
+  for(
+    let i=10;
+    i--;
+  ){
+
+    hearts.push({
+
+      startX:
+        5 +
+        Math.random()*25,
+
+      startY:
+        20 +
+        Math.random()*30,
+
+      endX:
+        75 +
+        Math.random()*75,
+
+      endY:
+        75 +
+        Math.random()*105
+
+    });
+
+  }
+
+  hearts.forEach(
+    (data,index)=>{
+
+      const heart =
+        document.createElement(
+          "span"
+        );
+
+      heart.className =
+        type === "crescent"
+          ? "crescent-moon"
+          : type === "sun"
+            ? "sun-effect"
+            : type === "flower"
+              ? "flower-effect"
+              : "heart";
+
+      heart.textContent =
+        type === "crescent"
+          ? "☾"
+          : type === "sun"
+            ? "☀"
+            : type === "flower"
+              ? "🌸"
+              : (index % 4 === 0
+                  ? "♡"
+                  : "♥");
+
+      heart.style.setProperty(
+        "--start-x",
+        `${data.startX}px`
+      );
+
+      heart.style.setProperty(
+        "--start-y",
+        `${data.startY}px`
+      );
+
+      heart.style.setProperty(
+        "--end-x",
+        `${data.endX}px`
+      );
+
+      heart.style.setProperty(
+        "--end-y",
+        `${data.endY}px`
+      );
+
+      const rotation =
+        -60 +
+        Math.random()*120;
+
+      heart.style.setProperty(
+        "--rotate",
+        `${rotation}deg`
+      );
+
+      const size =
+        11 +
+        Math.random()*13;
+
+      heart.style.fontSize =
+        `${size}px`;
+
+      const delay =
+        Math.random()*350;
+
+      heart.style.animationDelay =
+        `${delay}ms`;
+
+      heartContainer.appendChild(
+        heart
+      );
+
+      heart.addEventListener(
+        "animationend",
+        ()=>{
+          heart.remove();
+        }
+      );
+
+    }
+  );
+
+}
+
+/* =====================================================
+   アニメーション中かどうか
+===================================================== */
+
+let isAnimating=false;
+
+/* =====================================================
+   キャラクターをクリック
+===================================================== */
+
+function startSecretMoon(){
+
+  /*
+   * シークレット専用クリック演出。
+   * 月夜は別HTMLに完全分離しているので、
+   * ここでは表示・終了通知だけを担当する。
+   */
+
+  if(
+    document.getElementById(
+      "secretMoonFrame"
+    )
+  ){
+
+    return;
+
+  }
+
+  /*
+   * 月夜の最後に衣装が「戻る場所」を、広げる前に測っておく。
+   * 外側のページ（画面全体）基準の中心座標と大きさを渡す。
+   */
+  try{
+
+    const homeEl =
+      document.getElementById(
+        "secretCostume"
+      );
+
+    const homeRect =
+      homeEl.getBoundingClientRect();
+
+    const outer =
+      window.frameElement
+        ? window.frameElement.getBoundingClientRect()
+        : {left:0,top:0};
+
+    window.__secretMoonHome = {
+      cx:outer.left+homeRect.left+homeRect.width/2,
+      cy:outer.top+homeRect.top+homeRect.height/2,
+      size:homeRect.width
+    };
+
+  }catch(e){
+
+    window.__secretMoonHome = null;
+
+  }
+
+  /*
+   * design.html は handbell.html の小さなiframe（202×160）の中にある。
+   * このままだと 100vw×100vh が202×160になり、月夜が小さく切れてしまう。
+   * そこで月夜の間だけ、自分を包んでいるiframeを画面全体に広げる。
+   * （すでに大きい場合は何もしない）
+   */
+  const hostFrame = window.frameElement;
+
+  if(
+    hostFrame &&
+    window.innerWidth < 600 &&
+    hostFrame.dataset.secretMoonSaved === undefined
+  ){
+
+    hostFrame.dataset.secretMoonSaved =
+      hostFrame.style.cssText;
+
+    [
+      ["position","fixed"],
+      ["left","0"],
+      ["top","0"],
+      ["right","auto"],
+      ["bottom","auto"],
+      ["width","100vw"],
+      ["height","100vh"],
+      ["z-index","99999"]
+    ].forEach(([k,v])=>{
+      hostFrame.style.setProperty(k,v,"important");
+    });
+
+  }
+
+  const frame =
+    document.createElement("iframe");
+
+  frame.id =
+    "secretMoonFrame";
+
+  /* 古い版が残らないよう、毎回URLを変えて読み込む */
+  frame.src =
+    "secret_moon.html?v=" + Date.now();
+
+  frame.title =
+    "シークレット月夜演出";
+
+  frame.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+  frame.style.position =
+    "fixed";
+
+  frame.style.left =
+    "0";
+
+  frame.style.top =
+    "0";
+
+  frame.style.width =
+    "100vw";
+
+  frame.style.height =
+    "100vh";
+
+  frame.style.border =
+    "0";
+
+  frame.style.margin =
+    "0";
+
+  frame.style.padding =
+    "0";
+
+  frame.style.background =
+    "transparent";
+
+  frame.style.zIndex =
+    "99999";
+
+  frame.style.pointerEvents =
+    "auto";
+
+  frame.style.display =
+    "block";
+
+  /* 月夜のあいだ、本物のベルちゃんは隠す（終わったら戻す） */
+  frame.style.visibility =
+    "visible";
+
+  document.body.style.visibility =
+    "hidden";
+
+  document.body.appendChild(
+    frame
+  );
+
+}
+
+/* =====================================================
+   キャラクターをクリック
+===================================================== */
+
+function celebrate(){
+
+  if(
+    isAnimating
+  ){
+
+    return;
+
+  }
+
+  /*
+   * ★ シークレット衣装 ★
+   *
+   * 通常の「2回ジャンプ＋ハート」は絶対に実行しない。
+   * シークレットのときだけ専用の月夜演出へ分岐する。
+   */
+  if(
+    isSecretEquipped(
+      currentCharacter
+    ) &&
+    secretCostume &&
+    secretCostume.classList.contains(
+      "show"
+    )
+  ){
+
+    isAnimating=true;
+
+    bubble.classList.add(
+      "bubble-hidden"
+    );
+
+    /* ノーマルと同じ2回ジャンプ。出すものだけ三日月に変更 */
+    secretCostume.classList.remove(
+      "celebrating"
+    );
+
+    void secretCostume.offsetWidth;
+
+    secretCostume.classList.add(
+      "celebrating"
+    );
+
+    /* ベルちゃんは三日月、チャイムくんは太陽・花をランダム */
+    const secretEffect =
+      currentCharacter === "chime"
+        ? (Math.random() < 0.5 ? "sun" : "flower")
+        : "crescent";
+
+    setTimeout(
+      ()=>{
+        startHearts(secretEffect);
+      },
+      150
+    );
+
+    setTimeout(
+      ()=>{
+        startHearts(secretEffect);
+      },
+      950
+    );
+
+    setTimeout(
+      ()=>{
+
+        secretCostume.classList.remove(
+          "celebrating"
+        );
+
+        changeBellMessage();
+
+        bubble.classList.remove(
+          "bubble-hidden"
+        );
+
+        bubble.style.animation =
+          "none";
+
+        void bubble.offsetWidth;
+
+        bubble.style.animation =
+          "";
+
+        isAnimating=false;
+
+      },
+      1800
+    );
+
+    return;
+
+  }
+
+  /* ===== 通常衣装は今まで通り ===== */
+
+  isAnimating=true;
+
+  bubble.classList.add(
+    "bubble-hidden"
+  );
+
+  bellImage.classList.remove(
+    "celebrating"
+  );
+
+  void bellImage.offsetWidth;
+
+  bellImage.classList.add(
+    "celebrating"
+  );
+
+  setTimeout(
+    ()=>{
+      startHearts();
+    },
+    150
+  );
+
+  setTimeout(
+    ()=>{
+      startHearts();
+    },
+    950
+  );
+
+}
+
+/* =====================================================
+   アニメーション終了
+===================================================== */
+
+bellImage.addEventListener(
+  "animationend",
+  event=>{
+
+    if(
+      event.animationName !==
+      "bellCelebrate"
+    ){
+
+      return;
+
+    }
+
+    bellImage.classList.remove(
+      "celebrating"
+    );
+
+    if(secretCostume){
+
+      secretCostume.classList.remove(
+        "celebrating"
+      );
+
+    }
+
+    changeBellMessage();
+
+    bubble.classList.remove(
+      "bubble-hidden"
+    );
+
+    bubble.style.animation =
+      "none";
+
+    void bubble.offsetWidth;
+
+    bubble.style.animation =
+      "";
+
+    isAnimating=false;
+
+  }
+);
+
+/* =====================================================
+   初期キャラクター
+===================================================== */
+
+/*
+ * 初期表示でも画像エラーを
+ * 「？」のままにしない。
+ */
+
+bellImage.addEventListener(
+  "error",
+  ()=>{
+
+    const fallback =
+      characterImages[
+        currentCharacter
+      ]?.src ||
+      "bell.png";
+
+    if(
+      !bellImage.src.endsWith(
+        fallback
+      )
+    ){
+
+      bellImage.src =
+        fallback;
+
+    }
+
+  }
+);
+
+setCharacter(
+  "bell"
+);
+
+if(isEmbedded){
+  requestAnimationFrame(sendBellHitBounds);
+}
+
+/* =====================================================
+   初期メッセージ
+===================================================== */
+
+setBellMessages(
+  buildBellMessages(
+    {}
+  )
+);
+
+/* =====================================================
+   親ページへ準備完了を通知
+===================================================== */
+
+if(
+  isEmbedded
+){
+
+  window.parent.postMessage(
+    {
+      type:
+        "handbell-ready"
+    },
+    "*"
+  );
+
+}
+
+/* =====================================================
+   クリックイベント
+===================================================== */
+
+bellImage.addEventListener(
+  "click",
+  celebrate
+);
+
+window.addEventListener("resize",sendBellHitBounds);
+
+/* =====================================================
+   シークレット月夜演出の終了通知
+===================================================== */
+
+window.addEventListener(
+  "message",
+  event=>{
+
+    if(
+      !event.data ||
+      event.data.type !==
+        "secret-moon-finished"
+    ){
+
+      return;
+
+    }
+
+    const frame =
+      document.getElementById(
+        "secretMoonFrame"
+      );
+
+    if(frame){
+      frame.remove();
+    }
+
+    /* 広げていた外側のiframeを元の大きさに戻す */
+    const hostFrame = window.frameElement;
+
+    if(
+      hostFrame &&
+      hostFrame.dataset.secretMoonSaved !== undefined
+    ){
+
+      hostFrame.style.cssText =
+        hostFrame.dataset.secretMoonSaved;
+
+      delete hostFrame.dataset.secretMoonSaved;
+
+    }
+
+    document.body.style.visibility =
+      "";
+
+    window.__secretMoonHome = null;
+
+    changeBellMessage();
+
+    bubble.classList.remove(
+      "bubble-hidden"
+    );
+
+    bubble.style.animation =
+      "none";
+
+    void bubble.offsetWidth;
+
+    bubble.style.animation =
+      "";
+
+    isAnimating=false;
+
+  }
+);
+
+
+/* =====================================================
+   位置調整モード：design.html?edit=1 で直接開くと使える
+   画面を見ながら7レイヤーの位置・大きさ・角度を調整し、
+   最後に「コピー」で数値をそのまま貼り付けられる。
+   通常表示（iframe）には一切影響しない。
+===================================================== */
+if(new URLSearchParams(location.search).get("edit")==="1"){
+(function(){
+
+  const NAMES=["1 base","2 main","3 layer-01","4 layer-02","5 layer-03","6 layer-04","7 layer-05"];
+
+  /* 全レイヤーを表示して、ベルちゃんのシークレット衣装を出す */
+  for(let i=0;i<7;i++) SECRET_LAYER_ENABLED[i]=true;
+  document.body.classList.add("logged-in","edit-static");
+  equippedCostumes={bell:"secret-bell",chime:null};
+  currentCharacter="bell";
+
+  const css=document.createElement("style");
+  css.textContent=`
+    .bell-area{transform:scale(3);transform-origin:right bottom}
+    body.edit-static .secret-body,
+    body.edit-static .secret-layer,
+    body.edit-static .secret-costume::before,
+    body.edit-static .secret-costume::after{animation:none!important}
+    #editPanel{position:fixed;left:8px;top:8px;width:290px;max-height:calc(100% - 16px);
+      overflow:auto;background:rgba(255,255,255,.96);border:1px solid #cfd5df;border-radius:14px;
+      padding:10px;z-index:99999;font:13px/1.5 -apple-system,"Hiragino Sans",sans-serif;color:#20242a}
+    #editPanel button{border:1px solid #cfd5df;background:#f3f6fb;border-radius:8px;
+      min-height:38px;padding:0 8px;font-size:13px;font-weight:700;color:#20242a}
+    #editPanel button.on{background:#1f6feb;color:#fff;border-color:#1f6feb}
+    #editPanel .row{display:flex;gap:4px;align-items:center;margin:5px 0}
+    #editPanel .row b{width:46px;flex:none}
+    #editPanel .row button{flex:1}
+    #editPanel .layers{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+    #editPanel textarea{width:100%;height:150px;font:11px/1.4 monospace;box-sizing:border-box}
+  `;
+  document.head.appendChild(css);
+
+  /* 元の値を控える（リセット用） */
+  const snap=JSON.stringify({
+    pos:SECRET_LAYER_POSITIONS,size:SECRET_LAYER_SIZES,en:SECRET_LAYER_ENABLED
+  });
+
+  let cur=0, solo=false;
+
+  function apply(){
+    for(let i=0;i<7;i++){
+      const w=secretCostume.querySelector(".secret-layer-wrap-"+i);
+      if(!w) continue;
+      const p=SECRET_LAYER_POSITIONS[i], z=SECRET_LAYER_SIZES[i];
+      w.style.transform=`translate(${p.x}px, ${p.y}px) scale(${z.scale}) rotate(${z.angle}deg)`;
+      w.style.display=SECRET_LAYER_ENABLED[i]?"":"none";
+      w.style.opacity=(solo && i!==cur)?"0.15":"1";
+      const img=w.querySelector("img");
+      if(img) img.style.filter=(i===cur)?"drop-shadow(0 0 2px #e0218a)":"";
+    }
+  }
+
+  function fmt(){
+    const L=(arr,f)=>arr.map((v,i)=>"  "+f(v)+(i<6?",":"")+" // "+(i+1)).join("\n");
+    return "const SECRET_LAYER_POSITIONS = [\n"+
+      L(SECRET_LAYER_POSITIONS,v=>`{x:${v.x},y:${v.y}}`)+"\n];\n\n"+
+      "const SECRET_LAYER_SIZES = [\n"+
+      L(SECRET_LAYER_SIZES,v=>`{width:${v.width},height:${v.height},scale:${v.scale},angle:${v.angle}}`)+"\n];\n\n"+
+      "const SECRET_LAYER_ENABLED = [\n"+
+      L(SECRET_LAYER_ENABLED,v=>String(v))+"\n];";
+  }
+
+  const panel=document.createElement("div");
+  panel.id="editPanel";
+  document.body.appendChild(panel);
+
+  const round=v=>Math.round(v*100)/100;
+
+  function build(){
+    panel.innerHTML="";
+    const title=document.createElement("div");
+    title.innerHTML="<b>位置調整モード</b>（動きは停止中）";
+    panel.appendChild(title);
+
+    const layers=document.createElement("div");
+    layers.className="layers";
+    NAMES.forEach((n,i)=>{
+      const b=document.createElement("button");
+      b.textContent=(SECRET_LAYER_ENABLED[i]?"":"✕ ")+n;
+      if(i===cur) b.className="on";
+      b.onclick=()=>{cur=i;build();apply();};
+      layers.appendChild(b);
+    });
+    panel.appendChild(layers);
+
+    const tog=document.createElement("div");
+    tog.className="row";
+    const vis=document.createElement("button");
+    vis.textContent=SECRET_LAYER_ENABLED[cur]?"このレイヤーを隠す":"このレイヤーを表示";
+    vis.onclick=()=>{SECRET_LAYER_ENABLED[cur]=!SECRET_LAYER_ENABLED[cur];build();apply();};
+    const so=document.createElement("button");
+    so.textContent="他を薄くする"; if(solo) so.className="on";
+    so.onclick=()=>{solo=!solo;build();apply();};
+    tog.append(vis,so);
+    panel.appendChild(tog);
+
+    const defs=[
+      ["x（右＋）",SECRET_LAYER_POSITIONS[cur],"x",[-5,-1,1,5]],
+      ["y（下＋）",SECRET_LAYER_POSITIONS[cur],"y",[-5,-1,1,5]],
+      ["大きさ",SECRET_LAYER_SIZES[cur],"scale",[-0.05,-0.01,0.01,0.05]],
+      ["角度",SECRET_LAYER_SIZES[cur],"angle",[-5,-1,1,5]]
+    ];
+    defs.forEach(([label,obj,key,steps])=>{
+      const row=document.createElement("div");
+      row.className="row";
+      const name=document.createElement("b");
+      name.textContent=label;
+      row.appendChild(name);
+      const val=document.createElement("span");
+      val.style.cssText="width:44px;text-align:center;flex:none";
+      val.textContent=obj[key];
+      steps.forEach(st=>{
+        const b=document.createElement("button");
+        b.textContent=(st>0?"+":"")+st;
+        b.onclick=()=>{obj[key]=round(obj[key]+st);val.textContent=obj[key];apply();out.value=fmt();};
+        row.appendChild(b);
+        if(st===-1||st===-0.01) row.appendChild(val);
+      });
+      panel.appendChild(row);
+    });
+
+    const out=document.createElement("textarea");
+    out.readOnly=true; out.value=fmt();
+
+    const act=document.createElement("div");
+    act.className="row";
+    const cp=document.createElement("button");
+    cp.textContent="数値をコピー";
+    cp.onclick=()=>{
+      out.value=fmt();
+      (navigator.clipboard?navigator.clipboard.writeText(out.value):Promise.reject())
+        .catch(()=>{out.select();document.execCommand("copy");});
+      cp.textContent="コピーしました";
+      setTimeout(()=>cp.textContent="数値をコピー",1500);
+    };
+    const rs=document.createElement("button");
+    rs.textContent="最初に戻す";
+    rs.onclick=()=>{
+      const o=JSON.parse(snap);
+      o.pos.forEach((v,i)=>Object.assign(SECRET_LAYER_POSITIONS[i],v));
+      o.size.forEach((v,i)=>Object.assign(SECRET_LAYER_SIZES[i],v));
+      o.en.forEach((v,i)=>SECRET_LAYER_ENABLED[i]=v);
+      build();apply();
+    };
+    act.append(cp,rs);
+    panel.appendChild(act);
+    panel.appendChild(out);
+  }
+
+  /* 衣装を描画してからパネルを出す */
+  setCharacter("bell");
+  build();
+  apply();
+  setTimeout(apply,600);
+  setTimeout(apply,1500);
+
+})();
+
+}
+
+/* =====================================================
+   チャイムくん シークレット衣装 位置調整モード
+   design.html?edit=chime で開くと使える（通常表示には影響しない）
+
+   ★ 6レイヤーを画面上で動かして、
+      CHIME_SECRET_LAYERS / CHIME_LAYER_* の数値を出力します。
+===================================================== */
+if(new URLSearchParams(location.search).get("edit")==="chime"){
+(function(){
+
+  /* 通常の表示を隠して、調整画面を全面に出す */
+  const ba=document.querySelector(".bell-area");
+  if(ba)ba.style.display="none";
+  document.body.style.visibility="visible";
+
+  const style=document.createElement("style");
+  style.textContent=`
+#ceRoot{position:fixed;left:0;top:0;right:0;bottom:0;z-index:100000;display:flex;background:#eef1f6;color:#20242a;font:13px/1.5 -apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;-webkit-text-size-adjust:100%;overscroll-behavior:none}
+#ceRoot *{box-sizing:border-box}
+#cePanel{width:300px;flex:none;height:100%;overflow:auto;background:#fff;border-right:1px solid #d9dee7;padding:10px}
+#cePanel h1{font-size:15px;margin:0 0 4px}
+#cePanel .note{font-size:11px;color:#68717d;margin:2px 0 8px}
+#cePanel button{border:1px solid #cfd5df;background:#f3f6fb;border-radius:8px;min-height:38px;padding:0 6px;font-size:13px;font-weight:700;color:#20242a;touch-action:manipulation}
+#cePanel button.on{background:#1f6feb;color:#fff;border-color:#1f6feb}
+#cePanel button.off{opacity:.5}
+#cePanel .row{display:flex;gap:4px;align-items:center;margin:5px 0}
+#cePanel .row b{width:50px;flex:none;font-size:12px}
+#cePanel .row button{flex:1;min-width:0}
+#cePanel .row .val{width:46px;text-align:center;flex:none;font-size:12px}
+#cePanel .layers{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:6px 0}
+#cePanel .layers button{text-align:left;line-height:1.25;padding:4px 6px;min-height:42px}
+#cePanel .layers button small{display:block;font-weight:400;opacity:.8;font-size:10px}
+#cePanel textarea{width:100%;height:170px;font:11px/1.4 ui-monospace,Menlo,monospace;margin-top:6px}
+#cePanel hr{border:0;border-top:1px solid #e3e7ee;margin:8px 0}
+#cePanel label.file{display:block;margin-top:6px;font-size:11px;color:#68717d}
+#ceStage{flex:1;min-width:0;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;background:linear-gradient(#e4e8ef 1px,transparent 1px) 0 0/20px 20px,linear-gradient(90deg,#e4e8ef 1px,transparent 1px) 0 0/20px 20px,#f5f7fb}
+#ceStage.drag{cursor:grabbing}
+#ceHolder{position:relative}
+#ceFrame{position:absolute;left:0;top:0;width:202px;height:160px;transform-origin:0 0;background:#fff;outline:1px dashed #1f6feb}
+#ceCostume{position:absolute;pointer-events:none;overflow:visible}
+#ceCostume::before{content:"";position:absolute;inset:0;outline:1px solid rgba(31,111,235,.55);pointer-events:none;z-index:50}
+#ceBody{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;transform-origin:50% 50%}
+.ceWrap{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;transform-origin:50% 50%;pointer-events:none}
+.ceWrap img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;object-position:center;max-width:none;max-height:none;display:block;pointer-events:none;-webkit-user-drag:none}
+#ceShade{position:absolute;left:0;top:0;width:202px;height:160px;pointer-events:none;z-index:60;box-shadow:0 0 0 4000px rgba(238,241,246,.62)}
+#ceHint{position:absolute;left:12px;bottom:10px;right:12px;font-size:11px;color:#68717d;pointer-events:none;text-align:center}
+#ceWarn{position:absolute;left:12px;right:12px;top:10px;background:#fff4e5;color:#79500a;border-radius:10px;padding:8px 10px;font-size:12px;display:none}
+@media (max-width:760px){#ceRoot{flex-direction:column-reverse}#cePanel{width:100%;height:52%;border-right:0;border-top:1px solid #d9dee7}#ceStage{height:48%;flex:none}}
+  `;
+  document.head.appendChild(style);
+
+  const root=document.createElement("div");
+  root.id="ceRoot";
+  root.innerHTML=`<div id="cePanel"></div><div id="ceStage"><div id="ceWarn"></div><div id="ceHolder"><div id="ceFrame"><div id="ceCostume"><div id="ceBody"></div></div><div id="ceShade"></div></div></div><div id="ceHint">画面をドラッグすると、選んでいるレイヤーが動きます（点線の外は、実際には切れて見えません）</div></div>`;
+  document.body.appendChild(root);
+
+  const FRAME={size:80,right:18,top:0};
+  const AREA={w:220,h:140,top:3,iframeW:202,iframeH:160};
+  const BOX_X=(AREA.w-FRAME.right-FRAME.size)-(AREA.w-AREA.iframeW);
+  const BOX_Y=AREA.top+FRAME.top;
+
+  const LAYERS=[
+    {key:"base",name:"base",sub:"本体＋ドレス",file:"costumes/chime-secret-base.png",w:512,h:768},
+    {key:"layer-01",name:"layer-01",sub:"大きなリボン",file:"costumes/chime-secret-layer-01.png",w:868,h:920},
+    {key:"layer-02",name:"layer-02",sub:"裾のヒラヒラ",file:"costumes/chime-secret-layer-02.png",w:1230,h:828},
+    {key:"layer-03",name:"layer-03",sub:"雲のフリル",file:"costumes/chime-secret-layer-03.png",w:840,h:596},
+    {key:"layer-04",name:"layer-04",sub:"星のチャーム",file:"costumes/chime-secret-layer-04.png",w:438,h:770},
+    {key:"layer-05",name:"layer-05",sub:"太陽＋花の飾り",file:"costumes/chime-secret-layer-05.png",w:760,h:834}
+  ];
+  const BASE_LONG=768;
+
+  function defaults(){
+    const pos={
+      "base":{x:0,y:0},
+      "layer-01":{x:0,y:4},
+      "layer-02":{x:0,y:18},
+      "layer-03":{x:0,y:22},
+      "layer-04":{x:0,y:16},
+      "layer-05":{x:24,y:-8}
+    };
+    const st={};
+    LAYERS.forEach(L=>{
+      st[L.key]={x:pos[L.key].x,y:pos[L.key].y,scale:Math.round(Math.max(L.w,L.h)/BASE_LONG*100)/100,angle:0,on:true};
+    });
+    return {layers:st,order:["layer-02","layer-03","base","layer-01","layer-04","layer-05"],global:{x:0,y:0,scale:1,angle:0}};
+  }
+
+  let S=defaults();
+  const STORE="chimeSecretEditV1";
+  try{const saved=JSON.parse(localStorage.getItem(STORE)||"null");if(saved&&saved.layers&&saved.order&&saved.global&&saved.order.length===LAYERS.length)S=saved;}catch(e){}
+  function save(){try{localStorage.setItem(STORE,JSON.stringify(S))}catch(e){}}
+
+  let sel="base";
+  let solo=false;
+  const $=id=>document.getElementById(id);
+  const round=(v,n)=>{const k=Math.pow(10,n);return Math.round(v*k)/k};
+  const byKey=k=>LAYERS.find(L=>L.key===k);
+
+  const bodyEl=$("ceBody"),costumeEl=$("ceCostume");
+  costumeEl.style.left=BOX_X+"px";
+  costumeEl.style.top=BOX_Y+"px";
+  costumeEl.style.width=FRAME.size+"px";
+  costumeEl.style.height=FRAME.size+"px";
+  const customSrc={};
+  let loadFail=0;
+
+  function buildLayers(){
+    bodyEl.innerHTML="";
+    S.order.forEach(k=>{
+      const L=byKey(k);
+      const w=document.createElement("div");
+      w.className="ceWrap";
+      w.dataset.key=k;
+      const img=document.createElement("img");
+      img.alt="";
+      img.draggable=false;
+      img.onerror=()=>{loadFail++;checkWarn()};
+      img.src=customSrc[k]||L.file;
+      w.appendChild(img);
+      bodyEl.appendChild(w);
+    });
+    apply();
+  }
+  function checkWarn(){
+    const el=$("ceWarn");
+    if(loadFail>=LAYERS.length-1){
+      el.style.display="block";
+      el.textContent="画像が見つかりません。costumes/ フォルダに chime-secret-*.png を入れるか、左下の「画像を選ぶ」から6枚を選んでください。";
+    }
+  }
+  function apply(){
+    const g=S.global;
+    bodyEl.style.transform="translate("+g.x+"px,"+g.y+"px) scale("+g.scale+") rotate("+g.angle+"deg)";
+    bodyEl.querySelectorAll(".ceWrap").forEach(w=>{
+      const k=w.dataset.key,d=S.layers[k];
+      w.style.transform="translate("+d.x+"px,"+d.y+"px) scale("+d.scale+") rotate("+d.angle+"deg)";
+      w.style.display=d.on?"":"none";
+      w.style.opacity=(solo&&sel!=="all"&&k!==sel)?"0.15":"1";
+      const img=w.querySelector("img");
+      img.style.filter=(sel===k)?"drop-shadow(0 0 2px #e0218a)":"";
+    });
+  }
+
+  let Z=3;
+  function layout(){
+    const stage=$("ceStage");
+    const aw=stage.clientWidth-16,ah=stage.clientHeight-40;
+    Z=Math.max(1.2,Math.min(4,aw/AREA.iframeW,ah/AREA.iframeH));
+    const holder=$("ceHolder");
+    holder.style.width=(AREA.iframeW*Z)+"px";
+    holder.style.height=(AREA.iframeH*Z)+"px";
+    $("ceFrame").style.transform="scale("+Z+")";
+  }
+
+  let drag=null;
+  const stageEl=$("ceStage");
+  stageEl.addEventListener("pointerdown",e=>{
+    const target=(sel==="all")?S.global:S.layers[sel];
+    drag={id:e.pointerId,sx:e.clientX,sy:e.clientY,x0:target.x,y0:target.y};
+    stageEl.classList.add("drag");
+    try{stageEl.setPointerCapture(e.pointerId)}catch(_){}
+    e.preventDefault();
+  });
+  stageEl.addEventListener("pointermove",e=>{
+    if(!drag||e.pointerId!==drag.id)return;
+    let dx=(e.clientX-drag.sx)/Z,dy=(e.clientY-drag.sy)/Z;
+    const target=(sel==="all")?S.global:S.layers[sel];
+    if(sel!=="all"){
+      const g=S.global,r=-g.angle*Math.PI/180,c=Math.cos(r),s=Math.sin(r);
+      const rx=dx*c-dy*s,ry=dx*s+dy*c;
+      dx=rx/(g.scale||1);dy=ry/(g.scale||1);
+    }
+    target.x=round(drag.x0+dx,1);target.y=round(drag.y0+dy,1);
+    apply();updatePanelValues();
+  });
+  function endDrag(e){if(!drag||(e&&e.pointerId!==drag.id))return;drag=null;stageEl.classList.remove("drag");save()}
+  stageEl.addEventListener("pointerup",endDrag);
+  stageEl.addEventListener("pointercancel",endDrag);
+
+  function fmt(){
+    const ord=S.order;
+    const line=(arr,f)=>arr.map((k,i)=>"  "+f(k)+(i<arr.length-1?",":"")+" // "+(i+1)+" "+byKey(k).name+"（"+byKey(k).sub+"）").join("\n");
+    const L=S.layers,g=S.global;
+    return "/* チャイムくん シークレット衣装（奥 → 手前の順） */\n"+
+      "const CHIME_SECRET_LAYERS = [\n"+line(ord,k=>JSON.stringify(byKey(k).file))+"\n];\n\n"+
+      "const CHIME_LAYER_POSITIONS = [\n"+line(ord,k=>"{x:"+L[k].x+",y:"+L[k].y+"}")+"\n];\n\n"+
+      "const CHIME_LAYER_SIZES = [\n"+line(ord,k=>"{width:100,height:100,scale:"+L[k].scale+",angle:"+L[k].angle+"}")+"\n];\n\n"+
+      "const CHIME_LAYER_ENABLED = [\n"+line(ord,k=>String(L[k].on))+"\n];\n\n"+
+      "const CHIME_SECRET_GLOBAL = {x:"+g.x+",y:"+g.y+",scale:"+g.scale+",angle:"+g.angle+"};";
+  }
+
+  const panel=$("cePanel");
+  let outEl=null;
+  const valEls={};
+  function targetObj(){return sel==="all"?S.global:S.layers[sel]}
+  function updatePanelValues(){
+    const t=targetObj();
+    ["x","y","scale","angle"].forEach(k=>{if(valEls[k])valEls[k].textContent=t[k]});
+    if(outEl)outEl.value=fmt();
+  }
+  function mkBtn(text,fn,cls){const b=document.createElement("button");b.textContent=text;if(cls)b.className=cls;b.onclick=fn;return b}
+
+  function build(){
+    panel.innerHTML="";
+    const h=document.createElement("h1");h.textContent="チャイムくん 位置調整";panel.appendChild(h);
+    const n=document.createElement("div");n.className="note";n.textContent="レイヤーを選んで、画面をドラッグ。細かい調整はボタンで。";panel.appendChild(n);
+
+    const grid=document.createElement("div");grid.className="layers";
+    [...S.order].reverse().forEach(k=>{
+      const L=byKey(k);const b=document.createElement("button");
+      b.innerHTML=(S.layers[k].on?"":"✕ ")+L.name+"<small>"+L.sub+"</small>";
+      if(sel===k)b.classList.add("on");
+      if(!S.layers[k].on)b.classList.add("off");
+      b.onclick=()=>{sel=k;build();apply()};grid.appendChild(b);
+    });
+    const allB=document.createElement("button");allB.innerHTML="全体<small>まとめて動かす</small>";
+    if(sel==="all")allB.classList.add("on");
+    allB.onclick=()=>{sel="all";build();apply()};grid.appendChild(allB);panel.appendChild(grid);
+    const order=document.createElement("div");order.className="note";order.textContent="↑ 上ほど手前、下ほど奥に表示されます";panel.appendChild(order);
+
+    if(sel!=="all"){
+      const r1=document.createElement("div");r1.className="row";
+      r1.appendChild(mkBtn(S.layers[sel].on?"隠す":"表示する",()=>{S.layers[sel].on=!S.layers[sel].on;save();build();apply()}));
+      r1.appendChild(mkBtn("他を薄く",()=>{solo=!solo;build();apply()},solo?"on":""));panel.appendChild(r1);
+      const r2=document.createElement("div");r2.className="row";
+      r2.appendChild(mkBtn("◀ 奥へ",()=>move(-1)));r2.appendChild(mkBtn("手前へ ▶",()=>move(1)));panel.appendChild(r2);
+    }
+
+    const t=targetObj();
+    const defs=[["x（右＋）","x",[-5,-1,1,5],1],["y（下＋）","y",[-5,-1,1,5],1],["大きさ","scale",[-0.05,-0.01,0.01,0.05],2],["角度","angle",[-5,-1,1,5],1]];
+    defs.forEach(([label,key,steps,prec])=>{
+      const row=document.createElement("div");row.className="row";const nm=document.createElement("b");nm.textContent=label;row.appendChild(nm);
+      steps.forEach((st,i)=>{row.appendChild(mkBtn((st>0?"+":"")+st,()=>{const o=targetObj();o[key]=round(o[key]+st,prec);if(key==="scale"&&o[key]<0.05)o[key]=0.05;apply();updatePanelValues();save()}));if(i===1){const v=document.createElement("span");v.className="val";v.textContent=t[key];valEls[key]=v;row.appendChild(v)}});
+      panel.appendChild(row);
+    });
+
+    const act=document.createElement("div");act.className="row";
+    const cp=mkBtn("数値をコピー",()=>{outEl.value=fmt();const done=()=>{cp.textContent="コピーしました";setTimeout(()=>cp.textContent="数値をコピー",1500)};if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(outEl.value).then(done).catch(()=>{outEl.select();document.execCommand("copy");done()})}else{outEl.select();document.execCommand("copy");done()}});
+    const rs=mkBtn("最初に戻す",()=>{if(!confirm("調整した内容をすべて最初に戻しますか？"))return;S=defaults();save();sel="base";build();buildLayers()});
+    act.append(cp,rs);panel.appendChild(act);
+
+    outEl=document.createElement("textarea");outEl.readOnly=true;outEl.value=fmt();panel.appendChild(outEl);
+
+    const lab=document.createElement("label");lab.className="file";lab.textContent="画像を選ぶ（6枚まとめて・costumes/にまだ無いとき用）";
+    const inp=document.createElement("input");inp.type="file";inp.multiple=true;inp.accept="image/png,image/*";
+    inp.onchange=()=>{[...inp.files].forEach(f=>{const m=f.name.match(/(base|layer-0[1-5])/i);if(m)customSrc[m[1].toLowerCase()]=URL.createObjectURL(f)});loadFail=0;$("ceWarn").style.display="none";buildLayers()};
+    lab.appendChild(document.createElement("br"));lab.appendChild(inp);panel.appendChild(lab);updatePanelValues();
+  }
+
+  function move(dir){const i=S.order.indexOf(sel),j=i+dir;if(i<0||j<0||j>=S.order.length)return;const a=S.order;[a[i],a[j]]=[a[j],a[i]];save();build();buildLayers()}
+
+  window.addEventListener("resize",layout);
+  layout();build();buildLayers();setTimeout(layout,300);
+
+})();
+}
+
+</script>
+
+</body>
+</html>
