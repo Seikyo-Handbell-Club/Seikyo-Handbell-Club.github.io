@@ -286,7 +286,8 @@ body.logged-in .bubble:after{
 }
 
 /* =====================================================
-   シークレット用・三日月
+   シークレット用：三日月
+   ハートとまったく同じ飛び方・タイミングを使用
 ===================================================== */
 
 .crescent-moon{
@@ -308,52 +309,13 @@ body.logged-in .bubble:after{
       var(--start-x),
       var(--start-y)
     )
-    scale(.3);
+    scale(.4);
 
   animation:
-    crescentFly
+    heartFly
     1.8s
     cubic-bezier(.2,.75,.25,1)
     forwards;
-
-  text-shadow:
-    0 0 5px rgba(255,235,150,.9);
-}
-
-@keyframes crescentFly{
-
-  0%{
-    opacity:0;
-
-    transform:
-      translate(
-        var(--start-x),
-        var(--start-y)
-      )
-      scale(.3)
-      rotate(0deg);
-  }
-
-  12%{
-    opacity:1;
-  }
-
-  45%{
-    opacity:1;
-  }
-
-  100%{
-    opacity:0;
-
-    transform:
-      translate(
-        var(--end-x),
-        var(--end-y)
-      )
-      scale(1)
-      rotate(var(--rotate));
-  }
-
 }
 
 /* =====================================================
@@ -3751,116 +3713,10 @@ function changeBellMessage(){
 }
 
 /* =====================================================
-   シークレット用・三日月
-===================================================== */
-
-function startCrescentMoon(){
-
-  if(
-    !heartContainer
-  ){
-
-    return;
-
-  }
-
-  const moonPositions=[];
-
-  for(
-    let i=0;
-    i<34;
-    i++
-  ){
-
-    moonPositions.push({
-
-      startX:
-        -55 +
-        Math.random()*110,
-
-      startY:
-        -10 +
-        Math.random()*25,
-
-      endX:
-        -130 +
-        Math.random()*260,
-
-      endY:
-        -120 -
-        Math.random()*150
-
-    });
-
-  }
-
-  moonPositions.forEach(
-    moon=>{
-
-      const el =
-        document.createElement(
-          "span"
-        );
-
-      el.className =
-        "crescent-moon";
-
-      el.textContent =
-        "☾";
-
-      el.style.setProperty(
-        "--start-x",
-        `${moon.startX}px`
-      );
-
-      el.style.setProperty(
-        "--start-y",
-        `${moon.startY}px`
-      );
-
-      el.style.setProperty(
-        "--end-x",
-        `${moon.endX}px`
-      );
-
-      el.style.setProperty(
-        "--end-y",
-        `${moon.endY}px`
-      );
-
-      el.style.setProperty(
-        "--rotate",
-        `${-90+Math.random()*180}deg`
-      );
-
-      el.style.fontSize =
-        `${13+Math.random()*10}px`;
-
-      el.style.animationDuration =
-        `${1.55+Math.random()*.35}s`;
-
-      heartContainer.appendChild(
-        el
-      );
-
-      el.addEventListener(
-        "animationend",
-        ()=>{
-          el.remove();
-        },
-        {once:true}
-      );
-
-    }
-  );
-
-}
-
-/* =====================================================
    大量のハート
 ===================================================== */
 
-function startHearts(){
+function startHearts(type="heart"){
 
   if(
     !heartContainer
@@ -4135,12 +3991,16 @@ function startHearts(){
         );
 
       heart.className =
-        "heart";
+        type === "crescent"
+          ? "crescent-moon"
+          : "heart";
 
       heart.textContent =
-        index % 4 === 0
-          ? "♡"
-          : "♥";
+        type === "crescent"
+          ? "☾"
+          : (index % 4 === 0
+              ? "♡"
+              : "♥");
 
       heart.style.setProperty(
         "--start-x",
@@ -4394,29 +4254,56 @@ function celebrate(){
       "bubble-hidden"
     );
 
-    /* シークレットも通常と同じ2回ジャンプ */
-    bellImage.classList.remove(
+    /* ノーマルと同じ2回ジャンプ。出すものだけ三日月に変更 */
+    secretCostume.classList.remove(
       "celebrating"
     );
 
-    void bellImage.offsetWidth;
+    void secretCostume.offsetWidth;
 
-    bellImage.classList.add(
+    secretCostume.classList.add(
       "celebrating"
     );
 
     setTimeout(
       ()=>{
-        startCrescentMoon();
+        startHearts("crescent");
       },
       150
     );
 
     setTimeout(
       ()=>{
-        startCrescentMoon();
+        startHearts("crescent");
       },
       950
+    );
+
+    setTimeout(
+      ()=>{
+
+        secretCostume.classList.remove(
+          "celebrating"
+        );
+
+        changeBellMessage();
+
+        bubble.classList.remove(
+          "bubble-hidden"
+        );
+
+        bubble.style.animation =
+          "none";
+
+        void bubble.offsetWidth;
+
+        bubble.style.animation =
+          "";
+
+        isAnimating=false;
+
+      },
+      1800
     );
 
     return;
