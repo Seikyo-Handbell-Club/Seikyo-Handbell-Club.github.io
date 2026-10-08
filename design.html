@@ -1439,20 +1439,66 @@ function renderSecretCostume(
         sizes[index] ||
         {width:100,height:100,scale:1,angle:0};
 
-      layerWrap.style.width =
-        `${layerSize.width}%`;
+      /* =====================================================
+         ★ チャイムくんだけ高画質描画
 
-      layerWrap.style.height =
-        `${layerSize.height}%`;
+         元の実装では、90px前後の小さなwrapper内に画像を
+         いったん縮小してから、CSS transform の scale(2.25)
+         で拡大していました。
 
-      layerWrap.style.left =
-        `${(100-layerSize.width)/2}%`;
+         これだとブラウザが「小さくラスタライズ → 拡大」する
+         ため、ベースの細かいドレス模様がぼやけます。
 
-      layerWrap.style.top =
-        `${(100-layerSize.height)/2}%`;
+         チャイムくんでは scale を transform で後から掛けず、
+         最初から拡大後のサイズで画像をレイアウトします。
+         見た目の中心・位置・角度は従来と同じになるように
+         wrapperを中心基準で大きくします。
+      ===================================================== */
 
-      layerWrap.style.transform =
-        `translate(${layerPosition.x}px, ${layerPosition.y}px) scale(${layerSize.scale}) rotate(${layerSize.angle}deg)`;
+      if(isChime){
+
+        const renderScale =
+          layerSize.scale || 1;
+
+        const renderWidth =
+          layerSize.width * renderScale;
+
+        const renderHeight =
+          layerSize.height * renderScale;
+
+        layerWrap.style.width =
+          `${renderWidth}%`;
+
+        layerWrap.style.height =
+          `${renderHeight}%`;
+
+        layerWrap.style.left =
+          `${(100-renderWidth)/2}%`;
+
+        layerWrap.style.top =
+          `${(100-renderHeight)/2}%`;
+
+        layerWrap.style.transform =
+          `translate(${layerPosition.x}px, ${layerPosition.y}px) rotate(${layerSize.angle}deg)`;
+
+      }else{
+
+        layerWrap.style.width =
+          `${layerSize.width}%`;
+
+        layerWrap.style.height =
+          `${layerSize.height}%`;
+
+        layerWrap.style.left =
+          `${(100-layerSize.width)/2}%`;
+
+        layerWrap.style.top =
+          `${(100-layerSize.height)/2}%`;
+
+        layerWrap.style.transform =
+          `translate(${layerPosition.x}px, ${layerPosition.y}px) scale(${layerSize.scale}) rotate(${layerSize.angle}deg)`;
+
+      }
 
       layerWrap.style.transformOrigin =
         "center center";
@@ -1483,6 +1529,14 @@ function renderSecretCostume(
 
       img.style.objectPosition =
         "center center";
+
+      if(isChime){
+        /* ブラウザに低解像度の縮小画像として扱わせない */
+        img.style.imageRendering =
+          "auto";
+        img.decoding =
+          "async";
+      }
 
       img.onload =
         ()=>{
