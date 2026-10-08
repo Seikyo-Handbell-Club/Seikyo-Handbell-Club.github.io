@@ -320,40 +320,40 @@ body.logged-in .bubble:after{
     cubic-bezier(.2,.75,.25,1)
     forwards;
 }
-/* =====================================================
-   シークレット用：太陽
-   三日月・ハートと同じ飛び方・タイミング
-===================================================== */
-
-.sun-effect{
-  position:absolute;
-  left:0;
-  top:0;
-  color:#FFD43B;
-  text-shadow:0 0 5px #FFD43B;
-  font-size:18px;
-  line-height:1;
-  opacity:0;
-  transform:translate(var(--start-x),var(--start-y)) scale(.4);
-  animation:heartFly 1.8s cubic-bezier(.2,.75,.25,1) forwards;
-}
 
 /* =====================================================
-   シークレット用：花
-   三日月・ハートと同じ飛び方・タイミング
+   チャイムくん用：太陽＋花
+   1回の演出の中で両方を一緒に飛ばす
 ===================================================== */
 
-.flower-effect{
+.chime-effect{
   position:absolute;
+
   left:0;
   top:0;
-  font-size:18px;
-  line-height:1;
-  opacity:0;
-  transform:translate(var(--start-x),var(--start-y)) scale(.4);
-  animation:heartFly 1.8s cubic-bezier(.2,.75,.25,1) forwards;
-}
 
+  font-size:18px;
+
+  line-height:1;
+
+  opacity:0;
+
+  transform:
+    translate(
+      var(--start-x),
+      var(--start-y)
+    )
+    scale(.4);
+
+  animation:
+    heartFly
+    1.8s
+    cubic-bezier(.2,.75,.25,1)
+    forwards;
+
+  filter:
+    drop-shadow(0 0 3px rgba(255,255,255,.7));
+}
 /* =====================================================
    ハートが飛び散る
 ===================================================== */
@@ -4058,22 +4058,18 @@ function startHearts(type="heart"){
       heart.className =
         type === "crescent"
           ? "crescent-moon"
-          : (type === "sun"
-              ? "sun-effect"
-              : (type === "flower"
-                  ? "flower-effect"
-                  : "heart"));
+          : type === "sunflower"
+            ? "chime-effect"
+            : "heart";
 
       heart.textContent =
         type === "crescent"
           ? "☾"
-          : (type === "sun"
-              ? "☀"
-              : (type === "flower"
-                  ? "🌸"
-                  : (index % 4 === 0
-                      ? "♡"
-                      : "♥")));
+          : type === "sunflower"
+            ? (index % 2 === 0 ? "☀️" : "🌸")
+            : (index % 4 === 0
+                ? "♡"
+                : "♥");
 
       heart.style.setProperty(
         "--start-x",
@@ -4327,7 +4323,16 @@ function celebrate(){
       "bubble-hidden"
     );
 
-    /* ノーマルと同じ2回ジャンプ。出すものだけ三日月に変更 */
+    /*
+     * ベルちゃんは今まで通り三日月。
+     * チャイムくんは1回の演出の中で
+     * 太陽＋花を同時に飛ばす。
+     */
+    const secretEffectType =
+      currentCharacter === "chime"
+        ? "sunflower"
+        : "crescent";
+
     secretCostume.classList.remove(
       "celebrating"
     );
@@ -4338,26 +4343,16 @@ function celebrate(){
       "celebrating"
     );
 
-    /*
-     * ベルちゃんは三日月のまま。
-     * チャイムくんは太陽か花をランダムで選び、
-     * 2回とも同じ種類を出す。
-     */
-    const secretEffect =
-      currentCharacter === "chime"
-        ? (Math.random() < 0.5 ? "sun" : "flower")
-        : "crescent";
-
     setTimeout(
       ()=>{
-        startHearts(secretEffect);
+        startHearts(secretEffectType);
       },
       150
     );
 
     setTimeout(
       ()=>{
-        startHearts(secretEffect);
+        startHearts(secretEffectType);
       },
       950
     );
