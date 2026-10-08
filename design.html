@@ -803,7 +803,7 @@ const SECRET_BELL_LAYERS = [
 const CHIME_SECRET_LAYERS = [
   "costumes/chime-secret-layer-03.png", // 1 layer-03（雲のフリル）
   "costumes/chime-secret-layer-02.png", // 2 layer-02（裾のヒラヒラ）
-  "costumes/chime-secret-base.png",     // 3 base（本体＋ドレス）
+  "costumes/chime-secret-base-max.png",     // 3 base（本体＋ドレス）
   "costumes/chime-secret-layer-05.png", // 4 layer-05（太陽＋花の飾り）
   "costumes/chime-secret-layer-01.png", // 5 layer-01（大きなリボン）
   "costumes/chime-secret-layer-04.png"  // 6 layer-04（星のチャーム）
@@ -837,9 +837,9 @@ const CHIME_LAYER_ENABLED = [
 ];
 
 const CHIME_SECRET_GLOBAL = {
-  x:-50,
-  y:30,
-  scale:0.7,
+  x:15,
+  y:-25,
+  scale:0.85,
   angle:0
 };
 
@@ -1210,83 +1210,6 @@ async function prepareSecretLayer(
       pixels[
         i*4+3
       ]=0;
-
-    }
-
-  }
-
-  /* =====================================================
-     ★ チャイムくん・ベースだけ画質補正
-     小さく表示したときに潰れやすい細部を
-     ごく弱いシャープ処理で補正する。
-
-     他のシークレットレイヤーには適用しない。
-  ===================================================== */
-
-  if(src.includes("chime-secret-base.png")){
-
-    const sourcePixels =
-      new Uint8ClampedArray(
-        pixels
-      );
-
-    const sharpenAmount = 0.22;
-
-    for(let y=1; y<height-1; y++){
-
-      for(let x=1; x<width-1; x++){
-
-        const index =
-          (y*width+x)*4;
-
-        const alpha =
-          sourcePixels[index+3];
-
-        /* ほぼ透明な場所は触らない */
-        if(alpha < 32){
-          continue;
-        }
-
-        for(let channel=0; channel<3; channel++){
-
-          const center =
-            sourcePixels[index+channel];
-
-          const left =
-            sourcePixels[index-4+channel];
-
-          const right =
-            sourcePixels[index+4+channel];
-
-          const up =
-            sourcePixels[index-width*4+channel];
-
-          const down =
-            sourcePixels[index+width*4+channel];
-
-          const edge =
-            center*4
-            -left
-            -right
-            -up
-            -down;
-
-          const sharpened =
-            center +
-            edge*sharpenAmount;
-
-          pixels[index+channel] =
-            Math.max(
-              0,
-              Math.min(
-                255,
-                Math.round(sharpened)
-              )
-            );
-
-        }
-
-      }
 
     }
 
@@ -4898,7 +4821,7 @@ if(new URLSearchParams(location.search).get("edit")==="chime"){
   const BOX_Y=AREA.top+FRAME.top;
 
   const LAYERS=[
-    {key:"base",name:"base",sub:"本体＋ドレス",file:"costumes/chime-secret-base.png",w:512,h:768},
+    {key:"base",name:"base",sub:"本体＋ドレス",file:"costumes/chime-secret-base-max.png",w:512,h:768},
     {key:"layer-01",name:"layer-01",sub:"大きなリボン",file:"costumes/chime-secret-layer-01.png",w:868,h:920},
     {key:"layer-02",name:"layer-02",sub:"裾のヒラヒラ",file:"costumes/chime-secret-layer-02.png",w:1230,h:828},
     {key:"layer-03",name:"layer-03",sub:"雲のフリル",file:"costumes/chime-secret-layer-03.png",w:840,h:596},
