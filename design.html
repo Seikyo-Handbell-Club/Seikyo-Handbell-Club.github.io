@@ -954,17 +954,42 @@ async function prepareSecretLayer(
   image.src =
     src;
 
-  await new Promise(
-    (resolve,reject)=>{
+  try{
 
-      image.onload =
-        resolve;
+    await new Promise(
+      (resolve,reject)=>{
 
-      image.onerror =
-        reject;
+        image.onload =
+          resolve;
+
+        image.onerror =
+          reject;
+
+      }
+    );
+
+  }catch(error){
+
+    /*
+     * 高画質版がまだGitHub側に置かれていない場合でも、
+     * シークレット衣装そのものが消えないように元画像へ戻す。
+     */
+    if(
+      src.includes("chime-secret-base-max.png")
+    ){
+
+      return prepareSecretLayer(
+        src.replace(
+          "chime-secret-base-max.png",
+          "chime-secret-base.png"
+        )
+      );
 
     }
-  );
+
+    throw error;
+
+  }
 
   const width =
     image.naturalWidth;
