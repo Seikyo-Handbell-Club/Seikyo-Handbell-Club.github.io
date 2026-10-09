@@ -1379,7 +1379,7 @@ function renderSecretCostume(
     );
 
     secretDisplayedCharacter = character;
-    if(!wasSecretShowingForCharacter) startHearts(String(character).toLowerCase() === "chime" ? "crescent" : "heart");
+    if(!wasSecretShowingForCharacter) startHearts(String(character).toLowerCase() === "chime" ? "sunflower" : "heart");
     return;
 
   }
@@ -1577,7 +1577,7 @@ function renderSecretCostume(
             );
 
             secretDisplayedCharacter = character;
-            if(!wasSecretShowingForCharacter) startHearts(String(character).toLowerCase() === "chime" ? "crescent" : "heart");
+            if(!wasSecretShowingForCharacter) startHearts(String(character).toLowerCase() === "chime" ? "sunflower" : "heart");
             requestAnimationFrame(sendBellHitBounds);
 
           }
@@ -4421,14 +4421,14 @@ function celebrate(){
 
     setTimeout(
       ()=>{
-        startHearts(currentCharacter === "chime" ? "crescent" : "heart");
+        startHearts(currentCharacter === "chime" ? "sunflower" : "heart");
       },
       150
     );
 
     setTimeout(
       ()=>{
-        startHearts(currentCharacter === "chime" ? "crescent" : "heart");
+        startHearts(currentCharacter === "chime" ? "sunflower" : "heart");
       },
       950
     );
