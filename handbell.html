@@ -5877,6 +5877,12 @@ async function showEdit(){
     }
   }
 
+  /* マイページを開くたびにFirebaseの最新設定を読み直す */
+  try{
+    const latestProfileSnap = await get(ref(db, `members/${currentUser.uid}`));
+    if(latestProfileSnap.exists()) profile = {...profile, ...(latestProfileSnap.val() || {})};
+  }catch(e){ console.warn("最新プロフィールの読み込みに失敗しました:", e); }
+
   hide();
 
   $("editView").classList.remove("hidden");
@@ -7409,8 +7415,8 @@ async function decideLoginImage(){
   /* 今月OFFの記録を最優先。古いlocalStorageのONで復活させない */
   const monthlyEnabled = monthlyDisabledMonth === monthKey
     ? false
-    : data.monthlyImageEnabled === false
-      ? false
+    : typeof data.monthlyImageEnabled === "boolean"
+      ? data.monthlyImageEnabled
       : savedMonthlySetting !== null
         ? savedMonthlySetting
         : true;

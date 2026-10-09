@@ -32,6 +32,8 @@ body{
   width:min(760px,100%);
   margin:0 auto;
 }
+.top-back-row{display:flex;justify-content:flex-start;margin:0 0 12px;}
+.top-back-row button{border:1px solid #d5e0e7;border-radius:12px;background:#fff;color:#26343d;padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer;}
 
 .card{
   background:#fff;
@@ -246,6 +248,10 @@ button:disabled{
 
 <div class="page">
 
+  <div class="top-back-row">
+    <button id="topBackButton" type="button" class="secondary">← マイページに戻る</button>
+  </div>
+
   <div class="card">
     <h1>👕 着替える</h1>
     <p class="small">
@@ -281,7 +287,7 @@ button:disabled{
       class="secondary"
       type="button"
     >
-      ← マイページに戻る
+      ← ホームに戻る
     </button>
 
     <div id="message"></div>
@@ -583,9 +589,10 @@ async function loadMemberData(){
 
     };
 
+    /* 選択は仮状態。保存ボタンを押すまでは装備を変更しない */
     selectedCostume = {
-      bell: equippedCostume.bell || "normal",
-      chime: equippedCostume.chime || "normal"
+      bell: null,
+      chime: null
     };
 
     return true;
@@ -760,16 +767,15 @@ selectChime.addEventListener("click",()=>{selectedCharacter="chime";renderAll();
    戻る
 ========================= */
 
-backButton.addEventListener(
-  "click",
-  ()=>{
-    if(window.parent !== window){
-      window.parent.postMessage({type:"handbell-close-costume"}, "*");
-    }else{
-      location.href = "handbell.html";
-    }
+function returnFromCostume(){
+  if(window.parent !== window){
+    window.parent.postMessage({type:"handbell-close-costume"}, "*");
+  }else{
+    location.href = "handbell.html";
   }
-);
+}
+backButton.addEventListener("click", returnFromCostume);
+topBackButton.addEventListener("click", returnFromCostume);
 
 saveButton.addEventListener(
   "click",
