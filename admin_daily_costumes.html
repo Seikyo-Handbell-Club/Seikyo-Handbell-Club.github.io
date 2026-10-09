@@ -236,9 +236,16 @@ GitHub上の画像ファイルは削除されません。`))return;
     message("uploadMsg","登録解除に失敗しました。\n\n"+(e.message||"不明"),"error");
   }
 }
-// キャラクター切り替えは現在の画面内だけで行い、ページ遷移・再読み込みをしない
-$("bellButton").addEventListener("click",e=>{e.preventDefault();e.stopPropagation();setCharacter("bell");});
-$("chimeButton").addEventListener("click",e=>{e.preventDefault();e.stopPropagation();setCharacter("chime");});
+// キャラクター切り替えは画面内だけで行う。
+// capture段階で処理し、ほかのクリック処理によるページ遷移・再読み込みも防ぐ。
+document.addEventListener("click",e=>{
+  const button=e.target.closest("#bellButton, #chimeButton");
+  if(!button)return;
+  e.preventDefault();
+  e.stopPropagation();
+  e.stopImmediatePropagation();
+  setCharacter(button.id==="chimeButton"?"chime":"bell");
+},true);
 $("costumeFiles").onchange=renderSelectedFiles;
 $("uploadButton").onclick=registerSelected;
 $("logoutButton").onclick=()=>signOut(auth);
