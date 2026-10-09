@@ -2169,6 +2169,8 @@ textarea{
 
 <script type="module">
 
+import { awardRandomCostumeOnPageOpen } from "./costume-system.js";
+
 import{
   initializeApp
 }
@@ -2307,18 +2309,33 @@ let equippedCostume = {
    毎日もらえる衣装
    ※ コレクションとは完全に別管理
 ========================= */
-const dailyCostumeDefinitions = [
-  {
-    id:"daily-costume-01",
-    name:"毎日衣装 01",
-    src:"costumes/daily-costume-01.png"
-  },
-  {
-    id:"daily-costume-02",
-    name:"毎日衣装 02",
-    src:"costumes/daily-costume-02.png"
-  }
-];
+/*
+ * 毎日衣装の画像はキャラクター別に管理。
+ * ベルちゃん：ZIPから連携した54枚（高画質WebP）
+ * チャイムくん：これまでの既存2枚を維持
+ */
+const dailyCostumeDefinitions = {
+  bell: Array.from({length:54}, (_, index) => {
+    const number = String(index + 1).padStart(2,"0");
+    return {
+      id:`daily-costume-${number}`,
+      name:`毎日衣装 ${number}`,
+      src:`costumes/daily-costume-${number}.webp`
+    };
+  }),
+  chime: [
+    {
+      id:"daily-costume-01",
+      name:"毎日衣装 01",
+      src:"costumes/daily-costume-01.png"
+    },
+    {
+      id:"daily-costume-02",
+      name:"毎日衣装 02",
+      src:"costumes/daily-costume-02.png"
+    }
+  ]
+};
 
 let dailyCostumes = {
   bell:{},
@@ -2336,7 +2353,8 @@ function getDailyCostumeCharacter(){
 
 function getDailyCostumeAvailable(character){
   const owned = dailyCostumes?.[character] || {};
-  return dailyCostumeDefinitions.filter(item => !owned[item.id]);
+  const definitions = dailyCostumeDefinitions?.[character] || [];
+  return definitions.filter(item => !owned[item.id]);
 }
 
 function showDailyCostumeGift(character,costume){
@@ -2446,7 +2464,8 @@ async function acquireDailyCostume(){
 
     if(!gift) return;
 
-    const costume = dailyCostumeDefinitions.find(item => item.id === gift.id);
+    const costume = (dailyCostumeDefinitions?.[gift.character] || [])
+      .find(item => item.id === gift.id);
     if(!costume) return;
 
     /* 既存の衣装データを消さず、今回の1着だけ追加 */
@@ -3354,6 +3373,24 @@ onAuthStateChanged(
        同じ日付・キャラクター条件で確認して記録する。
     ========================= */
     acquireTodayCharacterCostume();
+
+    /* 新しい衣装システム：テスト中はページを開くたびに、
+       選択中キャラクターの未取得衣装を1着だけ獲得する。
+       シークレット衣装抽選とは別処理。 */
+    await awardRandomCostumeOnPageOpen({
+      db,
+      ref,
+      get,
+      set,
+      currentUser,
+      profile,
+      collectionItems,
+      getCachedCollectionData,
+      saveCollectionDataCache,
+      renderCollection,
+      updateCollectionMiniCount,
+      collectionView: $("collectionView")
+    });
 
 
     $("loggedOutLeft")
