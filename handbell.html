@@ -6306,7 +6306,7 @@ async function toggleMonthlyImage(){
   const msg = $("monthlyImageSettingMsg");
   if(!currentUser){
     toggle.checked = true;
-    if(msg) msg.innerHTML = '<div class="msg error">設定を変更するにはログインしてください。</div>';
+    if(msg) msg.innerHTML = '<div class="msg error">【エラーコード: MI-001】設定を変更するにはログインしてください。</div>';
     showLogin();
     return;
   }
@@ -6315,7 +6315,7 @@ async function toggleMonthlyImage(){
     try{ await loadProfile(); }catch(e){}
     if(!profile){
       toggle.checked = !toggle.checked;
-      if(msg) msg.innerHTML = '<div class="msg error">プロフィールを読み込めませんでした。もう一度お試しください。</div>';
+      if(msg) msg.innerHTML = '<div class="msg error">【エラーコード: MI-002】プロフィールを読み込めませんでした。もう一度お試しください。</div>';
       return;
     }
   }
@@ -6344,7 +6344,8 @@ async function toggleMonthlyImage(){
     if(msg) msg.innerHTML = `<div class="msg">${enabled ? "毎月の画像を表示します。" : "今月の毎月の画像を表示しません。"}</div>`;
   }catch(e){
     console.error("毎月の画像設定のFirebase保存エラー:", e);
-    if(msg) msg.innerHTML = '<div class="msg">この端末には設定を保存しました。サーバーへの保存はできなかったため、別の端末にはまだ反映されない可能性があります。</div>';
+    const errorCode = e && e.code ? String(e.code) : "unknown";
+    if(msg) msg.innerHTML = `<div class="msg error">【エラーコード: MI-003】この端末には設定を保存しましたが、サーバーへの保存に失敗しました。別の端末には反映されない可能性があります。<br>詳細コード: ${errorCode}</div>`;
   }finally{
     toggle.disabled = false;
   }
@@ -6673,6 +6674,10 @@ window.backMyPage =
 
 window.saveCharacterSetting =
   saveCharacterSetting;
+
+
+window.toggleMonthlyImage =
+  toggleMonthlyImage;
 
 
 window.saveProfile =
