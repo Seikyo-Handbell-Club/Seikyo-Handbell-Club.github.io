@@ -6211,8 +6211,8 @@ async function showMyPage(){
     /* Firebaseの今月OFF記録を優先し、古い端末内設定でONに戻らないようにする */
     monthlyToggle.checked = disabledMonth === currentMonthKey
       ? false
-      : profile.monthlyImageEnabled === false
-        ? false
+      : typeof profile.monthlyImageEnabled === "boolean"
+        ? profile.monthlyImageEnabled
         : savedLocal !== null ? savedLocal : true;
   }
 
@@ -7406,11 +7406,14 @@ async function decideLoginImage(){
       savedMonthlySetting = saved.enabled;
     }
   }catch(e){}
-  const monthlyEnabled = savedMonthlySetting !== null
-    ? savedMonthlySetting
-    : monthlyDisabledMonth
-      ? monthlyDisabledMonth !== monthKey
-      : data.monthlyImageEnabled !== false;
+  /* 今月OFFの記録を最優先。古いlocalStorageのONで復活させない */
+  const monthlyEnabled = monthlyDisabledMonth === monthKey
+    ? false
+    : data.monthlyImageEnabled === false
+      ? false
+      : savedMonthlySetting !== null
+        ? savedMonthlySetting
+        : true;
 
   if(monthlyEnabled){
     return {

@@ -281,7 +281,7 @@ button:disabled{
       class="secondary"
       type="button"
     >
-      ← ホームに戻る
+      ← マイページに戻る
     </button>
 
     <div id="message"></div>
@@ -653,10 +653,9 @@ function closeImageLightbox(){
   if(!box)return; box.classList.remove("show"); box.setAttribute("aria-hidden","true");
   document.getElementById("imageLightboxImg").src="";
 }
+/* 衣装選択画面では画像の拡大操作を無効化し、カードの選択を優先する */
 document.addEventListener("click",function(e){
-  if(e.target.closest(".image-lightbox-close") || e.target.id==="imageLightbox") { closeImageLightbox(); return; }
-  const img=e.target.closest(".costume-card img");
-  if(img){ e.preventDefault(); e.stopPropagation(); openImageLightbox(img.src,img.alt); }
+  if(e.target.closest(".image-lightbox-close") || e.target.id==="imageLightbox") { closeImageLightbox(); }
 },true);
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeImageLightbox();});
 
