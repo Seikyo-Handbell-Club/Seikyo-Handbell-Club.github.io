@@ -1142,7 +1142,7 @@ textarea{
 
 
 /* 着替え画面：ホームを再読み込みせずに表示 */
-#changeCostumeOverlay{position:fixed;inset:0;z-index:2147483000;background:#f6f8fa;display:none;pointer-events:none;}
+#changeCostumeOverlay{position:fixed;inset:0;z-index:2147483647;background:#f6f8fa;display:none;pointer-events:none;isolation:isolate;}
 #changeCostumeOverlay.show{display:block;pointer-events:auto;}
 #changeCostumeFrame{display:block;position:absolute;inset:0;width:100%;height:100%;border:0;background:#f6f8fa;pointer-events:auto;z-index:1;}
 #collectionView{animation:none!important;transition:none!important;}
@@ -6201,8 +6201,7 @@ async function showMyPage(){
 
   const monthlyToggle = $("monthlyImageToggle");
   if(monthlyToggle){
-    const now = new Date();
-    const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
+    const currentMonthKey = getMonthlyImageMonthKey();
     const disabledMonth = String(profile.monthlyImageDisabledMonth || "");
     let savedLocal = null;
     try{
@@ -6283,6 +6282,11 @@ async function saveCharacterSetting(){
 
 
 
+function getMonthlyImageMonthKey(){
+  const d = typeof getAppDate === "function" ? getAppDate() : new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+}
+
 /* =========================
    毎月の画像設定
 ========================= */
@@ -6303,8 +6307,7 @@ async function toggleMonthlyImage(){
     }
   }
 
-  const now = new Date();
-  const monthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
+  const monthKey = getMonthlyImageMonthKey();
   const enabled = toggle.checked;
   const storageKey = `handbell-monthly-image-${currentUser.uid}`;
   const previousEnabled = !enabled;
@@ -7165,6 +7168,13 @@ async function updateCollectionMiniCount(){
 }
 
 function openCostumeOverlay(){
+  const welcomeOverlay = document.getElementById("welcomeOverlay");
+  if(welcomeOverlay){
+    welcomeOverlay.classList.remove("show","closing");
+    welcomeOverlay.setAttribute("aria-hidden","true");
+    welcomeOverlay.style.pointerEvents = "none";
+    welcomeOverlay.style.visibility = "hidden";
+  }
   if(!currentUser){ showLogin(); return; }
   /* 透明な残留オーバーレイがクリックを奪わないよう、表示前に他の画面オーバーレイを閉じる */
   ["collectionImageOverlay","costumeOverlay"].forEach(id=>{const other=document.getElementById(id);if(other){other.classList.remove("show");other.style.display="none";}});
@@ -7187,6 +7197,18 @@ function openCostumeOverlay(){
   }
   frame.onload = () => { frame.style.pointerEvents = "auto"; };
 }
+
+
+/* iPadで「着替える」のタップを確実に拾う */
+document.addEventListener("click", function(event){
+  const button = event.target && event.target.closest
+    ? event.target.closest('button[onclick="openCostumeOverlay()"]')
+    : null;
+  if(!button) return;
+  event.preventDefault();
+  event.stopPropagation();
+  openCostumeOverlay();
+}, true);
 
 function closeCostumeOverlay(){
   const overlay=$("changeCostumeOverlay");
@@ -7343,7 +7365,7 @@ async function decideLoginImage(){
 
   const today = getAppDate();
   const todayString = getTodayString(today);
-  const monthKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}`;
+  const monthKey = getMonthlyImageMonthKey();
   const memberRef = ref(db, `members/${currentUser.uid}`);
   const snap = await get(memberRef);
   const data = snap.exists() ? (snap.val() || {}) : {};
