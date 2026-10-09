@@ -401,14 +401,14 @@ const secretCostumeDefinitions = {
     id:"secret-bell",
     collectionId:"secret_bell_rare_costume",
     name:"ベルちゃん・シークレット衣装",
-    src:"costumes/bell-secret-main.png",
+    src:"costumes/bell-secret-complete.jpg",
     kind:"secret"
   },
   chime:{
     id:"secret-chime",
     collectionId:"secret_chime_rare_costume",
     name:"チャイムくん・シークレット衣装",
-    src:"costumes/chime-secret-main.png",
+    src:"costumes/chime-secret-complete.jpg",
     kind:"secret"
   }
 };
@@ -653,19 +653,11 @@ function renderCostumes(){
     const card=document.createElement("button");
     card.type="button"; card.className="costume-card";
     if(selectedCostume[character]===costume.id) card.classList.add("selected");
-    if(costume.kind === "secret") {
-      card.insertAdjacentHTML("beforeend", secretCostumePreviewHtml(character));
-      card.querySelectorAll(".secret-preview-wrap img").forEach(img=>{
-        img.addEventListener("error",()=>{
-          const src=img.getAttribute("src") || "";
-          if(src.includes("chime-secret-base-max.png") && img.dataset.fallbackUsed !== "true"){
-            img.dataset.fallbackUsed="true";
-            img.src=src.replace("chime-secret-base-max.png","chime-secret-base.png");
-          }
-        });
-      });
-    } else {
-      const image=document.createElement("img"); image.src=costume.src; image.alt=costume.name;
+    {
+      const image=document.createElement("img");
+      image.src=costume.src;
+      image.alt=costume.name;
+      image.loading="lazy";
       card.appendChild(image);
     }
     const name=document.createElement("div"); name.className="costume-name"; name.textContent=costume.name;

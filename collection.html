@@ -453,6 +453,15 @@ button:disabled{
 
 
       <!-- =========================
+           シークレット衣装
+      ========================== -->
+
+      <div class="costume-category">
+        <h2 class="costume-category-title">🌙 シークレット衣装</h2>
+        <div id="secretCostumes" class="costume-grid"></div>
+      </div>
+
+      <!-- =========================
            毎日衣装
       ========================== -->
 
@@ -797,6 +806,9 @@ const dailyCostumesContainer =
   document.getElementById(
     "dailyCostumes"
   );
+
+const secretCostumesContainer =
+  document.getElementById("secretCostumes");
 
 const saveButton =
   document.getElementById(
@@ -1151,6 +1163,9 @@ function renderWardrobe(){
   dailyCostumesContainer.innerHTML =
     "";
 
+  secretCostumesContainer.innerHTML =
+    "";
+
 
   const character =
     selectedCharacter;
@@ -1208,6 +1223,27 @@ function renderWardrobe(){
 
   }
 
+
+  /* ===================================================
+     シークレット衣装
+  =================================================== */
+  const secretId = character === "bell"
+    ? "secret_bell_rare_costume"
+    : "secret_chime_rare_costume";
+  const secretCostume = {
+    id: secretId,
+    name: character === "bell" ? "ベルちゃん・シークレット衣装" : "チャイムくん・シークレット衣装",
+    src: character === "bell" ? "costumes/bell-secret-complete.jpg" : "costumes/chime-secret-complete.jpg"
+  };
+  if (acquiredCollection && acquiredCollection[secretId]) {
+    secretCostumesContainer.appendChild(
+      createCostumeCard(character, secretCostume, "secret")
+    );
+  } else {
+    secretCostumesContainer.appendChild(
+      createEmptyMessage("まだ取得済みのシークレット衣装がありません。")
+    );
+  }
 
   /* ===================================================
      毎日衣装
