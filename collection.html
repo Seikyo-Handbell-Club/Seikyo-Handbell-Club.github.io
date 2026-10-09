@@ -335,7 +335,7 @@ button:disabled{
 .image-lightbox.show{display:flex;}
 .image-lightbox img{display:block;max-width:96vw;max-height:88vh;object-fit:contain;background:transparent;}
 .image-lightbox-close{position:absolute;right:14px;top:12px;border:0;border-radius:999px;width:44px;height:44px;font-size:28px;background:#fff;color:#222;cursor:pointer;}
-.costume-card img{cursor:zoom-in;}
+.costume-card img{cursor:pointer;}
 
 </style>
 </head>
@@ -699,31 +699,14 @@ const eventCostumeDefinitions = [
    毎日衣装
 ===================================================== */
 
-const dailyCostumeDefinitions = [
-
-  {
-    id:
-      "daily-costume-01",
-
-    name:
-      "毎日衣装 01",
-
-    src:
-      "costumes/daily-costume-01.png"
-  },
-
-  {
-    id:
-      "daily-costume-02",
-
-    name:
-      "毎日衣装 02",
-
-    src:
-      "costumes/daily-costume-02.png"
-  }
-
-];
+const dailyCostumeDefinitions = Array.from({length:54},(_,index)=>{
+  const number = String(index+1).padStart(2,"0");
+  return {
+    id:`daily-costume-${number}`,
+    name:`ベルちゃん・毎日衣装 ${number}`,
+    src:`costumes/daily-costume-${number}.webp`
+  };
+});
 
 
 /* =====================================================
@@ -1002,24 +985,7 @@ function isDailyCostumeAcquired(
    衣装カード作成
 ===================================================== */
 
-function openImageLightbox(src, alt){
-  const box=document.getElementById("imageLightbox");
-  const image=document.getElementById("imageLightboxImg");
-  image.src=src; image.alt=alt||"拡大画像";
-  box.classList.add("show"); box.setAttribute("aria-hidden","false");
-}
-function closeImageLightbox(){
-  const box=document.getElementById("imageLightbox");
-  if(!box)return; box.classList.remove("show"); box.setAttribute("aria-hidden","true");
-  document.getElementById("imageLightboxImg").src="";
-}
-document.addEventListener("click",function(e){
-  if(e.target.closest(".image-lightbox-close") || e.target.id==="imageLightbox") { closeImageLightbox(); return; }
-  const img=e.target.closest(".costume-card img");
-  if(img){ e.preventDefault(); e.stopPropagation(); openImageLightbox(img.src,img.alt); }
-},true);
-document.addEventListener("keydown",e=>{if(e.key==="Escape")closeImageLightbox();});
-
+/* 衣装選択ではタップで画像を拡大せず、衣装カードの選択を優先する */
 function createCostumeCard(
   character,
   costume,
@@ -1276,14 +1242,9 @@ function renderWardrobe(){
      毎日衣装
   =================================================== */
 
-  const dailyList =
-    dailyCostumeDefinitions.filter(
-      costume =>
-        isDailyCostumeAcquired(
-          character,
-          costume.id
-        )
-    );
+  const dailyList = character === "bell"
+    ? dailyCostumeDefinitions.filter(costume => isDailyCostumeAcquired(character,costume.id))
+    : [];
 
 
   if(

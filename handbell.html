@@ -2169,8 +2169,6 @@ textarea{
 
 <script type="module">
 
-import { awardRandomCostumeOnPageOpen } from "./costume-system.js";
-
 import{
   initializeApp
 }
@@ -2309,33 +2307,14 @@ let equippedCostume = {
    毎日もらえる衣装
    ※ コレクションとは完全に別管理
 ========================= */
-/*
- * 毎日衣装の画像はキャラクター別に管理。
- * ベルちゃん：ZIPから連携した54枚（高画質WebP）
- * チャイムくん：これまでの既存2枚を維持
- */
-const dailyCostumeDefinitions = {
-  bell: Array.from({length:54}, (_, index) => {
-    const number = String(index + 1).padStart(2,"0");
-    return {
-      id:`daily-costume-${number}`,
-      name:`毎日衣装 ${number}`,
-      src:`costumes/daily-costume-${number}.webp`
-    };
-  }),
-  chime: [
-    {
-      id:"daily-costume-01",
-      name:"毎日衣装 01",
-      src:"costumes/daily-costume-01.png"
-    },
-    {
-      id:"daily-costume-02",
-      name:"毎日衣装 02",
-      src:"costumes/daily-costume-02.png"
-    }
-  ]
-};
+const dailyCostumeDefinitions = Array.from({length:54},(_,index)=>{
+  const number = String(index+1).padStart(2,"0");
+  return {
+    id:`daily-costume-${number}`,
+    name:`ベルちゃん・毎日衣装 ${number}`,
+    src:`costumes/daily-costume-${number}.webp`
+  };
+});
 
 let dailyCostumes = {
   bell:{},
@@ -2348,13 +2327,12 @@ function getDailyCostumeDate(){
 }
 
 function getDailyCostumeCharacter(){
-  return profile?.characterType === "chime" ? "chime" : "bell";
+  return "bell";
 }
 
 function getDailyCostumeAvailable(character){
   const owned = dailyCostumes?.[character] || {};
-  const definitions = dailyCostumeDefinitions?.[character] || [];
-  return definitions.filter(item => !owned[item.id]);
+  return dailyCostumeDefinitions.filter(item => !owned[item.id]);
 }
 
 function showDailyCostumeGift(character,costume){
@@ -2410,82 +2388,67 @@ async function loadDailyCostumes(){
 async function acquireDailyCostume(){
   if(!currentUser || !profile) return;
 
+  let gift = null;
   try{
-    await loadDailyCostumes();
+    const uid = currentUser.uid;
+    const bellDailyRef = ref(db,`members/${uid}/dailyCostumes/bell`);
 
-    const today = getDailyCostumeDate();
-    const stateRef = ref(db,`members/${currentUser.uid}/dailyCostumeState`);
-    const selectedCharacter = getDailyCostumeCharacter();
-
-    let gift = null;
-    let giftAlreadyShown = false;
-
-    const result = await runTransaction(stateRef,current => {
-      const state = current && typeof current === "object" ? current : {};
-
-      if(state.lastDate === today){
-        if(state.receivedId && state.character){
-          gift = {
-            character:state.character,
-            id:state.receivedId
-          };
-        }
-        giftAlreadyShown = true;
-        return state;
-      }
-
-      let character = selectedCharacter;
-      let available = getDailyCostumeAvailable(character);
-
-      if(!available.length){
-        character = character === "bell" ? "chime" : "bell";
-        available = getDailyCostumeAvailable(character);
-      }
-
-      if(!available.length){
-        return state;
-      }
-
-      const costume = available[Math.floor(Math.random() * available.length)];
-
-      gift = {
-        character,
-        id:costume.id
-      };
-
-      return {
-        lastDate:today,
-        receivedId:costume.id,
-        character
-      };
+    /* Firebase transaction prevents two page opens from awarding the same outfit. */
+    const result = await runTransaction(bellDailyRef,current=>{
+      gift = null;
+      const owned = current && typeof current === "object" && !Array.isArray(current)
+        ? {...current}
+        : {};
+      const available = dailyCostumeDefinitions.filter(item=>!owned[item.id]);
+      if(!available.length) return owned;
+      const costume = available[Math.floor(Math.random()*available.length)];
+      gift = {character:"bell",id:costume.id};
+      owned[costume.id] = true;
+      return owned;
     });
 
-    if(!result.committed) return;
+    const savedBellDaily = result.snapshot && result.snapshot.exists()
+      ? (result.snapshot.val() || {})
+      : {};
+    dailyCostumes = {
+      bell:savedBellDaily,
+      chime:dailyCostumes?.chime || {}
+    };
 
-    if(!gift) return;
+    if(!result.committed || !gift) return;
 
-    const costume = (dailyCostumeDefinitions?.[gift.character] || [])
-      .find(item => item.id === gift.id);
+    const costume = dailyCostumeDefinitions.find(item=>item.id===gift.id);
     if(!costume) return;
 
-    /* 既存の衣装データを消さず、今回の1着だけ追加 */
-    await update(
-      ref(db),
-      {
-        [`members/${currentUser.uid}/dailyCostumes/${gift.character}/${costume.id}`]:true
+    /* Add every owned daily outfit to the main collection as well. */
+    const collectionSnap = await get(ref(db,`members/${uid}/collection`));
+    const collection = collectionSnap.exists() && collectionSnap.val() && typeof collectionSnap.val()==="object"
+      ? collectionSnap.val()
+      : {};
+    const updates = {};
+    Object.keys(savedBellDaily).forEach(id=>{
+      if(savedBellDaily[id] && !collection[id]){
+        updates[`members/${uid}/collection/${id}`] = {
+          acquiredAt:Date.now(),
+          source:"dailyCostume"
+        };
       }
-    );
+    });
+    if(Object.keys(updates).length) await update(ref(db),updates);
 
-    dailyCostumes = {
-      bell:{...(dailyCostumes.bell || {})},
-      chime:{...(dailyCostumes.chime || {})}
-    };
-    dailyCostumes[gift.character][costume.id] = true;
+    /* 画面内キャッシュにも反映して、コレクション数がすぐ更新されるようにする */
+    const cachedCollection = getCachedCollectionData() || {...collection};
+    Object.keys(savedBellDaily).forEach(id=>{
+      if(savedBellDaily[id] && !cachedCollection[id]){
+        cachedCollection[id] = collection[id] || {
+          acquiredAt:Date.now(),
+          source:"dailyCostume"
+        };
+      }
+    });
+    saveCollectionDataCache(uid,cachedCollection);
 
-    /* 同じページで既に表示済みなら二重表示しない */
-    if(!giftAlreadyShown){
-      showDailyCostumeGift(gift.character,costume);
-    }
+    showDailyCostumeGift("bell",costume);
   }catch(e){
     console.error("毎日衣装の取得エラー:",e);
   }
@@ -3364,7 +3327,7 @@ onAuthStateChanged(
     sendEquippedCostumeToBell();
     sendEventCostumeOverrideToBell();
 
-    /* 今日のプレゼント（1日1着・コレクションとは別管理） */
+    /* ページを開くたびに、未取得の毎日衣装を1着プレゼント */
     await acquireDailyCostume();
 
     /* =========================
@@ -3373,24 +3336,6 @@ onAuthStateChanged(
        同じ日付・キャラクター条件で確認して記録する。
     ========================= */
     acquireTodayCharacterCostume();
-
-    /* 新しい衣装システム：テスト中はページを開くたびに、
-       選択中キャラクターの未取得衣装を1着だけ獲得する。
-       シークレット衣装抽選とは別処理。 */
-    await awardRandomCostumeOnPageOpen({
-      db,
-      ref,
-      get,
-      set,
-      currentUser,
-      profile,
-      collectionItems,
-      getCachedCollectionData,
-      saveCollectionDataCache,
-      renderCollection,
-      updateCollectionMiniCount,
-      collectionView: $("collectionView")
-    });
 
 
     $("loggedOutLeft")
@@ -6251,14 +6196,12 @@ async function showMyPage(){
       const savedSetting = JSON.parse(localStorage.getItem(`handbell-monthly-image-${currentUser.uid}`) || "null");
       if(savedSetting && savedSetting.month === currentMonthKey && typeof savedSetting.enabled === "boolean") savedLocal = savedSetting.enabled;
     }catch(e){}
-    /* 今月の端末内設定があればそれを最優先する。
-       Firebaseへの保存が失敗しても、この端末ではスイッチ状態を維持できる。
-       端末内に今月の設定がない場合だけ、Firebaseの月別OFF記録を使う。 */
-    monthlyToggle.checked = savedLocal !== null
-      ? savedLocal
-      : disabledMonth
-        ? disabledMonth !== currentMonthKey
-        : true;
+    /* Firebaseの今月OFF記録を優先し、古い端末内設定でONに戻らないようにする */
+    monthlyToggle.checked = disabledMonth === currentMonthKey
+      ? false
+      : typeof profile.monthlyImageEnabled === "boolean"
+        ? profile.monthlyImageEnabled
+        : savedLocal !== null ? savedLocal : true;
   }
 
   const character = profile.characterType === "chime" ? "chime" : "bell";
@@ -6340,52 +6283,30 @@ function getMonthlyImageMonthKey(){
 async function toggleMonthlyImage(){
   const toggle = $("monthlyImageToggle");
   if(!toggle) return;
-  const msg = $("monthlyImageSettingMsg");
-  if(!currentUser){
-    toggle.checked = true;
-    if(msg) msg.innerHTML = '<div class="msg error">【エラーコード: MI-001】設定を変更するにはログインしてください。</div>';
-    showLogin();
-    return;
-  }
+  if(!currentUser){ toggle.checked = true; showLogin(); return; }
   if(!profile){
-    if(msg) msg.innerHTML = '<div class="msg">設定を確認しています…</div>';
     try{ await loadProfile(); }catch(e){}
-    if(!profile){
-      toggle.checked = !toggle.checked;
-      if(msg) msg.innerHTML = '<div class="msg error">【エラーコード: MI-002】プロフィールを読み込めませんでした。もう一度お試しください。</div>';
-      return;
-    }
+    if(!profile){ toggle.checked = !toggle.checked; return; }
   }
   const monthKey = getMonthlyImageMonthKey();
   const enabled = !!toggle.checked;
   const storageKey = `handbell-monthly-image-${currentUser.uid}`;
   toggle.disabled = true;
-  /* 操作直後に結果欄へ表示し、Firebaseの応答待ちで無表示にならないようにする */
-  if(msg) msg.innerHTML = '<div class="msg">設定を保存しています…</div>';
-  /* 先に端末内へ保存し、Firebase保存が失敗してもスイッチを元に戻さない */
-  try{
-    localStorage.setItem(storageKey, JSON.stringify({month:monthKey, enabled}));
-  }catch(storageError){
-    console.error("毎月の画像設定の端末内保存エラー:", storageError);
-  }
-  profile = {
-    ...profile,
-    monthlyImageEnabled:enabled,
-    monthlyImageDisabledMonth:enabled ? null : monthKey
-  };
   try{
     await update(ref(db, "members/" + currentUser.uid), {
       monthlyImageEnabled: enabled,
       monthlyImageDisabledMonth: enabled ? null : monthKey
     });
+    profile = {...profile, monthlyImageEnabled:enabled, monthlyImageDisabledMonth:enabled ? null : monthKey};
+    try{ localStorage.setItem(storageKey, JSON.stringify({month:monthKey, enabled})); }catch(storageError){}
+    const msg = $("monthlyImageSettingMsg");
     if(msg) msg.innerHTML = `<div class="msg">${enabled ? "毎月の画像を表示します。" : "今月の毎月の画像を表示しません。"}</div>`;
   }catch(e){
-    console.error("毎月の画像設定のFirebase保存エラー:", e);
-    const errorCode = e && e.code ? String(e.code) : "unknown";
-    if(msg) msg.innerHTML = `<div class="msg error">【エラーコード: MI-003】この端末には設定を保存しましたが、サーバーへの保存に失敗しました。別の端末には反映されない可能性があります。<br>詳細コード: ${errorCode}</div>`;
-  }finally{
-    toggle.disabled = false;
-  }
+    console.error("毎月の画像設定保存エラー:", e);
+    toggle.checked = !enabled;
+    const msg = $("monthlyImageSettingMsg");
+    if(msg) msg.innerHTML = '<div class="msg error">設定を保存できませんでした。通信状態を確認して、もう一度お試しください。</div>';
+  }finally{ toggle.disabled = false; }
 }
 
 /* =========================
@@ -6713,10 +6634,6 @@ window.saveCharacterSetting =
   saveCharacterSetting;
 
 
-window.toggleMonthlyImage =
-  toggleMonthlyImage;
-
-
 window.saveProfile =
   saveProfile;
 
@@ -6870,10 +6787,10 @@ function getTodayString(date = new Date()){
 
 /* =========================
    コレクション
-   52種類：
+   106種類：
    月別画像12 + イベント画像12 +
    ベルちゃん衣装12 + チャイムくん衣装12 +
-   シークレット画像2 + レア衣装2
+   毎日衣装54 + シークレット画像2 + レア衣装2
 ========================= */
 
 const collectionItems = [
@@ -6922,6 +6839,61 @@ const collectionItems = [
   {id:"event_christmaseve_chime",group:"chime",name:"チャイムくん・クリスマスイブ",src:"costumes/chime-christmaseve.png"},
   {id:"event_christmas_chime",group:"chime",name:"チャイムくん・クリスマス",src:"costumes/chime-christmas.png"},
   {id:"event_newyearseve_chime",group:"chime",name:"チャイムくん・大晦日",src:"costumes/chime-winter.png"},
+
+  {id:"daily-costume-01",group:"dailyCostume",name:"ベルちゃん・毎日衣装 01",src:"costumes/daily-costume-01.webp"},
+  {id:"daily-costume-02",group:"dailyCostume",name:"ベルちゃん・毎日衣装 02",src:"costumes/daily-costume-02.webp"},
+  {id:"daily-costume-03",group:"dailyCostume",name:"ベルちゃん・毎日衣装 03",src:"costumes/daily-costume-03.webp"},
+  {id:"daily-costume-04",group:"dailyCostume",name:"ベルちゃん・毎日衣装 04",src:"costumes/daily-costume-04.webp"},
+  {id:"daily-costume-05",group:"dailyCostume",name:"ベルちゃん・毎日衣装 05",src:"costumes/daily-costume-05.webp"},
+  {id:"daily-costume-06",group:"dailyCostume",name:"ベルちゃん・毎日衣装 06",src:"costumes/daily-costume-06.webp"},
+  {id:"daily-costume-07",group:"dailyCostume",name:"ベルちゃん・毎日衣装 07",src:"costumes/daily-costume-07.webp"},
+  {id:"daily-costume-08",group:"dailyCostume",name:"ベルちゃん・毎日衣装 08",src:"costumes/daily-costume-08.webp"},
+  {id:"daily-costume-09",group:"dailyCostume",name:"ベルちゃん・毎日衣装 09",src:"costumes/daily-costume-09.webp"},
+  {id:"daily-costume-10",group:"dailyCostume",name:"ベルちゃん・毎日衣装 10",src:"costumes/daily-costume-10.webp"},
+  {id:"daily-costume-11",group:"dailyCostume",name:"ベルちゃん・毎日衣装 11",src:"costumes/daily-costume-11.webp"},
+  {id:"daily-costume-12",group:"dailyCostume",name:"ベルちゃん・毎日衣装 12",src:"costumes/daily-costume-12.webp"},
+  {id:"daily-costume-13",group:"dailyCostume",name:"ベルちゃん・毎日衣装 13",src:"costumes/daily-costume-13.webp"},
+  {id:"daily-costume-14",group:"dailyCostume",name:"ベルちゃん・毎日衣装 14",src:"costumes/daily-costume-14.webp"},
+  {id:"daily-costume-15",group:"dailyCostume",name:"ベルちゃん・毎日衣装 15",src:"costumes/daily-costume-15.webp"},
+  {id:"daily-costume-16",group:"dailyCostume",name:"ベルちゃん・毎日衣装 16",src:"costumes/daily-costume-16.webp"},
+  {id:"daily-costume-17",group:"dailyCostume",name:"ベルちゃん・毎日衣装 17",src:"costumes/daily-costume-17.webp"},
+  {id:"daily-costume-18",group:"dailyCostume",name:"ベルちゃん・毎日衣装 18",src:"costumes/daily-costume-18.webp"},
+  {id:"daily-costume-19",group:"dailyCostume",name:"ベルちゃん・毎日衣装 19",src:"costumes/daily-costume-19.webp"},
+  {id:"daily-costume-20",group:"dailyCostume",name:"ベルちゃん・毎日衣装 20",src:"costumes/daily-costume-20.webp"},
+  {id:"daily-costume-21",group:"dailyCostume",name:"ベルちゃん・毎日衣装 21",src:"costumes/daily-costume-21.webp"},
+  {id:"daily-costume-22",group:"dailyCostume",name:"ベルちゃん・毎日衣装 22",src:"costumes/daily-costume-22.webp"},
+  {id:"daily-costume-23",group:"dailyCostume",name:"ベルちゃん・毎日衣装 23",src:"costumes/daily-costume-23.webp"},
+  {id:"daily-costume-24",group:"dailyCostume",name:"ベルちゃん・毎日衣装 24",src:"costumes/daily-costume-24.webp"},
+  {id:"daily-costume-25",group:"dailyCostume",name:"ベルちゃん・毎日衣装 25",src:"costumes/daily-costume-25.webp"},
+  {id:"daily-costume-26",group:"dailyCostume",name:"ベルちゃん・毎日衣装 26",src:"costumes/daily-costume-26.webp"},
+  {id:"daily-costume-27",group:"dailyCostume",name:"ベルちゃん・毎日衣装 27",src:"costumes/daily-costume-27.webp"},
+  {id:"daily-costume-28",group:"dailyCostume",name:"ベルちゃん・毎日衣装 28",src:"costumes/daily-costume-28.webp"},
+  {id:"daily-costume-29",group:"dailyCostume",name:"ベルちゃん・毎日衣装 29",src:"costumes/daily-costume-29.webp"},
+  {id:"daily-costume-30",group:"dailyCostume",name:"ベルちゃん・毎日衣装 30",src:"costumes/daily-costume-30.webp"},
+  {id:"daily-costume-31",group:"dailyCostume",name:"ベルちゃん・毎日衣装 31",src:"costumes/daily-costume-31.webp"},
+  {id:"daily-costume-32",group:"dailyCostume",name:"ベルちゃん・毎日衣装 32",src:"costumes/daily-costume-32.webp"},
+  {id:"daily-costume-33",group:"dailyCostume",name:"ベルちゃん・毎日衣装 33",src:"costumes/daily-costume-33.webp"},
+  {id:"daily-costume-34",group:"dailyCostume",name:"ベルちゃん・毎日衣装 34",src:"costumes/daily-costume-34.webp"},
+  {id:"daily-costume-35",group:"dailyCostume",name:"ベルちゃん・毎日衣装 35",src:"costumes/daily-costume-35.webp"},
+  {id:"daily-costume-36",group:"dailyCostume",name:"ベルちゃん・毎日衣装 36",src:"costumes/daily-costume-36.webp"},
+  {id:"daily-costume-37",group:"dailyCostume",name:"ベルちゃん・毎日衣装 37",src:"costumes/daily-costume-37.webp"},
+  {id:"daily-costume-38",group:"dailyCostume",name:"ベルちゃん・毎日衣装 38",src:"costumes/daily-costume-38.webp"},
+  {id:"daily-costume-39",group:"dailyCostume",name:"ベルちゃん・毎日衣装 39",src:"costumes/daily-costume-39.webp"},
+  {id:"daily-costume-40",group:"dailyCostume",name:"ベルちゃん・毎日衣装 40",src:"costumes/daily-costume-40.webp"},
+  {id:"daily-costume-41",group:"dailyCostume",name:"ベルちゃん・毎日衣装 41",src:"costumes/daily-costume-41.webp"},
+  {id:"daily-costume-42",group:"dailyCostume",name:"ベルちゃん・毎日衣装 42",src:"costumes/daily-costume-42.webp"},
+  {id:"daily-costume-43",group:"dailyCostume",name:"ベルちゃん・毎日衣装 43",src:"costumes/daily-costume-43.webp"},
+  {id:"daily-costume-44",group:"dailyCostume",name:"ベルちゃん・毎日衣装 44",src:"costumes/daily-costume-44.webp"},
+  {id:"daily-costume-45",group:"dailyCostume",name:"ベルちゃん・毎日衣装 45",src:"costumes/daily-costume-45.webp"},
+  {id:"daily-costume-46",group:"dailyCostume",name:"ベルちゃん・毎日衣装 46",src:"costumes/daily-costume-46.webp"},
+  {id:"daily-costume-47",group:"dailyCostume",name:"ベルちゃん・毎日衣装 47",src:"costumes/daily-costume-47.webp"},
+  {id:"daily-costume-48",group:"dailyCostume",name:"ベルちゃん・毎日衣装 48",src:"costumes/daily-costume-48.webp"},
+  {id:"daily-costume-49",group:"dailyCostume",name:"ベルちゃん・毎日衣装 49",src:"costumes/daily-costume-49.webp"},
+  {id:"daily-costume-50",group:"dailyCostume",name:"ベルちゃん・毎日衣装 50",src:"costumes/daily-costume-50.webp"},
+  {id:"daily-costume-51",group:"dailyCostume",name:"ベルちゃん・毎日衣装 51",src:"costumes/daily-costume-51.webp"},
+  {id:"daily-costume-52",group:"dailyCostume",name:"ベルちゃん・毎日衣装 52",src:"costumes/daily-costume-52.webp"},
+  {id:"daily-costume-53",group:"dailyCostume",name:"ベルちゃん・毎日衣装 53",src:"costumes/daily-costume-53.webp"},
+  {id:"daily-costume-54",group:"dailyCostume",name:"ベルちゃん・毎日衣装 54",src:"costumes/daily-costume-54.webp"},
 
   {id:"secret_rare_image",group:"secret",name:"レア画像",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.rare}`},
   {id:"secret_ultra_rare_image",group:"secret",name:"超レア画像",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.ultraRare}`},
@@ -7123,6 +7095,7 @@ function collectionCardHtml(item,acquired){
   const isCostume =
     item.group === "bell" ||
     item.group === "chime" ||
+    item.group === "dailyCostume" ||
     item.id === "secret_bell_rare_costume" ||
     item.id === "secret_chime_rare_costume";
   const secretCharacter = item.id === "secret_bell_rare_costume" ? "bell" : item.id === "secret_chime_rare_costume" ? "chime" : null;
@@ -7150,6 +7123,7 @@ function renderCollectionItems(acquiredData){
       item.group==="bell" ||
       item.group==="chime"
     )],
+    ["🎁 ベルちゃんの毎日衣装",collectionItems.filter(item=>item.group==="dailyCostume")],
     ["✨ シークレット",collectionItems.filter(item=>item.group==="secret")]
   ];
 
@@ -7270,12 +7244,7 @@ window.addEventListener("message",event=>{
   if(event.data.type === "handbell-close-costume") closeCostumeOverlay();
   if(event.data.type === "handbell-go-home"){
     closeCostumeOverlay();
-    /* マイページを含む他画面を確実に隠し、ホームのカレンダーを表示する */
-    hide();
-    $("detail").innerHTML = "";
-    $("calendarView").classList.remove("hidden");
-    editingId = null;
-    render();
+    backHome();
   }
   if(event.data.type === "handbell-costume-saved"){
     loadEquippedCostume().then(()=>{
@@ -7486,13 +7455,14 @@ async function decideLoginImage(){
       savedMonthlySetting = saved.enabled;
     }
   }catch(e){}
-  /* スイッチと同じ優先順位で判定する。
-     今月の端末内設定があれば最優先し、なければFirebaseの月別OFF記録を使う。 */
-  const monthlyEnabled = savedMonthlySetting !== null
-    ? savedMonthlySetting
-    : monthlyDisabledMonth
-      ? monthlyDisabledMonth !== monthKey
-      : true;
+  /* 今月OFFの記録を最優先。古いlocalStorageのONで復活させない */
+  const monthlyEnabled = monthlyDisabledMonth === monthKey
+    ? false
+    : typeof data.monthlyImageEnabled === "boolean"
+      ? data.monthlyImageEnabled
+      : savedMonthlySetting !== null
+        ? savedMonthlySetting
+        : true;
 
   if(monthlyEnabled){
     return {
