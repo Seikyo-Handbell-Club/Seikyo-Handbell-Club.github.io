@@ -238,10 +238,7 @@ ${item.fileName}`);
     message("uploadMsg",`${pending.length}着登録しました。GitHub上の画像をそのまま使用します。`,"success");
   }catch(e){
     console.error(e);
-    message("uploadMsg","衣装の登録に失敗しました。
-
-エラーコード: "+(e.code||"不明")+"
-詳細: "+(e.message||"不明"),"error");
+    message("uploadMsg","衣装の登録に失敗しました。\n\nエラーコード: "+(e.code||"不明")+"\n詳細: "+(e.message||"不明"),"error");
   }finally{button.disabled=false;}
 }
 async function deleteCostume(id,item){
@@ -255,9 +252,7 @@ GitHub上の画像ファイルは削除されません。`))return;
     message("uploadMsg","衣装の登録を解除しました。","success");
   }catch(e){
     console.error(e);
-    message("uploadMsg","登録解除に失敗しました。
-
-"+(e.message||"不明"),"error");
+    message("uploadMsg","登録解除に失敗しました。\n\n"+(e.message||"不明"),"error");
   }
 }
 async function adminLogin(){
@@ -268,10 +263,7 @@ async function adminLogin(){
     const c=await signInWithEmailAndPassword(auth,ADMIN_EMAIL,password);
     const s=await get(ref(db,"admins/"+c.user.uid));
     if(!s.exists()||s.val()!==true){await signOut(auth);message("loginMsg","管理者として登録されていません。","error");}
-  }catch(e){message("loginMsg","ログインできませんでした。
-
-エラーコード: "+(e.code||"不明")+"
-詳細: "+(e.message||"不明"),"error");}
+  }catch(e){message("loginMsg","ログインできませんでした。\n\nエラーコード: "+(e.code||"不明")+"\n詳細: "+(e.message||"不明"),"error");}
   finally{b.disabled=false;b.textContent="ログイン";}
 }
 $("bellButton").onclick=()=>setCharacter("bell");
@@ -289,9 +281,7 @@ onAuthStateChanged(auth,async user=>{
     if(!(await isAdmin())){await signOut(auth);return;}
     $("login").classList.add("hidden");$("app").classList.remove("hidden");
     await loadCostumes();
-  }catch(e){console.error(e);message("loginMsg","管理者権限の確認に失敗しました。
-
-"+(e.message||"不明"),"error");}
+   }catch(e){console.error(e);message("loginMsg","管理者権限の確認に失敗しました。"+(e.message||"不明"),"error");}
 });
 </script>
 </body>

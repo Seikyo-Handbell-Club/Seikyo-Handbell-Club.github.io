@@ -417,6 +417,24 @@ button:disabled{
 
 
       <!-- =========================
+           ノーマル衣装
+      ========================== -->
+
+      <div class="costume-category">
+
+        <h2 class="costume-category-title">
+          🙂 ノーマル衣装
+        </h2>
+
+        <div
+          id="normalCostumes"
+          class="costume-grid"
+        ></div>
+
+      </div>
+
+
+      <!-- =========================
            イベント衣装
       ========================== -->
 
@@ -479,7 +497,7 @@ button:disabled{
       class="secondary"
       type="button"
     >
-      ← マイページに戻る
+      ← ホームに戻る
     </button>
 
     <div id="message"></div>
@@ -765,6 +783,11 @@ const changeCharacterButton =
     "changeCharacterButton"
   );
 
+const normalCostumesContainer =
+  document.getElementById(
+    "normalCostumes"
+  );
+
 const eventCostumes =
   document.getElementById(
     "eventCostumes"
@@ -1034,7 +1057,9 @@ function createCostumeCard(
   typeBadge.textContent =
     type === "daily"
       ? "毎日"
-      : "イベント";
+      : type === "normal"
+        ? "ノーマル"
+        : "イベント";
 
   card.appendChild(
     typeBadge
@@ -1117,6 +1142,9 @@ function renderWardrobe(){
     return;
 
 
+  normalCostumesContainer.innerHTML =
+    "";
+
   eventCostumes.innerHTML =
     "";
 
@@ -1126,6 +1154,15 @@ function renderWardrobe(){
 
   const character =
     selectedCharacter;
+
+  const normalCostume = {
+    id: "normal",
+    name: character === "bell" ? "ベルちゃん・ノーマル" : "チャイムくん・ノーマル",
+    src: character === "bell" ? "bell.png" : "chime.png"
+  };
+  normalCostumesContainer.appendChild(
+    createCostumeCard(character, normalCostume, "normal")
+  );
 
 
   /* ===================================================
@@ -1327,10 +1364,10 @@ async function loadMemberData(){
     selectedCostume = {
 
       bell:
-        equippedCostume.bell,
+        equippedCostume.bell || "normal",
 
       chime:
-        equippedCostume.chime
+        equippedCostume.chime || "normal"
 
     };
 
@@ -1373,10 +1410,13 @@ async function saveCostume(){
   }
 
 
-  const costumeId =
+  const selectedId =
     selectedCostume[
       selectedCharacter
     ];
+
+  /* normal を明示保存し、イベント日でも通常衣装に戻せるようにする */
+  const costumeId = selectedId;
 
 
   if(!costumeId){
@@ -1432,19 +1472,16 @@ async function saveCostume(){
     ] =
       costumeId;
 
-
     showMessage(
-      "衣装を変更しました！"
+      "衣装を保存しました！"
     );
 
+    saveButton.disabled = false;
+    renderWardrobe();
 
-    setTimeout(
-      ()=>{
-        location.href =
-          "handbell.html";
-      },
-      700
-    );
+    if(window.parent !== window){
+      window.parent.postMessage({type:"handbell-costume-saved"}, "*");
+    }
 
 
   }catch(error){
@@ -1502,8 +1539,11 @@ changeCharacterButton.addEventListener(
 backButton.addEventListener(
   "click",
   ()=>{
-    location.href =
-      "handbell.html";
+    if(window.parent !== window){
+      window.parent.postMessage({type:"handbell-close-costume"}, "*");
+    }else{
+      location.href = "handbell.html";
+    }
   }
 );
 

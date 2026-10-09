@@ -938,6 +938,7 @@ function isSecretEquipped(
 }
 
 let secretRenderToken=0;
+let secretDisplayedCharacter=null;
 
 /*
  * シークレット画像の周囲に残っている白・薄灰色・チェック柄系の
@@ -1261,6 +1262,10 @@ function renderSecretCostume(
   const renderToken =
     ++secretRenderToken;
 
+  const wasSecretShowingForCharacter =
+    secretCostume.classList.contains("show") &&
+    secretDisplayedCharacter === character;
+
   secretCostume.innerHTML="";
 
   secretCostume.classList.remove(
@@ -1273,13 +1278,10 @@ function renderSecretCostume(
     "true"
   );
 
-  /* 通常衣装では通常キャラクター画像を表示 */
+  /* 画像要素自体は維持。シークレット装備中は通常画像を先に隠して、
+     通常キャラクターが一瞬だけ見えるちらつきを防ぐ。 */
 
-  bellImage.style.visibility =
-    "visible";
-
-  bellImage.style.opacity =
-    "1";
+  bellImage.style.display = "block";
 
   /* =====================================================
      ベルちゃん / チャイムくんで
@@ -1318,9 +1320,15 @@ function renderSecretCostume(
     !isSecretEquipped(character)
   ){
 
+    bellImage.style.visibility = "visible";
+    bellImage.style.opacity = "1";
+    secretDisplayedCharacter = null;
     return;
 
   }
+
+  bellImage.style.visibility = "hidden";
+  bellImage.style.opacity = "0";
 
   let loadedCount=0;
   let failed=false;
@@ -1358,11 +1366,8 @@ function renderSecretCostume(
     enabledLayerCount===0
   ){
 
-    bellImage.style.visibility =
-      "visible";
-
-    bellImage.style.opacity =
-      "0";
+    bellImage.style.visibility = "hidden";
+    bellImage.style.opacity = "0";
 
     secretCostume.classList.add(
       "show"
@@ -1373,6 +1378,8 @@ function renderSecretCostume(
       "false"
     );
 
+    secretDisplayedCharacter = character;
+    if(!wasSecretShowingForCharacter) startHearts();
     return;
 
   }
@@ -1557,11 +1564,8 @@ function renderSecretCostume(
             !failed
           ){
 
-            bellImage.style.visibility =
-              "visible";
-
-            bellImage.style.opacity =
-              "0";
+            bellImage.style.visibility = "hidden";
+            bellImage.style.opacity = "0";
 
             secretCostume.classList.add(
               "show"
@@ -1572,6 +1576,8 @@ function renderSecretCostume(
               "false"
             );
 
+            secretDisplayedCharacter = character;
+            if(!wasSecretShowingForCharacter) startHearts();
             requestAnimationFrame(sendBellHitBounds);
 
           }
@@ -1608,6 +1614,7 @@ function renderSecretCostume(
           );
 
           secretCostume.innerHTML="";
+          secretDisplayedCharacter = null;
 
           bellImage.style.visibility =
             "visible";
@@ -2192,6 +2199,11 @@ function getCharacterImage(
     equippedCostumes?.[selected] ||
     null;
 
+  /* 「ノーマルに戻す」を明示選択した場合は、イベント日でも通常画像を優先する */
+  if(equipped === "normal"){
+    return characterImages[selected].src;
+  }
+
   const equippedImage =
     getCostumeImageFromId(
       equipped,
@@ -2220,6 +2232,10 @@ function getCharacterImage(
       null;
 
     if(override){
+
+      if(override === "normal"){
+        return characterImages[selected].src;
+      }
 
       const overrideImage =
         getCostumeImageFromId(
@@ -2734,6 +2750,7 @@ const isEmbedded =
   window;
 
 let parentSchedules={};
+let hasReceivedParentSchedules=false;
 
 function setBellMessages(
   messages,
@@ -2764,14 +2781,7 @@ function setBellMessages(
     cleaned;
 
   showMessage(
-    preferred &&
-    cleaned.includes(
-      preferred
-    )
-      ? preferred
-      : pickRandom(
-          cleaned
-        )
+    preferred || pickRandom(cleaned)
   );
 
 }
@@ -2919,10 +2929,10 @@ function receiveParentSchedules(
       : {};
 
   setBellMessages(
-    buildBellMessages(
-      parentSchedules
-    )
+    buildBellMessages(parentSchedules),
+    hasReceivedParentSchedules ? message.textContent : null
   );
+  hasReceivedParentSchedules=true;
 
 }
 
@@ -2970,6 +2980,7 @@ window.addEventListener(
       event.data.type ===
       "handbell-parent-click"
     ){
+      resetCharacterIdleTimer();
       celebrate();
       return;
     }
@@ -3836,6 +3847,21 @@ function changeBellMessage(){
 }
 
 /* =====================================================
+   30秒間キャラクター操作がなければ自動でおしゃべり
+===================================================== */
+let characterIdleTimer = null;
+function resetCharacterIdleTimer(){
+  if(characterIdleTimer) clearTimeout(characterIdleTimer);
+  characterIdleTimer = setTimeout(()=>{
+    if(!isAnimating){
+      celebrate();
+    }else{
+      resetCharacterIdleTimer();
+    }
+  },30000);
+}
+
+/* =====================================================
    大量のハート
 ===================================================== */
 
@@ -4393,21 +4419,16 @@ function celebrate(){
       "celebrating"
     );
 
-    const secretEffect =
-      currentCharacter === "chime"
-        ? "sunflower"
-        : "crescent";
-
     setTimeout(
       ()=>{
-        startHearts(secretEffect);
+        startHearts();
       },
       150
     );
 
     setTimeout(
       ()=>{
-        startHearts(secretEffect);
+        startHearts();
       },
       950
     );
@@ -4434,6 +4455,7 @@ function celebrate(){
           "";
 
         isAnimating=false;
+        resetCharacterIdleTimer();
 
       },
       1800
@@ -4521,6 +4543,7 @@ bellImage.addEventListener(
       "";
 
     isAnimating=false;
+    resetCharacterIdleTimer();
 
   }
 );
@@ -4561,6 +4584,9 @@ bellImage.addEventListener(
 setCharacter(
   "bell"
 );
+resetCharacterIdleTimer();
+bellImage.addEventListener("pointerdown", resetCharacterIdleTimer, {passive:true});
+secretCostume.addEventListener("pointerdown", resetCharacterIdleTimer, {passive:true});
 
 if(isEmbedded){
   requestAnimationFrame(sendBellHitBounds);

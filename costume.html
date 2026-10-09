@@ -224,6 +224,13 @@ button:disabled{
 
 .character-choice-button{flex:1;padding:12px 8px;border:2px solid #e1e5ea;border-radius:14px;background:#fff;font-weight:700;cursor:pointer;}
 .character-choice-button.selected{border-color:#ff8ab3;background:#fff2f7;}
+
+.secret-costume-preview{position:relative;width:100%;height:150px;margin:0 auto 8px;overflow:hidden;}
+.secret-preview-stage{position:absolute;width:90px;height:90px;left:50%;top:50%;transform:translate(-50%,-50%) scale(1.5);overflow:visible;}
+.secret-preview-body{position:absolute;left:0;top:0;width:100%;height:100%;transform-origin:center center;overflow:visible;}
+.secret-preview-wrap{position:absolute;pointer-events:none;overflow:visible;transform-origin:center center;}
+.secret-preview-wrap img{position:absolute!important;left:0!important;top:0!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:contain!important;margin:0!important;padding:0!important;}
+
 </style>
 </head>
 
@@ -266,7 +273,7 @@ button:disabled{
       class="secondary"
       type="button"
     >
-      ← マイページに戻る
+      ← ホームに戻る
     </button>
 
     <div id="message"></div>
@@ -406,13 +413,47 @@ const secretCostumeDefinitions = {
   }
 };
 
+const SECRET_PREVIEW_LAYOUT = {
+  bell: {
+    layers:["costumes/bell-secret-base.png","costumes/bell-secret-main.png","costumes/bell-secret-layer-01.png","costumes/bell-secret-layer-02.png","costumes/bell-secret-layer-03.png","costumes/bell-secret-layer-04.png","costumes/bell-secret-layer-05.png"],
+    positions:[{x:-5.1,y:-9.9},{x:-4,y:30},{x:0,y:0},{x:25,y:35},{x:-62,y:35},{x:0,y:0},{x:32.5,y:4.9}],
+    sizes:[{width:100,height:100,scale:1.1,angle:-3.9},{width:100,height:100,scale:1.45,angle:0},{width:100,height:100,scale:1,angle:0},{width:100,height:100,scale:1,angle:0},{width:100,height:100,scale:1,angle:0},{width:100,height:100,scale:1,angle:0},{width:100,height:100,scale:.96,angle:10.3}],
+    enabled:[true,true,false,true,true,false,true], global:{x:0,y:50,scale:.9,angle:0}
+  },
+  chime: {
+    layers:["costumes/chime-secret-layer-03.png","costumes/chime-secret-layer-02.png","costumes/chime-secret-base-max.png","costumes/chime-secret-layer-05.png","costumes/chime-secret-layer-01.png","costumes/chime-secret-layer-04.png"],
+    positions:[{x:-64,y:44.9},{x:-65.6,y:108},{x:-60.7,y:60.6},{x:-25.1,y:29.4},{x:-65.3,y:84.4},{x:-121.7,y:44.4}],
+    sizes:[{width:100,height:100,scale:1.99,angle:0},{width:100,height:100,scale:1.75,angle:0},{width:100,height:100,scale:2.25,angle:0},{width:100,height:100,scale:1.09,angle:0},{width:100,height:100,scale:.9,angle:0},{width:100,height:100,scale:1,angle:0}],
+    enabled:[false,true,true,true,true,false], global:{x:20,y:20,scale:.65,angle:0}
+  }
+};
+function secretCostumePreviewHtml(character){
+  const layout=SECRET_PREVIEW_LAYOUT[character === "chime" ? "chime" : "bell"];
+  const g=layout.global;
+  const bodyTransform=`translate(${g.x}px,${g.y}px) scale(${g.scale}) rotate(${g.angle}deg)`;
+  const layers=layout.layers.map((src,i)=>{
+    if(!layout.enabled[i]) return "";
+    const p=layout.positions[i], z=layout.sizes[i];
+    const w=z.width*(character === "chime" ? z.scale : 1);
+    const h=z.height*(character === "chime" ? z.scale : 1);
+    const left=(100-w)/2, top=(100-h)/2;
+    const transform=character === "chime"
+      ? `translate(${p.x}px,${p.y}px) rotate(${z.angle}deg)`
+      : `translate(${p.x}px,${p.y}px) scale(${z.scale}) rotate(${z.angle}deg)`;
+    return `<div class="secret-preview-wrap" style="width:${w}%;height:${h}%;left:${left}%;top:${top}%;transform:${transform}"><img src="${src}" alt="" draggable="false"></div>`;
+  }).join("");
+  return `<div class="secret-costume-preview"><div class="secret-preview-stage"><div class="secret-preview-body" style="transform:${bodyTransform}">${layers}</div></div></div>`;
+}
+
 const costumeDefinitions = {
   bell:[
+    {id:"normal",name:"ベルちゃん・ノーマル",src:"bell.png",kind:"normal"},
     ...eventCostumeDefinitions.map(([key,name,bellFile])=>({id:`event_${key}_bell`,name:`ベルちゃん・${name}`,src:`costumes/${bellFile}`,kind:"event"})),
     ...dailyCostumeDefinitions.map(costume=>({...costume,kind:"daily"})),
     secretCostumeDefinitions.bell
   ],
   chime:[
+    {id:"normal",name:"チャイムくん・ノーマル",src:"chime.png",kind:"normal"},
     ...eventCostumeDefinitions.map(([key,name,bellFile,chimeFile])=>({id:`event_${key}_chime`,name:`チャイムくん・${name}`,src:`costumes/${chimeFile}`,kind:"event"})),
     ...dailyCostumeDefinitions.map(costume=>({...costume,kind:"daily"})),
     secretCostumeDefinitions.chime
@@ -546,13 +587,8 @@ async function loadMemberData(){
     };
 
     selectedCostume = {
-
-      bell:
-        equippedCostume.bell,
-
-      chime:
-        equippedCostume.chime
-
+      bell: equippedCostume.bell || "normal",
+      chime: equippedCostume.chime || "normal"
     };
 
     return true;
@@ -585,7 +621,7 @@ function isAcquired(
   costume
 ){
 
-  if(!costume.id)
+  if(!costume.id || costume.kind === "normal")
     return true;
 
   if(costume.kind === "daily"){
@@ -617,10 +653,24 @@ function renderCostumes(){
     const card=document.createElement("button");
     card.type="button"; card.className="costume-card";
     if(selectedCostume[character]===costume.id) card.classList.add("selected");
-    const image=document.createElement("img"); image.src=costume.src; image.alt=costume.name;
+    if(costume.kind === "secret") {
+      card.insertAdjacentHTML("beforeend", secretCostumePreviewHtml(character));
+      card.querySelectorAll(".secret-preview-wrap img").forEach(img=>{
+        img.addEventListener("error",()=>{
+          const src=img.getAttribute("src") || "";
+          if(src.includes("chime-secret-base-max.png") && img.dataset.fallbackUsed !== "true"){
+            img.dataset.fallbackUsed="true";
+            img.src=src.replace("chime-secret-base-max.png","chime-secret-base.png");
+          }
+        });
+      });
+    } else {
+      const image=document.createElement("img"); image.src=costume.src; image.alt=costume.name;
+      card.appendChild(image);
+    }
     const name=document.createElement("div"); name.className="costume-name"; name.textContent=costume.name;
-    card.appendChild(image); card.appendChild(name);
-    const badge=document.createElement("span"); badge.className="costume-type-badge"+(costume.kind==="daily"?" daily":""); badge.textContent=costume.kind==="daily"?"毎日":"イベント"; card.appendChild(badge);
+    card.appendChild(name);
+    const badge=document.createElement("span"); badge.className="costume-type-badge"+(costume.kind==="daily"?" daily":""); badge.textContent=costume.kind==="daily"?"毎日":costume.kind==="normal"?"ノーマル":costume.kind==="secret"?"シークレット":"イベント"; card.appendChild(badge);
     if(selectedCostume[character]===costume.id){const b=document.createElement("span");b.className="selected-badge";b.textContent="選択中";card.appendChild(b);}
     card.addEventListener("click",()=>{selectedCostume[character]=costume.id;renderAll();});
     costumeList.appendChild(card);
@@ -652,8 +702,10 @@ async function saveCostume(){
   if(!currentUser)return;
 
   const character=selectedCharacter;
-  const costumeId=selectedCostume[character];
-  if(!costumeId)return;
+  const selectedId=selectedCostume[character];
+  if(!selectedId)return;
+  /* normal を明示保存し、イベント日でも通常衣装に戻せるようにする */
+  const costumeId = selectedId;
 
   saveButton.disabled=true;
   showMessage("衣装を保存しています……");
@@ -681,11 +733,12 @@ async function saveCostume(){
 
     equippedCostume[character]=costumeId;
 
-    showMessage("衣装を変更しました！");
-
-    setTimeout(()=>{
-      location.href="handbell.html";
-    },700);
+    showMessage("衣装を保存しました！");
+    if(window.parent !== window){
+      window.parent.postMessage({type:"handbell-costume-saved"}, "*");
+    }
+    saveButton.disabled=false;
+    renderAll();
 
   }catch(error){
     console.error("衣装保存エラー:",error);
@@ -704,8 +757,11 @@ selectChime.addEventListener("click",()=>{selectedCharacter="chime";renderAll();
 backButton.addEventListener(
   "click",
   ()=>{
-    location.href =
-      "handbell.html";
+    if(window.parent !== window){
+      window.parent.postMessage({type:"handbell-close-costume"}, "*");
+    }else{
+      location.href = "handbell.html";
+    }
   }
 );
 
