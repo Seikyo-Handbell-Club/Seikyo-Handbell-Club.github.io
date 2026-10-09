@@ -6216,11 +6216,11 @@ async function showMyPage(){
     }catch(e){}
     /* Firebaseの今月OFF記録を優先し、古い端末内設定でONに戻らないようにする */
     /* OFF記録が今月のものならOFF。前月以前のOFF記録は翌月の自動ONとして扱う。 */
+    /* 月単位のOFF記録だけを有効にする。古い monthlyImageEnabled:false が
+       monthlyImageDisabledMonth なしで残っていても、翌月以降までOFFにしない。 */
     monthlyToggle.checked = disabledMonth
       ? disabledMonth !== currentMonthKey
-      : typeof profile.monthlyImageEnabled === "boolean"
-        ? profile.monthlyImageEnabled
-        : savedLocal !== null ? savedLocal : true;
+      : savedLocal !== null ? savedLocal : true;
   }
 
   const character = profile.characterType === "chime" ? "chime" : "bell";
@@ -7422,14 +7422,13 @@ async function decideLoginImage(){
       savedMonthlySetting = saved.enabled;
     }
   }catch(e){}
-  /* 今月OFFの記録だけをOFFとして扱う。前月以前の記録は翌月に自動ONへ戻す。 */
+  /* 月単位のOFF記録だけを有効にする。
+     古い monthlyImageEnabled:false だけが残っている場合は、今月のOFFとは見なさない。 */
   const monthlyEnabled = monthlyDisabledMonth
     ? monthlyDisabledMonth !== monthKey
-    : typeof data.monthlyImageEnabled === "boolean"
-      ? data.monthlyImageEnabled
-      : savedMonthlySetting !== null
-        ? savedMonthlySetting
-        : true;
+    : savedMonthlySetting !== null
+      ? savedMonthlySetting
+      : true;
 
   if(monthlyEnabled){
     return {
