@@ -6214,13 +6214,14 @@ async function showMyPage(){
       const savedSetting = JSON.parse(localStorage.getItem(`handbell-monthly-image-${currentUser.uid}`) || "null");
       if(savedSetting && savedSetting.month === currentMonthKey && typeof savedSetting.enabled === "boolean") savedLocal = savedSetting.enabled;
     }catch(e){}
-    /* Firebaseの今月OFF記録を優先し、古い端末内設定でONに戻らないようにする */
-    /* OFF記録が今月のものならOFF。前月以前のOFF記録は翌月の自動ONとして扱う。 */
-    /* 月単位のOFF記録だけを有効にする。古い monthlyImageEnabled:false が
-       monthlyImageDisabledMonth なしで残っていても、翌月以降までOFFにしない。 */
-    monthlyToggle.checked = disabledMonth
-      ? disabledMonth !== currentMonthKey
-      : savedLocal !== null ? savedLocal : true;
+    /* 今月の端末内設定があればそれを最優先する。
+       Firebaseへの保存が失敗しても、この端末ではスイッチ状態を維持できる。
+       端末内に今月の設定がない場合だけ、Firebaseの月別OFF記録を使う。 */
+    monthlyToggle.checked = savedLocal !== null
+      ? savedLocal
+      : disabledMonth
+        ? disabledMonth !== currentMonthKey
+        : true;
   }
 
   const character = profile.characterType === "chime" ? "chime" : "bell";
@@ -6311,21 +6312,30 @@ async function toggleMonthlyImage(){
   const enabled = !!toggle.checked;
   const storageKey = `handbell-monthly-image-${currentUser.uid}`;
   toggle.disabled = true;
+  /* 先に端末内へ保存し、Firebase保存が失敗してもスイッチを元に戻さない */
+  try{
+    localStorage.setItem(storageKey, JSON.stringify({month:monthKey, enabled}));
+  }catch(storageError){
+    console.error("毎月の画像設定の端末内保存エラー:", storageError);
+  }
+  profile = {
+    ...profile,
+    monthlyImageEnabled:enabled,
+    monthlyImageDisabledMonth:enabled ? null : monthKey
+  };
+  const msg = $("monthlyImageSettingMsg");
   try{
     await update(ref(db, "members/" + currentUser.uid), {
       monthlyImageEnabled: enabled,
       monthlyImageDisabledMonth: enabled ? null : monthKey
     });
-    profile = {...profile, monthlyImageEnabled:enabled, monthlyImageDisabledMonth:enabled ? null : monthKey};
-    try{ localStorage.setItem(storageKey, JSON.stringify({month:monthKey, enabled})); }catch(storageError){}
-    const msg = $("monthlyImageSettingMsg");
     if(msg) msg.innerHTML = `<div class="msg">${enabled ? "毎月の画像を表示します。" : "今月の毎月の画像を表示しません。"}</div>`;
   }catch(e){
-    console.error("毎月の画像設定保存エラー:", e);
-    toggle.checked = !enabled;
-    const msg = $("monthlyImageSettingMsg");
-    if(msg) msg.innerHTML = '<div class="msg error">設定を保存できませんでした。通信状態を確認して、もう一度お試しください。</div>';
-  }finally{ toggle.disabled = false; }
+    console.error("毎月の画像設定のFirebase保存エラー:", e);
+    if(msg) msg.innerHTML = '<div class="msg">この端末には設定を保存しました。サーバーへの保存はできなかったため、別の端末にはまだ反映されない可能性があります。</div>';
+  }finally{
+    toggle.disabled = false;
+  }
 }
 
 /* =========================
@@ -7422,12 +7432,12 @@ async function decideLoginImage(){
       savedMonthlySetting = saved.enabled;
     }
   }catch(e){}
-  /* 月単位のOFF記録だけを有効にする。
-     古い monthlyImageEnabled:false だけが残っている場合は、今月のOFFとは見なさない。 */
-  const monthlyEnabled = monthlyDisabledMonth
-    ? monthlyDisabledMonth !== monthKey
-    : savedMonthlySetting !== null
-      ? savedMonthlySetting
+  /* スイッチと同じ優先順位で判定する。
+     今月の端末内設定があれば最優先し、なければFirebaseの月別OFF記録を使う。 */
+  const monthlyEnabled = savedMonthlySetting !== null
+    ? savedMonthlySetting
+    : monthlyDisabledMonth
+      ? monthlyDisabledMonth !== monthKey
       : true;
 
   if(monthlyEnabled){
