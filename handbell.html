@@ -2222,6 +2222,9 @@ from
 ===================================================== */
 const TEST_DATE = null;
 
+/* 衣装プレゼント確認用：0=通常運用、1=毎回テスト表示（本番データは変更しない） */
+const COSTUME_GIFT_TEST_MODE = 0;
+
 /* テスト日付を実際のDateとして取得 */
 function getTestDate(){
   if(!TEST_DATE) return null;
@@ -2316,10 +2319,9 @@ const dailyCostumeDefinitions = Array.from({length:54},(_,index)=>{
   };
 });
 
-let dailyCostumes = {
-  bell:{},
-  chime:{}
-};
+/* チャイムくん用衣装は画像が用意できてから登録する。既存のベル画像を流用しない。 */
+const chimeCostumeDefinitions = [];
+let dailyCostumes = {bell:{},chime:{}};
 
 function getDailyCostumeDate(){
   const d = getAppDate();
@@ -2327,132 +2329,183 @@ function getDailyCostumeDate(){
 }
 
 function getDailyCostumeCharacter(){
-  return "bell";
+  return profile?.characterType === "chime" ? "chime" : "bell";
+}
+
+function getCostumeDefinitions(character){
+  return character === "chime" ? chimeCostumeDefinitions : dailyCostumeDefinitions;
 }
 
 function getDailyCostumeAvailable(character){
   const owned = dailyCostumes?.[character] || {};
-  return dailyCostumeDefinitions.filter(item => !owned[item.id]);
+  return getCostumeDefinitions(character).filter(item => !owned[item.id]);
 }
 
+const dailyGiftQueue = [];
+let dailyGiftShowing = false;
 function showDailyCostumeGift(character,costume){
-  const old = $("dailyGiftOverlay");
-  if(old) old.remove();
-
-  const overlay = document.createElement("div");
-  overlay.id = "dailyGiftOverlay";
-  overlay.innerHTML = `
-    <div class="daily-gift-card" role="dialog" aria-modal="true">
-      <div class="daily-gift-title">🎁 今日のプレゼント</div>
-      <div class="daily-gift-character">${character === "chime" ? "チャイムくん" : "ベルちゃん"}の衣装を入手しました！</div>
-      <img class="daily-gift-image" src="${esc(costume.src)}" alt="${esc(costume.name)}">
-      <div class="daily-gift-name">${esc(costume.name)}</div>
-      <div class="daily-gift-note">「着替える」から着用できます</div>
-      <button id="dailyGiftClose" type="button">受け取る</button>
-    </div>
-  `;
-
-  document.body.appendChild(overlay);
-
-  const close = () => overlay.remove();
-  $("dailyGiftClose")?.addEventListener("click",close);
-  overlay.addEventListener("click",e=>{
-    if(e.target === overlay) close();
-  });
+  dailyGiftQueue.push({character,costume});
+  if(dailyGiftShowing) return;
+  const next = () => {
+    const gift = dailyGiftQueue.shift();
+    if(!gift){ dailyGiftShowing = false; return; }
+    dailyGiftShowing = true;
+    const characterName = gift.character === "chime" ? "チャイムくん" : "ベルちゃん";
+    const overlay = document.createElement("div");
+    overlay.id = "dailyGiftOverlay";
+    overlay.innerHTML = `
+      <div class="daily-gift-card" role="dialog" aria-modal="true">
+        <div class="daily-gift-title">🎁 ${characterName}からのプレゼント</div>
+        <div class="daily-gift-character">${characterName}の衣装を入手しました！</div>
+        <img class="daily-gift-image" src="${esc(gift.costume.src)}" alt="${esc(gift.costume.name)}">
+        <div class="daily-gift-name">${esc(gift.costume.name)}</div>
+        <div class="daily-gift-note">「着替える」から着用できます</div>
+        <button id="dailyGiftClose" type="button">受け取る</button>
+      </div>`;
+    document.body.appendChild(overlay);
+    const close = () => { overlay.remove(); dailyGiftShowing = false; next(); };
+    $("dailyGiftClose")?.addEventListener("click",close);
+    overlay.addEventListener("click",e=>{ if(e.target === overlay) close(); });
+  };
+  next();
 }
 
 async function loadDailyCostumes(){
-  if(!currentUser){
-    dailyCostumes = {bell:{},chime:{}};
-    return;
-  }
-
+  if(!currentUser){ dailyCostumes = {bell:{},chime:{}}; return; }
   try{
-    const snap = await get(
-      ref(db,`members/${currentUser.uid}/dailyCostumes`)
-    );
-    const data = snap.exists() && snap.val() && typeof snap.val() === "object"
-      ? snap.val()
-      : {};
-
+    const snap = await get(ref(db,`members/${currentUser.uid}/dailyCostumes`));
+    const data = snap.exists() && snap.val() && typeof snap.val() === "object" ? snap.val() : {};
     dailyCostumes = {
-      bell: data.bell && typeof data.bell === "object" ? data.bell : {},
-      chime: data.chime && typeof data.chime === "object" ? data.chime : {}
+      bell:data.bell && typeof data.bell === "object" ? data.bell : {},
+      chime:data.chime && typeof data.chime === "object" ? data.chime : {}
     };
-  }catch(e){
-    console.error("毎日衣装の読み込みエラー:",e);
-    dailyCostumes = {bell:{},chime:{}};
-  }
+  }catch(e){ console.error("衣装プレゼントの読み込みエラー:",e); dailyCostumes = {bell:{},chime:{}}; }
+}
+
+async function grantCostumeGift(character, source, sourceKey){
+  if(!currentUser) return false;
+  const definitions = getCostumeDefinitions(character);
+  /* チャイムくん画像がまだない間は、壊れた画像や誤った衣装を付与しない。 */
+  if(!definitions.length) return false;
+  const uid = currentUser.uid;
+  const costumeRef = ref(db,`members/${uid}/dailyCostumes/${character}`);
+  let selected = null;
+  const result = await runTransaction(costumeRef,current=>{
+    const owned = current && typeof current === "object" && !Array.isArray(current) ? {...current} : {};
+    const available = definitions.filter(item=>!owned[item.id]);
+    if(!available.length) return;
+    selected = available[Math.floor(Math.random()*available.length)];
+    owned[selected.id] = {acquiredAt:Date.now(),source,sourceKey};
+    return owned;
+  });
+  if(!result.committed || !selected) return false;
+  dailyCostumes[character] = result.snapshot.val() || {};
+  const collectionId = selected.id;
+  await update(ref(db),{
+    [`members/${uid}/collection/${collectionId}`]:{acquiredAt:Date.now(),source:"dailyCostume",giftSource:source,sourceKey}
+  });
+  const cached = getCachedCollectionData() || {};
+  cached[collectionId] = {acquiredAt:Date.now(),source:"dailyCostume",giftSource:source,sourceKey};
+  saveCollectionDataCache(uid,cached);
+  showDailyCostumeGift(character,selected);
+  return true;
+}
+
+function scheduleEndMinutes(schedule){
+  const value = String(schedule?.time || schedule?.endTime || "");
+  const matches = [...value.matchAll(/(\d{1,2}):(\d{2})/g)];
+  if(!matches.length) return null;
+  const m = matches[matches.length-1];
+  return Number(m[1])*60 + Number(m[2]);
+}
+
+function isScheduleFinished(date,schedule){
+  const today = getDailyCostumeDate();
+  if(date < today) return true;
+  if(date > today) return false;
+  const end = scheduleEndMinutes(schedule);
+  if(end === null) return false;
+  const now = new Date();
+  return now.getHours()*60 + now.getMinutes() >= end;
+}
+
+async function loadGiftScheduleData(){
+  const [scheduleSnap,noticeSnap] = await Promise.all([get(ref(db,"schedules")),get(ref(db,"notices"))]);
+  return {
+    schedules:scheduleSnap.exists() ? scheduleSnap.val() || {} : {},
+    notices:noticeSnap.exists() ? noticeSnap.val() || {} : {}
+  };
 }
 
 async function acquireDailyCostume(){
   if(!currentUser || !profile) return;
+  const character = getDailyCostumeCharacter();
 
-  let gift = null;
-  try{
-    const uid = currentUser.uid;
-    const bellDailyRef = ref(db,`members/${uid}/dailyCostumes/bell`);
+  /* テストは画面表示のみ。参加回数・衣装獲得・イベント受取記録は一切変更しない。 */
+  if(COSTUME_GIFT_TEST_MODE === 1){
+    const defs = getCostumeDefinitions(character);
+    if(defs.length) showDailyCostumeGift(character,defs[0]);
+    else console.info("チャイムくんの衣装画像が未登録のため、テスト表示はスキップしました。");
+    return;
+  }
 
-    /* Firebase transaction prevents two page opens from awarding the same outfit. */
-    const result = await runTransaction(bellDailyRef,current=>{
-      gift = null;
-      const owned = current && typeof current === "object" && !Array.isArray(current)
-        ? {...current}
-        : {};
-      const available = dailyCostumeDefinitions.filter(item=>!owned[item.id]);
-      if(!available.length) return owned;
-      const costume = available[Math.floor(Math.random()*available.length)];
-      gift = {character:"bell",id:costume.id};
-      owned[costume.id] = true;
-      return owned;
-    });
+  await loadDailyCostumes();
+  const uid = currentUser.uid;
+  const stateRef = ref(db,`members/${uid}/costumeGiftState`);
+  const stateSnap = await get(stateRef);
+  const state = stateSnap.exists() && stateSnap.val() && typeof stateSnap.val()==="object" ? stateSnap.val() : {};
+  const attendanceDates = state.attendanceDates && typeof state.attendanceDates==="object" ? {...state.attendanceDates} : {};
+  const eventClaims = state.eventClaims && typeof state.eventClaims==="object" ? {...state.eventClaims} : {};
+  let attendanceCount = Number(state.attendanceCount) || 0;
+  let pendingAttendanceGifts = Number(state.pendingAttendanceGifts) || 0;
+  const {schedules,notices} = await loadGiftScheduleData();
+  const noticeDates = new Set(Object.values(notices).filter(n=>n && n.uid===uid && n.date).map(n=>String(n.date)));
 
-    const savedBellDaily = result.snapshot && result.snapshot.exists()
-      ? (result.snapshot.val() || {})
-      : {};
-    dailyCostumes = {
-      bell:savedBellDaily,
-      chime:dailyCostumes?.chime || {}
-    };
+  /* 過去～今日の終了済み部活動予定を日付ごとに判定。欠席・遅刻・早退・途中抜けの連絡はすべて除外。 */
+  const dateSchedules = new Map();
+  Object.entries(schedules).forEach(([key,s])=>{
+    if(!s || typeof s!=="object") return;
+    const date = String(s.date || (/^\d{4}-\d{2}-\d{2}$/.test(key) ? key : ""));
+    if(!date || !(s.type==="normal" || s.type==="concert" || s.type==="event" || !s.type)) return;
+    if(!dateSchedules.has(date)) dateSchedules.set(date,[]);
+    dateSchedules.get(date).push({key,s});
+  });
+  let milestonesToGrant = 0;
+  for(const [date,items] of [...dateSchedules.entries()].sort((a,b)=>a[0].localeCompare(b[0]))){
+    if(attendanceDates[date] || noticeDates.has(date)) continue;
+    if(!items.some(({s})=>isScheduleFinished(date,s))) continue;
+    attendanceDates[date] = true;
+    attendanceCount++;
+    if(attendanceCount % 3 === 0) milestonesToGrant++;
+  }
 
-    if(!result.committed || !gift) return;
+  /* 対象タグは「演奏会」「その他のイベント」の2種類だけ。イベントキー単位で一度だけ受取対象にする。 */
+  const pendingEvents = [];
+  Object.entries(schedules).forEach(([key,s])=>{
+    if(!s || typeof s!=="object") return;
+    const date = String(s.date || (/^\d{4}-\d{2}-\d{2}$/.test(key) ? key : ""));
+    if(!date || !(s.type === "concert" || s.type === "event") || eventClaims[key]) return;
+    if(!isScheduleFinished(date,s)) return;
+    pendingEvents.push(key);
+  });
 
-    const costume = dailyCostumeDefinitions.find(item=>item.id===gift.id);
-    if(!costume) return;
-
-    /* Add every owned daily outfit to the main collection as well. */
-    const collectionSnap = await get(ref(db,`members/${uid}/collection`));
-    const collection = collectionSnap.exists() && collectionSnap.val() && typeof collectionSnap.val()==="object"
-      ? collectionSnap.val()
-      : {};
-    const updates = {};
-    Object.keys(savedBellDaily).forEach(id=>{
-      if(savedBellDaily[id] && !collection[id]){
-        updates[`members/${uid}/collection/${id}`] = {
-          acquiredAt:Date.now(),
-          source:"dailyCostume"
-        };
-      }
-    });
-    if(Object.keys(updates).length) await update(ref(db),updates);
-
-    /* 画面内キャッシュにも反映して、コレクション数がすぐ更新されるようにする */
-    const cachedCollection = getCachedCollectionData() || {...collection};
-    Object.keys(savedBellDaily).forEach(id=>{
-      if(savedBellDaily[id] && !cachedCollection[id]){
-        cachedCollection[id] = collection[id] || {
-          acquiredAt:Date.now(),
-          source:"dailyCostume"
-        };
-      }
-    });
-    saveCollectionDataCache(uid,cachedCollection);
-
-    showDailyCostumeGift("bell",costume);
-  }catch(e){
-    console.error("毎日衣装の取得エラー:",e);
+  pendingAttendanceGifts += milestonesToGrant;
+  await set(stateRef,{attendanceCount,attendanceDates,eventClaims,pendingAttendanceGifts,updatedAt:Date.now()});
+  /* 衣装画像がまだないキャラクターの報酬は保留し、後日受け取れるようにする。 */
+  while(pendingAttendanceGifts > 0){
+    const ok = await grantCostumeGift(character,"attendance3",`attendance-${attendanceCount - (pendingAttendanceGifts-1)*3}`);
+    if(!ok) break;
+    pendingAttendanceGifts--;
+    await set(stateRef,{attendanceCount,attendanceDates,eventClaims,pendingAttendanceGifts,updatedAt:Date.now()});
+  }
+  for(const eventKey of pendingEvents){
+    const ok = await grantCostumeGift(character,"event",eventKey);
+    if(!ok) break;
+    eventClaims[eventKey] = true;
+    await set(stateRef,{attendanceCount,attendanceDates,eventClaims,pendingAttendanceGifts,updatedAt:Date.now()});
   }
 }
+
 
 
 let currentUser =
