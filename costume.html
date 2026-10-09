@@ -684,7 +684,8 @@ function renderCostumes(){
     const name=document.createElement("div"); name.className="costume-name"; name.textContent=costume.name;
     card.appendChild(name);
     const badge=document.createElement("span"); badge.className="costume-type-badge"+(costume.kind==="daily"?" daily":""); badge.textContent=costume.kind==="daily"?"毎日":costume.kind==="normal"?"ノーマル":costume.kind==="secret"?"シークレット":"イベント"; card.appendChild(badge);
-    if(selectedCostume[character]===costume.id){const b=document.createElement("span");b.className="selected-badge";b.textContent="選択中";card.appendChild(b);}
+    if(equippedCostume[character]===costume.id){const b=document.createElement("span");b.className="selected-badge worn-badge";b.textContent="着用中";card.appendChild(b);}
+    if(selectedCostume[character]===costume.id){const b=document.createElement("span");b.className="selected-badge choosing-badge";b.textContent="選択中";card.appendChild(b);}
     card.addEventListener("click",()=>{selectedCostume[character]=costume.id;renderAll();});
     costumeList.appendChild(card);
   });
@@ -744,9 +745,11 @@ async function saveCostume(){
 
     await update(ref(db),updates);
 
+    /* 前の衣装の「着用中」を外し、今選んだ衣装だけを着用中にする */
     equippedCostume[character]=costumeId;
+    selectedCostume[character]=null;
 
-    showMessage("衣装を保存しました！");
+    showMessage("衣装を変更しました！");
     if(window.parent !== window){
       window.parent.postMessage({type:"handbell-costume-saved"}, "*");
     }
@@ -767,15 +770,24 @@ selectChime.addEventListener("click",()=>{selectedCharacter="chime";renderAll();
    戻る
 ========================= */
 
-function returnFromCostume(){
+function returnToMyPage(){
   if(window.parent !== window){
     window.parent.postMessage({type:"handbell-close-costume"}, "*");
   }else{
     location.href = "handbell.html";
   }
 }
-backButton.addEventListener("click", returnFromCostume);
-topBackButton.addEventListener("click", returnFromCostume);
+function returnHome(){
+  if(window.parent !== window){
+    /* 親ページ側で着替え画面を閉じ、カレンダー（ホーム）を表示する */
+    window.parent.postMessage({type:"handbell-go-home"}, window.location.origin);
+  }else{
+    /* 単独ページとして開かれている場合も、マイページではなくホームへ戻す */
+    location.replace(new URL("handbell.html", window.location.href).href);
+  }
+}
+backButton.addEventListener("click", returnHome);
+topBackButton.addEventListener("click", returnToMyPage);
 
 saveButton.addEventListener(
   "click",

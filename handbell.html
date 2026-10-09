@@ -6191,12 +6191,12 @@ async function showMyPage(){
     return;
   }
 
-  if(!profile){
-    const loaded = await loadProfile();
-    if(!loaded){
-      showLogin();
-      return;
-    }
+  /* マイページを開くたびFirebaseから最新プロフィールを再取得する。
+     毎月画像設定が古いprofileのまま復活するのを防ぐ。 */
+  const loaded = await loadProfile();
+  if(!loaded){
+    showLogin();
+    return;
   }
 
   hide();
@@ -6215,8 +6215,9 @@ async function showMyPage(){
       if(savedSetting && savedSetting.month === currentMonthKey && typeof savedSetting.enabled === "boolean") savedLocal = savedSetting.enabled;
     }catch(e){}
     /* Firebaseの今月OFF記録を優先し、古い端末内設定でONに戻らないようにする */
-    monthlyToggle.checked = disabledMonth === currentMonthKey
-      ? false
+    /* OFF記録が今月のものならOFF。前月以前のOFF記録は翌月の自動ONとして扱う。 */
+    monthlyToggle.checked = disabledMonth
+      ? disabledMonth !== currentMonthKey
       : typeof profile.monthlyImageEnabled === "boolean"
         ? profile.monthlyImageEnabled
         : savedLocal !== null ? savedLocal : true;
@@ -7203,6 +7204,15 @@ function closeCostumeOverlay(){
 window.addEventListener("message",event=>{
   if(!event.data || typeof event.data.type !== "string") return;
   if(event.data.type === "handbell-close-costume") closeCostumeOverlay();
+  if(event.data.type === "handbell-go-home"){
+    closeCostumeOverlay();
+    /* マイページを含む他画面を確実に隠し、ホームのカレンダーを表示する */
+    hide();
+    $("detail").innerHTML = "";
+    $("calendarView").classList.remove("hidden");
+    editingId = null;
+    render();
+  }
   if(event.data.type === "handbell-costume-saved"){
     loadEquippedCostume().then(()=>{
       loadEventCostumeOverride().then(()=>{
@@ -7412,9 +7422,9 @@ async function decideLoginImage(){
       savedMonthlySetting = saved.enabled;
     }
   }catch(e){}
-  /* 今月OFFの記録を最優先。古いlocalStorageのONで復活させない */
-  const monthlyEnabled = monthlyDisabledMonth === monthKey
-    ? false
+  /* 今月OFFの記録だけをOFFとして扱う。前月以前の記録は翌月に自動ONへ戻す。 */
+  const monthlyEnabled = monthlyDisabledMonth
+    ? monthlyDisabledMonth !== monthKey
     : typeof data.monthlyImageEnabled === "boolean"
       ? data.monthlyImageEnabled
       : savedMonthlySetting !== null

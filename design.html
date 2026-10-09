@@ -1379,7 +1379,7 @@ function renderSecretCostume(
     );
 
     secretDisplayedCharacter = character;
-    if(!wasSecretShowingForCharacter){ if(String(character).toLowerCase() === "chime") startHearts("sunflower"); else startSecretMoon(); }
+    /* 衣装を表示しただけではエフェクトを出さない。クリック時のジャンプに合わせて出す。 */
     return;
 
   }
@@ -1577,7 +1577,7 @@ function renderSecretCostume(
             );
 
             secretDisplayedCharacter = character;
-            if(!wasSecretShowingForCharacter){ if(String(character).toLowerCase() === "chime") startHearts("sunflower"); else startSecretMoon(); }
+    /* 衣装を表示しただけではエフェクトを出さない。クリック時のジャンプに合わせて出す。 */
             requestAnimationFrame(sendBellHitBounds);
 
           }
@@ -4389,13 +4389,11 @@ function celebrate(){
   /*
    * ★ シークレット衣装 ★
    *
-   * 通常の「2回ジャンプ＋ハート」は絶対に実行しない。
-   * シークレットのときだけ専用の月夜演出へ分岐する。
+   * ノーマルと同じジャンプを使い、飛び出すものだけ差し替える。
+   * ベルちゃんは三日月、チャイムくんは太陽と花びら。
    */
   if(
-    isSecretEquipped(
-      currentCharacter
-    ) &&
+    isSecretEquipped(currentCharacter) &&
     secretCostume &&
     secretCostume.classList.contains(
       "show"
@@ -4408,7 +4406,7 @@ function celebrate(){
       "bubble-hidden"
     );
 
-    /* ノーマルと同じ2回ジャンプ。出すものだけ三日月に変更 */
+    /* ノーマルと同じ2回ジャンプ。ベルちゃんは三日月、チャイムくんは太陽と桜 */
     secretCostume.classList.remove(
       "celebrating"
     );
@@ -4421,14 +4419,14 @@ function celebrate(){
 
     setTimeout(
       ()=>{
-        if(currentCharacter === "chime") startHearts("sunflower"); else startSecretMoon();
+        if(currentCharacter === "chime") startHearts("sunflower"); else startHearts("crescent");
       },
       150
     );
 
     setTimeout(
       ()=>{
-        if(currentCharacter === "chime") startHearts("sunflower"); else startSecretMoon();
+        if(currentCharacter === "chime") startHearts("sunflower"); else startHearts("crescent");
       },
       950
     );
