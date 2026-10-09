@@ -75,7 +75,7 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}
 <div class="upload-box">
 <label for="costumeFiles">登録する衣装画像</label>
 <input id="costumeFiles" type="file" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp" multiple>
-<p class="small">54枚まとめて選択してもOK。画像そのものはFirebaseへ送信されません。</p>
+
 <div id="selectedList" class="selected-list hidden"></div>
 <button id="uploadButton" class="primary" type="button">選択した衣装を登録</button>
 <div id="uploadMsg"></div>
@@ -219,7 +219,7 @@ ${item.fileName}`);
     message("uploadMsg",`${pending.length}着登録しました。GitHub上の画像をそのまま使用します。`,"success");
   }catch(e){
     console.error(e);
-    message("uploadMsg","衣装の登録に失敗しました。\n\nエラーコード: "+(e.code||"不明")+"\n詳細: "+(e.message||"不明"),"error");
+    message("uploadMsg","衣装の登録に失敗しました。\n\nエラーコード: "+(e.code||"不明")+"\n詳細: "+(e.message||"不明")+((e.code==="PERMISSION_DENIED"||String(e.message||"").includes("PERMISSION_DENIED"))?"\n\nFirebase Realtime Databaseのルールで dailyCostumes への書き込みが許可されていません。管理者ログインができていても、データベース側の書き込み許可が必要です。":""),"error");
   }finally{button.disabled=false;}
 }
 async function deleteCostume(id,item){
@@ -236,8 +236,9 @@ GitHub上の画像ファイルは削除されません。`))return;
     message("uploadMsg","登録解除に失敗しました。\n\n"+(e.message||"不明"),"error");
   }
 }
-$("bellButton").onclick=()=>setCharacter("bell");
-$("chimeButton").onclick=()=>setCharacter("chime");
+// キャラクター切り替えは現在の画面内だけで行い、ページ遷移・再読み込みをしない
+$("bellButton").addEventListener("click",e=>{e.preventDefault();e.stopPropagation();setCharacter("bell");});
+$("chimeButton").addEventListener("click",e=>{e.preventDefault();e.stopPropagation();setCharacter("chime");});
 $("costumeFiles").onchange=renderSelectedFiles;
 $("uploadButton").onclick=registerSelected;
 $("logoutButton").onclick=()=>signOut(auth);
