@@ -6282,6 +6282,8 @@ async function toggleMonthlyImage(){
   const now = new Date();
   const monthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
   const enabled = toggle.checked;
+  /* 先に端末にも保存し、再読み込み直後の初期値上書きを防ぐ */
+  try{ localStorage.setItem(`handbell-monthly-image-${currentUser.uid}`, JSON.stringify({month:monthKey,enabled})); }catch(e){}
 
   try{
     await update(
@@ -7036,21 +7038,10 @@ const SECRET_PREVIEW_LAYOUT = {
   }
 };
 function secretCostumePreviewHtml(character){
-  const layout=SECRET_PREVIEW_LAYOUT[character === "chime" ? "chime" : "bell"];
-  const g=layout.global;
-  const bodyTransform=`translate(${g.x}px,${g.y}px) scale(${g.scale}) rotate(${g.angle}deg)`;
-  const layers=layout.layers.map((src,i)=>{
-    if(!layout.enabled[i]) return "";
-    const p=layout.positions[i], z=layout.sizes[i];
-    const w=z.width*(character === "chime" ? z.scale : 1);
-    const h=z.height*(character === "chime" ? z.scale : 1);
-    const left=(100-w)/2, top=(100-h)/2;
-    const transform=character === "chime"
-      ? `translate(${p.x}px,${p.y}px) rotate(${z.angle}deg)`
-      : `translate(${p.x}px,${p.y}px) scale(${z.scale}) rotate(${z.angle}deg)`;
-    return `<div class="secret-preview-wrap" style="width:${w}%;height:${h}%;left:${left}%;top:${top}%;transform:${transform}"><img src="${src}" alt="" draggable="false"></div>`;
-  }).join("");
-  return `<div class="secret-costume-preview"><div class="secret-preview-stage"><div class="secret-preview-body" style="transform:${bodyTransform}">${layers}</div></div></div>`;
+  const isChime = character === "chime";
+  const src = isChime ? "costumes/chime-secret-complete.jpg" : "costumes/bell-secret-complete.jpg";
+  const alt = isChime ? "チャイムくん・シークレット衣装" : "ベルちゃん・シークレット衣装";
+  return `<div class="secret-costume-preview"><img class="secret-costume-complete-image" src="${src}" alt="${alt}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:contain;"></div>`;
 }
 
 function collectionCardHtml(item,acquired){
@@ -7147,9 +7138,14 @@ function openCostumeOverlay(){
   const overlay=$("changeCostumeOverlay");
   const frame=$("changeCostumeFrame");
   if(!overlay || !frame) return;
-  if(!frame.src || frame.src.endsWith("about:blank")) frame.src="costume.html?embedded=1";
+  const costumeUrl = new URL("costume.html?embedded=1", window.location.href).href;
+  if(frame.getAttribute("src") !== "costume.html?embedded=1" && frame.src !== costumeUrl){
+    frame.src = "costume.html?embedded=1";
+  }
+  overlay.style.display = "block";
   overlay.classList.add("show");
   overlay.setAttribute("aria-hidden","false");
+  frame.style.pointerEvents = "auto";
 }
 
 function closeCostumeOverlay(){

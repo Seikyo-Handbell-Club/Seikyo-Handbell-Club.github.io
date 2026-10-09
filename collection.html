@@ -1030,7 +1030,8 @@ function createCostumeCard(
 
   image.src =
     costume.src;
-
+  image.loading = "lazy";
+  image.decoding = "async";
   image.alt =
     costume.name;
 
