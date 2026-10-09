@@ -6303,15 +6303,28 @@ function getMonthlyImageMonthKey(){
 async function toggleMonthlyImage(){
   const toggle = $("monthlyImageToggle");
   if(!toggle) return;
-  if(!currentUser){ toggle.checked = true; showLogin(); return; }
+  const msg = $("monthlyImageSettingMsg");
+  if(!currentUser){
+    toggle.checked = true;
+    if(msg) msg.innerHTML = '<div class="msg error">設定を変更するにはログインしてください。</div>';
+    showLogin();
+    return;
+  }
   if(!profile){
+    if(msg) msg.innerHTML = '<div class="msg">設定を確認しています…</div>';
     try{ await loadProfile(); }catch(e){}
-    if(!profile){ toggle.checked = !toggle.checked; return; }
+    if(!profile){
+      toggle.checked = !toggle.checked;
+      if(msg) msg.innerHTML = '<div class="msg error">プロフィールを読み込めませんでした。もう一度お試しください。</div>';
+      return;
+    }
   }
   const monthKey = getMonthlyImageMonthKey();
   const enabled = !!toggle.checked;
   const storageKey = `handbell-monthly-image-${currentUser.uid}`;
   toggle.disabled = true;
+  /* 操作直後に結果欄へ表示し、Firebaseの応答待ちで無表示にならないようにする */
+  if(msg) msg.innerHTML = '<div class="msg">設定を保存しています…</div>';
   /* 先に端末内へ保存し、Firebase保存が失敗してもスイッチを元に戻さない */
   try{
     localStorage.setItem(storageKey, JSON.stringify({month:monthKey, enabled}));
@@ -6323,7 +6336,6 @@ async function toggleMonthlyImage(){
     monthlyImageEnabled:enabled,
     monthlyImageDisabledMonth:enabled ? null : monthKey
   };
-  const msg = $("monthlyImageSettingMsg");
   try{
     await update(ref(db, "members/" + currentUser.uid), {
       monthlyImageEnabled: enabled,
