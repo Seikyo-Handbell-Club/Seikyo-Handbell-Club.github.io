@@ -51,16 +51,7 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}
 <body>
 <header><h1>毎日ログイン衣装管理</h1></header>
 <main>
-<section id="login" class="card">
-<h2>管理者ログイン</h2>
-<p class="small">管理者用パスワードを入力してください。</p>
-<label for="password">パスワード</label>
-<input id="password" type="password" autocomplete="current-password" placeholder="パスワード">
-<button id="loginButton" class="primary" type="button">ログイン</button>
-<div id="loginMsg"></div>
-</section>
-
-<section id="app" class="hidden">
+<section id="app">
 <div class="topbar">
 <button class="back" type="button" onclick="location.href='admin.html'">← 管理者設定へ戻る</button>
 <button id="logoutButton" class="logout" type="button">ログアウト</button>
@@ -77,15 +68,8 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}
 
 <div class="card">
 <h2 id="uploadTitle">ベルちゃんの衣装を登録</h2>
-<p class="small">このページはFirebase Storageを一切使いません。画像本体はGitHub Pagesに置き、Firebaseには画像URLと衣装情報だけを保存します。</p>
-
-<label for="githubBaseUrl">GitHub Pagesの衣装フォルダURL</label>
-<input id="githubBaseUrl" type="url" value="https://seikyo-handbell-club.github.io/costumes/daily-costumes/" spellcheck="false">
-<p class="small">ベルちゃんはこのURLの後ろに <b>bell/</b>、チャイムくんは <b>chime/</b> が付きます。例：<br>https://seikyo-handbell-club.github.io/costumes/daily-costumes/bell/daily-costume-01.png</p>
-
 <div class="warning">
-先にGitHubの <b>costumes/daily-costumes/bell/</b> または <b>chime/</b> に画像を置いてください。<br>
-下で同じ画像ファイルを選ぶと、ファイル名から公開URLを作って登録します。ここからGitHubへアップロードはしません。
+画像をアップロードする前に、次の点を確認してください。<br><br>・背景を透過にする<br>・画像を正方形（スクエア）にする<br>・イラストを画像いっぱいに配置する<br>・高画質化する
 </div>
 
 <div class="upload-box">
@@ -108,7 +92,7 @@ label{display:block;font-weight:700;font-size:14px;margin:12px 0 5px}
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-import{getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut,setPersistence,browserLocalPersistence}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import{getAuth,onAuthStateChanged,signOut,setPersistence,browserLocalPersistence}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import{getDatabase,ref,get,set,remove}from"https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
 
 const firebaseConfig={
@@ -135,10 +119,7 @@ function message(id,text,type=""){
 function characterName(){return currentCharacter==="bell"?"ベルちゃん":"チャイムくん";}
 function sanitizeName(name){return String(name||"").replace(/[\/:*?"<>|#%{}]/g,"_").trim()||"衣装";}
 function normalizeBaseUrl(){
-  let base=$("githubBaseUrl").value.trim();
-  if(!base)base="https://seikyo-handbell-club.github.io/costumes/daily-costumes/";
-  if(!base.endsWith("/"))base+="/";
-  return base;
+  return "https://seikyo-handbell-club.github.io/costumes/daily-costumes/";
 }
 function imageUrlForFile(file){
   const base=normalizeBaseUrl();
@@ -255,33 +236,29 @@ GitHub上の画像ファイルは削除されません。`))return;
     message("uploadMsg","登録解除に失敗しました。\n\n"+(e.message||"不明"),"error");
   }
 }
-async function adminLogin(){
-  const password=$("password").value;
-  if(!password){message("loginMsg","パスワードを入力してください。","error");return;}
-  const b=$("loginButton");b.disabled=true;b.textContent="ログイン中...";
-  try{
-    const c=await signInWithEmailAndPassword(auth,ADMIN_EMAIL,password);
-    const s=await get(ref(db,"admins/"+c.user.uid));
-    if(!s.exists()||s.val()!==true){await signOut(auth);message("loginMsg","管理者として登録されていません。","error");}
-  }catch(e){message("loginMsg","ログインできませんでした。\n\nエラーコード: "+(e.code||"不明")+"\n詳細: "+(e.message||"不明"),"error");}
-  finally{b.disabled=false;b.textContent="ログイン";}
-}
 $("bellButton").onclick=()=>setCharacter("bell");
 $("chimeButton").onclick=()=>setCharacter("chime");
 $("costumeFiles").onchange=renderSelectedFiles;
 $("uploadButton").onclick=registerSelected;
 $("logoutButton").onclick=()=>signOut(auth);
-$("password").onkeydown=e=>{if(e.key==="Enter")adminLogin()};
-$("loginButton").onclick=adminLogin;
 const params=new URLSearchParams(location.search);
 setCharacter(params.get("character")==="chime"?"chime":"bell");
 onAuthStateChanged(auth,async user=>{
-  if(!user){$("login").classList.remove("hidden");$("app").classList.add("hidden");return;}
+  if(!user){
+    message("uploadMsg","管理者ログインが必要です。先に管理者設定ページでログインしてください。","error");
+    $("uploadButton").disabled=true;
+    return;
+  }
   try{
-    if(!(await isAdmin())){await signOut(auth);return;}
-    $("login").classList.add("hidden");$("app").classList.remove("hidden");
+    if(!(await isAdmin())){
+      await signOut(auth);
+      message("uploadMsg","管理者権限が確認できませんでした。管理者設定ページでログインし直してください。","error");
+      $("uploadButton").disabled=true;
+      return;
+    }
+    $("uploadButton").disabled=false;
     await loadCostumes();
-   }catch(e){console.error(e);message("loginMsg","管理者権限の確認に失敗しました。"+(e.message||"不明"),"error");}
+   }catch(e){console.error(e);message("uploadMsg","管理者権限の確認に失敗しました。"+(e.message||"不明"),"error");}
 });
 </script>
 </body>
