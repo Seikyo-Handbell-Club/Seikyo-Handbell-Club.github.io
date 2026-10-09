@@ -6206,13 +6206,14 @@ async function showMyPage(){
     let savedLocal = null;
     try{
       const savedSetting = JSON.parse(localStorage.getItem(`handbell-monthly-image-${currentUser.uid}`) || "null");
-      if(savedSetting && savedSetting.month === currentMonthKey) savedLocal = savedSetting.enabled;
+      if(savedSetting && savedSetting.month === currentMonthKey && typeof savedSetting.enabled === "boolean") savedLocal = savedSetting.enabled;
     }catch(e){}
-    monthlyToggle.checked = savedLocal !== null
-      ? savedLocal === true
-      : disabledMonth
-        ? disabledMonth !== currentMonthKey
-        : profile.monthlyImageEnabled !== false;
+    /* Firebaseの今月OFF記録を優先し、古い端末内設定でONに戻らないようにする */
+    monthlyToggle.checked = disabledMonth === currentMonthKey
+      ? false
+      : profile.monthlyImageEnabled === false
+        ? false
+        : savedLocal !== null ? savedLocal : true;
   }
 
   const character = profile.characterType === "chime" ? "chime" : "bell";
@@ -6294,63 +6295,31 @@ function getMonthlyImageMonthKey(){
 async function toggleMonthlyImage(){
   const toggle = $("monthlyImageToggle");
   if(!toggle) return;
-  if(!currentUser){
-    toggle.checked = true;
-    showLogin();
-    return;
-  }
+  if(!currentUser){ toggle.checked = true; showLogin(); return; }
   if(!profile){
     try{ await loadProfile(); }catch(e){}
-    if(!profile){
-      toggle.checked = !toggle.checked;
-      return;
-    }
+    if(!profile){ toggle.checked = !toggle.checked; return; }
   }
-
   const monthKey = getMonthlyImageMonthKey();
-  const enabled = toggle.checked;
+  const enabled = !!toggle.checked;
   const storageKey = `handbell-monthly-image-${currentUser.uid}`;
-  const previousEnabled = !enabled;
   toggle.disabled = true;
-  /* 先に端末にも保存し、画面表示側でも同じ設定を参照する */
-  try{ localStorage.setItem(storageKey, JSON.stringify({month:monthKey,enabled})); }catch(e){}
-
   try{
-    await update(
-      ref(db,"members/" + currentUser.uid),
-      enabled
-        ? {
-            monthlyImageEnabled:true,
-            monthlyImageDisabledMonth:null
-          }
-        : {
-            monthlyImageEnabled:false,
-            monthlyImageDisabledMonth:monthKey
-          }
-    );
-
-    profile = {
-      ...profile,
-      monthlyImageEnabled:enabled,
-      monthlyImageDisabledMonth:enabled ? null : monthKey
-    };
-    try{ localStorage.setItem(storageKey, JSON.stringify({month:monthKey,enabled})); }catch(e){}
-
-    $("monthlyImageSettingMsg").innerHTML =
-      `<div class="msg">${enabled ? "毎月の画像を表示します。" : "今月の毎月の画像を表示しません。"}</div>`;
-
+    await update(ref(db, "members/" + currentUser.uid), {
+      monthlyImageEnabled: enabled,
+      monthlyImageDisabledMonth: enabled ? null : monthKey
+    });
+    profile = {...profile, monthlyImageEnabled:enabled, monthlyImageDisabledMonth:enabled ? null : monthKey};
+    try{ localStorage.setItem(storageKey, JSON.stringify({month:monthKey, enabled})); }catch(storageError){}
+    const msg = $("monthlyImageSettingMsg");
+    if(msg) msg.innerHTML = `<div class="msg">${enabled ? "毎月の画像を表示します。" : "今月の毎月の画像を表示しません。"}</div>`;
   }catch(e){
-    console.error("毎月の画像設定保存エラー:",e);
-    /* 端末内の選択は維持し、次回表示時にもOFFを反映する */
-    try{ localStorage.setItem(storageKey, JSON.stringify({month:monthKey,enabled})); }catch(storageError){}
-    profile = { ...profile, monthlyImageEnabled:enabled, monthlyImageDisabledMonth:enabled ? null : monthKey };
-    $("monthlyImageSettingMsg").innerHTML =
-      '<div class="msg error">設定を保存できませんでした。通信状態を確認して、もう一度お試しください。</div>';
-  }finally{
-    toggle.disabled = false;
-  }
+    console.error("毎月の画像設定保存エラー:", e);
+    toggle.checked = !enabled;
+    const msg = $("monthlyImageSettingMsg");
+    if(msg) msg.innerHTML = '<div class="msg error">設定を保存できませんでした。通信状態を確認して、もう一度お試しください。</div>';
+  }finally{ toggle.disabled = false; }
 }
-
 
 /* =========================
    プロフィール保存
@@ -7215,6 +7184,11 @@ function closeCostumeOverlay(){
   if(!overlay) return;
   overlay.classList.remove("show");
   overlay.setAttribute("aria-hidden","true");
+  /* display/pointer-events も戻して、透明な画面がホーム操作を塞がないようにする */
+  overlay.style.display="none";
+  overlay.style.pointerEvents="none";
+  const frame=$("changeCostumeFrame");
+  if(frame) frame.style.pointerEvents="none";
   sendCharacterToBell();
   sendEquippedCostumeToBell();
   sendEventCostumeOverrideToBell();
