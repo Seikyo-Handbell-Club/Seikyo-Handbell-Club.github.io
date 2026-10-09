@@ -32,8 +32,6 @@ body{
   width:min(760px,100%);
   margin:0 auto;
 }
-.top-back-row{display:flex;justify-content:flex-start;margin:0 0 12px;}
-.top-back-row button{border:1px solid #d5e0e7;border-radius:12px;background:#fff;color:#26343d;padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer;}
 
 .card{
   background:#fff;
@@ -248,10 +246,6 @@ button:disabled{
 
 <div class="page">
 
-  <div class="top-back-row">
-    <button id="topBackButton" type="button" class="secondary">← マイページに戻る</button>
-  </div>
-
   <div class="card">
     <h1>👕 着替える</h1>
     <p class="small">
@@ -397,18 +391,31 @@ const eventCostumeDefinitions = [
   ["newyearseve","大晦日","bell-winter.png","chime-winter.png"]
 ];
 
-const dailyCostumeDefinitions = [
-  {
-    id:"daily-costume-01",
-    name:"毎日衣装 01",
-    src:"costumes/daily-costume-01.png"
-  },
-  {
-    id:"daily-costume-02",
-    name:"毎日衣装 02",
-    src:"costumes/daily-costume-02.png"
-  }
-];
+const dailyCostumeDefinitions = {
+  bell: Array.from({length:54}, (_, index) => {
+    const number = String(index + 1).padStart(2,"0");
+    return {
+      id:`daily-costume-${number}`,
+      name:`毎日衣装 ${number}`,
+      src:`costumes/daily-costume-${number}.webp`,
+      kind:"daily"
+    };
+  }),
+  chime: [
+    {
+      id:"daily-costume-01",
+      name:"毎日衣装 01",
+      src:"costumes/daily-costume-01.png",
+      kind:"daily"
+    },
+    {
+      id:"daily-costume-02",
+      name:"毎日衣装 02",
+      src:"costumes/daily-costume-02.png",
+      kind:"daily"
+    }
+  ]
+};
 
 const secretCostumeDefinitions = {
   bell:{
@@ -452,13 +459,13 @@ const costumeDefinitions = {
   bell:[
     {id:"normal",name:"ベルちゃん・ノーマル",src:"bell.png",kind:"normal"},
     ...eventCostumeDefinitions.map(([key,name,bellFile])=>({id:`event_${key}_bell`,name:`ベルちゃん・${name}`,src:`costumes/${bellFile}`,kind:"event"})),
-    ...dailyCostumeDefinitions.map(costume=>({...costume,kind:"daily"})),
+    ...dailyCostumeDefinitions.bell.map(costume=>({...costume,kind:"daily"})),
     secretCostumeDefinitions.bell
   ],
   chime:[
     {id:"normal",name:"チャイムくん・ノーマル",src:"chime.png",kind:"normal"},
     ...eventCostumeDefinitions.map(([key,name,bellFile,chimeFile])=>({id:`event_${key}_chime`,name:`チャイムくん・${name}`,src:`costumes/${chimeFile}`,kind:"event"})),
-    ...dailyCostumeDefinitions.map(costume=>({...costume,kind:"daily"})),
+    ...dailyCostumeDefinitions.chime.map(costume=>({...costume,kind:"daily"})),
     secretCostumeDefinitions.chime
   ]
 };
@@ -589,10 +596,9 @@ async function loadMemberData(){
 
     };
 
-    /* 選択は仮状態。保存ボタンを押すまでは装備を変更しない */
     selectedCostume = {
-      bell: null,
-      chime: null
+      bell: equippedCostume.bell || "normal",
+      chime: equippedCostume.chime || "normal"
     };
 
     return true;
@@ -660,9 +666,10 @@ function closeImageLightbox(){
   if(!box)return; box.classList.remove("show"); box.setAttribute("aria-hidden","true");
   document.getElementById("imageLightboxImg").src="";
 }
-/* 衣装選択画面では画像の拡大操作を無効化し、カードの選択を優先する */
 document.addEventListener("click",function(e){
-  if(e.target.closest(".image-lightbox-close") || e.target.id==="imageLightbox") { closeImageLightbox(); }
+  if(e.target.closest(".image-lightbox-close") || e.target.id==="imageLightbox") { closeImageLightbox(); return; }
+  const img=e.target.closest(".costume-card img");
+  if(img){ e.preventDefault(); e.stopPropagation(); openImageLightbox(img.src,img.alt); }
 },true);
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeImageLightbox();});
 
@@ -684,8 +691,7 @@ function renderCostumes(){
     const name=document.createElement("div"); name.className="costume-name"; name.textContent=costume.name;
     card.appendChild(name);
     const badge=document.createElement("span"); badge.className="costume-type-badge"+(costume.kind==="daily"?" daily":""); badge.textContent=costume.kind==="daily"?"毎日":costume.kind==="normal"?"ノーマル":costume.kind==="secret"?"シークレット":"イベント"; card.appendChild(badge);
-    if(equippedCostume[character]===costume.id){const b=document.createElement("span");b.className="selected-badge worn-badge";b.textContent="着用中";card.appendChild(b);}
-    if(selectedCostume[character]===costume.id){const b=document.createElement("span");b.className="selected-badge choosing-badge";b.textContent="選択中";card.appendChild(b);}
+    if(selectedCostume[character]===costume.id){const b=document.createElement("span");b.className="selected-badge";b.textContent="選択中";card.appendChild(b);}
     card.addEventListener("click",()=>{selectedCostume[character]=costume.id;renderAll();});
     costumeList.appendChild(card);
   });
@@ -745,11 +751,9 @@ async function saveCostume(){
 
     await update(ref(db),updates);
 
-    /* 前の衣装の「着用中」を外し、今選んだ衣装だけを着用中にする */
     equippedCostume[character]=costumeId;
-    selectedCostume[character]=null;
 
-    showMessage("衣装を変更しました！");
+    showMessage("衣装を保存しました！");
     if(window.parent !== window){
       window.parent.postMessage({type:"handbell-costume-saved"}, "*");
     }
@@ -770,24 +774,16 @@ selectChime.addEventListener("click",()=>{selectedCharacter="chime";renderAll();
    戻る
 ========================= */
 
-function returnToMyPage(){
-  if(window.parent !== window){
-    window.parent.postMessage({type:"handbell-close-costume"}, "*");
-  }else{
-    location.href = "handbell.html";
+backButton.addEventListener(
+  "click",
+  ()=>{
+    if(window.parent !== window){
+      window.parent.postMessage({type:"handbell-close-costume"}, "*");
+    }else{
+      location.href = "handbell.html";
+    }
   }
-}
-function returnHome(){
-  if(window.parent !== window){
-    /* 親ページ側で着替え画面を閉じ、カレンダー（ホーム）を表示する */
-    window.parent.postMessage({type:"handbell-go-home"}, window.location.origin);
-  }else{
-    /* 単独ページとして開かれている場合も、マイページではなくホームへ戻す */
-    location.replace(new URL("handbell.html", window.location.href).href);
-  }
-}
-backButton.addEventListener("click", returnHome);
-topBackButton.addEventListener("click", returnToMyPage);
+);
 
 saveButton.addEventListener(
   "click",

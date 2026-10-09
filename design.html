@@ -165,8 +165,8 @@ body:not(.logged-in) .bubble{
   width:198px;
   max-width:198px;
   box-sizing:border-box;
-  right:6px;
-  top:-3px;
+  right:4px;
+  top:10px;
 }
 
 body:not(.logged-in) .bubble:after{
@@ -536,8 +536,8 @@ body.logged-in{
 }
 
 body:not(.logged-in) .secret-costume{
-  right:25px !important;
-  top:-30px !important;
+  right:20px !important;
+  top:12px !important;
 }
 
 body.logged-in .secret-costume{
@@ -1379,7 +1379,7 @@ function renderSecretCostume(
     );
 
     secretDisplayedCharacter = character;
-    /* 衣装を表示しただけではエフェクトを出さない。クリック時のジャンプに合わせて出す。 */
+    if(!wasSecretShowingForCharacter) startHearts(String(character).toLowerCase() === "chime" ? "sunflower" : "heart");
     return;
 
   }
@@ -1577,7 +1577,7 @@ function renderSecretCostume(
             );
 
             secretDisplayedCharacter = character;
-    /* 衣装を表示しただけではエフェクトを出さない。クリック時のジャンプに合わせて出す。 */
+            if(!wasSecretShowingForCharacter) startHearts(String(character).toLowerCase() === "chime" ? "sunflower" : "heart");
             requestAnimationFrame(sendBellHitBounds);
 
           }
@@ -2286,22 +2286,19 @@ function getCostumeImageFromId(
 
   }
 
-  if(
-    costumeId ===
-    "daily-costume-01"
-  ){
+  /* 毎日衣装：ベルちゃん54枚はWebP、チャイムくんは従来のPNGを維持 */
+  const dailyCostumeMatch = /^daily-costume-(\d{2})$/.exec(costumeId);
+  if(dailyCostumeMatch){
+    const number = Number(dailyCostumeMatch[1]);
+    const paddedNumber = dailyCostumeMatch[1];
 
-    return "costumes/daily-costume-01.png";
+    if(character === "bell" && number >= 1 && number <= 54){
+      return `costumes/daily-costume-${paddedNumber}.webp`;
+    }
 
-  }
-
-  if(
-    costumeId ===
-    "daily-costume-02"
-  ){
-
-    return "costumes/daily-costume-02.png";
-
+    if(character === "chime" && number >= 1 && number <= 2){
+      return `costumes/daily-costume-${paddedNumber}.png`;
+    }
   }
 
   if(
@@ -4389,11 +4386,13 @@ function celebrate(){
   /*
    * ★ シークレット衣装 ★
    *
-   * ノーマルと同じジャンプを使い、飛び出すものだけ差し替える。
-   * ベルちゃんは三日月、チャイムくんは太陽と花びら。
+   * 通常の「2回ジャンプ＋ハート」は絶対に実行しない。
+   * シークレットのときだけ専用の月夜演出へ分岐する。
    */
   if(
-    isSecretEquipped(currentCharacter) &&
+    isSecretEquipped(
+      currentCharacter
+    ) &&
     secretCostume &&
     secretCostume.classList.contains(
       "show"
@@ -4406,7 +4405,7 @@ function celebrate(){
       "bubble-hidden"
     );
 
-    /* ノーマルと同じ2回ジャンプ。ベルちゃんは三日月、チャイムくんは太陽と桜 */
+    /* ノーマルと同じ2回ジャンプ。出すものだけ三日月に変更 */
     secretCostume.classList.remove(
       "celebrating"
     );
@@ -4419,14 +4418,14 @@ function celebrate(){
 
     setTimeout(
       ()=>{
-        if(currentCharacter === "chime") startHearts("sunflower"); else startHearts("crescent");
+        startHearts(currentCharacter === "chime" ? "sunflower" : "heart");
       },
       150
     );
 
     setTimeout(
       ()=>{
-        if(currentCharacter === "chime") startHearts("sunflower"); else startHearts("crescent");
+        startHearts(currentCharacter === "chime" ? "sunflower" : "heart");
       },
       950
     );
