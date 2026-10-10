@@ -1918,23 +1918,59 @@ async function deleteMember(id){
 
   if(!(await isAdmin()))return;
 
-  if(
-    !confirm(
-      "この部員登録を削除しますか？"
-    )
-  ){
-    return;
+  const confirmed = confirm(
+    "この部員のデータをすべて削除します。\n\n" +
+    "・部員登録情報\n" +
+    "・部員プロフィール／コレクション等の個人データ\n" +
+    "・過去を含む欠席／遅刻／早退などの連絡記録\n\n" +
+    "削除後は元に戻せません。続けますか？"
+  );
+
+  if(!confirmed)return;
+
+  try{
+    /* memberIds に保存されている Auth UID を先に取得する */
+    const memberIdSnap = await get(ref(db,"memberIds/"+id));
+    const memberIdData = memberIdSnap.exists() ? (memberIdSnap.val() || {}) : {};
+    const uid = String(memberIdData.uid || "").trim();
+
+    /* 対象者の連絡だけを抽出。共有のお知らせや他の部員の連絡は残す */
+    const noticesSnap = await get(ref(db,"notices"));
+    const allNotices = noticesSnap.exists() ? (noticesSnap.val() || {}) : {};
+    const targetNoticeIds = Object.entries(allNotices)
+      .filter(([, notice]) => {
+        if(!notice || typeof notice !== "object") return false;
+        return (uid && String(notice.uid || "") === uid) ||
+          String(notice.schoolId || "") === String(id);
+      })
+      .map(([noticeId]) => noticeId);
+
+    const deletions = [
+      remove(ref(db,"memberRegistrations/"+id)),
+      remove(ref(db,"memberIds/"+id)),
+      ...targetNoticeIds.map(noticeId => remove(ref(db,"notices/"+noticeId)))
+    ];
+
+    /* UID が登録されている場合、その人の個人データ一式も削除 */
+    if(uid){
+      deletions.push(remove(ref(db,"members/"+uid)));
+    }
+
+    await Promise.all(deletions);
+    await loadMembers();
+
+    alert(
+      "部員にひもづくデータを削除しました。\n" +
+      "削除した連絡記録："+targetNoticeIds.length+"件\n\n" +
+      (uid
+        ? "Firebase Authentication のログインアカウントは、この画面からは削除できません。必要な場合は Firebase Console の Authentication から別途削除してください。"
+        : "memberIds に UID が見つからなかったため、ログインアカウントと UID で保存された個人データは、この処理では削除できていません。Firebase Console で確認してください。")
+    );
+
+  }catch(error){
+    console.error("部員データ削除エラー:",error);
+    alert("削除中にエラーが発生しました。一部だけ削除されている可能性があります。Firebase のデータを確認してください。\n\n"+(error?.message || error));
   }
-
-  await remove(
-    ref(db,"memberRegistrations/"+id)
-  );
-
-  await remove(
-    ref(db,"memberIds/"+id)
-  );
-
-  await loadMembers();
 }
 
 
