@@ -41,8 +41,7 @@ export async function awardRandomCostumeOnPageOpen({
       document.body.appendChild(panel);
     }
     const content = panel.querySelector("#costumeTestDiagnosticText");
-    if (content) content.textContent = "衣装獲得テストの確認
-" + message;
+    if (content) content.textContent = "衣装獲得テストの確認\n" + message;
     panel.style.borderColor = kind === "error" ? "#bd3333" : (kind === "success" ? "#27834a" : "#4776c5");
   };
 
