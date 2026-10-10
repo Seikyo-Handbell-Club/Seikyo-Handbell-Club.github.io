@@ -6898,10 +6898,12 @@ function getTodayString(date = new Date()){
 
 /* =========================
    コレクション
-   52種類：
+   134枠：
    月別画像12 + イベント画像12 +
-   ベルちゃん衣装12 + チャイムくん衣装12 +
-   シークレット画像2 + レア衣装2
+   ベルちゃん衣装54 + チャイムくん衣装54 +
+   シークレット画像2
+   ※各キャラクターの54枠にはシークレット衣装1枠を含む。
+   ※追加枠は衣装画像が用意されるまで未取得の？？？枠として表示。
 ========================= */
 
 const collectionItems = [
@@ -6938,6 +6940,48 @@ const collectionItems = [
   {id:"event_christmas_bell",group:"bell",name:"ベルちゃん・クリスマス",src:"costumes/bell-christmas.png"},
   {id:"event_newyearseve_bell",group:"bell",name:"ベルちゃん・大晦日",src:"costumes/bell-winter.png"},
 
+  {id:"bell_costume_slot_01",group:"bell",name:"ベルちゃん・追加衣装01",hiddenName:"？？？",src:"costumes/bell-costume-01.png",placeholder:true},
+  {id:"bell_costume_slot_02",group:"bell",name:"ベルちゃん・追加衣装02",hiddenName:"？？？",src:"costumes/bell-costume-02.png",placeholder:true},
+  {id:"bell_costume_slot_03",group:"bell",name:"ベルちゃん・追加衣装03",hiddenName:"？？？",src:"costumes/bell-costume-03.png",placeholder:true},
+  {id:"bell_costume_slot_04",group:"bell",name:"ベルちゃん・追加衣装04",hiddenName:"？？？",src:"costumes/bell-costume-04.png",placeholder:true},
+  {id:"bell_costume_slot_05",group:"bell",name:"ベルちゃん・追加衣装05",hiddenName:"？？？",src:"costumes/bell-costume-05.png",placeholder:true},
+  {id:"bell_costume_slot_06",group:"bell",name:"ベルちゃん・追加衣装06",hiddenName:"？？？",src:"costumes/bell-costume-06.png",placeholder:true},
+  {id:"bell_costume_slot_07",group:"bell",name:"ベルちゃん・追加衣装07",hiddenName:"？？？",src:"costumes/bell-costume-07.png",placeholder:true},
+  {id:"bell_costume_slot_08",group:"bell",name:"ベルちゃん・追加衣装08",hiddenName:"？？？",src:"costumes/bell-costume-08.png",placeholder:true},
+  {id:"bell_costume_slot_09",group:"bell",name:"ベルちゃん・追加衣装09",hiddenName:"？？？",src:"costumes/bell-costume-09.png",placeholder:true},
+  {id:"bell_costume_slot_10",group:"bell",name:"ベルちゃん・追加衣装10",hiddenName:"？？？",src:"costumes/bell-costume-10.png",placeholder:true},
+  {id:"bell_costume_slot_11",group:"bell",name:"ベルちゃん・追加衣装11",hiddenName:"？？？",src:"costumes/bell-costume-11.png",placeholder:true},
+  {id:"bell_costume_slot_12",group:"bell",name:"ベルちゃん・追加衣装12",hiddenName:"？？？",src:"costumes/bell-costume-12.png",placeholder:true},
+  {id:"bell_costume_slot_13",group:"bell",name:"ベルちゃん・追加衣装13",hiddenName:"？？？",src:"costumes/bell-costume-13.png",placeholder:true},
+  {id:"bell_costume_slot_14",group:"bell",name:"ベルちゃん・追加衣装14",hiddenName:"？？？",src:"costumes/bell-costume-14.png",placeholder:true},
+  {id:"bell_costume_slot_15",group:"bell",name:"ベルちゃん・追加衣装15",hiddenName:"？？？",src:"costumes/bell-costume-15.png",placeholder:true},
+  {id:"bell_costume_slot_16",group:"bell",name:"ベルちゃん・追加衣装16",hiddenName:"？？？",src:"costumes/bell-costume-16.png",placeholder:true},
+  {id:"bell_costume_slot_17",group:"bell",name:"ベルちゃん・追加衣装17",hiddenName:"？？？",src:"costumes/bell-costume-17.png",placeholder:true},
+  {id:"bell_costume_slot_18",group:"bell",name:"ベルちゃん・追加衣装18",hiddenName:"？？？",src:"costumes/bell-costume-18.png",placeholder:true},
+  {id:"bell_costume_slot_19",group:"bell",name:"ベルちゃん・追加衣装19",hiddenName:"？？？",src:"costumes/bell-costume-19.png",placeholder:true},
+  {id:"bell_costume_slot_20",group:"bell",name:"ベルちゃん・追加衣装20",hiddenName:"？？？",src:"costumes/bell-costume-20.png",placeholder:true},
+  {id:"bell_costume_slot_21",group:"bell",name:"ベルちゃん・追加衣装21",hiddenName:"？？？",src:"costumes/bell-costume-21.png",placeholder:true},
+  {id:"bell_costume_slot_22",group:"bell",name:"ベルちゃん・追加衣装22",hiddenName:"？？？",src:"costumes/bell-costume-22.png",placeholder:true},
+  {id:"bell_costume_slot_23",group:"bell",name:"ベルちゃん・追加衣装23",hiddenName:"？？？",src:"costumes/bell-costume-23.png",placeholder:true},
+  {id:"bell_costume_slot_24",group:"bell",name:"ベルちゃん・追加衣装24",hiddenName:"？？？",src:"costumes/bell-costume-24.png",placeholder:true},
+  {id:"bell_costume_slot_25",group:"bell",name:"ベルちゃん・追加衣装25",hiddenName:"？？？",src:"costumes/bell-costume-25.png",placeholder:true},
+  {id:"bell_costume_slot_26",group:"bell",name:"ベルちゃん・追加衣装26",hiddenName:"？？？",src:"costumes/bell-costume-26.png",placeholder:true},
+  {id:"bell_costume_slot_27",group:"bell",name:"ベルちゃん・追加衣装27",hiddenName:"？？？",src:"costumes/bell-costume-27.png",placeholder:true},
+  {id:"bell_costume_slot_28",group:"bell",name:"ベルちゃん・追加衣装28",hiddenName:"？？？",src:"costumes/bell-costume-28.png",placeholder:true},
+  {id:"bell_costume_slot_29",group:"bell",name:"ベルちゃん・追加衣装29",hiddenName:"？？？",src:"costumes/bell-costume-29.png",placeholder:true},
+  {id:"bell_costume_slot_30",group:"bell",name:"ベルちゃん・追加衣装30",hiddenName:"？？？",src:"costumes/bell-costume-30.png",placeholder:true},
+  {id:"bell_costume_slot_31",group:"bell",name:"ベルちゃん・追加衣装31",hiddenName:"？？？",src:"costumes/bell-costume-31.png",placeholder:true},
+  {id:"bell_costume_slot_32",group:"bell",name:"ベルちゃん・追加衣装32",hiddenName:"？？？",src:"costumes/bell-costume-32.png",placeholder:true},
+  {id:"bell_costume_slot_33",group:"bell",name:"ベルちゃん・追加衣装33",hiddenName:"？？？",src:"costumes/bell-costume-33.png",placeholder:true},
+  {id:"bell_costume_slot_34",group:"bell",name:"ベルちゃん・追加衣装34",hiddenName:"？？？",src:"costumes/bell-costume-34.png",placeholder:true},
+  {id:"bell_costume_slot_35",group:"bell",name:"ベルちゃん・追加衣装35",hiddenName:"？？？",src:"costumes/bell-costume-35.png",placeholder:true},
+  {id:"bell_costume_slot_36",group:"bell",name:"ベルちゃん・追加衣装36",hiddenName:"？？？",src:"costumes/bell-costume-36.png",placeholder:true},
+  {id:"bell_costume_slot_37",group:"bell",name:"ベルちゃん・追加衣装37",hiddenName:"？？？",src:"costumes/bell-costume-37.png",placeholder:true},
+  {id:"bell_costume_slot_38",group:"bell",name:"ベルちゃん・追加衣装38",hiddenName:"？？？",src:"costumes/bell-costume-38.png",placeholder:true},
+  {id:"bell_costume_slot_39",group:"bell",name:"ベルちゃん・追加衣装39",hiddenName:"？？？",src:"costumes/bell-costume-39.png",placeholder:true},
+  {id:"bell_costume_slot_40",group:"bell",name:"ベルちゃん・追加衣装40",hiddenName:"？？？",src:"costumes/bell-costume-40.png",placeholder:true},
+  {id:"bell_costume_slot_41",group:"bell",name:"ベルちゃん・追加衣装41",hiddenName:"？？？",src:"costumes/bell-costume-41.png",placeholder:true},
+
   {id:"event_newyear_chime",group:"chime",name:"チャイムくん・お正月",src:"costumes/chime-newyear.png"},
   {id:"event_setsubun_chime",group:"chime",name:"チャイムくん・節分",src:"costumes/chime-setsubun.png"},
   {id:"event_valentine_chime",group:"chime",name:"チャイムくん・バレンタイン",src:"costumes/chime-valentine.png"},
@@ -6950,6 +6994,48 @@ const collectionItems = [
   {id:"event_christmaseve_chime",group:"chime",name:"チャイムくん・クリスマスイブ",src:"costumes/chime-christmaseve.png"},
   {id:"event_christmas_chime",group:"chime",name:"チャイムくん・クリスマス",src:"costumes/chime-christmas.png"},
   {id:"event_newyearseve_chime",group:"chime",name:"チャイムくん・大晦日",src:"costumes/chime-winter.png"},
+
+  {id:"chime_costume_slot_01",group:"chime",name:"チャイムくん・追加衣装01",hiddenName:"？？？",src:"costumes/chime-costume-01.png",placeholder:true},
+  {id:"chime_costume_slot_02",group:"chime",name:"チャイムくん・追加衣装02",hiddenName:"？？？",src:"costumes/chime-costume-02.png",placeholder:true},
+  {id:"chime_costume_slot_03",group:"chime",name:"チャイムくん・追加衣装03",hiddenName:"？？？",src:"costumes/chime-costume-03.png",placeholder:true},
+  {id:"chime_costume_slot_04",group:"chime",name:"チャイムくん・追加衣装04",hiddenName:"？？？",src:"costumes/chime-costume-04.png",placeholder:true},
+  {id:"chime_costume_slot_05",group:"chime",name:"チャイムくん・追加衣装05",hiddenName:"？？？",src:"costumes/chime-costume-05.png",placeholder:true},
+  {id:"chime_costume_slot_06",group:"chime",name:"チャイムくん・追加衣装06",hiddenName:"？？？",src:"costumes/chime-costume-06.png",placeholder:true},
+  {id:"chime_costume_slot_07",group:"chime",name:"チャイムくん・追加衣装07",hiddenName:"？？？",src:"costumes/chime-costume-07.png",placeholder:true},
+  {id:"chime_costume_slot_08",group:"chime",name:"チャイムくん・追加衣装08",hiddenName:"？？？",src:"costumes/chime-costume-08.png",placeholder:true},
+  {id:"chime_costume_slot_09",group:"chime",name:"チャイムくん・追加衣装09",hiddenName:"？？？",src:"costumes/chime-costume-09.png",placeholder:true},
+  {id:"chime_costume_slot_10",group:"chime",name:"チャイムくん・追加衣装10",hiddenName:"？？？",src:"costumes/chime-costume-10.png",placeholder:true},
+  {id:"chime_costume_slot_11",group:"chime",name:"チャイムくん・追加衣装11",hiddenName:"？？？",src:"costumes/chime-costume-11.png",placeholder:true},
+  {id:"chime_costume_slot_12",group:"chime",name:"チャイムくん・追加衣装12",hiddenName:"？？？",src:"costumes/chime-costume-12.png",placeholder:true},
+  {id:"chime_costume_slot_13",group:"chime",name:"チャイムくん・追加衣装13",hiddenName:"？？？",src:"costumes/chime-costume-13.png",placeholder:true},
+  {id:"chime_costume_slot_14",group:"chime",name:"チャイムくん・追加衣装14",hiddenName:"？？？",src:"costumes/chime-costume-14.png",placeholder:true},
+  {id:"chime_costume_slot_15",group:"chime",name:"チャイムくん・追加衣装15",hiddenName:"？？？",src:"costumes/chime-costume-15.png",placeholder:true},
+  {id:"chime_costume_slot_16",group:"chime",name:"チャイムくん・追加衣装16",hiddenName:"？？？",src:"costumes/chime-costume-16.png",placeholder:true},
+  {id:"chime_costume_slot_17",group:"chime",name:"チャイムくん・追加衣装17",hiddenName:"？？？",src:"costumes/chime-costume-17.png",placeholder:true},
+  {id:"chime_costume_slot_18",group:"chime",name:"チャイムくん・追加衣装18",hiddenName:"？？？",src:"costumes/chime-costume-18.png",placeholder:true},
+  {id:"chime_costume_slot_19",group:"chime",name:"チャイムくん・追加衣装19",hiddenName:"？？？",src:"costumes/chime-costume-19.png",placeholder:true},
+  {id:"chime_costume_slot_20",group:"chime",name:"チャイムくん・追加衣装20",hiddenName:"？？？",src:"costumes/chime-costume-20.png",placeholder:true},
+  {id:"chime_costume_slot_21",group:"chime",name:"チャイムくん・追加衣装21",hiddenName:"？？？",src:"costumes/chime-costume-21.png",placeholder:true},
+  {id:"chime_costume_slot_22",group:"chime",name:"チャイムくん・追加衣装22",hiddenName:"？？？",src:"costumes/chime-costume-22.png",placeholder:true},
+  {id:"chime_costume_slot_23",group:"chime",name:"チャイムくん・追加衣装23",hiddenName:"？？？",src:"costumes/chime-costume-23.png",placeholder:true},
+  {id:"chime_costume_slot_24",group:"chime",name:"チャイムくん・追加衣装24",hiddenName:"？？？",src:"costumes/chime-costume-24.png",placeholder:true},
+  {id:"chime_costume_slot_25",group:"chime",name:"チャイムくん・追加衣装25",hiddenName:"？？？",src:"costumes/chime-costume-25.png",placeholder:true},
+  {id:"chime_costume_slot_26",group:"chime",name:"チャイムくん・追加衣装26",hiddenName:"？？？",src:"costumes/chime-costume-26.png",placeholder:true},
+  {id:"chime_costume_slot_27",group:"chime",name:"チャイムくん・追加衣装27",hiddenName:"？？？",src:"costumes/chime-costume-27.png",placeholder:true},
+  {id:"chime_costume_slot_28",group:"chime",name:"チャイムくん・追加衣装28",hiddenName:"？？？",src:"costumes/chime-costume-28.png",placeholder:true},
+  {id:"chime_costume_slot_29",group:"chime",name:"チャイムくん・追加衣装29",hiddenName:"？？？",src:"costumes/chime-costume-29.png",placeholder:true},
+  {id:"chime_costume_slot_30",group:"chime",name:"チャイムくん・追加衣装30",hiddenName:"？？？",src:"costumes/chime-costume-30.png",placeholder:true},
+  {id:"chime_costume_slot_31",group:"chime",name:"チャイムくん・追加衣装31",hiddenName:"？？？",src:"costumes/chime-costume-31.png",placeholder:true},
+  {id:"chime_costume_slot_32",group:"chime",name:"チャイムくん・追加衣装32",hiddenName:"？？？",src:"costumes/chime-costume-32.png",placeholder:true},
+  {id:"chime_costume_slot_33",group:"chime",name:"チャイムくん・追加衣装33",hiddenName:"？？？",src:"costumes/chime-costume-33.png",placeholder:true},
+  {id:"chime_costume_slot_34",group:"chime",name:"チャイムくん・追加衣装34",hiddenName:"？？？",src:"costumes/chime-costume-34.png",placeholder:true},
+  {id:"chime_costume_slot_35",group:"chime",name:"チャイムくん・追加衣装35",hiddenName:"？？？",src:"costumes/chime-costume-35.png",placeholder:true},
+  {id:"chime_costume_slot_36",group:"chime",name:"チャイムくん・追加衣装36",hiddenName:"？？？",src:"costumes/chime-costume-36.png",placeholder:true},
+  {id:"chime_costume_slot_37",group:"chime",name:"チャイムくん・追加衣装37",hiddenName:"？？？",src:"costumes/chime-costume-37.png",placeholder:true},
+  {id:"chime_costume_slot_38",group:"chime",name:"チャイムくん・追加衣装38",hiddenName:"？？？",src:"costumes/chime-costume-38.png",placeholder:true},
+  {id:"chime_costume_slot_39",group:"chime",name:"チャイムくん・追加衣装39",hiddenName:"？？？",src:"costumes/chime-costume-39.png",placeholder:true},
+  {id:"chime_costume_slot_40",group:"chime",name:"チャイムくん・追加衣装40",hiddenName:"？？？",src:"costumes/chime-costume-40.png",placeholder:true},
+  {id:"chime_costume_slot_41",group:"chime",name:"チャイムくん・追加衣装41",hiddenName:"？？？",src:"costumes/chime-costume-41.png",placeholder:true},
 
   {id:"secret_rare_image",group:"secret",name:"レア画像",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.rare}`},
   {id:"secret_ultra_rare_image",group:"secret",name:"超レア画像",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.ultraRare}`},

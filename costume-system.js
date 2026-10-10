@@ -26,7 +26,8 @@ export async function awardRandomCostumeOnPageOpen({
   const character = profile.characterType === "chime" ? "chime" : "bell";
   const group = character;
   const available = collectionItems.filter(item =>
-    item && item.group === group && typeof item.id === "string" && typeof item.src === "string"
+    item && item.group === group && item.placeholder !== true &&
+    typeof item.id === "string" && typeof item.src === "string"
   );
   if (!available.length) return null;
 
