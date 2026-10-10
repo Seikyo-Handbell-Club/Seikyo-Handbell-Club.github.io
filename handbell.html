@@ -2348,6 +2348,20 @@ function getDailyCostumeAvailable(character){
   return dailyCostumeDefinitions.filter(item => !owned[item.id]);
 }
 
+function getCostumeGiftCharacterName(character){
+  return character === "chime" ? "チャイムくん" : "ベルちゃん";
+}
+
+function getCostumeGiftDisplayName(character,costume){
+  const characterName = getCostumeGiftCharacterName(character);
+  const rawName = String(costume?.name || costume?.id || "衣装");
+  // 旧データの「ベルちゃん・毎日衣装 54」などを、表示上は「ベルちゃん衣装 54」に整える。
+  const dailyName = rawName.replace(/^(?:ベルちゃん|チャイムくん)[・・]?毎日衣装/, `${characterName}衣装`);
+  if (dailyName !== rawName) return dailyName;
+  if (/^毎日衣装/.test(rawName)) return rawName.replace(/^毎日衣装/, `${characterName}衣装`);
+  return rawName;
+}
+
 function showCostumePageOpenTestGift(character,costume){
   const old = $("costumePageOpenTestGiftOverlay");
   if(old) old.remove();
@@ -2356,10 +2370,10 @@ function showCostumePageOpenTestGift(character,costume){
   overlay.id = "costumePageOpenTestGiftOverlay";
   overlay.innerHTML = `
     <div class="daily-gift-card" role="dialog" aria-modal="true">
-      <div class="daily-gift-title">🎉 衣装を獲得！</div>
-      <div class="daily-gift-character">${character === "chime" ? "チャイムくん" : "ベルちゃん"}の衣装をゲットしたよ！</div>
-      <img class="daily-gift-image" src="${esc(costume.src)}" alt="${esc(costume.name || costume.id)}">
-      <div class="daily-gift-name">${esc(costume.name || costume.id)}</div>
+      <div class="daily-gift-title">🎁 ${getCostumeGiftCharacterName(character)}からのプレゼント</div>
+      <div class="daily-gift-character">${getCostumeGiftCharacterName(character)}の衣装を入手しました！</div>
+      <img class="daily-gift-image" src="${esc(costume.src)}" alt="${esc(getCostumeGiftDisplayName(character,costume))}">
+      <div class="daily-gift-name">${esc(getCostumeGiftDisplayName(character,costume))}</div>
       <div class="daily-gift-note">コレクションに追加されたよ！</div>
       <button id="costumePageOpenTestGiftClose" type="button">受け取る</button>
     </div>
@@ -2392,10 +2406,10 @@ function showDailyCostumeGift(character,costume){
   overlay.id = "dailyGiftOverlay";
   overlay.innerHTML = `
     <div class="daily-gift-card" role="dialog" aria-modal="true">
-      <div class="daily-gift-title">🎁 今日のプレゼント</div>
-      <div class="daily-gift-character">${character === "chime" ? "チャイムくん" : "ベルちゃん"}の衣装を入手しました！</div>
-      <img class="daily-gift-image" src="${esc(costume.src)}" alt="${esc(costume.name)}">
-      <div class="daily-gift-name">${esc(costume.name)}</div>
+      <div class="daily-gift-title">🎁 ${getCostumeGiftCharacterName(character)}からのプレゼント</div>
+      <div class="daily-gift-character">${getCostumeGiftCharacterName(character)}の衣装を入手しました！</div>
+      <img class="daily-gift-image" src="${esc(costume.src)}" alt="${esc(getCostumeGiftDisplayName(character,costume))}">
+      <div class="daily-gift-name">${esc(getCostumeGiftDisplayName(character,costume))}</div>
       <div class="daily-gift-note">「着替える」から着用できます</div>
       <button id="dailyGiftClose" type="button">受け取る</button>
     </div>
