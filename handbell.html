@@ -2406,7 +2406,7 @@ function showSecretCostumeGift(character){
     secret:true,
     costume:{
       name:details.name,
-      src:character === "chime" ? "costumes/chime-secret-complete.jpg" : "costumes/bell-secret-complete.jpg"
+      src:character === "chime" ? "costumes/chime-secret-transparent.png" : "costumes/bell-secret-transparent.png"
     }
   });
   if(dailyGiftShowing) return;
@@ -7019,8 +7019,8 @@ const collectionItems = [
 
   {id:"secret_rare_image",group:"secret",name:"レア画像",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.rare}`},
   {id:"secret_ultra_rare_image",group:"secret",name:"超レア画像",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.ultraRare}`},
-  {id:"secret_bell_rare_costume",group:"secret",name:"星月夜の夢",hiddenName:"シークレット衣装",src:"costumes/bell-secret-main.png",description:"三日月と星々を散りばめた、幻想的なシークレット衣装。夜空のような深い紫と金色の輝きが、ベルちゃんを夢の世界へと誘うよ……！"},
-  {id:"secret_chime_rare_costume",group:"secret",name:"暁桜のシンフォニー",hiddenName:"シークレット衣装",src:"costumes/chime-secret-main.png",description:"夜明けの空と、咲き誇る桜をイメージした特別な衣装。黄金色の朝日が、新しい一日の始まりを優しく祝福してくれるよ！"}
+  {id:"secret_bell_rare_costume",group:"secret",name:"星月夜の夢",hiddenName:"シークレット衣装",src:"costumes/bell-secret-transparent.png",description:"三日月と星々を散りばめた、幻想的なシークレット衣装。夜空のような深い紫と金色の輝きが、ベルちゃんを夢の世界へと誘うよ……！"},
+  {id:"secret_chime_rare_costume",group:"secret",name:"暁桜のシンフォニー",hiddenName:"シークレット衣装",src:"costumes/chime-secret-transparent.png",description:"夜明けの空と、咲き誇る桜をイメージした特別な衣装。黄金色の朝日が、新しい一日の始まりを優しく祝福してくれるよ！"}
 ];
 
 function getCollectionItem(itemId){
@@ -7207,7 +7207,7 @@ const SECRET_PREVIEW_LAYOUT = {
 };
 function secretCostumePreviewHtml(character){
   const isChime = character === "chime";
-  const src = isChime ? "costumes/chime-secret-complete.jpg" : "costumes/bell-secret-complete.jpg";
+  const src = isChime ? "costumes/chime-secret-transparent.png" : "costumes/bell-secret-transparent.png";
   const alt = isChime ? "チャイムくん・シークレット衣装" : "ベルちゃん・シークレット衣装";
   return `<div class="secret-costume-preview"><img class="secret-costume-complete-image" src="${src}" alt="${alt}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:contain;"></div>`;
 }
