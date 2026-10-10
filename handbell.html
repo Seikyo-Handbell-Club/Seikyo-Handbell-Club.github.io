@@ -361,6 +361,14 @@ main{
   line-height:1.4;
 }
 
+.collection-description{
+  margin:5px 7px 8px;
+  font-size:12px;
+  line-height:1.6;
+  color:#657080;
+  text-align:left;
+}
+
 .collection-name{
   min-height:38px;
   padding:7px 6px 8px;
@@ -1115,6 +1123,14 @@ textarea{
 .daily-gift-name{
   font-size:18px;
   font-weight:800;
+}
+
+.daily-gift-description{
+  margin:10px 0 0;
+  font-size:13px;
+  line-height:1.75;
+  color:#596273;
+  text-align:left;
 }
 
 .daily-gift-note{
@@ -2344,7 +2360,7 @@ function getDailyCostumeAvailable(character){
 const dailyGiftQueue = [];
 let dailyGiftShowing = false;
 function showDailyCostumeGift(character,costume){
-  dailyGiftQueue.push({character,costume});
+  dailyGiftQueue.push({character,costume,secret:false});
   if(dailyGiftShowing) return;
   const next = () => {
     const gift = dailyGiftQueue.shift();
@@ -2355,11 +2371,60 @@ function showDailyCostumeGift(character,costume){
     overlay.id = "dailyGiftOverlay";
     overlay.innerHTML = `
       <div class="daily-gift-card" role="dialog" aria-modal="true">
-        <div class="daily-gift-title">🎁 ${characterName}からのプレゼント</div>
+        <div class="daily-gift-title">${gift.secret ? "✨ シークレット衣装を入手！" : `🎁 ${characterName}からのプレゼント`}</div>
         <div class="daily-gift-character">${characterName}の衣装を入手しました！</div>
         <img class="daily-gift-image" src="${esc(gift.costume.src)}" alt="${esc(gift.costume.name)}">
         <div class="daily-gift-name">${esc(gift.costume.name)}</div>
-        <div class="daily-gift-note">「着替える」から着用できます</div>
+        ${gift.secret ? `<div class="daily-gift-description">${esc(SECRET_COSTUME_DETAILS[gift.character].description)}</div>` : ""}
+        <div class="daily-gift-note">${gift.secret ? "コレクションにも追加されたよ！" : "「着替える」から着用できます"}</div>
+        <button id="dailyGiftClose" type="button">受け取る</button>
+      </div>`;
+    document.body.appendChild(overlay);
+    const close = () => { overlay.remove(); dailyGiftShowing = false; next(); };
+    $("dailyGiftClose")?.addEventListener("click",close);
+    overlay.addEventListener("click",e=>{ if(e.target === overlay) close(); });
+  };
+  next();
+}
+
+const SECRET_COSTUME_DETAILS = {
+  bell: {
+    name:"星月夜の夢",
+    description:"三日月と星々を散りばめた、幻想的なシークレット衣装。夜空のような深い紫と金色の輝きが、ベルちゃんを夢の世界へと誘うよ……！"
+  },
+  chime: {
+    name:"暁桜のシンフォニー",
+    description:"夜明けの空と、咲き誇る桜をイメージした特別な衣装。黄金色の朝日が、新しい一日の始まりを優しく祝福してくれるよ！"
+  }
+};
+
+function showSecretCostumeGift(character){
+  const details = SECRET_COSTUME_DETAILS[character];
+  if(!details) return;
+  dailyGiftQueue.push({
+    character,
+    secret:true,
+    costume:{
+      name:details.name,
+      src:character === "chime" ? "costumes/chime-secret-complete.jpg" : "costumes/bell-secret-complete.jpg"
+    }
+  });
+  if(dailyGiftShowing) return;
+  const next = () => {
+    const gift = dailyGiftQueue.shift();
+    if(!gift){ dailyGiftShowing = false; return; }
+    dailyGiftShowing = true;
+    const characterName = gift.character === "chime" ? "チャイムくん" : "ベルちゃん";
+    const overlay = document.createElement("div");
+    overlay.id = "dailyGiftOverlay";
+    overlay.innerHTML = `
+      <div class="daily-gift-card" role="dialog" aria-modal="true">
+        <div class="daily-gift-title">${gift.secret ? "✨ シークレット衣装を入手！" : `🎁 ${characterName}からのプレゼント`}</div>
+        <div class="daily-gift-character">${characterName}の特別な衣装だよ！</div>
+        <img class="daily-gift-image" src="${esc(gift.costume.src)}" alt="${esc(gift.costume.name)}">
+        <div class="daily-gift-name">${esc(gift.costume.name)}</div>
+        <div class="daily-gift-description">${esc(SECRET_COSTUME_DETAILS[gift.character].description)}</div>
+        <div class="daily-gift-note">コレクションにも追加されたよ！</div>
         <button id="dailyGiftClose" type="button">受け取る</button>
       </div>`;
     document.body.appendChild(overlay);
@@ -6954,8 +7019,8 @@ const collectionItems = [
 
   {id:"secret_rare_image",group:"secret",name:"レア画像",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.rare}`},
   {id:"secret_ultra_rare_image",group:"secret",name:"超レア画像",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.ultraRare}`},
-  {id:"secret_bell_rare_costume",group:"secret",name:"ベルちゃん・レア衣装",hiddenName:"シークレット衣装",src:"costumes/bell-secret-main.png"},
-  {id:"secret_chime_rare_costume",group:"secret",name:"チャイムくん・レア衣装",hiddenName:"シークレット衣装",src:"costumes/chime-secret-main.png"}
+  {id:"secret_bell_rare_costume",group:"secret",name:"星月夜の夢",hiddenName:"シークレット衣装",src:"costumes/bell-secret-main.png",description:"三日月と星々を散りばめた、幻想的なシークレット衣装。夜空のような深い紫と金色の輝きが、ベルちゃんを夢の世界へと誘うよ……！"},
+  {id:"secret_chime_rare_costume",group:"secret",name:"暁桜のシンフォニー",hiddenName:"シークレット衣装",src:"costumes/chime-secret-main.png",description:"夜明けの空と、咲き誇る桜をイメージした特別な衣装。黄金色の朝日が、新しい一日の始まりを優しく祝福してくれるよ！"}
 ];
 
 function getCollectionItem(itemId){
@@ -7164,6 +7229,7 @@ function collectionCardHtml(item,acquired){
   return `<div class="collection-card">
     <div class="collection-image-wrap${acquired ? " collection-image-clickable" : ""}">${visual}</div>
     <div class="collection-name">${esc(displayName)}</div>
+    ${acquired && item.description ? `<div class="collection-description">${esc(item.description)}</div>` : ""}
   </div>`;
 }
 
@@ -7421,6 +7487,7 @@ async function trySecretCostumeDraw(){
      */
     sendEquippedCostumeToBell();
     sendCharacterToBell();
+    showSecretCostumeGift(targetCharacter);
 
     return {
       character:targetCharacter,
