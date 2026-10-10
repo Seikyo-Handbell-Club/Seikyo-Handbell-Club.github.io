@@ -1205,6 +1205,7 @@ PDFを読み込む
 </select>
 
 
+<div id="mclassField">
 <label for="mclass">
 クラス
 </label>
@@ -1228,6 +1229,7 @@ PDFを読み込む
 <option>K</option>
 
 </select>
+</div>
 
 
 <button
@@ -1618,6 +1620,17 @@ const classOrder={
 let editingMemberId=null;
 
 
+function toggleMemberClassField(){
+  const isAdvisor = $("mgrade").value === "顧問など";
+  const field = $("mclassField");
+  if(field) field.style.display = isAdvisor ? "none" : "";
+  if(isAdvisor && $("mclass")) $("mclass").value = "";
+}
+
+$("mgrade").addEventListener("change", toggleMemberClassField);
+toggleMemberClassField();
+
+
 async function addMember(){
 
   if(!(await isAdmin()))return;
@@ -1625,13 +1638,13 @@ async function addMember(){
   const id=$("mid").value.trim();
   const name=$("mname").value.trim();
   const grade=$("mgrade").value;
-  const className=$("mclass").value;
+  const className=grade==="顧問など" ? "" : $("mclass").value;
 
-  if(!id||!name||!grade||!className){
+  if(!id||!name||!grade||(grade!=="顧問など"&&!className)){
 
     message(
       "memberMsg",
-      "学校ID・名前・学年・クラスをすべて入力してください。",
+      "学校ID・名前・学年を入力し、生徒の場合はクラスも選択してください。",
       "error"
     );
 
@@ -1787,7 +1800,7 @@ async function loadMembers(){
         </div>
 
         <div class="small">
-          ${esc(x.grade)}・${esc(x.className)}組
+          ${esc(x.grade)}${x.grade==="顧問など" ? "" : (x.className ? "・"+esc(x.className)+"組" : "")}
         </div>
 
       </div>
@@ -1821,6 +1834,7 @@ async function editMember(id){
   $("mname").value=d.name||"";
   $("mgrade").value=d.grade||"";
   $("mclass").value=d.className||"";
+  toggleMemberClassField();
 
   $("addMemberButton").textContent=
     "変更を保存";
@@ -1852,6 +1866,7 @@ function clearMemberForm(){
   $("mname").value="";
   $("mgrade").value="";
   $("mclass").value="";
+  toggleMemberClassField();
 
   $("addMemberButton").textContent=
     "登録する";
