@@ -3279,9 +3279,17 @@ function updateProfileDisplay(){
     return;
 
 
+  const grade = getProfileGrade();
+  const className = getProfileClass();
+  /* 顧問などの職員アカウントは「組」を付けずに表示する。生徒の組表示は従来どおり。 */
+  const isStaffLabel = /顧問|先生|職員/.test(`${grade}${className}`);
+  const suffix = isStaffLabel
+    ? `${grade}${className}`
+    : `${grade}${className}組`;
+
   $("profileMiniText")
     .innerHTML =
-      `<span class="profile-name">${esc(profile?.name ?? "")}</span><span class="profile-class">　${esc(getProfileGrade())}${esc(getProfileClass())}組</span>`;
+      `<span class="profile-name">${esc(profile?.name ?? "")}</span><span class="profile-class">　${esc(suffix)}</span>`;
 
 
   $("profileBox")
@@ -7682,6 +7690,8 @@ function showWelcomeOverlay(imageInfo){
   const overlay = $("welcomeOverlay");
   const image = $("welcomeImage");
   if(!overlay || !image || !imageInfo) return;
+  /* 同時に衣装プレゼント演出が出ても、WELCOME画面が背後に隠れないよう最前面にする。 */
+  overlay.style.zIndex = "100020";
 
   /* 画像が本当に読み込まれて表示可能になった時点で取得 */
   image.onload = () => {
