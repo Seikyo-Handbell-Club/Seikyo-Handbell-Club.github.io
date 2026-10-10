@@ -2348,6 +2348,42 @@ function getDailyCostumeAvailable(character){
   return dailyCostumeDefinitions.filter(item => !owned[item.id]);
 }
 
+function showCostumePageOpenTestGift(character,costume){
+  const old = $("costumePageOpenTestGiftOverlay");
+  if(old) old.remove();
+
+  const overlay = document.createElement("div");
+  overlay.id = "costumePageOpenTestGiftOverlay";
+  overlay.innerHTML = `
+    <div class="daily-gift-card" role="dialog" aria-modal="true">
+      <div class="daily-gift-title">🎉 衣装を獲得！</div>
+      <div class="daily-gift-character">${character === "chime" ? "チャイムくん" : "ベルちゃん"}の衣装をゲットしたよ！</div>
+      <img class="daily-gift-image" src="${esc(costume.src)}" alt="${esc(costume.name || costume.id)}">
+      <div class="daily-gift-name">${esc(costume.name || costume.id)}</div>
+      <div class="daily-gift-note">コレクションに追加されたよ！</div>
+      <button id="costumePageOpenTestGiftClose" type="button">受け取る</button>
+    </div>
+  `;
+  overlay.style.position = "fixed";
+  overlay.style.inset = "0";
+  overlay.style.zIndex = "100020";
+  overlay.style.display = "flex";
+  overlay.style.alignItems = "center";
+  overlay.style.justifyContent = "center";
+  overlay.style.padding = "20px";
+  overlay.style.background = "rgba(20,30,40,.58)";
+  overlay.style.backdropFilter = "blur(5px)";
+  overlay.style.webkitBackdropFilter = "blur(5px)";
+  overlay.style.overflowY = "auto";
+  document.body.appendChild(overlay);
+
+  const close = () => overlay.remove();
+  $("costumePageOpenTestGiftClose")?.addEventListener("click", close);
+  overlay.addEventListener("click", e => {
+    if(e.target === overlay) close();
+  });
+}
+
 function showDailyCostumeGift(character,costume){
   const old = $("dailyGiftOverlay");
   if(old) old.remove();
@@ -3379,7 +3415,8 @@ onAuthStateChanged(
         saveCollectionDataCache,
         renderCollection,
         updateCollectionMiniCount,
-        collectionView: $("collectionView")
+        collectionView: $("collectionView"),
+        showCostumeGift: showCostumePageOpenTestGift
       });
     }
 

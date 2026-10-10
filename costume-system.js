@@ -17,7 +17,8 @@ export async function awardRandomCostumeOnPageOpen({
   saveCollectionDataCache,
   renderCollection,
   updateCollectionMiniCount,
-  collectionView
+  collectionView,
+  showCostumeGift
 }) {
   if (!currentUser || !profile || !Array.isArray(collectionItems)) return null;
 
@@ -53,6 +54,11 @@ export async function awardRandomCostumeOnPageOpen({
       await renderCollection();
     }
     if (typeof updateCollectionMiniCount === "function") updateCollectionMiniCount();
+
+    // テスト獲得時も、ユーザーに衣装獲得演出を表示する。
+    if (typeof showCostumeGift === "function") {
+      showCostumeGift(character, selected);
+    }
 
     console.info("衣装テスト獲得:", character, selected.id);
     return { character, costumeId: selected.id };
