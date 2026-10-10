@@ -1066,6 +1066,79 @@ textarea{
   }
 }
 
+/* =========================
+   毎日プレゼント
+========================= */
+#dailyGiftOverlay{
+  position:fixed;
+  inset:0;
+  z-index:100000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(20,30,40,.45);
+  backdrop-filter:blur(5px);
+  -webkit-backdrop-filter:blur(5px);
+}
+
+.daily-gift-card{
+  width:min(360px,100%);
+  background:#fff;
+  border-radius:24px;
+  padding:24px 20px 20px;
+  text-align:center;
+  box-shadow:0 15px 50px rgba(0,0,0,.2);
+  animation:dailyGiftAppear .35s ease both;
+}
+
+.daily-gift-title{
+  font-size:21px;
+  font-weight:800;
+  margin-bottom:10px;
+}
+
+.daily-gift-character{
+  font-size:14px;
+  color:#596773;
+  margin-bottom:10px;
+}
+
+.daily-gift-image{
+  display:block;
+  width:180px;
+  height:180px;
+  object-fit:contain;
+  margin:0 auto 8px;
+}
+
+.daily-gift-name{
+  font-size:18px;
+  font-weight:800;
+}
+
+.daily-gift-note{
+  margin-top:7px;
+  font-size:12px;
+  color:#7b8791;
+}
+
+#dailyGiftClose{
+  width:100%;
+  margin-top:18px;
+  padding:13px;
+  border:0;
+  border-radius:12px;
+  background:#1f6feb;
+  color:#fff;
+  font-size:15px;
+  font-weight:700;
+}
+
+@keyframes dailyGiftAppear{
+  from{opacity:0;transform:scale(.94) translateY(10px)}
+  to{opacity:1;transform:scale(1) translateY(0)}
+}
 
 
 /* 着替え画面：ホームを再読み込みせずに表示 */
@@ -1624,7 +1697,6 @@ textarea{
     <option value="中3">中3</option>
     <option value="高1">高1</option>
     <option value="高2">高2</option>
-    <option value="顧問など">顧問など</option>
   </select>
 
   <label>
@@ -2099,6 +2171,13 @@ textarea{
 
 import { awardRandomCostumeOnPageOpen } from "./costume-system.js";
 
+/* 衣装獲得テスト設定
+   1 = テスト：ページを開くたびに未取得衣装を1着獲得
+   0 = テスト停止：ページを開くたびの獲得を行わない
+   ※ 0にしても「部活に3回参加で獲得」の本番処理が自動で追加されるわけではありません。
+*/
+const COSTUME_PAGE_OPEN_TEST_MODE = 1;
+
 import{
   initializeApp
 }
@@ -2233,6 +2312,174 @@ let equippedCostume = {
   chime:null
 };
 
+/* =========================
+   毎日もらえる衣装
+   ※ コレクションとは完全に別管理
+========================= */
+const dailyCostumeDefinitions = [
+  {
+    id:"daily-costume-01",
+    name:"毎日衣装 01",
+    src:"costumes/daily-costume-01.png"
+  },
+  {
+    id:"daily-costume-02",
+    name:"毎日衣装 02",
+    src:"costumes/daily-costume-02.png"
+  }
+];
+
+let dailyCostumes = {
+  bell:{},
+  chime:{}
+};
+
+function getDailyCostumeDate(){
+  const d = getAppDate();
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
+function getDailyCostumeCharacter(){
+  return profile?.characterType === "chime" ? "chime" : "bell";
+}
+
+function getDailyCostumeAvailable(character){
+  const owned = dailyCostumes?.[character] || {};
+  return dailyCostumeDefinitions.filter(item => !owned[item.id]);
+}
+
+function showDailyCostumeGift(character,costume){
+  const old = $("dailyGiftOverlay");
+  if(old) old.remove();
+
+  const overlay = document.createElement("div");
+  overlay.id = "dailyGiftOverlay";
+  overlay.innerHTML = `
+    <div class="daily-gift-card" role="dialog" aria-modal="true">
+      <div class="daily-gift-title">🎁 今日のプレゼント</div>
+      <div class="daily-gift-character">${character === "chime" ? "チャイムくん" : "ベルちゃん"}の衣装を入手しました！</div>
+      <img class="daily-gift-image" src="${esc(costume.src)}" alt="${esc(costume.name)}">
+      <div class="daily-gift-name">${esc(costume.name)}</div>
+      <div class="daily-gift-note">「着替える」から着用できます</div>
+      <button id="dailyGiftClose" type="button">受け取る</button>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  const close = () => overlay.remove();
+  $("dailyGiftClose")?.addEventListener("click",close);
+  overlay.addEventListener("click",e=>{
+    if(e.target === overlay) close();
+  });
+}
+
+async function loadDailyCostumes(){
+  if(!currentUser){
+    dailyCostumes = {bell:{},chime:{}};
+    return;
+  }
+
+  try{
+    const snap = await get(
+      ref(db,`members/${currentUser.uid}/dailyCostumes`)
+    );
+    const data = snap.exists() && snap.val() && typeof snap.val() === "object"
+      ? snap.val()
+      : {};
+
+    dailyCostumes = {
+      bell: data.bell && typeof data.bell === "object" ? data.bell : {},
+      chime: data.chime && typeof data.chime === "object" ? data.chime : {}
+    };
+  }catch(e){
+    console.error("毎日衣装の読み込みエラー:",e);
+    dailyCostumes = {bell:{},chime:{}};
+  }
+}
+
+async function acquireDailyCostume(){
+  if(!currentUser || !profile) return;
+
+  try{
+    await loadDailyCostumes();
+
+    const today = getDailyCostumeDate();
+    const stateRef = ref(db,`members/${currentUser.uid}/dailyCostumeState`);
+    const selectedCharacter = getDailyCostumeCharacter();
+
+    let gift = null;
+    let giftAlreadyShown = false;
+
+    const result = await runTransaction(stateRef,current => {
+      const state = current && typeof current === "object" ? current : {};
+
+      if(state.lastDate === today){
+        if(state.receivedId && state.character){
+          gift = {
+            character:state.character,
+            id:state.receivedId
+          };
+        }
+        giftAlreadyShown = true;
+        return state;
+      }
+
+      let character = selectedCharacter;
+      let available = getDailyCostumeAvailable(character);
+
+      if(!available.length){
+        character = character === "bell" ? "chime" : "bell";
+        available = getDailyCostumeAvailable(character);
+      }
+
+      if(!available.length){
+        return state;
+      }
+
+      const costume = available[Math.floor(Math.random() * available.length)];
+
+      gift = {
+        character,
+        id:costume.id
+      };
+
+      return {
+        lastDate:today,
+        receivedId:costume.id,
+        character
+      };
+    });
+
+    if(!result.committed) return;
+
+    if(!gift) return;
+
+    const costume = dailyCostumeDefinitions.find(item => item.id === gift.id);
+    if(!costume) return;
+
+    /* 既存の衣装データを消さず、今回の1着だけ追加 */
+    await update(
+      ref(db),
+      {
+        [`members/${currentUser.uid}/dailyCostumes/${gift.character}/${costume.id}`]:true
+      }
+    );
+
+    dailyCostumes = {
+      bell:{...(dailyCostumes.bell || {})},
+      chime:{...(dailyCostumes.chime || {})}
+    };
+    dailyCostumes[gift.character][costume.id] = true;
+
+    /* 同じページで既に表示済みなら二重表示しない */
+    if(!giftAlreadyShown){
+      showDailyCostumeGift(gift.character,costume);
+    }
+  }catch(e){
+    console.error("毎日衣装の取得エラー:",e);
+  }
+}
 
 
 let currentUser =
@@ -3107,6 +3354,9 @@ onAuthStateChanged(
     sendEquippedCostumeToBell();
     sendEventCostumeOverrideToBell();
 
+    /* 今日のプレゼント（1日1着・コレクションとは別管理） */
+    await acquireDailyCostume();
+
     /* =========================
        イベント衣装のコレクション取得
        design.html は変更せず、実際に表示される今日の衣装だけを
@@ -3114,23 +3364,24 @@ onAuthStateChanged(
     ========================= */
     acquireTodayCharacterCostume();
 
-    /* 新しい衣装システム：テスト中はページを開くたびに、
-       選択中キャラクターの未取得衣装を1着だけ獲得する。
-       シークレット衣装抽選とは別処理。 */
-    await awardRandomCostumeOnPageOpen({
-      db,
-      ref,
-      get,
-      set,
-      currentUser,
-      profile,
-      collectionItems,
-      getCachedCollectionData,
-      saveCollectionDataCache,
-      renderCollection,
-      updateCollectionMiniCount,
-      collectionView: $("collectionView")
-    });
+    /* テスト設定が1のときだけ、ページを開くたび未取得衣装を1着獲得する。
+       0にすると、このページオープン獲得だけを停止する。 */
+    if (COSTUME_PAGE_OPEN_TEST_MODE === 1) {
+      await awardRandomCostumeOnPageOpen({
+        db,
+        ref,
+        get,
+        set,
+        currentUser,
+        profile,
+        collectionItems,
+        getCachedCollectionData,
+        saveCollectionDataCache,
+        renderCollection,
+        updateCollectionMiniCount,
+        collectionView: $("collectionView")
+      });
+    }
 
 
     $("loggedOutLeft")
