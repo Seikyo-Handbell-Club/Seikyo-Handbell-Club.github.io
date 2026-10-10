@@ -1379,7 +1379,7 @@ function renderSecretCostume(
     );
 
     secretDisplayedCharacter = character;
-    if(!wasSecretShowingForCharacter){ if(String(character).toLowerCase() === "chime") startHearts("sunflower"); else startSecretMoon(); }
+    if(!wasSecretShowingForCharacter){ startHearts(String(character).toLowerCase() === "chime" ? "sunflower" : "crescent"); }
     return;
 
   }
@@ -1577,7 +1577,7 @@ function renderSecretCostume(
             );
 
             secretDisplayedCharacter = character;
-            if(!wasSecretShowingForCharacter){ if(String(character).toLowerCase() === "chime") startHearts("sunflower"); else startSecretMoon(); }
+            if(!wasSecretShowingForCharacter){ startHearts(String(character).toLowerCase() === "chime" ? "sunflower" : "crescent"); }
             requestAnimationFrame(sendBellHitBounds);
 
           }
