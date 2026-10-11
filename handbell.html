@@ -7782,6 +7782,16 @@ async function decideLoginImage(){
   const snap = await get(memberRef);
   const data = snap.exists() ? (snap.val() || {}) : {};
 
+  /* ① WELCOME：初回だけ表示する。表示済みならイベント画像などへ進む。 */
+  if(!data.welcomeShown){
+    await update(memberRef, {welcomeShown:true});
+    return {
+      kind: "welcome",
+      src: "images/welcome/welcome.jpg",
+      name: "WELCOME"
+    };
+  }
+
   /* イベント当日は毎回イベント画像を最優先で表示。
      毎月の画像設定や過去に表示した記録には左右されない。 */
   const event = getEventImageInfo(todayString);
@@ -7793,15 +7803,9 @@ async function decideLoginImage(){
     };
   }
 
-  /* ① WELCOME：初回ログインだけ。ここは100% */
-  if(!data.welcomeShown){
-    await update(memberRef, {welcomeShown:true});
-    return {
-      kind: "welcome",
-      src: "images/welcome/welcome.jpg",
-      name: "WELCOME"
-    };
-  }
+  /* WELCOME画像は自動表示しない。
+     イベント当日は上でイベント画像を表示し、それ以外は
+     月別画像の設定に従って表示する。 */
 
   /* ② 幸運画像：ページを開くたびに抽選する。イベントより先 */
   const luckyRandom = Math.random();
