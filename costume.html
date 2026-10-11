@@ -454,15 +454,6 @@ const costumeDefinitions = {
   chime:[
     {id:"normal",name:"チャイムくん・ノーマル",src:"chime.png",kind:"normal"},
     ...eventCostumeDefinitions.map(([key,name,bellFile,chimeFile])=>({id:`event_${key}_chime`,name:`チャイムくん・${name}`,src:`costumes/${chimeFile}`,kind:"event"})),
-    ...Array.from({length:54},(_,index)=>{
-      const number=String(index+1).padStart(2,"0");
-      return {
-        id:`chime_costume_slot_${number}`,
-        name:`チャイムくん衣装${number}`,
-        src:`costumes/chime-costume-${number}.png`,
-        kind:"collection"
-      };
-    }),
     secretCostumeDefinitions.chime
   ]
 };

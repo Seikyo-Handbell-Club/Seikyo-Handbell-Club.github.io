@@ -33,40 +33,30 @@ export async function awardRandomCostumeOnPageOpen({
     const owned = snapshot.exists() && snapshot.val() && typeof snapshot.val() === "object"
       ? snapshot.val() : {};
     const character = profile.characterType === "chime" ? "chime" : "bell";
-    const available = getNormalCostumes(collectionItems, character);
-    const unowned = available.filter(item => !owned[item.id]);
-    let selected = null;
+    const bellAvailable = getNormalCostumes(collectionItems, "bell");
+    const chimeAvailable = getNormalCostumes(collectionItems, "chime");
+    const bellUnowned = bellAvailable.filter(item => !owned[item.id]);
+    const chimeUnowned = chimeAvailable.filter(item => !owned[item.id]);
+    const bellComplete = bellAvailable.length >= 54 && bellUnowned.length === 0;
+    const chimeComplete = chimeAvailable.length >= 54 && chimeUnowned.length === 0;
 
-    if (unowned.length) {
+    // 片方の通常衣装54種類をコンプリートしたら、もう片方の未取得衣装を優先して抽選。
+    // 相手側をコンプリートするまで、ページを開くたびに相手側から1着獲得する。
+    let targetCharacter = character;
+    if (chimeComplete && bellUnowned.length > 0) targetCharacter = "bell";
+    else if (bellComplete && chimeUnowned.length > 0) targetCharacter = "chime";
+
+    const unowned = targetCharacter === "bell" ? bellUnowned : chimeUnowned;
+    let selected = null;
+    if (unowned.length > 0) {
       selected = unowned[Math.floor(Math.random() * unowned.length)];
-      const record = { acquiredAt: Date.now(), source: "costume-system-test" };
+      const record = {
+        acquiredAt: Date.now(),
+        source: targetCharacter !== character ? `${character}-complete-${targetCharacter}-guaranteed` : "costume-system-test"
+      };
       await set(ref(db, `members/${uid}/collection/${selected.id}`), record);
       owned[selected.id] = record;
-      if (typeof showCostumeGift === "function") showCostumeGift(character, selected);
-    }
-
-    // チャイムくんの通常衣装54枠をコンプリートしたら、ベルちゃんの未取得通常衣装を1着贈る。
-    const chimeIds = Array.from({ length: 54 }, (_, i) => `chime_costume_slot_${String(i + 1).padStart(2, "0")}`);
-    const chimeComplete = chimeIds.every(id => !!owned[id]);
-    // 完了後のベルちゃんプレゼントは一度だけ。最後のチャイムくん衣装と同時に
-    // 2つの演出が重ならないよう、次回ページを開いたときに贈る。
-    const completionGiftRef = ref(db, `members/${uid}/costumeSystem/chimeCompleteBellGifted`);
-    const completionGiftSnapshot = await get(completionGiftRef);
-    const completionGiftAlreadySent = completionGiftSnapshot.exists() && completionGiftSnapshot.val() === true;
-    if (chimeComplete && !completionGiftAlreadySent && !selected) {
-      const bellUnowned = getNormalCostumes(collectionItems, "bell").filter(item => !owned[item.id]);
-      if (bellUnowned.length) {
-        const bellGift = bellUnowned[Math.floor(Math.random() * bellUnowned.length)];
-        const record = { acquiredAt: Date.now(), source: "chime-complete-bell-guaranteed" };
-        await set(ref(db, `members/${uid}/collection/${bellGift.id}`), record);
-        await set(completionGiftRef, true);
-        owned[bellGift.id] = record;
-        if (typeof showCostumeGift === "function") showCostumeGift("bell", bellGift);
-        selected = bellGift;
-      } else {
-        // ベルちゃん通常衣装もすべて所持済みなら、完了済みとして記録して再判定を防ぐ。
-        await set(completionGiftRef, true);
-      }
+      if (typeof showCostumeGift === "function") showCostumeGift(targetCharacter, selected);
     }
 
     if (selected) {
