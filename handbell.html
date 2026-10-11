@@ -1268,7 +1268,6 @@ textarea{
 .secret-preview-wrap img{position:absolute!important;left:0!important;top:0!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:contain!important;margin:0!important;padding:0!important;}
 
 </style>
-  <script src="test-date.js"></script>
 </head>
 
 <body>
@@ -2340,12 +2339,42 @@ from
    Firebase設定
 ========================= */
 
-/* サイト共通テスト日付 */
+/* =====================================================
+   ★ テスト日付
+   URLに ?testDate=2026-12-25 を付けると、月別画像・イベント画像などを
+   指定した日付として確認できます。design.htmlでも同じURLパラメータを使えます。
+   通常表示に戻すときはURLから ?testDate=... を取り除いてください。
+===================================================== */
+const TEST_DATE = null;
+
+/* コード指定またはURL指定のテスト日付を取得 */
 function getTestDate(){
-  return window.getSiteTestDate ? window.getSiteTestDate() : null;
+  let value = TEST_DATE;
+
+  if(!value){
+    try{
+      value = new URLSearchParams(window.location.search).get("testDate");
+    }catch(error){
+      value = null;
+    }
+  }
+
+  if(!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+
+  const d = new Date(`${value}T12:00:00`);
+  if(Number.isNaN(d.getTime())) return null;
+
+  if(
+    d.getFullYear() !== Number(value.slice(0,4)) ||
+    d.getMonth()+1 !== Number(value.slice(5,7)) ||
+    d.getDate() !== Number(value.slice(8,10))
+  ) return null;
+
+  return d;
 }
+
 function getAppDate(){
-  return window.getSiteDate ? window.getSiteDate() : new Date();
+  return getTestDate() || new Date();
 }
 
 const firebaseConfig = {
@@ -7242,10 +7271,8 @@ async function acquireCollectionItem(itemId){
 function getCollectionItemForImageInfo(imageInfo){
   if(!imageInfo) return null;
   if(imageInfo.kind === "monthly"){
-    /* 表示に使った画像と同じ共通テスト日付の月を記録する。
-       実機の日付 new Date() を使うと、テスト日付と違う月の枠に保存されてしまう。 */
-    const appDate = getAppDate();
-    return `monthly_${String(appDate.getMonth()+1).padStart(2,"0")}`;
+    const testDate = getAppDate();
+    return `monthly_${String(testDate.getMonth()+1).padStart(2,"0")}`;
   }
   if(imageInfo.kind === "event"){
     const appDate = getAppDate();
