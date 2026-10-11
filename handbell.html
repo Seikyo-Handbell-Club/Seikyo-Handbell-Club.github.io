@@ -321,6 +321,80 @@ main{
   margin:0 0 10px;
 }
 
+.collection-toc{
+  margin:16px 0 22px;
+  padding:14px;
+  border:1px solid #e1e8ed;
+  border-radius:14px;
+  background:#f9fbfd;
+}
+.collection-toc-title{
+  margin:0 0 10px;
+  font-size:16px;
+}
+.collection-toc-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+.collection-toc-button{
+  width:100%;
+  min-height:42px;
+  padding:9px 10px;
+  border:1px solid #dce4ec;
+  border-radius:10px;
+  background:#fff;
+  color:#26343d;
+  font-size:13px;
+  line-height:1.35;
+  text-align:left;
+  overflow-wrap:anywhere;
+  touch-action:manipulation;
+}
+.collection-toc-button:active{
+  background:#eef5fb;
+}
+.collection-section{
+  scroll-margin-top:90px;
+}
+#collectionBackToTop{
+  position:fixed;
+  right:18px;
+  bottom:calc(18px + env(safe-area-inset-bottom, 0px));
+  z-index:1000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  width:52px;
+  height:52px;
+  padding:0;
+  border:1px solid #d8e5f5;
+  border-radius:50%;
+  background:#e8f1ff;
+  color:#2463b5;
+  box-shadow:0 3px 14px rgba(25,55,90,.22);
+  font-size:27px;
+  line-height:1;
+  touch-action:manipulation;
+}
+#collectionBackToTop.visible{
+  display:flex;
+}
+#collectionBackToTop:active{
+  transform:scale(.96);
+}
+@media(max-width:480px){
+  .collection-toc-grid{
+    grid-template-columns:1fr;
+  }
+  #collectionBackToTop{
+    right:14px;
+    bottom:calc(14px + env(safe-area-inset-bottom, 0px));
+    width:50px;
+    height:50px;
+  }
+}
+
 .collection-grid{
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
@@ -1653,8 +1727,14 @@ textarea{
 
   <h2>📚 コレクション</h2>
 
-
   <div id="collectionContent"></div>
+  <button
+    id="collectionBackToTop"
+    type="button"
+    aria-label="ページの上に戻る"
+    title="上に戻る"
+    onclick="scrollCollectionToTop()"
+  >↑</button>
 
 </section>
 
@@ -3025,6 +3105,8 @@ function hide(){
         .classList
         .add("hidden")
   );
+
+  updateCollectionBackToTop();
 
 }
 
@@ -7285,6 +7367,26 @@ function collectionCardHtml(item,acquired){
   </div>`;
 }
 
+function scrollToCollectionSection(sectionId){
+  const target=document.getElementById(`collection-section-${sectionId}`);
+  if(target){
+    target.scrollIntoView({behavior:"smooth",block:"start"});
+  }
+}
+
+function scrollCollectionToTop(){
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function updateCollectionBackToTop(){
+  const button=document.getElementById("collectionBackToTop");
+  const view=document.getElementById("collectionView");
+  if(!button || !view) return;
+  button.classList.toggle("visible",!view.classList.contains("hidden") && window.scrollY>250);
+}
+
+window.addEventListener("scroll",updateCollectionBackToTop,{passive:true});
+
 function renderCollectionItems(acquiredData){
   const box=$("collectionContent");
   if(!box) return;
@@ -7292,17 +7394,26 @@ function renderCollectionItems(acquiredData){
   const acquiredCount=collectionItems.filter(item=>isAcquired(item.id)).length;
 
   const groups=[
-    ["🖼️ 月替わり画像",collectionItems.filter(item=>item.group==="monthly")],
-    ["🎉 イベント画像",collectionItems.filter(item=>
-      item.group==="eventImage" ||
-      item.group==="bell" ||
-      item.group==="chime"
-    )],
-    ["✨ シークレット",collectionItems.filter(item=>item.group==="secret")]
+    ["monthly","🖼️ 月替わり画像",collectionItems.filter(item=>item.group==="monthly")],
+    ["event-images","🎉 イベント画像",collectionItems.filter(item=>item.group==="eventImage")],
+    ["bell-event-costumes","ベルちゃん・イベント衣装",collectionItems.filter(item=>item.group==="bell" && item.id.startsWith("event_"))],
+    ["bell-costumes","ベルちゃん衣装",collectionItems.filter(item=>item.group==="bell" && /^bell_costume_slot_(?:0[1-9]|[1-4][0-9]|5[0-4])$/.test(item.id))],
+    ["chime-event-costumes","チャイムくん・イベント衣装",collectionItems.filter(item=>item.group==="chime" && item.id.startsWith("event_"))],
+    ["chime-costumes","チャイムくん・衣装",collectionItems.filter(item=>item.group==="chime" && /^chime_costume_slot_(?:0[1-9]|[1-4][0-9]|5[0-4])$/.test(item.id))],
+    ["secret","㊙️シークレット㊙️",collectionItems.filter(item=>item.group==="secret")]
   ];
 
-  box.innerHTML=groups.map(([title,items])=>`
-    <div class="collection-section">
+  const toc = `
+    <nav class="collection-toc" aria-label="コレクション目次">
+      <h3 class="collection-toc-title">📑 コレクション目次</h3>
+      <div class="collection-toc-grid">
+        ${groups.map(([id,title])=>`<button type="button" class="collection-toc-button" onclick="scrollToCollectionSection('${id}')">${title}</button>`).join("")}
+      </div>
+    </nav>
+  `;
+
+  box.innerHTML=toc+groups.map(([id,title,items])=>`
+    <div class="collection-section" id="collection-section-${id}">
       <h3>${title}</h3>
       <div class="collection-grid">
         ${items.map(item=>collectionCardHtml(item,isAcquired(item.id))).join("")}
@@ -7446,6 +7557,7 @@ async function showCollection(){
   }
   hide();
   $("collectionView").classList.remove("hidden");
+  updateCollectionBackToTop();
   await renderCollection();
 }
 
