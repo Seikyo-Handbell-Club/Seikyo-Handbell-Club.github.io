@@ -7621,22 +7621,103 @@ async function showCollection(){
 }
 
 /* =====================================================
-   ★ シークレット衣装抽選
-
-   ・ページを開いたときに裏で抽選
-   ・通常確率は0.25%
-   ・両方未取得なら現在選択中キャラ
-   ・片方取得済みなら未取得側を固定
-   ・当選した瞬間にそのキャラを装備
-   ・月別画像／イベント画像の表示処理とは完全に別
+   ★ シークレット4種類共通・1日1回の抽選
+   - レア画像／超レア画像／ベル衣装／チャイム衣装を合計して1日1回
+   - Firebase transaction で抽選日と結果を確定し、複数回のリロードにも対応
+   - イベント衣装の日は抽選しない
+   - ?testDate=YYYY-MM-DD の日付を抽選日として使う
 ===================================================== */
-
-const SECRET_COSTUME_PROBABILITY =1.0;
+const SECRET_COSTUME_PROBABILITY = 1.0;
 
 const SECRET_COSTUME_IDS = {
   bell:"secret_bell_rare_costume",
   chime:"secret_chime_rare_costume"
 };
+
+async function getOrCreateDailySecretLottery(){
+  if(!currentUser || !profile) return null;
+
+  const uid = currentUser.uid;
+  const today = getTodayString(getAppDate());
+  const stateRef = ref(db,`members/${uid}/secretLotteryState`);
+
+  /* イベント衣装の日は、抽選結果を作らず「抽選なし」を記録する。 */
+  const eventCostumeId = getTodayCharacterCostumeItemId();
+  if(eventCostumeId){
+    try{
+      await runTransaction(stateRef,current=>{
+        if(current && current.date === today) return current;
+        return {date:today,type:"eventSkipped"};
+      });
+    }catch(error){
+      console.error("シークレット抽選日の保存に失敗しました",error);
+    }
+    return {date:today,type:"eventSkipped"};
+  }
+
+  try{
+    const stateResult = await runTransaction(stateRef,current=>{
+      if(current && current.date === today) return current;
+
+      const random = Math.random();
+      if(random < 0.0005){
+        return {date:today,type:"ultraRareImage"};
+      }
+      if(random < 0.002){
+        return {date:today,type:"rareImage"};
+      }
+
+      /* 抽選対象の衣装は、後段で最新の獲得記録を確認して確定する。 */
+      if(Math.random() < SECRET_COSTUME_PROBABILITY){
+        return {date:today,type:"costumePending"};
+      }
+      return {date:today,type:"none"};
+    });
+
+    const state = stateResult?.snapshot?.val?.() || null;
+    if(!state || state.date !== today) return null;
+
+    /* 衣装抽選だった場合は、取得済み状況に応じて対象を確定する。
+       すでに当日の結果が保存されている場合も、同じ対象を返す。 */
+    if(state.type === "costumePending"){
+      const memberSnap = await get(ref(db,`members/${uid}`));
+      const memberData = memberSnap.exists() ? (memberSnap.val() || {}) : {};
+      const collection = memberData.collection || {};
+      const bellOwned = !!collection[SECRET_COSTUME_IDS.bell];
+      const chimeOwned = !!collection[SECRET_COSTUME_IDS.chime];
+
+      if(bellOwned && chimeOwned){
+        await runTransaction(stateRef,current=>{
+          if(current && current.date === today && current.type === "costumePending"){
+            return {...current,type:"none"};
+          }
+          return current;
+        });
+        return {date:today,type:"none"};
+      }
+
+      let targetCharacter;
+      if(!bellOwned && !chimeOwned){
+        targetCharacter = profile.characterType === "chime" ? "chime" : "bell";
+      }else if(bellOwned){
+        targetCharacter = "chime";
+      }else{
+        targetCharacter = "bell";
+      }
+      const costumeId = SECRET_COSTUME_IDS[targetCharacter];
+      const fixedResult = await runTransaction(stateRef,current=>{
+        if(!current || current.date !== today || current.type !== "costumePending") return current;
+        return {...current,type:"costume",character:targetCharacter,costumeId};
+      });
+      return fixedResult?.snapshot?.val?.() || {date:today,type:"costume",character:targetCharacter,costumeId};
+    }
+
+    return state;
+  }catch(error){
+    console.error("シークレット抽選エラー:",error);
+    return null;
+  }
+}
 
 function showSecretCostumeGift(character){
   const old = $("secretCostumeGiftOverlay");
@@ -7676,100 +7757,38 @@ function showSecretCostumeGift(character){
 }
 
 async function trySecretCostumeDraw(){
-
   if(!currentUser || !profile) return null;
 
   try{
+    const lottery = await getOrCreateDailySecretLottery();
+    if(!lottery || lottery.type !== "costume" || !lottery.character || !lottery.costumeId){
+      return null;
+    }
 
-    const memberRef = ref(
-      db,
-      `members/${currentUser.uid}`
-    );
-
+    const memberRef = ref(db,`members/${currentUser.uid}`);
     const snap = await get(memberRef);
     const data = snap.exists() ? (snap.val() || {}) : {};
     const collection = data.collection || {};
+    const alreadyOwned = !!collection[lottery.costumeId];
 
-    const bellOwned = !!collection[SECRET_COSTUME_IDS.bell];
-    const chimeOwned = !!collection[SECRET_COSTUME_IDS.chime];
-
-    /* 両方取得済みなら、もう抽選しない */
-    if(bellOwned && chimeOwned){
-      return null;
-    }
-
-    let targetCharacter;
-
-    /* まだ両方未取得 → 現在選択中キャラ */
-    if(!bellOwned && !chimeOwned){
-      targetCharacter =
-        profile.characterType === "chime"
-          ? "chime"
-          : "bell";
-    }
-    /* ベル取得済み → チャイム固定 */
-    else if(bellOwned){
-      targetCharacter = "chime";
-    }
-    /* チャイム取得済み → ベル固定 */
-    else{
-      targetCharacter = "bell";
-    }
-
-    const random = Math.random();
-
-    if(random >= SECRET_COSTUME_PROBABILITY){
-      return null;
-    }
-
-    const costumeId =
-      SECRET_COSTUME_IDS[targetCharacter];
+    /* 同じ日にリロードしても、同じ衣装を二重に獲得・通知しない。 */
+    if(alreadyOwned) return null;
 
     const updates = {};
-
-    updates[
-      `members/${currentUser.uid}/collection/${costumeId}`
-    ] = {
-      acquiredAt:Date.now()
-    };
-
-    /*
-     * 当選したキャラクターを即座に装備。
-     * 選択中キャラクターとは別でもOK。
-     */
-    updates[
-      `members/${currentUser.uid}/equippedCostume/${targetCharacter}`
-    ] = costumeId;
-
+    updates[`members/${currentUser.uid}/collection/${lottery.costumeId}`] = {acquiredAt:Date.now()};
+    updates[`members/${currentUser.uid}/equippedCostume/${lottery.character}`] = lottery.costumeId;
     await update(ref(db),updates);
 
-    equippedCostume[targetCharacter] = costumeId;
-
-    /*
-     * 獲得した瞬間に右上へ即時反映。
-     * iframeの準備状態に関係なく、現在の装備をもう一度送る。
-     */
+    equippedCostume[lottery.character] = lottery.costumeId;
     sendEquippedCostumeToBell();
     sendCharacterToBell();
+    showSecretCostumeGift(lottery.character);
 
-    showSecretCostumeGift(targetCharacter);
-
-    return {
-      character:targetCharacter,
-      costumeId
-    };
-
+    return {character:lottery.character,costumeId:lottery.costumeId};
   }catch(error){
-
-    console.error(
-      "シークレット衣装抽選エラー:",
-      error
-    );
-
+    console.error("シークレット衣装抽選エラー:",error);
     return null;
-
   }
-
 }
 
 async function decideLoginImage(){
@@ -7807,10 +7826,11 @@ async function decideLoginImage(){
      イベント当日は上でイベント画像を表示し、それ以外は
      月別画像の設定に従って表示する。 */
 
-  /* ② 幸運画像：ページを開くたびに抽選する。イベントより先 */
-  const luckyRandom = Math.random();
+  /* ② シークレット4種類共通の抽選結果。
+     同じ日にリロードしても再抽選せず、イベント衣装の日は抽選しない。 */
+  const secretLottery = await getOrCreateDailySecretLottery();
 
-  if(luckyRandom < 0.0005){
+  if(secretLottery?.type === "ultraRareImage"){
     return {
       kind: "lucky",
       rarity: "ultraRare",
@@ -7819,7 +7839,7 @@ async function decideLoginImage(){
     };
   }
 
-  if(luckyRandom < 0.002){
+  if(secretLottery?.type === "rareImage"){
     return {
       kind: "lucky",
       rarity: "rare",
