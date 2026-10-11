@@ -1268,6 +1268,7 @@ textarea{
 .secret-preview-wrap img{position:absolute!important;left:0!important;top:0!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:contain!important;margin:0!important;padding:0!important;}
 
 </style>
+  <script src="test-date.js"></script>
 </head>
 
 <body>
@@ -2339,34 +2340,12 @@ from
    Firebase設定
 ========================= */
 
-/* =====================================================
-   ★ コレクション取得テスト用の日付
-   ここを変更すると、イベント衣装の取得判定も同じ日付になります。
-   例: const TEST_DATE = "2026-12-25";
-   通常運用: const TEST_DATE = "2026-12-25";
-   ※ design.html でテストする日付と同じ値にしてください。
-===================================================== */
-const TEST_DATE = null;
-
-/* テスト日付を実際のDateとして取得 */
+/* サイト共通テスト日付 */
 function getTestDate(){
-  if(!TEST_DATE) return null;
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(TEST_DATE)) return null;
-
-  const d = new Date(`${TEST_DATE}T12:00:00`);
-  if(Number.isNaN(d.getTime())) return null;
-
-  if(
-    d.getFullYear() !== Number(TEST_DATE.slice(0,4)) ||
-    d.getMonth()+1 !== Number(TEST_DATE.slice(5,7)) ||
-    d.getDate() !== Number(TEST_DATE.slice(8,10))
-  ) return null;
-
-  return d;
+  return window.getSiteTestDate ? window.getSiteTestDate() : null;
 }
-
 function getAppDate(){
-  return getTestDate() || new Date();
+  return window.getSiteDate ? window.getSiteDate() : new Date();
 }
 
 const firebaseConfig = {

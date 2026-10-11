@@ -241,6 +241,7 @@ button:disabled{
 .costume-card img{cursor:pointer;}
 
 </style>
+  <script src="test-date.js"></script>
 </head>
 
 <body>
@@ -684,7 +685,7 @@ function renderAll(){
 ========================= */
 
 function getTodayEventKey(){
-  const now=new Date();
+  const now=(window.getSiteDate ? window.getSiteDate() : new Date());
   const md=`${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
   if(now.getMonth()+1===1 && now.getDate()>=1 && now.getDate()<=5) return "newyear";
   const fixed={"02-03":"setsubun","02-14":"valentine","03-03":"hinamatsuri","03-14":"whiteday","05-05":"kodomonohi","07-07":"tanabata","10-31":"halloween","12-24":"christmaseve","12-25":"christmas","12-31":"newyearseve"};

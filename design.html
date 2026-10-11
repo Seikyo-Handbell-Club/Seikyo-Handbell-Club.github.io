@@ -689,6 +689,7 @@ body.logged-in .secret-costume{
 }
 
 </style>
+  <script src="test-date.js"></script>
 </head>
 
 <body>
@@ -1802,13 +1803,10 @@ const costumeImages = {
 
 };
 
-/* =====================================================
-   ★ コードからテスト日付を変更できます
-   例："2026-12-25" → 2026年12月25日として動作
-   通常の日付に戻す場合は null にしてください
-===================================================== */
-
-const TEST_DATE = null;
+/* サイト共通テスト日付 */
+function getTestDate(){
+  return window.getSiteTestDate ? window.getSiteTestDate() : null;
+}
 
 /* =====================================================
    十五夜の日
@@ -1831,133 +1829,9 @@ const jugoyaDates = {
 
 };
 
-/* =====================================================
-   ★ テスト日付機能
-   URLに ?testDate=2026-12-25 のように指定すると
-   その日付として特殊服を判定する。
-   指定しない場合は通常どおり今日の日付を使用。
-===================================================== */
-
-function getTestDate(){
-
-  /* コード指定のテスト日付を最優先 */
-
-  if(TEST_DATE){
-
-    try{
-
-      if(
-        /^\d{4}-\d{2}-\d{2}$/.test(
-          TEST_DATE
-        )
-      ){
-
-        const testDate =
-          new Date(
-            `${TEST_DATE}T12:00:00`
-          );
-
-        if(
-          !Number.isNaN(
-            testDate.getTime()
-          ) &&
-          testDate.getFullYear() ===
-            Number(
-              TEST_DATE.slice(0,4)
-            ) &&
-          testDate.getMonth()+1 ===
-            Number(
-              TEST_DATE.slice(5,7)
-            ) &&
-          testDate.getDate() ===
-            Number(
-              TEST_DATE.slice(8,10)
-            )
-        ){
-
-          return testDate;
-
-        }
-
-      }
-
-    }catch(error){
-
-      console.warn(
-        "コード指定のテスト日付を読み込めませんでした",
-        error
-      );
-
-    }
-
-  }
-
-  try{
-
-    const params =
-      new URLSearchParams(
-        window.location.search
-      );
-
-    const value =
-      params.get(
-        "testDate"
-      );
-
-    if(
-      value &&
-      /^\d{4}-\d{2}-\d{2}$/.test(
-        value
-      )
-    ){
-
-      const testDate =
-        new Date(
-          `${value}T12:00:00`
-        );
-
-      if(
-        !Number.isNaN(
-          testDate.getTime()
-        ) &&
-        testDate.getFullYear() ===
-          Number(
-            value.slice(0,4)
-          ) &&
-        testDate.getMonth()+1 ===
-          Number(
-            value.slice(5,7)
-          ) &&
-        testDate.getDate() ===
-          Number(
-            value.slice(8,10)
-          )
-      ){
-
-        return testDate;
-
-      }
-
-    }
-
-  }catch(error){
-
-    console.warn(
-      "テスト日付を読み込めませんでした",
-      error
-    );
-
-  }
-
-  return null;
-
-}
-
+/* 共通テスト日付をアプリ内の日付として使用 */
 function getCurrentDate(){
-
-  return getTestDate() ||
-    new Date();
-
+  return window.getSiteDate ? window.getSiteDate() : new Date();
 }
 
 /* =====================================================
