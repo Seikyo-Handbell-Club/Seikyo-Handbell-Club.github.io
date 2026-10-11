@@ -2356,7 +2356,7 @@ function showCostumePageOpenTestGift(character,costume){
   overlay.id = "costumePageOpenTestGiftOverlay";
   overlay.innerHTML = `
     <div class="daily-gift-card" role="dialog" aria-modal="true">
-      <div class="daily-gift-title">🎉 ベルちゃんからプレゼントが届いたよ！</div>
+      <div class="daily-gift-title">🎉 ${character === "chime" ? "チャイムくん" : "ベルちゃん"}からプレゼントが届いたよ！</div>
       <div class="daily-gift-character">${character === "chime" ? "チャイムくん" : "ベルちゃん"}の衣装をゲットしたよ！</div>
       <img class="daily-gift-image" src="${esc(costume.src)}" alt="${esc(costume.name || costume.id)}">
       <div class="daily-gift-name">${esc(costume.name || costume.id)}</div>
