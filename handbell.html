@@ -7462,7 +7462,7 @@ function renderCollectionItems(acquiredData){
       <div class="collection-toc-grid">
         ${groups.map(([id,title,items])=>{
           const count=items.filter(item=>isAcquired(item.id)).length;
-          return `<button type="button" class="collection-toc-button" onclick="scrollToCollectionSection('${id}')"><span>${title}</span><span class="collection-progress">${count}/${items.length}</span></button>`;
+          return `<button type="button" class="collection-toc-button" onclick="scrollToCollectionSection('${id}')"><span>${title}</span><span class="collection-progress">${count === items.length ? "COMPLETE!" : `${count}/${items.length}`}</span></button>`;
         }).join("")}
       </div>
     </nav>
@@ -7472,7 +7472,7 @@ function renderCollectionItems(acquiredData){
     <div class="collection-section" id="collection-section-${id}">
       <div class="collection-section-title-row">
         <h3>${title}</h3>
-        <span class="collection-section-progress">${items.filter(item=>isAcquired(item.id)).length}/${items.length}</span>
+        <span class="collection-section-progress">${items.filter(item=>isAcquired(item.id)).length === items.length ? "COMPLETE!" : `${items.filter(item=>isAcquired(item.id)).length}/${items.length}`}</span>
       </div>
       <div class="collection-grid">
         ${items.map(item=>collectionCardHtml(item,isAcquired(item.id))).join("")}
