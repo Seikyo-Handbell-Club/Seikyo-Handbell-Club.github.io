@@ -7372,9 +7372,12 @@ function collectionCardHtml(item,acquired){
 }
 
 function scrollToCollectionSection(sectionId){
-  const target=document.getElementById(`collection-section-${sectionId}`);
-  if(target){
-    target.scrollIntoView({behavior:"smooth",block:"start"});
+  const section=document.getElementById(`collection-section-${sectionId}`);
+  if(section){
+    // Align the category title itself with the top of the visible page.
+    const target=section.querySelector("h3") || section;
+    const top=target.getBoundingClientRect().top + window.scrollY - 80;
+    window.scrollTo({top:Math.max(0,top),behavior:"smooth"});
   }
 }
 
