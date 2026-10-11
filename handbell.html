@@ -7381,8 +7381,13 @@ function scrollToCollectionSection(sectionId){
   const section=document.getElementById(`collection-section-${sectionId}`);
   if(section){
     const target=section.querySelector("h3") || section;
-    // Scroll to the actual title, then keep a small gap so it cannot be clipped above the viewport.
-    const top=target.getBoundingClientRect().top + window.scrollY - 16;
+    // Keep the title below the fixed header on the iPad screen.
+    const headerCandidates=[...document.querySelectorAll("header, .header, .site-header, .top-header, #header")];
+    const fixedHeader=headerCandidates
+      .filter(el=>getComputedStyle(el).position==="fixed")
+      .sort((a,b)=>b.getBoundingClientRect().height-a.getBoundingClientRect().height)[0];
+    const headerHeight=fixedHeader ? fixedHeader.getBoundingClientRect().height : 280;
+    const top=target.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
     window.scrollTo({top:Math.max(0,top),behavior:"smooth"});
   }
 }
