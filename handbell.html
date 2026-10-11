@@ -7381,13 +7381,15 @@ function scrollToCollectionSection(sectionId){
   const section=document.getElementById(`collection-section-${sectionId}`);
   if(section){
     const target=section.querySelector("h3") || section;
-    // Keep the title below the fixed header on the iPad screen.
-    const headerCandidates=[...document.querySelectorAll("header, .header, .site-header, .top-header, #header")];
-    const fixedHeader=headerCandidates
-      .filter(el=>getComputedStyle(el).position==="fixed")
-      .sort((a,b)=>b.getBoundingClientRect().height-a.getBoundingClientRect().height)[0];
-    const headerHeight=fixedHeader ? fixedHeader.getBoundingClientRect().height : 280;
-    const top=target.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
+    // Place the title just below the visible fixed header, without leaving a large gap.
+    const candidates=[...document.querySelectorAll("header, .header, .site-header, .top-header, #header")];
+    const visibleHeader=candidates
+      .map(el=>({el,rect:el.getBoundingClientRect(),position:getComputedStyle(el).position}))
+      .filter(item=>(item.position==="fixed" || item.position==="sticky") && item.rect.top<=8 && item.rect.bottom>0)
+      .sort((a,b)=>b.rect.bottom-a.rect.bottom)[0];
+    const headerBottom=visibleHeader ? visibleHeader.rect.bottom : Math.min(400, window.innerHeight*0.42);
+    const desiredTop=headerBottom+12;
+    const top=target.getBoundingClientRect().top + window.scrollY - desiredTop;
     window.scrollTo({top:Math.max(0,top),behavior:"smooth"});
   }
 }
