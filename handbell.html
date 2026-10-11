@@ -347,9 +347,41 @@ main{
   color:#26343d;
   font-size:13px;
   line-height:1.35;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
   text-align:left;
   overflow-wrap:anywhere;
   touch-action:manipulation;
+}
+.collection-toc-button .collection-progress{
+  flex:none;
+  white-space:nowrap;
+  font-size:12px;
+  font-weight:800;
+  color:#4779ad;
+  background:#edf5ff;
+  border-radius:999px;
+  padding:4px 7px;
+}
+.collection-section-title-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+.collection-section-title-row h3{margin:0;}
+.collection-section-progress{
+  flex:none;
+  white-space:nowrap;
+  font-size:13px;
+  font-weight:800;
+  color:#4779ad;
+  background:#edf5ff;
+  border-radius:999px;
+  padding:5px 9px;
 }
 .collection-toc-button:active{
   background:#eef5fb;
@@ -7427,14 +7459,20 @@ function renderCollectionItems(acquiredData){
     <nav class="collection-toc" aria-label="コレクション目次">
       <h3 class="collection-toc-title">📑 コレクション目次</h3>
       <div class="collection-toc-grid">
-        ${groups.map(([id,title])=>`<button type="button" class="collection-toc-button" onclick="scrollToCollectionSection('${id}')">${title}</button>`).join("")}
+        ${groups.map(([id,title,items])=>{
+          const count=items.filter(item=>isAcquired(item.id)).length;
+          return `<button type="button" class="collection-toc-button" onclick="scrollToCollectionSection('${id}')"><span>${title}</span><span class="collection-progress">${count}/${items.length}</span></button>`;
+        }).join("")}
       </div>
     </nav>
   `;
 
   box.innerHTML=toc+groups.map(([id,title,items])=>`
     <div class="collection-section" id="collection-section-${id}">
-      <h3>${title}</h3>
+      <div class="collection-section-title-row">
+        <h3>${title}</h3>
+        <span class="collection-section-progress">${items.filter(item=>isAcquired(item.id)).length}/${items.length}</span>
+      </div>
       <div class="collection-grid">
         ${items.map(item=>collectionCardHtml(item,isAcquired(item.id))).join("")}
       </div>
