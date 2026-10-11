@@ -149,29 +149,9 @@ p{
 .costume-category-title{
   display:flex;
   align-items:center;
-  flex-wrap:wrap;
   gap:8px;
   margin:0 0 10px;
   font-size:17px;
-}
-
-.complete-badge{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  padding:5px 9px;
-  border-radius:999px;
-  background:#fff1b8;
-  border:1px solid #e5bd48;
-  color:#805900;
-  font-size:11px;
-  font-weight:800;
-  letter-spacing:.04em;
-  line-height:1;
-}
-
-.complete-badge[hidden]{
-  display:none;
 }
 
 .costume-grid{
@@ -470,7 +450,6 @@ button:disabled{
 
         <h2 class="costume-category-title">
           🎉 イベント衣装
-          <span id="eventComplete" class="complete-badge" hidden>COMPLETE!</span>
         </h2>
 
         <div
@@ -486,10 +465,7 @@ button:disabled{
       ========================== -->
 
       <div class="costume-category">
-        <h2 class="costume-category-title">
-          🌙 シークレット衣装
-          <span id="secretComplete" class="complete-badge" hidden>COMPLETE!</span>
-        </h2>
+        <h2 class="costume-category-title">🌙 シークレット衣装</h2>
         <div id="secretCostumes" class="costume-grid"></div>
       </div>
 
@@ -501,7 +477,6 @@ button:disabled{
 
         <h2 class="costume-category-title">
           🎁 毎日衣装
-          <span id="dailyComplete" class="complete-badge" hidden>COMPLETE!</span>
         </h2>
 
         <div
@@ -1163,36 +1138,6 @@ function createEmptyMessage(
 
 
 /* =====================================================
-   コレクションのコンプリート表示
-===================================================== */
-
-function updateCompleteBadges(character){
-
-  const eventComplete = document.getElementById("eventComplete");
-  const secretComplete = document.getElementById("secretComplete");
-  const dailyComplete = document.getElementById("dailyComplete");
-
-  const eventIds = getEventCostumes(character).map(costume => costume.id);
-  const hasAllEvents = eventIds.length > 0 && eventIds.every(isEventCostumeAcquired);
-  eventComplete.hidden = !hasAllEvents;
-
-  const secretId = character === "bell"
-    ? "secret_bell_rare_costume"
-    : "secret_chime_rare_costume";
-  secretComplete.hidden = !(acquiredCollection && acquiredCollection[secretId]);
-
-  /* 毎日衣装は現在ベルちゃんの54種類を対象にする */
-  if(character === "bell"){
-    const hasAllDaily = dailyCostumeDefinitions.length > 0 &&
-      dailyCostumeDefinitions.every(costume => isDailyCostumeAcquired(character, costume.id));
-    dailyComplete.hidden = !hasAllDaily;
-  }else{
-    dailyComplete.hidden = true;
-  }
-}
-
-
-/* =====================================================
    衣装一覧表示
 ===================================================== */
 
@@ -1330,8 +1275,6 @@ function renderWardrobe(){
 
   }
 
-
-  updateCompleteBadges(character);
 
   saveButton.disabled =
     !currentUser ||
