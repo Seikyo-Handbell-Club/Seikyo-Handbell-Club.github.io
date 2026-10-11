@@ -7242,7 +7242,10 @@ async function acquireCollectionItem(itemId){
 function getCollectionItemForImageInfo(imageInfo){
   if(!imageInfo) return null;
   if(imageInfo.kind === "monthly"){
-    return `monthly_${String(new Date().getMonth()+1).padStart(2,"0")}`;
+    /* 表示に使った画像と同じ共通テスト日付の月を記録する。
+       実機の日付 new Date() を使うと、テスト日付と違う月の枠に保存されてしまう。 */
+    const appDate = getAppDate();
+    return `monthly_${String(appDate.getMonth()+1).padStart(2,"0")}`;
   }
   if(imageInfo.kind === "event"){
     const appDate = getAppDate();
