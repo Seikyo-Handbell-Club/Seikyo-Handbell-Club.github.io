@@ -692,6 +692,14 @@ function getTodayEventKey(){
   return fixed[md]||null;
 }
 
+function getTodayEventOverrideKey(){
+  const eventKey=getTodayEventKey();
+  if(!eventKey)return null;
+  const now=(window.getSiteDate ? window.getSiteDate() : new Date());
+  const dateKey=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+  return `${eventKey}_${dateKey}`;
+}
+
 async function saveCostume(){
   if(!currentUser)return;
 
@@ -705,7 +713,7 @@ async function saveCostume(){
   showMessage("衣装を保存しています……");
 
   try{
-    const eventKey=getTodayEventKey();
+    const eventKey=getTodayEventOverrideKey();
     const updates={};
 
     /*
