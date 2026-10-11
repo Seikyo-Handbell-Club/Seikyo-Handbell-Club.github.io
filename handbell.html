@@ -426,6 +426,11 @@ main{
   display:block;
 }
 
+/* チャイムくん衣装は元画像の縦横比を保ち、正方形カード内に全体を表示 */
+.collection-image.chime-costume-image{
+  object-fit:contain;
+}
+
 .collection-secret{
   color:#fff;
   font-size:13px;
@@ -7360,10 +7365,11 @@ function collectionCardHtml(item,acquired){
     item.id === "secret_bell_rare_costume" ||
     item.id === "secret_chime_rare_costume";
   const secretCharacter = item.id === "secret_bell_rare_costume" ? "bell" : item.id === "secret_chime_rare_costume" ? "chime" : null;
+  const isChimeRegularCostume = /^chime_costume_slot_/.test(item.id);
   const visual=acquired
     ? (secretCharacter
         ? secretCostumePreviewHtml(secretCharacter).replace('<div class="secret-costume-preview">', `<div class="secret-costume-preview" data-collection-src="${esc(item.src)}" data-collection-type="costume">`)
-        : `<img class="collection-image" data-collection-src="${esc(item.src)}" data-collection-type="${isCostume ? "costume" : "normal"}" src="${esc(item.src)}" alt="${esc(item.name)}">`)
+        : `<img class="collection-image${isChimeRegularCostume ? " chime-costume-image" : ""}" data-collection-src="${esc(item.src)}" data-collection-type="${isCostume ? "costume" : "normal"}" src="${esc(item.src)}" alt="${esc(item.name)}">`)
     : `<div class="collection-secret">？？？</div>`;
   return `<div class="collection-card">
     <div class="collection-image-wrap${acquired ? " collection-image-clickable" : ""}">${visual}</div>
