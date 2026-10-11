@@ -689,7 +689,6 @@ body.logged-in .secret-costume{
 }
 
 </style>
-  <script src="test-date.js"></script>
 </head>
 
 <body>
@@ -1803,10 +1802,13 @@ const costumeImages = {
 
 };
 
-/* サイト共通テスト日付 */
-function getTestDate(){
-  return window.getSiteTestDate ? window.getSiteTestDate() : null;
-}
+/* =====================================================
+   ★ コードからテスト日付を変更できます
+   例："2026-12-25" → 2026年12月25日として動作
+   通常の日付に戻す場合は null にしてください
+===================================================== */
+
+const TEST_DATE = null;
 
 /* =====================================================
    十五夜の日
@@ -1829,9 +1831,138 @@ const jugoyaDates = {
 
 };
 
-/* 共通テスト日付をアプリ内の日付として使用 */
+/* =====================================================
+   ★ テスト日付機能
+   URLに ?testDate=2026-12-25 のように指定すると
+   その日付として特殊服を判定する。
+   指定しない場合は通常どおり今日の日付を使用。
+===================================================== */
+
+function getTestDate(){
+
+  /* コード指定のテスト日付を最優先 */
+
+  if(TEST_DATE){
+
+    try{
+
+      if(
+        /^\d{4}-\d{2}-\d{2}$/.test(
+          TEST_DATE
+        )
+      ){
+
+        const testDate =
+          new Date(
+            `${TEST_DATE}T12:00:00`
+          );
+
+        if(
+          !Number.isNaN(
+            testDate.getTime()
+          ) &&
+          testDate.getFullYear() ===
+            Number(
+              TEST_DATE.slice(0,4)
+            ) &&
+          testDate.getMonth()+1 ===
+            Number(
+              TEST_DATE.slice(5,7)
+            ) &&
+          testDate.getDate() ===
+            Number(
+              TEST_DATE.slice(8,10)
+            )
+        ){
+
+          return testDate;
+
+        }
+
+      }
+
+    }catch(error){
+
+      console.warn(
+        "コード指定のテスト日付を読み込めませんでした",
+        error
+      );
+
+    }
+
+  }
+
+  try{
+
+    let value = null;
+    const params = new URLSearchParams(window.location.search);
+    value = params.get("testDate");
+
+    /* handbell.html のURLに指定されたテスト日付も引き継ぐ */
+    if(!value){
+      try{
+        if(window.parent && window.parent !== window){
+          value = new URLSearchParams(window.parent.location.search).get("testDate");
+        }
+      }catch(error){
+        /* 親URLを読めない場合は通常日付を使用 */
+      }
+    }
+
+    if(
+      value &&
+      /^\d{4}-\d{2}-\d{2}$/.test(
+        value
+      )
+    ){
+
+      const testDate =
+        new Date(
+          `${value}T12:00:00`
+        );
+
+      if(
+        !Number.isNaN(
+          testDate.getTime()
+        ) &&
+        testDate.getFullYear() ===
+          Number(
+            value.slice(0,4)
+          ) &&
+        testDate.getMonth()+1 ===
+          Number(
+            value.slice(5,7)
+          ) &&
+        testDate.getDate() ===
+          Number(
+            value.slice(8,10)
+          )
+      ){
+
+        return testDate;
+
+      }
+
+    }
+
+  }catch(error){
+
+    console.warn(
+      "テスト日付を読み込めませんでした",
+      error
+    );
+
+  }
+
+  return null;
+
+}
+
 function getCurrentDate(){
-  return window.getSiteDate ? window.getSiteDate() : new Date();
+
+  return getTestDate() ||
+    new Date();
+
 }
 
 /* =====================================================
@@ -2033,49 +2164,120 @@ function getCharacterImage(
   date=getCurrentDate()
 ){
 
-  const selected = character === "chime" ? "chime" : "bell";
-  const costumeKey = getCostumeKey(date);
+  const selected =
+    character === "chime"
+      ? "chime"
+      : "bell";
 
-  /*
-   * イベント当日の優先順位：
-   * 1. その日にユーザーが自分で選んだ衣装
-   * 2. イベント衣装（所持状況に関係なく強制表示）
-   * イベント日以外：最後に保存した装備衣装
-   */
+  /* ---------------------------------------------
+     ① シークレット衣装
+     シークレットは最優先
+  --------------------------------------------- */
 
-  if(costumeKey){
-    const dateKey = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
-    const datedOverrideKey = `${costumeKey}_${dateKey}`;
-    const override =
-      eventCostumeOverrides?.[datedOverrideKey]?.[selected] ||
-      eventCostumeOverrides?.[costumeKey]?.[selected] ||
-      null;
+  if(
+    isSecretEquipped(
+      selected
+    )
+  ){
 
-    if(override){
-      if(override === "normal") return characterImages[selected].src;
-      const overrideImage = getCostumeImageFromId(override, selected);
-      if(overrideImage) return overrideImage;
-    }
+    return characterImages[
+      selected
+    ].src;
 
-    if(costumeImages[selected]?.[costumeKey]){
-      return costumeImages[selected][costumeKey];
-    }
   }
 
-  /* イベント日以外は保存済み衣装を維持 */
-  const equipped = equippedCostumes?.[selected] || null;
+  /*
+   * 衣装の優先順位
+   *
+   * 1. ユーザーが「着替える」で選んだ衣装
+   * 2. イベント日の衣装
+   * 3. 通常のベルちゃん
+   *
+   * イベント日は強制衣装ではありません。
+   */
 
-  if(equipped === "normal") return characterImages[selected].src;
+  /* ---------------------------------------------
+     ② ユーザーが選択した衣装
+  --------------------------------------------- */
 
-  const equippedImage = getCostumeImageFromId(equipped, selected);
-  if(equippedImage) return equippedImage;
+  const equipped =
+    equippedCostumes?.[selected] ||
+    null;
 
-  /* シークレット衣装は通常のイベント日判定がない日に表示 */
-  if(isSecretEquipped(selected)){
+  /* 「ノーマルに戻す」を明示選択した場合は、イベント日でも通常画像を優先する */
+  if(equipped === "normal"){
     return characterImages[selected].src;
   }
 
-  return characterImages[selected].src;
+  const equippedImage =
+    getCostumeImageFromId(
+      equipped,
+      selected
+    );
+
+  if(equippedImage){
+
+    return equippedImage;
+
+  }
+
+  /* ---------------------------------------------
+     ③ イベント衣装
+  --------------------------------------------- */
+
+  const costumeKey =
+    getCostumeKey(date);
+
+  if(costumeKey){
+
+    const override =
+      eventCostumeOverrides?.[
+        costumeKey
+      ]?.[selected] ||
+      null;
+
+    if(override){
+
+      if(override === "normal"){
+        return characterImages[selected].src;
+      }
+
+      const overrideImage =
+        getCostumeImageFromId(
+          override,
+          selected
+        );
+
+      if(overrideImage){
+
+        return overrideImage;
+
+      }
+
+    }
+
+    if(
+      costumeImages[
+        selected
+      ]?.[costumeKey]
+    ){
+
+      return costumeImages[
+        selected
+      ][costumeKey];
+
+    }
+
+  }
+
+  /* ---------------------------------------------
+     ④ 通常
+  --------------------------------------------- */
+
+  return characterImages[
+    selected
+  ].src;
+
 }
 
 function getCostumeImageFromId(

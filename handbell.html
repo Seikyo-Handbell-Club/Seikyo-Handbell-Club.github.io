@@ -2341,35 +2341,28 @@ from
 
 /* =====================================================
    ★ テスト日付
-   URLに ?testDate=2026-12-25 を付けると、月別画像・イベント画像などを
-   指定した日付として確認できます。design.htmlでも同じURLパラメータを使えます。
-   通常表示に戻すときはURLから ?testDate=... を取り除いてください。
+   URL末尾に ?testDate=2026-12-25 を付けると、
+   月別画像・イベント画像・衣装判定をまとめて指定日で確認できます。
+   通常表示に戻すときはURLから testDate を削除してください。
 ===================================================== */
 const TEST_DATE = null;
 
-/* コード指定またはURL指定のテスト日付を取得 */
+/* コード設定またはURL指定のテスト日付を取得 */
 function getTestDate(){
   let value = TEST_DATE;
-
   if(!value){
     try{
       value = new URLSearchParams(window.location.search).get("testDate");
-    }catch(error){
-      value = null;
-    }
+    }catch(error){ value = null; }
   }
-
   if(!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
-
   const d = new Date(`${value}T12:00:00`);
   if(Number.isNaN(d.getTime())) return null;
-
   if(
     d.getFullYear() !== Number(value.slice(0,4)) ||
     d.getMonth()+1 !== Number(value.slice(5,7)) ||
     d.getDate() !== Number(value.slice(8,10))
   ) return null;
-
   return d;
 }
 
@@ -6993,13 +6986,13 @@ function getEventImageInfo(date){
     };
   }
 
-  /* 1月6日〜1月31日は、お正月画像を期間中1回だけ表示する */
+  /* 1月6日〜1月31日も、お正月画像をページを開くたびに表示する */
   if(m === 1 && d >= 6 && d <= 31){
     return {
       key: `${y}-newyear-late`,
       file: "newyear.jpg.PNG",
       name: "お正月",
-      everyOpen: false
+      everyOpen: true
     };
   }
 
@@ -7027,7 +7020,7 @@ function getEventImageInfo(date){
           md === "12-24" ? "クリスマスイブ" :
           md === "12-25" ? "クリスマス" :
           md === "12-31" ? "大晦日" : "イベント",
-    everyOpen: false
+    everyOpen: true
   };
 }
 
@@ -7271,8 +7264,7 @@ async function acquireCollectionItem(itemId){
 function getCollectionItemForImageInfo(imageInfo){
   if(!imageInfo) return null;
   if(imageInfo.kind === "monthly"){
-    const testDate = getAppDate();
-    return `monthly_${String(testDate.getMonth()+1).padStart(2,"0")}`;
+    return `monthly_${String(getAppDate().getMonth()+1).padStart(2,"0")}`;
   }
   if(imageInfo.kind === "event"){
     const appDate = getAppDate();
@@ -7790,6 +7782,17 @@ async function decideLoginImage(){
   const snap = await get(memberRef);
   const data = snap.exists() ? (snap.val() || {}) : {};
 
+  /* イベント当日は毎回イベント画像を最優先で表示。
+     毎月の画像設定や過去に表示した記録には左右されない。 */
+  const event = getEventImageInfo(todayString);
+  if(event){
+    return {
+      kind: "event",
+      src: `images/events/${event.file}`,
+      name: event.name
+    };
+  }
+
   /* ① WELCOME：初回ログインだけ。ここは100% */
   if(!data.welcomeShown){
     await update(memberRef, {welcomeShown:true});
@@ -7819,27 +7822,6 @@ async function decideLoginImage(){
       src: `images/lucky/${luckyImageFiles.rare}`,
       name: "レア"
     };
-  }
-
-  /* ③ イベント：幸運画像・レア衣装に当選しなかった場合だけ判定する */
-  const event = getEventImageInfo(todayString);
-  if(event){
-    if(event.everyOpen){
-      return {
-        kind: "event",
-        src: `images/events/${event.file}`,
-        name: event.name
-      };
-    }
-
-    if(data.eventImageShownKey !== event.key){
-      await update(memberRef, {eventImageShownKey:event.key});
-      return {
-        kind: "event",
-        src: `images/events/${event.file}`,
-        name: event.name
-      };
-    }
   }
 
   /* ④ 月別：ONのときだけページを開くたびに表示する */
