@@ -1278,7 +1278,7 @@ PDFを読み込む
 
 <div class="card">
   <h2 class="section-title">欠席理由の管理</h2>
-  <p class="sub-title">部員サイトの「欠席理由」に表示する項目を追加・削除できます。「その他」は固定項目です。</p>
+  <p class="sub-title">部員サイトの「欠席理由」に表示する項目を追加・編集・削除できます。「その他」は固定項目です。</p>
   <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end">
     <div style="flex:1;min-width:200px">
       <label for="newAbsenceReason">追加する理由</label>
@@ -4557,6 +4557,7 @@ const DEFAULT_ABSENCE_REASONS = [
   "オープンキャンパス", "その他"
 ];
 let adminAbsenceReasons = [...DEFAULT_ABSENCE_REASONS];
+let editingAbsenceReason = null;
 
 async function loadAbsenceReasonsAdmin(){
   const snap = await get(ref(db,"settings/absenceReasons"));
@@ -4574,10 +4575,34 @@ function renderAbsenceReasonsAdmin(){
   if(!host)return;
   host.innerHTML=adminAbsenceReasons.map((reason,index)=>{
     const safe=esc(reason);
+    const encoded=encodeURIComponent(reason);
     const fixed=reason==="その他";
-    return `<div style="display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e5e8ed"><span>${index+1}. ${safe}${fixed?' <span class="small">（固定）</span>':''}</span>${fixed?'':'<button type="button" class="secondary" data-delete-reason="'+encodeURIComponent(reason)+'">削除</button>'}</div>`;
+    if(!fixed && editingAbsenceReason===reason){
+      return `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid #e5e8ed">
+        <span style="min-width:24px">${index+1}.</span>
+        <input type="text" maxlength="60" aria-label="欠席理由を編集" data-edit-reason-input="${encoded}" value="${safe}" style="flex:1;min-width:160px">
+        <button type="button" class="primary" data-save-reason="${encoded}">保存</button>
+        <button type="button" class="secondary" data-cancel-edit-reason>キャンセル</button>
+      </div>`;
+    }
+    return `<div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid #e5e8ed">
+      <span>${index+1}. ${safe}${fixed?' <span class="small">（固定・編集不可）</span>':''}</span>
+      ${fixed?'':'<div style="display:flex;gap:6px"><button type="button" class="secondary" data-edit-reason="'+encoded+'">編集</button><button type="button" class="secondary" data-delete-reason="'+encoded+'">削除</button></div>'}
+    </div>`;
   }).join("");
   host.querySelectorAll("[data-delete-reason]").forEach(button=>button.addEventListener("click",()=>deleteAbsenceReason(decodeURIComponent(button.dataset.deleteReason))));
+  host.querySelectorAll("[data-edit-reason]").forEach(button=>button.addEventListener("click",()=>{
+    editingAbsenceReason=decodeURIComponent(button.dataset.editReason);
+    renderAbsenceReasonsAdmin();
+    const input=host.querySelector("[data-edit-reason-input]");
+    if(input){input.focus();input.select();}
+  }));
+  host.querySelectorAll("[data-save-reason]").forEach(button=>button.addEventListener("click",()=>updateAbsenceReason(decodeURIComponent(button.dataset.saveReason))));
+  host.querySelectorAll("[data-cancel-edit-reason]").forEach(button=>button.addEventListener("click",()=>{editingAbsenceReason=null;renderAbsenceReasonsAdmin();}));
+  host.querySelectorAll("[data-edit-reason-input]").forEach(input=>input.addEventListener("keydown",e=>{
+    if(e.key==="Enter")updateAbsenceReason(decodeURIComponent(input.dataset.editReasonInput));
+    if(e.key==="Escape"){editingAbsenceReason=null;renderAbsenceReasonsAdmin();}
+  }));
 }
 
 async function saveAbsenceReasonsAdmin(){
@@ -4601,6 +4626,24 @@ async function addAbsenceReason(){
   }catch(e){message("absenceReasonMsg","保存に失敗しました。\n"+(e.message||"不明"),"error");}
 }
 
+async function updateAbsenceReason(oldReason){
+  if(!(await isAdmin()))return;
+  if(oldReason==="その他")return;
+  const input=$("absenceReasonsList").querySelector("[data-edit-reason-input]");
+  const value=(input?.value||"").trim();
+  if(!value){message("absenceReasonMsg","理由を空欄にはできません。","error");input?.focus();return;}
+  if(value==="その他"){message("absenceReasonMsg","「その他」は固定項目です。","error");input?.focus();return;}
+  if(adminAbsenceReasons.some(x=>x!==oldReason && x.toLowerCase()===value.toLowerCase())){message("absenceReasonMsg","同じ理由がすでにあります。","error");input?.focus();return;}
+  try{
+    const index=adminAbsenceReasons.indexOf(oldReason);
+    if(index<0)return;
+    adminAbsenceReasons[index]=value;
+    editingAbsenceReason=null;
+    await saveAbsenceReasonsAdmin();
+    message("absenceReasonMsg","欠席理由を編集しました。","success");
+  }catch(e){message("absenceReasonMsg","編集の保存に失敗しました。\n"+(e.message||"不明"),"error");}
+}
+
 async function deleteAbsenceReason(reason){
   if(!(await isAdmin()))return;
   if(reason==="その他")return;
@@ -4608,6 +4651,7 @@ async function deleteAbsenceReason(reason){
   try{
     adminAbsenceReasons=adminAbsenceReasons.filter(x=>x!==reason);
     if(!adminAbsenceReasons.includes("その他"))adminAbsenceReasons.push("その他");
+    if(editingAbsenceReason===reason)editingAbsenceReason=null;
     await saveAbsenceReasonsAdmin();
     message("absenceReasonMsg","欠席理由を削除しました。","success");
   }catch(e){message("absenceReasonMsg","削除に失敗しました。\n"+(e.message||"不明"),"error");}
