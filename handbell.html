@@ -517,7 +517,8 @@ main{
   display:flex;
 }
 
-#collectionImageOverlay img{
+#collectionImageOverlay img,
+#costumeOverlay img{
   display:block;
   max-width:100%;
   max-height:90vh;
@@ -526,6 +527,18 @@ main{
   object-fit:contain;
   border-radius:8px;
 }
+.collection-view-arrow{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:48px;height:64px;border:0;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;background:rgba(255,255,255,.17);
+  font-size:34px;line-height:1;cursor:pointer;
+  opacity:.65;transition:opacity .18s,background .18s;z-index:2;
+  -webkit-tap-highlight-color:transparent;
+}
+.collection-view-arrow:hover{opacity:.95;background:rgba(255,255,255,.28)}
+.collection-view-arrow.left{left:10px}.collection-view-arrow.right{right:10px}
+.collection-view-arrow.hidden-arrows{opacity:0;pointer-events:none}
 
 #costumeOverlay{
   position:fixed;
@@ -2184,13 +2197,17 @@ textarea{
 <!-- コレクション画像拡大 -->
 <div id="collectionImageOverlay" aria-hidden="true">
   <button id="collectionImageClose" class="collection-overlay-close" type="button">閉じる</button>
+  <button class="collection-view-arrow left" type="button" aria-label="前の入手済みアイテム" data-collection-step="-1">‹</button>
   <img id="collectionImageOverlayImg" src="" alt="">
+  <button class="collection-view-arrow right" type="button" aria-label="次の入手済みアイテム" data-collection-step="1">›</button>
 </div>
 
 <!-- コレクション衣装全画面 -->
 <div id="costumeOverlay" aria-hidden="true">
   <button id="costumeClose" class="collection-overlay-close" type="button">閉じる</button>
+  <button class="collection-view-arrow left" type="button" aria-label="前の入手済みアイテム" data-collection-step="-1">‹</button>
   <img id="costumeOverlayImg" src="" alt="">
+  <button class="collection-view-arrow right" type="button" aria-label="次の入手済みアイテム" data-collection-step="1">›</button>
 </div>
 
 <!-- ログイン成功ウェルカム画面（確認用：ログインするたびに表示） -->
@@ -7807,45 +7824,63 @@ function closeWelcomeOverlay(){
    コレクション画像タップ
 ========================= */
 
-function openCollectionImage(src){
-  const overlay=$("collectionImageOverlay");
-  const image=$("collectionImageOverlayImg");
-  if(!overlay || !image) return;
-  image.src=src;
-  overlay.classList.add("show");
-  overlay.setAttribute("aria-hidden","false");
-  document.body.style.overflow="hidden";
-}
+let collectionViewerItems=[];
+let collectionViewerIndex=-1;
+let collectionViewerType="normal";
 
+function refreshCollectionViewerItems(){
+  const box=$("collectionContent");
+  if(!box) return [];
+  // Acquired cards only have data-collection-src and clickable wrapper; ??? cards are excluded.
+  return [...box.querySelectorAll("[data-collection-src]")].filter(el=>{
+    const wrap=el.closest(".collection-image-wrap");
+    return !!(wrap && wrap.classList.contains("collection-image-clickable") && el.dataset.collectionSrc);
+  }).map(el=>({src:el.dataset.collectionSrc,type:el.dataset.collectionType||"normal",alt:el.getAttribute("alt")||""}));
+}
+function setCollectionViewerArrowsVisible(visible){
+  ["collectionImageOverlay","costumeOverlay"].forEach(id=>{
+    const overlay=$(id); if(!overlay) return;
+    overlay.querySelectorAll(".collection-view-arrow").forEach(btn=>btn.classList.toggle("hidden-arrows",!visible));
+  });
+}
+function showCollectionViewerItem(index){
+  if(!collectionViewerItems.length) return;
+  collectionViewerIndex=(index+collectionViewerItems.length)%collectionViewerItems.length;
+  const item=collectionViewerItems[collectionViewerIndex];
+  const overlay=$(item.type==="costume"?"costumeOverlay":"collectionImageOverlay");
+  const other=$(item.type==="costume"?"collectionImageOverlay":"costumeOverlay");
+  const image=$(item.type==="costume"?"costumeOverlayImg":"collectionImageOverlayImg");
+  if(!overlay||!image) return;
+  other.classList.remove("show"); other.setAttribute("aria-hidden","true");
+  overlay.classList.add("show"); overlay.setAttribute("aria-hidden","false");
+  image.src=item.src; image.alt=item.alt;
+  setCollectionViewerArrowsVisible(true);
+}
+function openCollectionImage(src){
+  collectionViewerItems=refreshCollectionViewerItems();
+  collectionViewerIndex=collectionViewerItems.findIndex(item=>item.src===src);
+  if(collectionViewerIndex<0){collectionViewerItems=[{src,type:"normal",alt:""}];collectionViewerIndex=0;}
+  document.body.style.overflow="hidden";
+  showCollectionViewerItem(collectionViewerIndex);
+}
 function closeCollectionImage(){
-  const overlay=$("collectionImageOverlay");
-  const image=$("collectionImageOverlayImg");
-  if(!overlay || !image) return;
-  overlay.classList.remove("show");
-  overlay.setAttribute("aria-hidden","true");
-  image.src="";
+  ["collectionImageOverlay","costumeOverlay"].forEach(id=>{
+    const overlay=$(id); if(!overlay) return;
+    overlay.classList.remove("show"); overlay.setAttribute("aria-hidden","true");
+    const image=overlay.querySelector("img"); if(image) image.src="";
+  });
+  collectionViewerItems=[]; collectionViewerIndex=-1;
   document.body.style.overflow="";
 }
 
 function openCollectionCostume(src){
-  const overlay=$("costumeOverlay");
-  const image=$("costumeOverlayImg");
-  if(!overlay || !image) return;
-  image.src=src;
-  overlay.classList.add("show");
-  overlay.setAttribute("aria-hidden","false");
+  collectionViewerItems=refreshCollectionViewerItems();
+  collectionViewerIndex=collectionViewerItems.findIndex(item=>item.src===src);
+  if(collectionViewerIndex<0){collectionViewerItems=[{src,type:"costume",alt:""}];collectionViewerIndex=0;}
   document.body.style.overflow="hidden";
+  showCollectionViewerItem(collectionViewerIndex);
 }
-
-function closeCollectionCostume(){
-  const overlay=$("costumeOverlay");
-  const image=$("costumeOverlayImg");
-  if(!overlay || !image) return;
-  overlay.classList.remove("show");
-  overlay.setAttribute("aria-hidden","true");
-  image.src="";
-  document.body.style.overflow="";
-}
+function closeCollectionCostume(){ closeCollectionImage(); }
 
 const collectionContent=$("collectionContent");
 if(collectionContent){
@@ -7858,6 +7893,19 @@ if(collectionContent){
     else openCollectionImage(src);
   });
 }
+
+["collectionImageOverlay","costumeOverlay"].forEach(id=>{
+  const overlay=$(id); if(!overlay) return;
+  overlay.addEventListener("click",event=>{
+    if(event.target.closest(".collection-overlay-close")) return;
+    if(event.target.closest(".collection-view-arrow")) return;
+    setCollectionViewerArrowsVisible(overlay.querySelector(".collection-view-arrow.hidden-arrows")!==null);
+  });
+  overlay.querySelectorAll(".collection-view-arrow").forEach(button=>button.addEventListener("click",event=>{
+    event.stopPropagation();
+    if(collectionViewerItems.length>1) showCollectionViewerItem(collectionViewerIndex+Number(button.dataset.collectionStep));
+  }));
+});
 
 const collectionImageClose=$("collectionImageClose");
 if(collectionImageClose){
