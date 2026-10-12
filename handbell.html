@@ -7850,10 +7850,12 @@ async function decideLoginImage(){
   const secretLottery = await getOrCreateDailySecretLottery();
 
   if(secretLottery?.type === "ultraRareImage" || secretLottery?.type === "rareImage"){
-    /* 表示権をFirebase transactionで先着1回だけ取得する。
-       再読み込みや同時に複数処理が走っても、同じ日の画像を繰り返し表示しない。 */
+    /* シークレット画像は当日1回だけ表示する。
+       すでに表示済み、または表示権の記録に失敗した場合は、
+       ページ全体を無画像にせず、下の月別画像判定へ進む。 */
     const displayClaimToken = `${Date.now()}_${Math.random().toString(36).slice(2)}`;
     const lotteryStateRef = ref(db,`members/${currentUser.uid}/secretLotteryState`);
+    let mayShowSecretImage = false;
     try{
       const claimResult = await runTransaction(lotteryStateRef,current=>{
         if(!current || current.date !== todayString) return current;
@@ -7861,30 +7863,28 @@ async function decideLoginImage(){
         return {...current,imageShown:true,imageShownToken:displayClaimToken};
       });
       const claimedState = claimResult?.snapshot?.val?.() || null;
-      if(!claimResult?.committed || claimedState?.imageShownToken !== displayClaimToken){
-        return null;
-      }
+      mayShowSecretImage = !!claimResult?.committed && claimedState?.imageShownToken === displayClaimToken;
     }catch(error){
-      console.error("シークレット画像の表示済み記録に失敗しました",error);
-      /* 記録できない場合は重複表示を避け、シークレット画像を表示しない。 */
-      return null;
+      console.error("シークレット画像の表示済み記録に失敗しました。月別画像へ進みます。",error);
     }
 
-    if(secretLottery.type === "ultraRareImage"){
+    if(mayShowSecretImage){
+      if(secretLottery.type === "ultraRareImage"){
+        return {
+          kind: "lucky",
+          rarity: "ultraRare",
+          src: `images/lucky/${luckyImageFiles.ultraRare}`,
+          name: "超レア"
+        };
+      }
       return {
         kind: "lucky",
-        rarity: "ultraRare",
-        src: `images/lucky/${luckyImageFiles.ultraRare}`,
-        name: "超レア"
+        rarity: "rare",
+        src: `images/lucky/${luckyImageFiles.rare}`,
+        name: "レア"
       };
     }
-
-    return {
-      kind: "lucky",
-      rarity: "rare",
-      src: `images/lucky/${luckyImageFiles.rare}`,
-      name: "レア"
-    };
+    /* ここで return null せず、通常の月別画像判定へフォールバックする */
   }
 
   /* ④ 月別：ONのときだけページを開くたびに表示する */
