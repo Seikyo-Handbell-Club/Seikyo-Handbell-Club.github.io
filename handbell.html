@@ -7421,7 +7421,9 @@ function collectionCardHtml(item,acquired){
   const visual=acquired
     ? (secretCharacter
         ? secretCostumePreviewHtml(secretCharacter).replace('<div class="secret-costume-preview">', `<div class="secret-costume-preview" data-collection-src="${esc(item.src)}" data-collection-type="costume">`)
-        : `<img class="collection-image${isChimeRegularCostume ? " chime-costume-image" : ""}" data-collection-src="${esc(item.src)}" data-collection-type="${isCostume ? "costume" : "normal"}" src="${esc(item.src)}" alt="${esc(item.name)}">`)
+        : (item.group === "monthly"
+          ? `<img class="collection-image monthly-queued-image${isChimeRegularCostume ? " chime-costume-image" : ""}" data-collection-src="${esc(item.src)}" data-monthly-queue="true" data-collection-type="normal" alt="${esc(item.name)}" loading="lazy" decoding="async">`
+          : `<img class="collection-image${isChimeRegularCostume ? " chime-costume-image" : ""}" data-collection-src="${esc(item.src)}" data-collection-type="${isCostume ? "costume" : "normal"}" src="${esc(item.src)}" alt="${esc(item.name)}" loading="lazy" decoding="async">`))
     : `<div class="collection-secret">？？？</div>`;
   return `<div class="collection-card">
     <div class="collection-image-wrap${acquired ? " collection-image-clickable" : ""}">${visual}</div>
@@ -7510,9 +7512,33 @@ function renderCollectionItems(acquiredData){
     });
   });
   box.querySelectorAll("img.collection-image").forEach(img=>{
+    // Set lazy loading in the HTML itself as well, so the browser doesn't start
+    // fetching every full-size collection image before this pass runs.
     img.loading="lazy";
     img.decoding="async";
   });
+  // Load monthly images one by one in their displayed order, rather than
+  // making all twelve large files compete for bandwidth at once.
+  const monthlyQueue = [...box.querySelectorAll("#collection-section-monthly img[data-monthly-queue='true']")];
+  let monthlyQueueIndex = 0;
+  let monthlyQueueStarted = false;
+  const loadNextMonthlyImage = () => {
+    if(monthlyQueueIndex >= monthlyQueue.length) return;
+    const img = monthlyQueue[monthlyQueueIndex++];
+    const src = img.dataset.collectionSrc;
+    if(!src){ loadNextMonthlyImage(); return; }
+    img.loading = "eager";
+    img.fetchPriority = monthlyQueueIndex === 1 ? "high" : "auto";
+    const advance = () => loadNextMonthlyImage();
+    img.addEventListener("load", advance, {once:true});
+    img.addEventListener("error", advance, {once:true});
+    img.src = src;
+  };
+  if(monthlyQueue.length){
+    // Start with the first image; continue after each image succeeds or fails.
+    monthlyQueueStarted = true;
+    loadNextMonthlyImage();
+  }
 
   const mini=$("collectionCountMini");
   if(mini){
