@@ -1273,6 +1273,25 @@ PDFを読み込む
 
 
 <!-- =====================================================
+     欠席理由の管理
+===================================================== -->
+
+<div class="card">
+  <h2 class="section-title">欠席理由の管理</h2>
+  <p class="sub-title">部員サイトの「欠席理由」に表示する項目を追加・削除できます。「その他」は固定項目です。</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end">
+    <div style="flex:1;min-width:200px">
+      <label for="newAbsenceReason">追加する理由</label>
+      <input id="newAbsenceReason" type="text" maxlength="60" placeholder="例：交通機関の遅延">
+    </div>
+    <button id="addAbsenceReasonButton" class="primary" type="button">理由を追加</button>
+  </div>
+  <div id="absenceReasonMsg" aria-live="polite"></div>
+  <div id="absenceReasonsList"><p class="small">読み込み中...</p></div>
+</div>
+
+
+<!-- =====================================================
      登録済み予定
 ===================================================== -->
 
@@ -1490,6 +1509,7 @@ onAuthStateChanged(
 
       await loadMembers();
       await loadSchedules();
+      await loadAbsenceReasonsAdmin();
 
     }catch(e){
 
@@ -4527,6 +4547,74 @@ async function deleteSchedule(key){
 
 
 /* =====================================================
+   欠席理由の管理
+===================================================== */
+
+const DEFAULT_ABSENCE_REASONS = [
+  "体調不良・けが", "通院", "家庭の用事・旅行", "他の部活動",
+  "塾・習い事", "冠婚葬祭", "追試・補講・課題", "セミナー",
+  "委員会・コアなどの仕事", "2者懇談・3者懇談", "英検など",
+  "オープンキャンパス", "その他"
+];
+let adminAbsenceReasons = [...DEFAULT_ABSENCE_REASONS];
+
+async function loadAbsenceReasonsAdmin(){
+  const snap = await get(ref(db,"settings/absenceReasons"));
+  if(snap.exists() && Array.isArray(snap.val())){
+    const saved = snap.val().map(v=>String(v||"").trim()).filter(Boolean);
+    adminAbsenceReasons = [...new Set([...saved.filter(v=>v!=="その他"),"その他"])];
+  }else{
+    adminAbsenceReasons = [...DEFAULT_ABSENCE_REASONS];
+  }
+  renderAbsenceReasonsAdmin();
+}
+
+function renderAbsenceReasonsAdmin(){
+  const host=$("absenceReasonsList");
+  if(!host)return;
+  host.innerHTML=adminAbsenceReasons.map((reason,index)=>{
+    const safe=esc(reason);
+    const fixed=reason==="その他";
+    return `<div style="display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e5e8ed"><span>${index+1}. ${safe}${fixed?' <span class="small">（固定）</span>':''}</span>${fixed?'':'<button type="button" class="secondary" data-delete-reason="'+encodeURIComponent(reason)+'">削除</button>'}</div>`;
+  }).join("");
+  host.querySelectorAll("[data-delete-reason]").forEach(button=>button.addEventListener("click",()=>deleteAbsenceReason(decodeURIComponent(button.dataset.deleteReason))));
+}
+
+async function saveAbsenceReasonsAdmin(){
+  await set(ref(db,"settings/absenceReasons"),adminAbsenceReasons);
+  renderAbsenceReasonsAdmin();
+}
+
+async function addAbsenceReason(){
+  if(!(await isAdmin()))return;
+  const input=$("newAbsenceReason");
+  const value=input.value.trim();
+  if(!value){message("absenceReasonMsg","追加する理由を入力してください。","error");return;}
+  if(value==="その他"){message("absenceReasonMsg","「その他」は固定項目です。","error");return;}
+  if(adminAbsenceReasons.some(x=>x.toLowerCase()===value.toLowerCase())){message("absenceReasonMsg","同じ理由がすでにあります。","error");return;}
+  try{
+    if(!adminAbsenceReasons.includes("その他"))adminAbsenceReasons.push("その他");
+    adminAbsenceReasons.splice(adminAbsenceReasons.length-1,0,value);
+    await saveAbsenceReasonsAdmin();
+    input.value="";
+    message("absenceReasonMsg","欠席理由を追加しました。","success");
+  }catch(e){message("absenceReasonMsg","保存に失敗しました。\n"+(e.message||"不明"),"error");}
+}
+
+async function deleteAbsenceReason(reason){
+  if(!(await isAdmin()))return;
+  if(reason==="その他")return;
+  if(!confirm(`「${reason}」を削除しますか？\n過去の連絡記録は変更されません。`))return;
+  try{
+    adminAbsenceReasons=adminAbsenceReasons.filter(x=>x!==reason);
+    if(!adminAbsenceReasons.includes("その他"))adminAbsenceReasons.push("その他");
+    await saveAbsenceReasonsAdmin();
+    message("absenceReasonMsg","欠席理由を削除しました。","success");
+  }catch(e){message("absenceReasonMsg","削除に失敗しました。\n"+(e.message||"不明"),"error");}
+}
+
+
+/* =====================================================
    window
 ===================================================== */
 
@@ -4575,6 +4663,13 @@ $("logoutButton")
     logout
   );
 
+
+$("addAbsenceReasonButton")
+  .addEventListener("click",addAbsenceReason);
+
+$("newAbsenceReason").addEventListener("keydown",e=>{
+  if(e.key==="Enter")addAbsenceReason();
+});
 
 $("addMemberButton")
   .addEventListener(

@@ -2094,81 +2094,9 @@ textarea{
     欠席理由（必須）
   </label>
 
-  <select
-    id="reasonType"
-    onchange="toggleOtherReason()"
-  >
-
-    <option value="">
-      理由を選択してください
-    </option>
-
-    <option value="体調不良・けが">
-      体調不良・けが
-    </option>
-
-    <option value="通院">
-      通院
-    </option>
-
-    <option value="家庭の用事・旅行">
-      家庭の用事・旅行
-    </option>
-
-    <option value="他の部活動">
-      他の部活動
-    </option>
-
-    <option value="塾・習い事">
-      塾・習い事
-    </option>
-
-    <option value="冠婚葬祭">
-      冠婚葬祭
-    </option>
-
-    <option value="追試・補講・課題">
-      追試・補講・課題
-    </option>
-
-    <option value="セミナー">
-      セミナー
-    </option>
-
-    <option value="委員会・コアなどの仕事">
-      委員会・コアなどの仕事
-    </option>
-
-    <option value="2者懇談・3者懇談">
-      2者懇談・3者懇談
-    </option>
-
-    <option value="英検など">
-      英検など
-    </option>
-
-    <option value="その他">
-      その他
-    </option>
-
+  <select id="reasonType" required>
+    <option value="">理由を選択してください</option>
   </select>
-
-
-  <div
-    id="otherReasonBox"
-    class="hidden"
-  >
-
-    <label>
-      その他の理由（必須）
-    </label>
-
-    <textarea
-      id="otherReason"
-      placeholder="理由を入力してください"
-    ></textarea>
-
-  </div>
 
 
   <div id="formNotice"></div>
@@ -4800,7 +4728,35 @@ function renderDayDetail(date,schedules,all){
    欠席連絡フォーム
 ========================= */
 
-function showForm(id=null){
+const DEFAULT_ABSENCE_REASONS = [
+  "体調不良・けが", "通院", "家庭の用事・旅行", "他の部活動",
+  "塾・習い事", "冠婚葬祭", "追試・補講・課題", "セミナー",
+  "委員会・コアなどの仕事", "2者懇談・3者懇談", "英検など",
+  "オープンキャンパス", "その他"
+];
+let absenceReasons = [...DEFAULT_ABSENCE_REASONS];
+
+async function loadAbsenceReasons(){
+  try{
+    const snap = await get(ref(db, "settings/absenceReasons"));
+    if(snap.exists() && Array.isArray(snap.val())){
+      const loaded = snap.val().map(v => String(v || "").trim()).filter(Boolean);
+      absenceReasons = [...new Set([...loaded.filter(v => v !== "その他"), "その他"])];
+    }else{
+      absenceReasons = [...DEFAULT_ABSENCE_REASONS];
+    }
+  }catch(e){
+    console.warn("欠席理由の読み込みに失敗しました。初期設定を使います。", e);
+  }
+  const select = $("reasonType");
+  if(!select) return;
+  const previous = select.value;
+  select.innerHTML = '<option value="">理由を選択してください</option>' +
+    absenceReasons.map(reason => `<option value="${String(reason).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;", "'":"&#39;"}[c]))}">${String(reason).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;", "'":"&#39;"}[c]))}</option>`).join("");
+  if(absenceReasons.includes(previous)) select.value = previous;
+}
+
+async function showForm(id=null){
 
   if(
     !currentUser ||
@@ -4817,6 +4773,7 @@ function showForm(id=null){
   editingId =
     id;
 
+  await loadAbsenceReasons();
 
   hide();
 
@@ -4875,16 +4832,6 @@ function showForm(id=null){
     $("reasonType")
       .value =
         "";
-
-
-    $("otherReason")
-      .value =
-        "";
-
-
-    $("otherReasonBox")
-      .classList
-      .add("hidden");
 
 
     $("formNotice")
@@ -5103,37 +5050,7 @@ async function updateTimeFields(){
 
 
 function toggleOtherReason(){
-
-  const type =
-    $("reasonType")
-      .value;
-
-
-  const box =
-    $("otherReasonBox");
-
-
-  if(
-    type === "その他"
-  ){
-
-    box
-      .classList
-      .remove("hidden");
-
-  }else{
-
-    box
-      .classList
-      .add("hidden");
-
-
-    $("otherReason")
-      .value =
-        "";
-
-  }
-
+  /* 「その他」も通常の選択肢。自由入力欄は表示しない。 */
 }
 
 
@@ -5638,18 +5555,7 @@ async function saveNoticeCore(){
       .value;
 
 
-  const otherReason =
-    $("otherReason")
-      .value
-      .trim();
-
-
-  const r =
-    reasonType === "その他"
-      ?
-      otherReason
-      :
-      reasonType;
+  const r = reasonType;
 
 
   if(
@@ -5660,21 +5566,6 @@ async function saveNoticeCore(){
 
     alert(
       "連絡の種類・日付・欠席理由は必須です。"
-    );
-
-
-    return;
-
-  }
-
-
-  if(
-    reasonType === "その他" &&
-    !otherReason
-  ){
-
-    alert(
-      "その他の理由を入力してください。"
     );
 
 
@@ -5894,16 +5785,6 @@ async function saveNoticeCore(){
   $("reasonType")
     .value =
       "";
-
-
-  $("otherReason")
-    .value =
-      "";
-
-
-  $("otherReasonBox")
-    .classList
-    .add("hidden");
 
 
   $("formNotice")
@@ -6159,6 +6040,7 @@ async function editNotice(id){
   editingId =
     id;
 
+  await loadAbsenceReasons();
 
   hide();
 
@@ -6236,49 +6118,11 @@ async function editNotice(id){
   updateTimeFields();
 
 
-  const reasonOptions = [
-
-    "体調不良・けが",
-    "通院",
-    "家庭の用事・旅行",
-    "他の部活動",
-    "塾・習い事",
-    "冠婚葬祭",
-    "追試・補講・課題",
-    "セミナー",
-    "委員会・コアなどの仕事",
-    "2者懇談・3者懇談",
-    "英検など"
-
-  ];
-
-
-  if(
-    reasonOptions.includes(
-      n.reason
-    )
-  ){
-
-    $("reasonType")
-      .value =
-        n.reason;
-
-
-    $("otherReason")
-      .value =
-        "";
-
+  if(absenceReasons.includes(n.reason)){
+    $("reasonType").value = n.reason;
   }else{
-
-    $("reasonType")
-      .value =
-        "その他";
-
-
-    $("otherReason")
-      .value =
-        n.reason || "";
-
+    // 過去に自由入力された理由は、今後は通常の「その他」として扱う
+    $("reasonType").value = "その他";
   }
 
 
@@ -7197,7 +7041,7 @@ const collectionItems = [
 
   {id:"secret_rare_image",group:"secret",name:"レア画像",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.rare}`},
   {id:"secret_ultra_rare_image",group:"secret",name:"超レア画像",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.ultraRare}`},
-  {id:"secret_bell_rare_costume",group:"secret",name:"星月夜の夢",hiddenName:"シークレット衣装",src:"costumes/bell-secret-collection.jpg"},
+  {id:"secret_bell_rare_costume",group:"secret",name:"星月夜の夢",hiddenName:"シークレット衣装",src:"costumes/bell-secret-complete.jpg"},
   {id:"secret_chime_rare_costume",group:"secret",name:"暁桜のシンフォニー",hiddenName:"シークレット衣装",src:"costumes/chime-secret-complete.jpg"}
 ];
 
@@ -7385,7 +7229,7 @@ const SECRET_PREVIEW_LAYOUT = {
 };
 function secretCostumePreviewHtml(character){
   const isChime = character === "chime";
-  const src = isChime ? "costumes/chime-secret-complete.jpg" : "costumes/bell-secret-collection.jpg";
+  const src = isChime ? "costumes/chime-secret-complete.jpg" : "costumes/bell-secret-complete.jpg";
   const alt = isChime ? "チャイムくん・暁桜のシンフォニー" : "ベルちゃん・星月夜の夢";
   return `<div class="secret-costume-preview"><img class="secret-costume-complete-image" src="${src}" alt="${alt}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:contain;"></div>`;
 }
@@ -7727,7 +7571,7 @@ function showSecretCostumeGift(character){
   const description = isChime
     ? "夜明けの空と、咲き誇る桜をイメージした特別な衣装。黄金色の朝日が、新しい一日の始まりを優しく祝福してくれるよ！"
     : "三日月と星々がきらめく、幻想的な夜空の衣装。深い藍色と金色の輝きが、ベルちゃんを夢の世界へと誘うよ……！";
-  const src = isChime ? "costumes/chime-secret-complete.jpg" : "costumes/bell-secret-collection.jpg";
+  const src = isChime ? "costumes/chime-secret-complete.jpg" : "costumes/bell-secret-complete.jpg";
   const overlay = document.createElement("div");
   overlay.id = "secretCostumeGiftOverlay";
   overlay.innerHTML = `
