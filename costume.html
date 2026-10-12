@@ -405,18 +405,18 @@ const db =
 ========================= */
 
 const eventCostumeDefinitions = [
-  ["newyear","お正月","bell-newyear.png","chime-newyear.png"],
-  ["setsubun","節分","bell-setsubun.png","chime-setsubun.png"],
-  ["valentine","バレンタイン","bell-valentine.png","chime-valentine.png"],
-  ["hinamatsuri","ひな祭り","bell-hinamatsuri.png","chime-hinamatsuri.png"],
-  ["whiteday","ホワイトデー","bell-whiteday.png","chime-whiteday.png"],
-  ["kodomonohi","こどもの日","bell-kodomonohi.png","chime-kodomonohi.png"],
-  ["tanabata","七夕","bell-tanabata.png","chime-tanabata.png"],
-  ["tsukimi","十五夜","bell-tsukimi.png","chime-tsukimi.png"],
-  ["halloween","ハロウィン","bell-halloween.png","chime-halloween.png"],
-  ["christmaseve","クリスマスイブ","bell-christmaseve.png","chime-christmaseve.png"],
-  ["christmas","クリスマス","bell-christmas.png","chime-christmas.png"],
-  ["newyearseve","大晦日","bell-winter.png","chime-winter.png"]
+  ["newyear","お正月","bell-newyear.webp","chime-newyear.webp"],
+  ["setsubun","節分","bell-setsubun.webp","chime-setsubun.webp"],
+  ["valentine","バレンタイン","bell-valentine.webp","chime-valentine.webp"],
+  ["hinamatsuri","ひな祭り","bell-hinamatsuri.webp","chime-hinamatsuri.webp"],
+  ["whiteday","ホワイトデー","bell-whiteday.webp","chime-whiteday.webp"],
+  ["kodomonohi","こどもの日","bell-kodomonohi.webp","chime-kodomonohi.webp"],
+  ["tanabata","七夕","bell-tanabata.webp","chime-tanabata.webp"],
+  ["tsukimi","十五夜","bell-tsukimi.webp","chime-tsukimi.webp"],
+  ["halloween","ハロウィン","bell-halloween.webp","chime-halloween.webp"],
+  ["christmaseve","クリスマスイブ","bell-christmaseve.webp","chime-christmaseve.webp"],
+  ["christmas","クリスマス","bell-christmas.webp","chime-christmas.webp"],
+  ["newyearseve","大晦日","bell-winter.webp","chime-winter.webp"]
 ];
 
 /*
@@ -435,7 +435,7 @@ function dailyCostumeDefinitions(character){
         ? `チャイムくん衣装${number}`
         : `ベルちゃん衣装${number}`,
       src:isChime
-        ? `costumes/chime-costume-${number}.png`
+        ? `costumes/chime-costume-${number}.webp`
         : `costumes/daily-costume-${number}.webp`,
       kind:"daily"
     };
@@ -447,27 +447,27 @@ const secretCostumeDefinitions = {
     id:"secret-bell",
     collectionId:"secret_bell_rare_costume",
     name:"ベルちゃん・シークレット衣装",
-    src:"costumes/bell-secret-transparent.png",
+    src:"costumes/bell-secret-transparent.webp",
     kind:"secret"
   },
   chime:{
     id:"secret-chime",
     collectionId:"secret_chime_rare_costume",
     name:"チャイムくん・シークレット衣装",
-    src:"costumes/chime-secret-transparent.png",
+    src:"costumes/chime-secret-transparent.webp",
     kind:"secret"
   }
 };
 
 const SECRET_PREVIEW_LAYOUT = {
   bell: {
-    layers:["costumes/bell-secret-base.png","costumes/bell-secret-main.png","costumes/bell-secret-layer-01.png","costumes/bell-secret-layer-02.png","costumes/bell-secret-layer-03.png","costumes/bell-secret-layer-04.png","costumes/bell-secret-layer-05.png"],
+    layers:["costumes/bell-secret-base.webp","costumes/bell-secret-main.webp","costumes/bell-secret-layer-01.webp","costumes/bell-secret-layer-02.webp","costumes/bell-secret-layer-03.webp","costumes/bell-secret-layer-04.webp","costumes/bell-secret-layer-05.webp"],
     positions:[{x:-5.1,y:-9.9},{x:-4,y:30},{x:0,y:0},{x:25,y:35},{x:-62,y:35},{x:0,y:0},{x:32.5,y:4.9}],
     sizes:[{width:100,height:100,scale:1.1,angle:-3.9},{width:100,height:100,scale:1.45,angle:0},{width:100,height:100,scale:1,angle:0},{width:100,height:100,scale:1,angle:0},{width:100,height:100,scale:1,angle:0},{width:100,height:100,scale:1,angle:0},{width:100,height:100,scale:.96,angle:10.3}],
     enabled:[true,true,false,true,true,false,true], global:{x:0,y:50,scale:.9,angle:0}
   },
   chime: {
-    layers:["costumes/chime-secret-layer-03.png","costumes/chime-secret-layer-02.png","costumes/chime-secret-base-max.png","costumes/chime-secret-layer-05.png","costumes/chime-secret-layer-01.png","costumes/chime-secret-layer-04.png"],
+    layers:["costumes/chime-secret-layer-03.webp","costumes/chime-secret-layer-02.webp","costumes/chime-secret-base-max.png","costumes/chime-secret-layer-05.webp","costumes/chime-secret-layer-01.webp","costumes/chime-secret-layer-04.webp"],
     positions:[{x:-64,y:44.9},{x:-65.6,y:108},{x:-60.7,y:60.6},{x:-25.1,y:29.4},{x:-65.3,y:84.4},{x:-121.7,y:44.4}],
     sizes:[{width:100,height:100,scale:1.99,angle:0},{width:100,height:100,scale:1.75,angle:0},{width:100,height:100,scale:2.25,angle:0},{width:100,height:100,scale:1.09,angle:0},{width:100,height:100,scale:.9,angle:0},{width:100,height:100,scale:1,angle:0}],
     enabled:[false,true,true,true,true,false], global:{x:20,y:20,scale:.65,angle:0}
@@ -475,20 +475,20 @@ const SECRET_PREVIEW_LAYOUT = {
 };
 function secretCostumePreviewHtml(character){
   const isChime = character === "chime";
-  const src = isChime ? "costumes/chime-secret-transparent.png" : "costumes/bell-secret-transparent.png";
+  const src = isChime ? "costumes/chime-secret-transparent.webp" : "costumes/bell-secret-transparent.webp";
   const alt = isChime ? "チャイムくん・シークレット衣装" : "ベルちゃん・シークレット衣装";
   return `<div class="secret-costume-preview"><img src="${src}" alt="${alt}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:contain;"></div>`;
 }
 
 const costumeDefinitions = {
   bell:[
-    {id:"normal",name:"ベルちゃん・ノーマル",src:"bell.png",kind:"normal"},
+    {id:"normal",name:"ベルちゃん・ノーマル",src:"bell.webp",kind:"normal"},
     ...eventCostumeDefinitions.map(([key,name,bellFile])=>({id:`event_${key}_bell`,name:`ベルちゃん・${name}`,src:`costumes/${bellFile}`,kind:"event"})),
     ...dailyCostumeDefinitions("bell"),
     secretCostumeDefinitions.bell
   ],
   chime:[
-    {id:"normal",name:"チャイムくん・ノーマル",src:"chime.png",kind:"normal"},
+    {id:"normal",name:"チャイムくん・ノーマル",src:"chime.webp",kind:"normal"},
     ...eventCostumeDefinitions.map(([key,name,bellFile,chimeFile])=>({id:`event_${key}_chime`,name:`チャイムくん・${name}`,src:`costumes/${chimeFile}`,kind:"event"})),
     ...dailyCostumeDefinitions("chime"),
     secretCostumeDefinitions.chime

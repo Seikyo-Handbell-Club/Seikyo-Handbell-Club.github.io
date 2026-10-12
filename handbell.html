@@ -322,12 +322,6 @@ main{
   margin-top:20px;
 }
 
-/* 長いコレクションの画面外セクションは、表示が近づくまで描画コストを抑える */
-.collection-section{
-  content-visibility:auto;
-  contain-intrinsic-size:auto 900px;
-}
-
 .collection-section h3{
   margin:0 0 10px;
 }
@@ -2304,7 +2298,7 @@ textarea{
     <img
       id="welcomeImage"
       class="welcome-image"
-      src="images/welcome/welcome.jpg"
+      src="images/welcome/welcome.webp"
       alt="Welcome to Handbell Club"
     >
     <button
@@ -6944,23 +6938,23 @@ render();
 ========================= */
 
 const monthlyImageFiles = {
-  1: "january.jpg.PNG",
-  2: "february.jpg.PNG",
-  3: "march.jpg.PNG",
-  4: "april.jpg.PNG",
-  5: "may.jpg.PNG",
-  6: "june.jpg.PNG",
-  7: "july.jpg.PNG",
-  8: "august.jpg.PNG",
-  9: "september.jpg.PNG",
-  10: "october.jpg.PNG",
-  11: "november.jpg.PNG",
-  12: "december.jpg.PNG"
+  1: "january.jpg.webp",
+  2: "february.jpg.webp",
+  3: "march.jpg.webp",
+  4: "april.jpg.webp",
+  5: "may.jpg.webp",
+  6: "june.jpg.webp",
+  7: "july.jpg.webp",
+  8: "august.jpg.webp",
+  9: "september.jpg.webp",
+  10: "october.jpg.webp",
+  11: "november.jpg.webp",
+  12: "december.jpg.webp"
 };
 
 const luckyImageFiles = {
-  rare: "rare.PNG.PNG",
-  ultraRare: "ultra_rare.PNG.PNG"
+  rare: "rare.PNG.webp",
+  ultraRare: "ultra_rare.PNG.webp"
 };
 
 /* レア衣装：ページを開いたときに低確率で表示 */
@@ -6970,18 +6964,18 @@ const rareCostumeFiles = {
 };
 
 const eventImageFiles = {
-  "01-01": "newyear.jpg.PNG",
-  "02-03": "setsubun.jpg.PNG",
-  "02-14": "valentine.jpg.PNG",
-  "03-03": "hinamatsuri.jpg.PNG",
-  "03-14": "whiteday.jpg.PNG",
-  "05-05": "childrensday.jpg.PNG",
-  "07-07": "tanabata.jpg.PNG",
-  "09-25": "jugoya.jpg.PNG",
-  "10-31": "halloween.jpg.PNG",
-  "12-24": "christmas_eve.jpg.PNG",
-  "12-25": "christmas.jpg.PNG",
-  "12-31": "newyears_eve.jpg.PNG"
+  "01-01": "newyear.jpg.webp",
+  "02-03": "setsubun.jpg.webp",
+  "02-14": "valentine.jpg.webp",
+  "03-03": "hinamatsuri.jpg.webp",
+  "03-14": "whiteday.jpg.webp",
+  "05-05": "childrensday.jpg.webp",
+  "07-07": "tanabata.jpg.webp",
+  "09-25": "jugoya.jpg.webp",
+  "10-31": "halloween.jpg.webp",
+  "12-24": "christmas_eve.jpg.webp",
+  "12-25": "christmas.jpg.webp",
+  "12-31": "newyears_eve.jpg.webp"
 };
 
 const jugoyaDates = {
@@ -7005,7 +6999,7 @@ function getEventImageInfo(date){
   if(m === 1 && d >= 1 && d <= 5){
     return {
       key: `${y}-newyear-${m}-${d}`,
-      file: "newyear.jpg.PNG",
+      file: "newyear.jpg.webp",
       name: "お正月",
       everyOpen: true
     };
@@ -7015,7 +7009,7 @@ function getEventImageInfo(date){
   if(m === 1 && d >= 6 && d <= 31){
     return {
       key: `${y}-newyear-late`,
-      file: "newyear.jpg.PNG",
+      file: "newyear.jpg.webp",
       name: "お正月",
       everyOpen: true
     };
@@ -7026,7 +7020,7 @@ function getEventImageInfo(date){
 
   if(m === 9 || m === 10){
     const jugoya = jugoyaDates[y];
-    if(jugoya === md) file = "jugoya.jpg.PNG";
+    if(jugoya === md) file = "jugoya.jpg.webp";
   }
 
   if(!file) return null;
@@ -7040,7 +7034,7 @@ function getEventImageInfo(date){
           md === "03-14" ? "ホワイトデー" :
           md === "05-05" ? "こどもの日" :
           md === "07-07" ? "七夕" :
-          file === "jugoya.jpg.PNG" ? "十五夜" :
+          file === "jugoya.jpg.webp" ? "十五夜" :
           md === "10-31" ? "ハロウィン" :
           md === "12-24" ? "クリスマスイブ" :
           md === "12-25" ? "クリスマス" :
@@ -7071,31 +7065,31 @@ const collectionItems = [
     src:`images/monthly/${file}`
   })),
 
-  {id:"event_newyear_image",group:"eventImage",name:"お正月",src:"images/events/newyear.jpg.PNG"},
-  {id:"event_setsubun_image",group:"eventImage",name:"節分",src:"images/events/setsubun.jpg.PNG"},
-  {id:"event_valentine_image",group:"eventImage",name:"バレンタイン",src:"images/events/valentine.jpg.PNG"},
-  {id:"event_hinamatsuri_image",group:"eventImage",name:"ひな祭り",src:"images/events/hinamatsuri.jpg.PNG"},
-  {id:"event_whiteday_image",group:"eventImage",name:"ホワイトデー",src:"images/events/whiteday.jpg.PNG"},
-  {id:"event_kodomonohi_image",group:"eventImage",name:"こどもの日",src:"images/events/childrensday.jpg.PNG"},
-  {id:"event_tanabata_image",group:"eventImage",name:"七夕",src:"images/events/tanabata.jpg.PNG"},
-  {id:"event_tsukimi_image",group:"eventImage",name:"十五夜",src:"images/events/jugoya.jpg.PNG"},
-  {id:"event_halloween_image",group:"eventImage",name:"ハロウィン",src:"images/events/halloween.jpg.PNG"},
-  {id:"event_christmaseve_image",group:"eventImage",name:"クリスマスイブ",src:"images/events/christmas_eve.jpg.PNG"},
-  {id:"event_christmas_image",group:"eventImage",name:"クリスマス",src:"images/events/christmas.jpg.PNG"},
-  {id:"event_newyearseve_image",group:"eventImage",name:"大晦日",src:"images/events/newyears_eve.jpg.PNG"},
+  {id:"event_newyear_image",group:"eventImage",name:"お正月",src:"images/events/newyear.jpg.webp"},
+  {id:"event_setsubun_image",group:"eventImage",name:"節分",src:"images/events/setsubun.jpg.webp"},
+  {id:"event_valentine_image",group:"eventImage",name:"バレンタイン",src:"images/events/valentine.jpg.webp"},
+  {id:"event_hinamatsuri_image",group:"eventImage",name:"ひな祭り",src:"images/events/hinamatsuri.jpg.webp"},
+  {id:"event_whiteday_image",group:"eventImage",name:"ホワイトデー",src:"images/events/whiteday.jpg.webp"},
+  {id:"event_kodomonohi_image",group:"eventImage",name:"こどもの日",src:"images/events/childrensday.jpg.webp"},
+  {id:"event_tanabata_image",group:"eventImage",name:"七夕",src:"images/events/tanabata.jpg.webp"},
+  {id:"event_tsukimi_image",group:"eventImage",name:"十五夜",src:"images/events/jugoya.jpg.webp"},
+  {id:"event_halloween_image",group:"eventImage",name:"ハロウィン",src:"images/events/halloween.jpg.webp"},
+  {id:"event_christmaseve_image",group:"eventImage",name:"クリスマスイブ",src:"images/events/christmas_eve.jpg.webp"},
+  {id:"event_christmas_image",group:"eventImage",name:"クリスマス",src:"images/events/christmas.jpg.webp"},
+  {id:"event_newyearseve_image",group:"eventImage",name:"大晦日",src:"images/events/newyears_eve.jpg.webp"},
 
-  {id:"event_newyear_bell",group:"bell",name:"ベルちゃん・お正月",src:"costumes/bell-newyear.png"},
-  {id:"event_setsubun_bell",group:"bell",name:"ベルちゃん・節分",src:"costumes/bell-setsubun.png"},
-  {id:"event_valentine_bell",group:"bell",name:"ベルちゃん・バレンタイン",src:"costumes/bell-valentine.png"},
-  {id:"event_hinamatsuri_bell",group:"bell",name:"ベルちゃん・ひな祭り",src:"costumes/bell-hinamatsuri.png"},
-  {id:"event_whiteday_bell",group:"bell",name:"ベルちゃん・ホワイトデー",src:"costumes/bell-whiteday.png"},
-  {id:"event_kodomonohi_bell",group:"bell",name:"ベルちゃん・こどもの日",src:"costumes/bell-kodomonohi.png"},
-  {id:"event_tanabata_bell",group:"bell",name:"ベルちゃん・七夕",src:"costumes/bell-tanabata.png"},
-  {id:"event_tsukimi_bell",group:"bell",name:"ベルちゃん・十五夜",src:"costumes/bell-tsukimi.png"},
-  {id:"event_halloween_bell",group:"bell",name:"ベルちゃん・ハロウィン",src:"costumes/bell-halloween.png"},
-  {id:"event_christmaseve_bell",group:"bell",name:"ベルちゃん・クリスマスイブ",src:"costumes/bell-christmaseve.png"},
-  {id:"event_christmas_bell",group:"bell",name:"ベルちゃん・クリスマス",src:"costumes/bell-christmas.png"},
-  {id:"event_newyearseve_bell",group:"bell",name:"ベルちゃん・大晦日",src:"costumes/bell-winter.png"},
+  {id:"event_newyear_bell",group:"bell",name:"ベルちゃん・お正月",src:"costumes/bell-newyear.webp"},
+  {id:"event_setsubun_bell",group:"bell",name:"ベルちゃん・節分",src:"costumes/bell-setsubun.webp"},
+  {id:"event_valentine_bell",group:"bell",name:"ベルちゃん・バレンタイン",src:"costumes/bell-valentine.webp"},
+  {id:"event_hinamatsuri_bell",group:"bell",name:"ベルちゃん・ひな祭り",src:"costumes/bell-hinamatsuri.webp"},
+  {id:"event_whiteday_bell",group:"bell",name:"ベルちゃん・ホワイトデー",src:"costumes/bell-whiteday.webp"},
+  {id:"event_kodomonohi_bell",group:"bell",name:"ベルちゃん・こどもの日",src:"costumes/bell-kodomonohi.webp"},
+  {id:"event_tanabata_bell",group:"bell",name:"ベルちゃん・七夕",src:"costumes/bell-tanabata.webp"},
+  {id:"event_tsukimi_bell",group:"bell",name:"ベルちゃん・十五夜",src:"costumes/bell-tsukimi.webp"},
+  {id:"event_halloween_bell",group:"bell",name:"ベルちゃん・ハロウィン",src:"costumes/bell-halloween.webp"},
+  {id:"event_christmaseve_bell",group:"bell",name:"ベルちゃん・クリスマスイブ",src:"costumes/bell-christmaseve.webp"},
+  {id:"event_christmas_bell",group:"bell",name:"ベルちゃん・クリスマス",src:"costumes/bell-christmas.webp"},
+  {id:"event_newyearseve_bell",group:"bell",name:"ベルちゃん・大晦日",src:"costumes/bell-winter.webp"},
 
   {id:"bell_costume_slot_01",group:"bell",name:"ベルちゃん衣装01",src:"costumes/daily-costume-01.webp"},
   {id:"bell_costume_slot_02",group:"bell",name:"ベルちゃん衣装02",src:"costumes/daily-costume-02.webp"},
@@ -7152,78 +7146,78 @@ const collectionItems = [
   {id:"bell_costume_slot_53",group:"bell",name:"ベルちゃん衣装53",src:"costumes/daily-costume-53.webp"},
   {id:"bell_costume_slot_54",group:"bell",name:"ベルちゃん衣装54",src:"costumes/daily-costume-54.webp"},
 
-  {id:"event_newyear_chime",group:"chime",name:"チャイムくん・お正月",src:"costumes/chime-newyear.png"},
-  {id:"event_setsubun_chime",group:"chime",name:"チャイムくん・節分",src:"costumes/chime-setsubun.png"},
-  {id:"event_valentine_chime",group:"chime",name:"チャイムくん・バレンタイン",src:"costumes/chime-valentine.png"},
-  {id:"event_hinamatsuri_chime",group:"chime",name:"チャイムくん・ひな祭り",src:"costumes/chime-hinamatsuri.png"},
-  {id:"event_whiteday_chime",group:"chime",name:"チャイムくん・ホワイトデー",src:"costumes/chime-whiteday.png"},
-  {id:"event_kodomonohi_chime",group:"chime",name:"チャイムくん・こどもの日",src:"costumes/chime-kodomonohi.png"},
-  {id:"event_tanabata_chime",group:"chime",name:"チャイムくん・七夕",src:"costumes/chime-tanabata.png"},
-  {id:"event_tsukimi_chime",group:"chime",name:"チャイムくん・十五夜",src:"costumes/chime-tsukimi.png"},
-  {id:"event_halloween_chime",group:"chime",name:"チャイムくん・ハロウィン",src:"costumes/chime-halloween.png"},
-  {id:"event_christmaseve_chime",group:"chime",name:"チャイムくん・クリスマスイブ",src:"costumes/chime-christmaseve.png"},
-  {id:"event_christmas_chime",group:"chime",name:"チャイムくん・クリスマス",src:"costumes/chime-christmas.png"},
-  {id:"event_newyearseve_chime",group:"chime",name:"チャイムくん・大晦日",src:"costumes/chime-winter.png"},
+  {id:"event_newyear_chime",group:"chime",name:"チャイムくん・お正月",src:"costumes/chime-newyear.webp"},
+  {id:"event_setsubun_chime",group:"chime",name:"チャイムくん・節分",src:"costumes/chime-setsubun.webp"},
+  {id:"event_valentine_chime",group:"chime",name:"チャイムくん・バレンタイン",src:"costumes/chime-valentine.webp"},
+  {id:"event_hinamatsuri_chime",group:"chime",name:"チャイムくん・ひな祭り",src:"costumes/chime-hinamatsuri.webp"},
+  {id:"event_whiteday_chime",group:"chime",name:"チャイムくん・ホワイトデー",src:"costumes/chime-whiteday.webp"},
+  {id:"event_kodomonohi_chime",group:"chime",name:"チャイムくん・こどもの日",src:"costumes/chime-kodomonohi.webp"},
+  {id:"event_tanabata_chime",group:"chime",name:"チャイムくん・七夕",src:"costumes/chime-tanabata.webp"},
+  {id:"event_tsukimi_chime",group:"chime",name:"チャイムくん・十五夜",src:"costumes/chime-tsukimi.webp"},
+  {id:"event_halloween_chime",group:"chime",name:"チャイムくん・ハロウィン",src:"costumes/chime-halloween.webp"},
+  {id:"event_christmaseve_chime",group:"chime",name:"チャイムくん・クリスマスイブ",src:"costumes/chime-christmaseve.webp"},
+  {id:"event_christmas_chime",group:"chime",name:"チャイムくん・クリスマス",src:"costumes/chime-christmas.webp"},
+  {id:"event_newyearseve_chime",group:"chime",name:"チャイムくん・大晦日",src:"costumes/chime-winter.webp"},
 
-  {id:"chime_costume_slot_01",group:"chime",name:"チャイムくん衣装01",hiddenName:"？？？",src:"costumes/chime-costume-01.png"},
-  {id:"chime_costume_slot_02",group:"chime",name:"チャイムくん衣装02",hiddenName:"？？？",src:"costumes/chime-costume-02.png"},
-  {id:"chime_costume_slot_03",group:"chime",name:"チャイムくん衣装03",hiddenName:"？？？",src:"costumes/chime-costume-03.png"},
-  {id:"chime_costume_slot_04",group:"chime",name:"チャイムくん衣装04",hiddenName:"？？？",src:"costumes/chime-costume-04.png"},
-  {id:"chime_costume_slot_05",group:"chime",name:"チャイムくん衣装05",hiddenName:"？？？",src:"costumes/chime-costume-05.png"},
-  {id:"chime_costume_slot_06",group:"chime",name:"チャイムくん衣装06",hiddenName:"？？？",src:"costumes/chime-costume-06.png"},
-  {id:"chime_costume_slot_07",group:"chime",name:"チャイムくん衣装07",hiddenName:"？？？",src:"costumes/chime-costume-07.png"},
-  {id:"chime_costume_slot_08",group:"chime",name:"チャイムくん衣装08",hiddenName:"？？？",src:"costumes/chime-costume-08.png"},
-  {id:"chime_costume_slot_09",group:"chime",name:"チャイムくん衣装09",hiddenName:"？？？",src:"costumes/chime-costume-09.png"},
-  {id:"chime_costume_slot_10",group:"chime",name:"チャイムくん衣装10",hiddenName:"？？？",src:"costumes/chime-costume-10.png"},
-  {id:"chime_costume_slot_11",group:"chime",name:"チャイムくん衣装11",hiddenName:"？？？",src:"costumes/chime-costume-11.png"},
-  {id:"chime_costume_slot_12",group:"chime",name:"チャイムくん衣装12",hiddenName:"？？？",src:"costumes/chime-costume-12.png"},
-  {id:"chime_costume_slot_13",group:"chime",name:"チャイムくん衣装13",hiddenName:"？？？",src:"costumes/chime-costume-13.png"},
-  {id:"chime_costume_slot_14",group:"chime",name:"チャイムくん衣装14",hiddenName:"？？？",src:"costumes/chime-costume-14.png"},
-  {id:"chime_costume_slot_15",group:"chime",name:"チャイムくん衣装15",hiddenName:"？？？",src:"costumes/chime-costume-15.png"},
-  {id:"chime_costume_slot_16",group:"chime",name:"チャイムくん衣装16",hiddenName:"？？？",src:"costumes/chime-costume-16.png"},
-  {id:"chime_costume_slot_17",group:"chime",name:"チャイムくん衣装17",hiddenName:"？？？",src:"costumes/chime-costume-17.png"},
-  {id:"chime_costume_slot_18",group:"chime",name:"チャイムくん衣装18",hiddenName:"？？？",src:"costumes/chime-costume-18.png"},
-  {id:"chime_costume_slot_19",group:"chime",name:"チャイムくん衣装19",hiddenName:"？？？",src:"costumes/chime-costume-19.png"},
-  {id:"chime_costume_slot_20",group:"chime",name:"チャイムくん衣装20",hiddenName:"？？？",src:"costumes/chime-costume-20.png"},
-  {id:"chime_costume_slot_21",group:"chime",name:"チャイムくん衣装21",hiddenName:"？？？",src:"costumes/chime-costume-21.png"},
-  {id:"chime_costume_slot_22",group:"chime",name:"チャイムくん衣装22",hiddenName:"？？？",src:"costumes/chime-costume-22.png"},
-  {id:"chime_costume_slot_23",group:"chime",name:"チャイムくん衣装23",hiddenName:"？？？",src:"costumes/chime-costume-23.png"},
-  {id:"chime_costume_slot_24",group:"chime",name:"チャイムくん衣装24",hiddenName:"？？？",src:"costumes/chime-costume-24.png"},
-  {id:"chime_costume_slot_25",group:"chime",name:"チャイムくん衣装25",hiddenName:"？？？",src:"costumes/chime-costume-25.png"},
-  {id:"chime_costume_slot_26",group:"chime",name:"チャイムくん衣装26",hiddenName:"？？？",src:"costumes/chime-costume-26.png"},
-  {id:"chime_costume_slot_27",group:"chime",name:"チャイムくん衣装27",hiddenName:"？？？",src:"costumes/chime-costume-27.png"},
-  {id:"chime_costume_slot_28",group:"chime",name:"チャイムくん衣装28",hiddenName:"？？？",src:"costumes/chime-costume-28.png"},
-  {id:"chime_costume_slot_29",group:"chime",name:"チャイムくん衣装29",hiddenName:"？？？",src:"costumes/chime-costume-29.png"},
-  {id:"chime_costume_slot_30",group:"chime",name:"チャイムくん衣装30",hiddenName:"？？？",src:"costumes/chime-costume-30.png"},
-  {id:"chime_costume_slot_31",group:"chime",name:"チャイムくん衣装31",hiddenName:"？？？",src:"costumes/chime-costume-31.png"},
-  {id:"chime_costume_slot_32",group:"chime",name:"チャイムくん衣装32",hiddenName:"？？？",src:"costumes/chime-costume-32.png"},
-  {id:"chime_costume_slot_33",group:"chime",name:"チャイムくん衣装33",hiddenName:"？？？",src:"costumes/chime-costume-33.png"},
-  {id:"chime_costume_slot_34",group:"chime",name:"チャイムくん衣装34",hiddenName:"？？？",src:"costumes/chime-costume-34.png"},
-  {id:"chime_costume_slot_35",group:"chime",name:"チャイムくん衣装35",hiddenName:"？？？",src:"costumes/chime-costume-35.png"},
-  {id:"chime_costume_slot_36",group:"chime",name:"チャイムくん衣装36",hiddenName:"？？？",src:"costumes/chime-costume-36.png"},
-  {id:"chime_costume_slot_37",group:"chime",name:"チャイムくん衣装37",hiddenName:"？？？",src:"costumes/chime-costume-37.png"},
-  {id:"chime_costume_slot_38",group:"chime",name:"チャイムくん衣装38",hiddenName:"？？？",src:"costumes/chime-costume-38.png"},
-  {id:"chime_costume_slot_39",group:"chime",name:"チャイムくん衣装39",hiddenName:"？？？",src:"costumes/chime-costume-39.png"},
-  {id:"chime_costume_slot_40",group:"chime",name:"チャイムくん衣装40",hiddenName:"？？？",src:"costumes/chime-costume-40.png"},
-  {id:"chime_costume_slot_41",group:"chime",name:"チャイムくん衣装41",hiddenName:"？？？",src:"costumes/chime-costume-41.png"},
-  {id:"chime_costume_slot_42",group:"chime",name:"チャイムくん衣装42",hiddenName:"？？？",src:"costumes/chime-costume-42.png"},
-  {id:"chime_costume_slot_43",group:"chime",name:"チャイムくん衣装43",hiddenName:"？？？",src:"costumes/chime-costume-43.png"},
-  {id:"chime_costume_slot_44",group:"chime",name:"チャイムくん衣装44",hiddenName:"？？？",src:"costumes/chime-costume-44.png"},
-  {id:"chime_costume_slot_45",group:"chime",name:"チャイムくん衣装45",hiddenName:"？？？",src:"costumes/chime-costume-45.png"},
-  {id:"chime_costume_slot_46",group:"chime",name:"チャイムくん衣装46",hiddenName:"？？？",src:"costumes/chime-costume-46.png"},
-  {id:"chime_costume_slot_47",group:"chime",name:"チャイムくん衣装47",hiddenName:"？？？",src:"costumes/chime-costume-47.png"},
-  {id:"chime_costume_slot_48",group:"chime",name:"チャイムくん衣装48",hiddenName:"？？？",src:"costumes/chime-costume-48.png"},
-  {id:"chime_costume_slot_49",group:"chime",name:"チャイムくん衣装49",hiddenName:"？？？",src:"costumes/chime-costume-49.png"},
-  {id:"chime_costume_slot_50",group:"chime",name:"チャイムくん衣装50",hiddenName:"？？？",src:"costumes/chime-costume-50.png"},
-  {id:"chime_costume_slot_51",group:"chime",name:"チャイムくん衣装51",hiddenName:"？？？",src:"costumes/chime-costume-51.png"},
-  {id:"chime_costume_slot_52",group:"chime",name:"チャイムくん衣装52",hiddenName:"？？？",src:"costumes/chime-costume-52.png"},
-  {id:"chime_costume_slot_53",group:"chime",name:"チャイムくん衣装53",hiddenName:"？？？",src:"costumes/chime-costume-53.png"},
-  {id:"chime_costume_slot_54",group:"chime",name:"チャイムくん衣装54",hiddenName:"？？？",src:"costumes/chime-costume-54.png"},
+  {id:"chime_costume_slot_01",group:"chime",name:"チャイムくん衣装01",hiddenName:"？？？",src:"costumes/chime-costume-01.webp"},
+  {id:"chime_costume_slot_02",group:"chime",name:"チャイムくん衣装02",hiddenName:"？？？",src:"costumes/chime-costume-02.webp"},
+  {id:"chime_costume_slot_03",group:"chime",name:"チャイムくん衣装03",hiddenName:"？？？",src:"costumes/chime-costume-03.webp"},
+  {id:"chime_costume_slot_04",group:"chime",name:"チャイムくん衣装04",hiddenName:"？？？",src:"costumes/chime-costume-04.webp"},
+  {id:"chime_costume_slot_05",group:"chime",name:"チャイムくん衣装05",hiddenName:"？？？",src:"costumes/chime-costume-05.webp"},
+  {id:"chime_costume_slot_06",group:"chime",name:"チャイムくん衣装06",hiddenName:"？？？",src:"costumes/chime-costume-06.webp"},
+  {id:"chime_costume_slot_07",group:"chime",name:"チャイムくん衣装07",hiddenName:"？？？",src:"costumes/chime-costume-07.webp"},
+  {id:"chime_costume_slot_08",group:"chime",name:"チャイムくん衣装08",hiddenName:"？？？",src:"costumes/chime-costume-08.webp"},
+  {id:"chime_costume_slot_09",group:"chime",name:"チャイムくん衣装09",hiddenName:"？？？",src:"costumes/chime-costume-09.webp"},
+  {id:"chime_costume_slot_10",group:"chime",name:"チャイムくん衣装10",hiddenName:"？？？",src:"costumes/chime-costume-10.webp"},
+  {id:"chime_costume_slot_11",group:"chime",name:"チャイムくん衣装11",hiddenName:"？？？",src:"costumes/chime-costume-11.webp"},
+  {id:"chime_costume_slot_12",group:"chime",name:"チャイムくん衣装12",hiddenName:"？？？",src:"costumes/chime-costume-12.webp"},
+  {id:"chime_costume_slot_13",group:"chime",name:"チャイムくん衣装13",hiddenName:"？？？",src:"costumes/chime-costume-13.webp"},
+  {id:"chime_costume_slot_14",group:"chime",name:"チャイムくん衣装14",hiddenName:"？？？",src:"costumes/chime-costume-14.webp"},
+  {id:"chime_costume_slot_15",group:"chime",name:"チャイムくん衣装15",hiddenName:"？？？",src:"costumes/chime-costume-15.webp"},
+  {id:"chime_costume_slot_16",group:"chime",name:"チャイムくん衣装16",hiddenName:"？？？",src:"costumes/chime-costume-16.webp"},
+  {id:"chime_costume_slot_17",group:"chime",name:"チャイムくん衣装17",hiddenName:"？？？",src:"costumes/chime-costume-17.webp"},
+  {id:"chime_costume_slot_18",group:"chime",name:"チャイムくん衣装18",hiddenName:"？？？",src:"costumes/chime-costume-18.webp"},
+  {id:"chime_costume_slot_19",group:"chime",name:"チャイムくん衣装19",hiddenName:"？？？",src:"costumes/chime-costume-19.webp"},
+  {id:"chime_costume_slot_20",group:"chime",name:"チャイムくん衣装20",hiddenName:"？？？",src:"costumes/chime-costume-20.webp"},
+  {id:"chime_costume_slot_21",group:"chime",name:"チャイムくん衣装21",hiddenName:"？？？",src:"costumes/chime-costume-21.webp"},
+  {id:"chime_costume_slot_22",group:"chime",name:"チャイムくん衣装22",hiddenName:"？？？",src:"costumes/chime-costume-22.webp"},
+  {id:"chime_costume_slot_23",group:"chime",name:"チャイムくん衣装23",hiddenName:"？？？",src:"costumes/chime-costume-23.webp"},
+  {id:"chime_costume_slot_24",group:"chime",name:"チャイムくん衣装24",hiddenName:"？？？",src:"costumes/chime-costume-24.webp"},
+  {id:"chime_costume_slot_25",group:"chime",name:"チャイムくん衣装25",hiddenName:"？？？",src:"costumes/chime-costume-25.webp"},
+  {id:"chime_costume_slot_26",group:"chime",name:"チャイムくん衣装26",hiddenName:"？？？",src:"costumes/chime-costume-26.webp"},
+  {id:"chime_costume_slot_27",group:"chime",name:"チャイムくん衣装27",hiddenName:"？？？",src:"costumes/chime-costume-27.webp"},
+  {id:"chime_costume_slot_28",group:"chime",name:"チャイムくん衣装28",hiddenName:"？？？",src:"costumes/chime-costume-28.webp"},
+  {id:"chime_costume_slot_29",group:"chime",name:"チャイムくん衣装29",hiddenName:"？？？",src:"costumes/chime-costume-29.webp"},
+  {id:"chime_costume_slot_30",group:"chime",name:"チャイムくん衣装30",hiddenName:"？？？",src:"costumes/chime-costume-30.webp"},
+  {id:"chime_costume_slot_31",group:"chime",name:"チャイムくん衣装31",hiddenName:"？？？",src:"costumes/chime-costume-31.webp"},
+  {id:"chime_costume_slot_32",group:"chime",name:"チャイムくん衣装32",hiddenName:"？？？",src:"costumes/chime-costume-32.webp"},
+  {id:"chime_costume_slot_33",group:"chime",name:"チャイムくん衣装33",hiddenName:"？？？",src:"costumes/chime-costume-33.webp"},
+  {id:"chime_costume_slot_34",group:"chime",name:"チャイムくん衣装34",hiddenName:"？？？",src:"costumes/chime-costume-34.webp"},
+  {id:"chime_costume_slot_35",group:"chime",name:"チャイムくん衣装35",hiddenName:"？？？",src:"costumes/chime-costume-35.webp"},
+  {id:"chime_costume_slot_36",group:"chime",name:"チャイムくん衣装36",hiddenName:"？？？",src:"costumes/chime-costume-36.webp"},
+  {id:"chime_costume_slot_37",group:"chime",name:"チャイムくん衣装37",hiddenName:"？？？",src:"costumes/chime-costume-37.webp"},
+  {id:"chime_costume_slot_38",group:"chime",name:"チャイムくん衣装38",hiddenName:"？？？",src:"costumes/chime-costume-38.webp"},
+  {id:"chime_costume_slot_39",group:"chime",name:"チャイムくん衣装39",hiddenName:"？？？",src:"costumes/chime-costume-39.webp"},
+  {id:"chime_costume_slot_40",group:"chime",name:"チャイムくん衣装40",hiddenName:"？？？",src:"costumes/chime-costume-40.webp"},
+  {id:"chime_costume_slot_41",group:"chime",name:"チャイムくん衣装41",hiddenName:"？？？",src:"costumes/chime-costume-41.webp"},
+  {id:"chime_costume_slot_42",group:"chime",name:"チャイムくん衣装42",hiddenName:"？？？",src:"costumes/chime-costume-42.webp"},
+  {id:"chime_costume_slot_43",group:"chime",name:"チャイムくん衣装43",hiddenName:"？？？",src:"costumes/chime-costume-43.webp"},
+  {id:"chime_costume_slot_44",group:"chime",name:"チャイムくん衣装44",hiddenName:"？？？",src:"costumes/chime-costume-44.webp"},
+  {id:"chime_costume_slot_45",group:"chime",name:"チャイムくん衣装45",hiddenName:"？？？",src:"costumes/chime-costume-45.webp"},
+  {id:"chime_costume_slot_46",group:"chime",name:"チャイムくん衣装46",hiddenName:"？？？",src:"costumes/chime-costume-46.webp"},
+  {id:"chime_costume_slot_47",group:"chime",name:"チャイムくん衣装47",hiddenName:"？？？",src:"costumes/chime-costume-47.webp"},
+  {id:"chime_costume_slot_48",group:"chime",name:"チャイムくん衣装48",hiddenName:"？？？",src:"costumes/chime-costume-48.webp"},
+  {id:"chime_costume_slot_49",group:"chime",name:"チャイムくん衣装49",hiddenName:"？？？",src:"costumes/chime-costume-49.webp"},
+  {id:"chime_costume_slot_50",group:"chime",name:"チャイムくん衣装50",hiddenName:"？？？",src:"costumes/chime-costume-50.webp"},
+  {id:"chime_costume_slot_51",group:"chime",name:"チャイムくん衣装51",hiddenName:"？？？",src:"costumes/chime-costume-51.webp"},
+  {id:"chime_costume_slot_52",group:"chime",name:"チャイムくん衣装52",hiddenName:"？？？",src:"costumes/chime-costume-52.webp"},
+  {id:"chime_costume_slot_53",group:"chime",name:"チャイムくん衣装53",hiddenName:"？？？",src:"costumes/chime-costume-53.webp"},
+  {id:"chime_costume_slot_54",group:"chime",name:"チャイムくん衣装54",hiddenName:"？？？",src:"costumes/chime-costume-54.webp"},
 
   {id:"secret_rare_image",group:"secret",name:"レア画像",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.rare}`},
   {id:"secret_ultra_rare_image",group:"secret",name:"超レア画像",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.ultraRare}`},
-  {id:"secret_bell_rare_costume",group:"secret",name:"星月夜の夢",hiddenName:"シークレット衣装",src:"costumes/bell-secret-collection.jpg"},
-  {id:"secret_chime_rare_costume",group:"secret",name:"暁桜のシンフォニー",hiddenName:"シークレット衣装",src:"costumes/chime-secret-complete.jpg"}
+  {id:"secret_bell_rare_costume",group:"secret",name:"星月夜の夢",hiddenName:"シークレット衣装",src:"costumes/bell-secret-collection.webp"},
+  {id:"secret_chime_rare_costume",group:"secret",name:"暁桜のシンフォニー",hiddenName:"シークレット衣装",src:"costumes/chime-secret-complete.webp"}
 ];
 
 function getCollectionItem(itemId){
@@ -7396,13 +7390,13 @@ async function loadCollectionData(forceRefresh=false){
 
 const SECRET_PREVIEW_LAYOUT = {
   bell: {
-    layers:["costumes/bell-secret-base.png","costumes/bell-secret-main.png","costumes/bell-secret-layer-01.png","costumes/bell-secret-layer-02.png","costumes/bell-secret-layer-03.png","costumes/bell-secret-layer-04.png","costumes/bell-secret-layer-05.png"],
+    layers:["costumes/bell-secret-base.webp","costumes/bell-secret-main.webp","costumes/bell-secret-layer-01.webp","costumes/bell-secret-layer-02.webp","costumes/bell-secret-layer-03.webp","costumes/bell-secret-layer-04.webp","costumes/bell-secret-layer-05.webp"],
     positions:[{x:-5.1,y:-9.9},{x:-4,y:30},{x:0,y:0},{x:25,y:35},{x:-62,y:35},{x:0,y:0},{x:32.5,y:4.9}],
     sizes:[{width:100,height:100,scale:1.1,angle:-3.9},{width:100,height:100,scale:1.45,angle:0},{width:100,height:100,scale:1,angle:0},{width:100,height:100,scale:1,angle:0},{width:100,height:100,scale:1,angle:0},{width:100,height:100,scale:1,angle:0},{width:100,height:100,scale:.96,angle:10.3}],
     enabled:[true,true,false,true,true,false,true], global:{x:0,y:50,scale:.9,angle:0}
   },
   chime: {
-    layers:["costumes/chime-secret-layer-03.png","costumes/chime-secret-layer-02.png","costumes/chime-secret-base-max.png","costumes/chime-secret-layer-05.png","costumes/chime-secret-layer-01.png","costumes/chime-secret-layer-04.png"],
+    layers:["costumes/chime-secret-layer-03.webp","costumes/chime-secret-layer-02.webp","costumes/chime-secret-base-max.png","costumes/chime-secret-layer-05.webp","costumes/chime-secret-layer-01.webp","costumes/chime-secret-layer-04.webp"],
     positions:[{x:-64,y:44.9},{x:-65.6,y:108},{x:-60.7,y:60.6},{x:-25.1,y:29.4},{x:-65.3,y:84.4},{x:-121.7,y:44.4}],
     sizes:[{width:100,height:100,scale:1.99,angle:0},{width:100,height:100,scale:1.75,angle:0},{width:100,height:100,scale:2.25,angle:0},{width:100,height:100,scale:1.09,angle:0},{width:100,height:100,scale:.9,angle:0},{width:100,height:100,scale:1,angle:0}],
     enabled:[false,true,true,true,true,false], global:{x:20,y:20,scale:.65,angle:0}
@@ -7410,7 +7404,7 @@ const SECRET_PREVIEW_LAYOUT = {
 };
 function secretCostumePreviewHtml(character){
   const isChime = character === "chime";
-  const src = isChime ? "costumes/chime-secret-complete.jpg" : "costumes/bell-secret-complete.jpg";
+  const src = isChime ? "costumes/chime-secret-complete.webp" : "costumes/bell-secret-complete.webp";
   const alt = isChime ? "チャイムくん・暁桜のシンフォニー" : "ベルちゃん・星月夜の夢";
   return `<div class="secret-costume-preview"><img class="secret-costume-complete-image" src="${src}" alt="${alt}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:contain;"></div>`;
 }
@@ -7513,7 +7507,7 @@ function renderCollectionItems(acquiredData){
       const src=img.getAttribute("src") || "";
       if(src.includes("chime-secret-base-max.png") && img.dataset.fallbackUsed !== "true"){
         img.dataset.fallbackUsed="true";
-        img.src=src.replace("chime-secret-base-max.png","chime-secret-base.png");
+        img.src=src.replace("chime-secret-base-max.png","chime-secret-base.webp");
       }
     });
   });
@@ -7523,16 +7517,28 @@ function renderCollectionItems(acquiredData){
     img.loading="lazy";
     img.decoding="async";
   });
-  // 月替わり画像も1枚ずつ順番待ちさせず、ブラウザの遅延読み込みに任せる。
-  // 表示範囲に近い画像から取得され、1枚の遅い画像が後続12枚を止めない。
-  box.querySelectorAll("#collection-section-monthly img[data-monthly-queue='true']").forEach((img,index)=>{
-    const src=img.dataset.collectionSrc;
-    if(!src) return;
-    img.loading="lazy";
-    img.decoding="async";
-    img.fetchPriority=index===0 ? "high" : "low";
-    img.src=src;
-  });
+  // Load monthly images one by one in their displayed order, rather than
+  // making all twelve large files compete for bandwidth at once.
+  const monthlyQueue = [...box.querySelectorAll("#collection-section-monthly img[data-monthly-queue='true']")];
+  let monthlyQueueIndex = 0;
+  let monthlyQueueStarted = false;
+  const loadNextMonthlyImage = () => {
+    if(monthlyQueueIndex >= monthlyQueue.length) return;
+    const img = monthlyQueue[monthlyQueueIndex++];
+    const src = img.dataset.collectionSrc;
+    if(!src){ loadNextMonthlyImage(); return; }
+    img.loading = "eager";
+    img.fetchPriority = monthlyQueueIndex === 1 ? "high" : "auto";
+    const advance = () => loadNextMonthlyImage();
+    img.addEventListener("load", advance, {once:true});
+    img.addEventListener("error", advance, {once:true});
+    img.src = src;
+  };
+  if(monthlyQueue.length){
+    // Start with the first image; continue after each image succeeds or fails.
+    monthlyQueueStarted = true;
+    loadNextMonthlyImage();
+  }
 
   const mini=$("collectionCountMini");
   if(mini){
@@ -7783,7 +7789,7 @@ function showSecretCostumeGift(character){
   const description = isChime
     ? "夜明けの空と、咲き誇る桜をイメージした特別な衣装。黄金色の朝日が、新しい一日の始まりを優しく祝福してくれるよ！"
     : "三日月と星々がきらめく、幻想的な夜空の衣装。深い藍色と金色の輝きが、ベルちゃんを夢の世界へと誘うよ……！";
-  const src = isChime ? "costumes/chime-secret-complete.jpg" : "costumes/bell-secret-collection.jpg";
+  const src = isChime ? "costumes/chime-secret-complete.webp" : "costumes/bell-secret-collection.webp";
   const overlay = document.createElement("div");
   overlay.id = "secretCostumeGiftOverlay";
   overlay.innerHTML = `
@@ -7879,7 +7885,7 @@ async function decideLoginImage(){
   if(data.welcomeImageDisplayed !== true){
     return {
       kind: "welcome",
-      src: "images/welcome/welcome.jpg",
+      src: "images/welcome/welcome.webp",
       name: "WELCOME",
       markWelcomeShownAfterLoad: true
     };
@@ -8099,9 +8105,9 @@ function refreshCollectionViewerItems(){
     return !!(wrap && wrap.classList.contains("collection-image-clickable") && el.dataset.collectionSrc);
   }).map(el=>{
     const src=el.dataset.collectionSrc;
-    const secret=(src.includes("bell-secret-complete.jpg") || src.includes("bell-secret-collection.jpg"))
+    const secret=(src.includes("bell-secret-complete.webp") || src.includes("bell-secret-collection.webp"))
       ? {title:"星月夜の夢",description:"三日月と星々がきらめく、幻想的な夜空の衣装。深い藍色と金色の輝きが、ベルちゃんを夢の世界へと誘うよ……！"}
-      : src.includes("chime-secret-complete.jpg")
+      : src.includes("chime-secret-complete.webp")
         ? {title:"暁桜のシンフォニー",description:"夜明けの空と、咲き誇る桜をイメージした特別な衣装。黄金色の朝日が、新しい一日の始まりを優しく祝福してくれるよ！"}
         : null;
     return {src,type:el.dataset.collectionType||"normal",alt:el.getAttribute("alt")||"",secret};

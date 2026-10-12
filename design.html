@@ -714,7 +714,7 @@ body.logged-in .secret-costume{
 
   <img
     class="bell"
-    src="bell.png"
+    src="bell.webp"
     alt="ベルちゃん"
     id="bellImage"
   >
@@ -779,19 +779,19 @@ const SECRET_COSTUME_IDS = {
 
 const SECRET_BELL_LAYERS = [
 
-  "costumes/bell-secret-base.png",
+  "costumes/bell-secret-base.webp",
 
-  "costumes/bell-secret-main.png",
+  "costumes/bell-secret-main.webp",
 
-  "costumes/bell-secret-layer-01.png",
+  "costumes/bell-secret-layer-01.webp",
 
-  "costumes/bell-secret-layer-02.png",
+  "costumes/bell-secret-layer-02.webp",
 
-  "costumes/bell-secret-layer-03.png",
+  "costumes/bell-secret-layer-03.webp",
 
-  "costumes/bell-secret-layer-04.png",
+  "costumes/bell-secret-layer-04.webp",
 
-  "costumes/bell-secret-layer-05.png"
+  "costumes/bell-secret-layer-05.webp"
 
 ];
 
@@ -801,12 +801,12 @@ const SECRET_BELL_LAYERS = [
 ===================================================== */
 
 const CHIME_SECRET_LAYERS = [
-  "costumes/chime-secret-layer-03.png", // 1 layer-03（雲のフリル）
-  "costumes/chime-secret-layer-02.png", // 2 layer-02（裾のヒラヒラ）
+  "costumes/chime-secret-layer-03.webp", // 1 layer-03（雲のフリル）
+  "costumes/chime-secret-layer-02.webp", // 2 layer-02（裾のヒラヒラ）
   "costumes/chime-secret-base-max.png",     // 3 base（本体＋ドレス）
-  "costumes/chime-secret-layer-05.png", // 4 layer-05（太陽＋花の飾り）
-  "costumes/chime-secret-layer-01.png", // 5 layer-01（大きなリボン）
-  "costumes/chime-secret-layer-04.png"  // 6 layer-04（星のチャーム）
+  "costumes/chime-secret-layer-05.webp", // 4 layer-05（太陽＋花の飾り）
+  "costumes/chime-secret-layer-01.webp", // 5 layer-01（大きなリボン）
+  "costumes/chime-secret-layer-04.webp"  // 6 layer-04（星のチャーム）
 ];
 
 const CHIME_LAYER_POSITIONS = [
@@ -982,7 +982,7 @@ async function prepareSecretLayer(
       return prepareSecretLayer(
         src.replace(
           "chime-secret-base-max.png",
-          "chime-secret-base.png"
+          "chime-secret-base.webp"
         )
       );
 
@@ -1705,12 +1705,12 @@ let eventCostumeOverrides={};
 const characterImages = {
 
   bell:{
-    src:"bell.png",
+    src:"bell.webp",
     name:"ベルちゃん"
   },
 
   chime:{
-    src:"chime.png",
+    src:"chime.webp",
     name:"チャイムくん"
   }
 
@@ -1725,80 +1725,80 @@ const costumeImages = {
   bell:{
 
     newyear:
-      "costumes/bell-newyear.png",
+      "costumes/bell-newyear.webp",
 
     setsubun:
-      "costumes/bell-setsubun.png",
+      "costumes/bell-setsubun.webp",
 
     valentine:
-      "costumes/bell-valentine.png",
+      "costumes/bell-valentine.webp",
 
     hinamatsuri:
-      "costumes/bell-hinamatsuri.png",
+      "costumes/bell-hinamatsuri.webp",
 
     whiteday:
-      "costumes/bell-whiteday.png",
+      "costumes/bell-whiteday.webp",
 
     kodomonohi:
-      "costumes/bell-kodomonohi.png",
+      "costumes/bell-kodomonohi.webp",
 
     tanabata:
-      "costumes/bell-tanabata.png",
+      "costumes/bell-tanabata.webp",
 
     tsukimi:
-      "costumes/bell-tsukimi.png",
+      "costumes/bell-tsukimi.webp",
 
     halloween:
-      "costumes/bell-halloween.png",
+      "costumes/bell-halloween.webp",
 
     christmaseve:
-      "costumes/bell-christmaseve.png",
+      "costumes/bell-christmaseve.webp",
 
     christmas:
-      "costumes/bell-christmas.png",
+      "costumes/bell-christmas.webp",
 
     winter:
-      "costumes/bell-winter.png"
+      "costumes/bell-winter.webp"
 
   },
 
   chime:{
 
     newyear:
-      "costumes/chime-newyear.png",
+      "costumes/chime-newyear.webp",
 
     setsubun:
-      "costumes/chime-setsubun.png",
+      "costumes/chime-setsubun.webp",
 
     valentine:
-      "costumes/chime-valentine.png",
+      "costumes/chime-valentine.webp",
 
     hinamatsuri:
-      "costumes/chime-hinamatsuri.png",
+      "costumes/chime-hinamatsuri.webp",
 
     whiteday:
-      "costumes/chime-whiteday.png",
+      "costumes/chime-whiteday.webp",
 
     kodomonohi:
-      "costumes/chime-kodomonohi.png",
+      "costumes/chime-kodomonohi.webp",
 
     tanabata:
-      "costumes/chime-tanabata.png",
+      "costumes/chime-tanabata.webp",
 
     tsukimi:
-      "costumes/chime-tsukimi.png",
+      "costumes/chime-tsukimi.webp",
 
     halloween:
-      "costumes/chime-halloween.png",
+      "costumes/chime-halloween.webp",
 
     christmaseve:
-      "costumes/chime-christmaseve.png",
+      "costumes/chime-christmaseve.webp",
 
     christmas:
-      "costumes/chime-christmas.png",
+      "costumes/chime-christmas.webp",
 
     winter:
-      "costumes/chime-winter.png"
+      "costumes/chime-winter.webp"
 
   }
 
@@ -4521,7 +4521,7 @@ bellImage.addEventListener(
       characterImages[
         currentCharacter
       ]?.src ||
-      "bell.png";
+      "bell.webp";
 
     if(
       !bellImage.src.endsWith(
@@ -4883,11 +4883,11 @@ if(new URLSearchParams(location.search).get("edit")==="chime"){
 
   const LAYERS=[
     {key:"base",name:"base",sub:"本体＋ドレス",file:"costumes/chime-secret-base-max.png",w:512,h:768},
-    {key:"layer-01",name:"layer-01",sub:"大きなリボン",file:"costumes/chime-secret-layer-01.png",w:868,h:920},
-    {key:"layer-02",name:"layer-02",sub:"裾のヒラヒラ",file:"costumes/chime-secret-layer-02.png",w:1230,h:828},
-    {key:"layer-03",name:"layer-03",sub:"雲のフリル",file:"costumes/chime-secret-layer-03.png",w:840,h:596},
-    {key:"layer-04",name:"layer-04",sub:"星のチャーム",file:"costumes/chime-secret-layer-04.png",w:438,h:770},
-    {key:"layer-05",name:"layer-05",sub:"太陽＋花の飾り",file:"costumes/chime-secret-layer-05.png",w:760,h:834}
+    {key:"layer-01",name:"layer-01",sub:"大きなリボン",file:"costumes/chime-secret-layer-01.webp",w:868,h:920},
+    {key:"layer-02",name:"layer-02",sub:"裾のヒラヒラ",file:"costumes/chime-secret-layer-02.webp",w:1230,h:828},
+    {key:"layer-03",name:"layer-03",sub:"雲のフリル",file:"costumes/chime-secret-layer-03.webp",w:840,h:596},
+    {key:"layer-04",name:"layer-04",sub:"星のチャーム",file:"costumes/chime-secret-layer-04.webp",w:438,h:770},
+    {key:"layer-05",name:"layer-05",sub:"太陽＋花の飾り",file:"costumes/chime-secret-layer-05.webp",w:760,h:834}
   ];
   const BASE_LONG=768;
 
