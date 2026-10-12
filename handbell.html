@@ -7757,11 +7757,13 @@ async function decideLoginImage(){
 
   /* ① WELCOME：初回だけ表示する。表示済みならイベント画像などへ進む。 */
   if(!data.welcomeShown){
-    await update(memberRef, {welcomeShown:true});
+    /* WELCOME画像を実際に表示できる前に表示済み扱いにしない。
+       画像の読み込みに失敗した場合も、次回ログイン時に再表示できる。 */
     return {
       kind: "welcome",
       src: "images/welcome/welcome.jpg",
-      name: "WELCOME"
+      name: "WELCOME",
+      markWelcomeShownAfterLoad: true
     };
   }
 
@@ -7858,37 +7860,57 @@ async function decideLoginImage(){
 
 let showWelcomeAfterLogin = false;
 
+let welcomeImageHandlingToken = 0;
+let welcomeShownUpdateInProgress = false;
+
 function showWelcomeOverlay(imageInfo){
   const overlay = $("welcomeOverlay");
   const image = $("welcomeImage");
   if(!overlay || !image || !imageInfo) return;
+  const token = ++welcomeImageHandlingToken;
   /* 同時に衣装プレゼント演出が出ても、WELCOME画面が背後に隠れないよう最前面にする。 */
   overlay.style.zIndex = "100020";
+  overlay.style.visibility = "visible";
+  overlay.style.pointerEvents = "auto";
 
-  /* 画像が本当に読み込まれて表示可能になった時点で取得 */
-  image.onload = () => {
+  let handled = false;
+  const handleLoadedImage = async () => {
+    if(handled || token !== welcomeImageHandlingToken || !image.complete || image.naturalWidth <= 0) return;
+    handled = true;
     acquireCollectionForDisplayedImage(imageInfo);
+    /* 初回WELCOMEは画像が実際に読み込まれて表示できた後で初めて表示済みにする。
+       これにより読み込み失敗時に月別画像へ進んでしまう問題を防ぐ。 */
+    if(imageInfo.markWelcomeShownAfterLoad && currentUser && !welcomeShownUpdateInProgress){
+      welcomeShownUpdateInProgress = true;
+      try{
+        await update(ref(db,`members/${currentUser.uid}`),{welcomeShown:true});
+      }catch(error){
+        console.error("WELCOME表示済み状態の保存に失敗しました",error);
+      }finally{
+        welcomeShownUpdateInProgress = false;
+      }
+    }
   };
 
+  image.onload = () => { void handleLoadedImage(); };
   image.onerror = () => {
-    /* 読み込み失敗時は取得しない */
+    /* 読み込み失敗時は初回WELCOMEを表示済みにせず、月別画像にも進めない。 */
+    console.error("WELCOME画像を読み込めませんでした:",imageInfo.src);
   };
 
-  image.src = imageInfo.src;
-  image.alt = imageInfo.name || "Welcome";
   overlay.classList.remove("closing");
   overlay.setAttribute("aria-hidden","false");
-
+  overlay.classList.add("show");
+  image.alt = imageInfo.name || "Welcome";
+  if(image.src !== new URL(imageInfo.src,window.location.href).href){
+    image.src = imageInfo.src;
+  }else if(image.complete && image.naturalWidth > 0){
+    void handleLoadedImage();
+  }
   /* キャッシュ済み画像でもonloadが発火しない場合に備える */
   if(image.complete && image.naturalWidth > 0){
-    acquireCollectionForDisplayedImage(imageInfo);
+    void handleLoadedImage();
   }
-
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      overlay.classList.add("show");
-    });
-  });
 }
 
 function closeWelcomeOverlay(){
