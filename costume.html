@@ -94,6 +94,12 @@ p{
   gap:12px;
 }
 
+/* 衣装カテゴリの絞り込みボタン */
+.costume-filter-bar{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px;}
+.costume-filter-button{width:auto;flex:1 1 auto;min-width:calc(33.333% - 8px);padding:10px 12px;border:1px solid #d8e1e7;border-radius:999px;background:#fff;color:#43545e;font-size:13px;font-weight:700;white-space:nowrap;}
+.costume-filter-button.active{background:#3f7fb8;border-color:#3f7fb8;color:#fff;}
+@media(max-width:480px){.costume-filter-button{min-width:calc(50% - 8px);}}
+
 .costume-card{
   position:relative;
   border:2px solid #e1e8ed;
@@ -279,6 +285,13 @@ button:disabled{
 
   <div class="card character-section">
     <div class="character-title"><h2 id="selectedCharacterTitle">🔔 ベルちゃんの衣装</h2></div>
+    <div id="costumeFilterBar" class="costume-filter-bar" aria-label="衣装の種類で絞り込む">
+      <button type="button" class="costume-filter-button active" data-filter="all">全部</button>
+      <button type="button" class="costume-filter-button" data-filter="event">イベント衣装</button>
+      <button type="button" class="costume-filter-button" data-filter="daily">通常衣装</button>
+      <button type="button" class="costume-filter-button" data-filter="secret">シークレット衣装</button>
+      <button type="button" class="costume-filter-button" data-filter="favorites">お気に入り</button>
+    </div>
     <div id="costumeList" class="costume-grid"></div>
   </div>
   <div class="actions">
@@ -505,6 +518,7 @@ let dailyCostumes = {
 let selectedCostume = {bell:null,chime:null};
 let eventCostumeOverride = {};
 let selectedCharacter = "bell";
+let activeCostumeFilter = "all";
 
 
 /* =========================
@@ -681,8 +695,15 @@ function isAcquired(
 function renderCostumes(){
   const character=selectedCharacter;
   costumeList.innerHTML="";
-  (costumeDefinitions[character]||[]).forEach(costume=>{
-    if(!isAcquired(character,costume)) return;
+  const visibleCostumes=(costumeDefinitions[character]||[]).filter(costume=>{
+    if(!isAcquired(character,costume)) return false;
+    if(activeCostumeFilter === "event") return costume.kind === "event";
+    if(activeCostumeFilter === "daily") return costume.kind === "daily" || costume.kind === "normal";
+    if(activeCostumeFilter === "secret") return costume.kind === "secret";
+    if(activeCostumeFilter === "favorites") return !!favoriteCostumes[character]?.[costume.id];
+    return true;
+  });
+  visibleCostumes.forEach(costume=>{
     const card=document.createElement("div");
     card.className="costume-card";
     card.setAttribute("role","button");
@@ -747,8 +768,22 @@ function renderCostumes(){
     card.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();chooseCostume();}});
     costumeList.appendChild(card);
   });
-  if(!costumeList.children.length){const empty=document.createElement("div");empty.className="locked-message";empty.textContent="まだ取得済みの衣装がありません。";costumeList.appendChild(empty);}
+  if(!costumeList.children.length){
+    const empty=document.createElement("div");
+    empty.className="locked-message";
+    empty.style.gridColumn="1 / -1";
+    empty.textContent=activeCostumeFilter==="favorites"?"お気に入りに登録した衣装はまだありません。":activeCostumeFilter==="all"?"まだ取得済みの衣装がありません。":"この種類の取得済み衣装はまだありません。";
+    costumeList.appendChild(empty);
+  }
 }
+const costumeFilterBar=document.getElementById("costumeFilterBar");
+costumeFilterBar.addEventListener("click",event=>{
+  const button=event.target.closest("[data-filter]");
+  if(!button) return;
+  activeCostumeFilter=button.dataset.filter;
+  costumeFilterBar.querySelectorAll("[data-filter]").forEach(item=>item.classList.toggle("active",item===button));
+  renderCostumes();
+});
 function renderAll(){
   selectedCharacterTitle.textContent=selectedCharacter==="chime"?"🎵 チャイムくんの衣装":"🔔 ベルちゃんの衣装";
   selectBell.classList.toggle("selected",selectedCharacter==="bell");
