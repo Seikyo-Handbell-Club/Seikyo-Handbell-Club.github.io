@@ -3690,8 +3690,13 @@ async function login(){
     const memberIdData =
       memberIdSnap.val() || {};
 
+    // Firebase Authentication に登録済みのメールアドレスを優先する。
+    // 古いデータで authEmail が未登録の場合は recoveryEmail を使い、
+    // それもない場合だけ従来の学校ID由来メールアドレスへフォールバックする。
     const loginEmail =
-      memberIdData.authEmail || email(id);
+      memberIdData.authEmail ||
+      memberIdData.recoveryEmail ||
+      email(id);
 
     showWelcomeAfterLogin = true;
 
@@ -3729,12 +3734,19 @@ async function login(){
     );
 
 
+    const loginErrorHelp =
+      e.code === "auth/invalid-credential"
+        ? "学校IDに対応する登録メールアドレス、またはパスワードが一致していない可能性があります。入力内容を確認してください。解決しない場合は「パスワード再設定」から再設定してください。"
+        : "";
+
     $("loginMsg")
       .innerHTML =
         `
         <div class="msg error">
 
           ログインできませんでした。<br><br>
+
+          ${loginErrorHelp ? `<div>${esc(loginErrorHelp)}</div><br>` : ""}
 
           <strong>エラーコード：</strong>
           ${esc(e.code || "不明")}<br>
