@@ -34,6 +34,8 @@ body{
 }
 .top-back-row{display:flex;justify-content:flex-start;margin:0 0 12px;}
 .top-back-row button{border:1px solid #d5e0e7;border-radius:12px;background:#fff;color:#26343d;padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer;}
+#scrollToTopButton{position:fixed;right:18px;bottom:20px;z-index:1000;border:1px solid #d5e0e7;border-radius:999px;background:rgba(255,255,255,.96);color:#26343d;padding:12px 16px;font-size:14px;font-weight:700;box-shadow:0 4px 14px rgba(30,55,70,.16);cursor:pointer;display:none;}
+#scrollToTopButton.show{display:block;}
 
 .card{
   background:#fff;
@@ -253,6 +255,7 @@ button:disabled{
 
 <body>
 <div id="imageLightbox" class="image-lightbox" aria-hidden="true" role="dialog" aria-label="画像を拡大"><button type="button" class="image-lightbox-close" aria-label="閉じる">×</button><img id="imageLightboxImg" alt="拡大画像"></div>
+<button id="scrollToTopButton" type="button" aria-label="ページの上に戻る">↑ 上に戻る</button>
 
 <div class="page">
 
@@ -856,6 +859,13 @@ function returnHome(){
 }
 backButton.addEventListener("click", returnHome);
 topBackButton.addEventListener("click", returnToMyPage);
+
+window.addEventListener("scroll",()=>{
+  scrollToTopButton.classList.toggle("show",window.scrollY>250);
+},{passive:true});
+scrollToTopButton.addEventListener("click",()=>{
+  window.scrollTo({top:0,behavior:"smooth"});
+});
 
 saveButton.addEventListener(
   "click",
