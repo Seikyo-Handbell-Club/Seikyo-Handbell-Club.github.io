@@ -7903,9 +7903,11 @@ function showWelcomeOverlay(imageInfo){
   const token = ++welcomeImageHandlingToken;
   const expectedUid = currentUser?.uid || null;
   let handled = false;
+  let retryUsed = false;
 
   const finishLoadedImage = async () => {
-    if(handled || token !== welcomeImageHandlingToken || !image.complete || image.naturalWidth <= 0) return;
+    if(handled || token !== welcomeImageHandlingToken) return;
+    if(!image.complete || image.naturalWidth <= 0) return;
     if(expectedUid && currentUser?.uid !== expectedUid) return;
     handled = true;
     acquireCollectionForDisplayedImage(imageInfo);
@@ -7922,33 +7924,46 @@ function showWelcomeOverlay(imageInfo){
     }
   };
 
-  image.onload = () => { void finishLoadedImage(); };
-  image.onerror = () => {
-    console.error("ログイン画像を読み込めませんでした:",imageInfo.src);
-    /* 初回WELCOMEが読み込めなかった場合は表示済みにせず、次回ログインで再試行する */
+  const revealWhenReady = () => {
+    if(token !== welcomeImageHandlingToken) return;
+    if(image.complete && image.naturalWidth > 0){
+      overlay.classList.add("show");
+      overlay.classList.remove("closing");
+      overlay.setAttribute("aria-hidden","false");
+      overlay.style.zIndex = "100020";
+      overlay.style.visibility = "visible";
+      overlay.style.pointerEvents = "auto";
+      void finishLoadedImage();
+    }
   };
 
-  overlay.classList.remove("closing");
+  image.onload = revealWhenReady;
+  image.onerror = () => {
+    if(token !== welcomeImageHandlingToken) return;
+    console.error("ログイン画像を読み込めませんでした:",imageInfo.src);
+    /* 初回読み込みが失敗した場合のみ、キャッシュを避けて1回だけ再試行する */
+    if(imageInfo.markWelcomeShownAfterLoad && !retryUsed){
+      retryUsed = true;
+      const retryUrl = new URL(imageInfo.src,window.location.href);
+      retryUrl.searchParams.set("_welcomeRetry",String(Date.now()));
+      image.src = retryUrl.href;
+    }
+  };
+
+  overlay.classList.remove("closing","show");
   overlay.setAttribute("aria-hidden","false");
   overlay.style.zIndex = "100020";
   overlay.style.visibility = "visible";
   overlay.style.pointerEvents = "auto";
   image.alt = imageInfo.name || "Welcome";
 
-  const targetSrc = new URL(imageInfo.src,window.location.href).href;
-  if(image.src !== targetSrc) image.src = targetSrc;
+  /* 失敗した画像要素が complete=true のまま残る場合にも備え、srcを設定し直す */
+  const targetUrl = new URL(imageInfo.src,window.location.href);
+  targetUrl.searchParams.set("_welcomeLoad",String(Date.now()));
+  image.src = targetUrl.href;
 
-  /* 初回ロード直後のonload競合に備え、画像のロード完了を確認してから表示する */
-  const revealWhenReady = () => {
-    if(token !== welcomeImageHandlingToken) return;
-    if(image.complete && image.naturalWidth > 0){
-      overlay.classList.add("show");
-      void finishLoadedImage();
-    }
-  };
-  revealWhenReady();
-  if(!image.complete){
-    image.addEventListener("load", revealWhenReady, {once:true});
+  if(image.complete && image.naturalWidth > 0){
+    revealWhenReady();
   }
 }
 
