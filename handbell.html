@@ -3690,21 +3690,51 @@ async function login(){
     const memberIdData =
       memberIdSnap.val() || {};
 
-    // Firebase Authentication に登録済みのメールアドレスを優先する。
-    // 古いデータで authEmail が未登録の場合は recoveryEmail を使い、
-    // それもない場合だけ従来の学校ID由来メールアドレスへフォールバックする。
-    const loginEmail =
-      memberIdData.authEmail ||
-      memberIdData.recoveryEmail ||
-      email(id);
+    // メールアドレス訂正後に、DB側の authEmail と Firebase Authentication 側の
+    // 登録メールが一時的にずれている可能性があるため、保存済み候補を順番に照合する。
+    // パスワードは変更せず、候補メールだけを切り替えて試す。
+    const loginEmailCandidates = [
+      memberIdData.pendingRecoveryEmail,
+      memberIdData.authEmail,
+      memberIdData.recoveryEmail,
+      email(id)
+    ]
+      .map(value => String(value || "").trim())
+      .filter((value, index, values) =>
+        value && values.findIndex(item => item.toLowerCase() === value.toLowerCase()) === index
+      );
+
+    if(!loginEmailCandidates.length){
+      throw Error("no-login-email");
+    }
 
     showWelcomeAfterLogin = true;
 
-    await signInWithEmailAndPassword(
-      auth,
-      loginEmail,
-      pw
-    );
+    let loginSucceeded = false;
+    let lastLoginError = null;
+
+    for(const loginEmail of loginEmailCandidates){
+      try{
+        await signInWithEmailAndPassword(auth, loginEmail, pw);
+        loginSucceeded = true;
+        break;
+      }catch(loginError){
+        lastLoginError = loginError;
+        // 認証情報不一致なら、保存されている別のメール候補も確認する。
+        // 通信障害などはメール候補の問題ではないため、その場で終了する。
+        if(![
+          "auth/invalid-credential",
+          "auth/user-not-found",
+          "auth/wrong-password"
+        ].includes(loginError.code)){
+          throw loginError;
+        }
+      }
+    }
+
+    if(!loginSucceeded){
+      throw lastLoginError || Error("auth/invalid-credential");
+    }
 
 
   }catch(e){
@@ -3735,9 +3765,11 @@ async function login(){
 
 
     const loginErrorHelp =
-      e.code === "auth/invalid-credential"
-        ? "学校IDに対応する登録メールアドレス、またはパスワードが一致していない可能性があります。入力内容を確認してください。解決しない場合は「パスワード再設定」から再設定してください。"
-        : "";
+      e.message === "no-login-email"
+        ? "この学校IDにはログイン用メールアドレスが登録されていません。管理者に登録情報を確認してもらってください。"
+        : e.code === "auth/invalid-credential"
+          ? "保存されているメールアドレス候補を確認しましたが認証できませんでした。パスワードが正しくても、Firebase側の登録メールアドレスと学校IDの紐付けが異なる可能性があります。管理者に学校IDの authEmail・recoveryEmail とFirebase Authenticationの登録メールアドレスを照合してもらってください。"
+          : "";
 
     $("loginMsg")
       .innerHTML =
@@ -4797,7 +4829,11 @@ function renderDayDetail(date,schedules,all){
         h += `
           <div class="item">
             <strong>
-              ${esc(n.grade ? `${n.grade}年` : "学年未登録")} ${esc(n.className ? `${n.className}組` : "クラス未登録")} ${esc(n.name || "名前未設定")}
+              ${
+                /顧問|先生|職員/.test(`${n.grade || ""}${n.className || ""}`)
+                  ? `${esc(n.grade || "")}${esc(n.className || "")}`
+                  : `${esc(n.grade ? `${n.grade}年` : "学年未登録")} ${esc(n.className ? `${String(n.className).replace(/組$/, "")}組` : "クラス未登録")}`
+              } ${esc(n.name || "名前未設定")}
             </strong>
             <span class="badge">
               ${esc(n.type || "欠席")}
