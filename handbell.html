@@ -7581,7 +7581,7 @@ async function showCollection(){
    - イベント衣装の日は抽選しない
    - ?testDate=YYYY-MM-DD の日付を抽選日として使う
 ===================================================== */
-const SECRET_COSTUME_PROBABILITY = 1.0;
+const SECRET_COSTUME_PROBABILITY = 0.001;
 
 const SECRET_COSTUME_IDS = {
   bell:"secret_bell_rare_costume",
@@ -7614,7 +7614,7 @@ async function getOrCreateDailySecretLottery(){
       if(current && current.date === today) return current;
 
       const random = Math.random();
-      if(random < 0.0005){
+      if(random < 0.90){
         return {date:today,type:"ultraRareImage"};
       }
       if(random < 0.002){
