@@ -7151,7 +7151,7 @@ const collectionItems = [
 
   {id:"secret_rare_image",group:"secret",name:"レア画像",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.rare}`},
   {id:"secret_ultra_rare_image",group:"secret",name:"超レア画像",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.ultraRare}`},
-  {id:"secret_bell_rare_costume",group:"secret",name:"星月夜の夢",hiddenName:"シークレット衣装",src:"costumes/bell-secret-complete.jpg"},
+  {id:"secret_bell_rare_costume",group:"secret",name:"星月夜の夢",hiddenName:"シークレット衣装",src:"costumes/bell-secret-collection.jpg"},
   {id:"secret_chime_rare_costume",group:"secret",name:"暁桜のシンフォニー",hiddenName:"シークレット衣装",src:"costumes/chime-secret-complete.jpg"}
 ];
 
@@ -7901,7 +7901,7 @@ function refreshCollectionViewerItems(){
     return !!(wrap && wrap.classList.contains("collection-image-clickable") && el.dataset.collectionSrc);
   }).map(el=>{
     const src=el.dataset.collectionSrc;
-    const secret=src.includes("bell-secret-complete.jpg")
+    const secret=(src.includes("bell-secret-complete.jpg") || src.includes("bell-secret-collection.jpg"))
       ? {title:"星月夜の夢",description:"三日月と星々がきらめく、幻想的な夜空の衣装。深い藍色と金色の輝きが、ベルちゃんを夢の世界へと誘うよ……！"}
       : src.includes("chime-secret-complete.jpg")
         ? {title:"暁桜のシンフォニー",description:"夜明けの空と、咲き誇る桜をイメージした特別な衣装。黄金色の朝日が、新しい一日の始まりを優しく祝福してくれるよ！"}
