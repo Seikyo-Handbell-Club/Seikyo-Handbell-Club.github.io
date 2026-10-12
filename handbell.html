@@ -7882,7 +7882,16 @@ async function decideLoginImage(){
 
   /* ② シークレット4種類共通の抽選結果。
      抽選結果は1日1回だけ保存し、レア画像の表示権も同日に1回だけ取得する。 */
-  const secretLottery = await getOrCreateDailySecretLottery();
+  /* 抽選データの取得が遅い／応答しない場合でも、月別画像を長時間待たせない。
+     700ms以内に抽選結果が得られた場合だけ、従来どおりレア画像の判定を行う。
+     タイムアウトした抽選処理自体は継続するが、このログイン画像判定は月別画像へ進む。 */
+  const secretLottery = await Promise.race([
+    getOrCreateDailySecretLottery().catch(error => {
+      console.error("シークレット画像の抽選取得に失敗しました。月別画像へ進みます。", error);
+      return null;
+    }),
+    new Promise(resolve => setTimeout(() => resolve(null), 700))
+  ]);
 
   if(secretLottery?.type === "ultraRareImage" || secretLottery?.type === "rareImage"){
     /* シークレット画像は当日1回だけ表示する。
