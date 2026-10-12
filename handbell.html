@@ -3454,6 +3454,7 @@ onAuthStateChanged(
 
     if(!u){
 
+      loginImageProcessingUid = null;
       profile =
         null;
 
@@ -3529,7 +3530,40 @@ onAuthStateChanged(
     }
 
 
-    /* プロフィール取得完了後に、保存済み衣装とキャラクターをiframeへ送る */
+    /* ログイン後の表示領域を先に切り替える。
+       衣装・コレクションの追加読み込みが遅れてもログイン画像判定を止めない。 */
+    $("loggedOutLeft").classList.add("hidden");
+    $("loggedOutRight").classList.add("hidden");
+    $("loggedInLeft").classList.remove("hidden");
+    $("loggedInRight").classList.remove("hidden");
+    $("loginMsg").innerHTML = "";
+
+    if(authProcessing){
+      authProcessing = false;
+      hide();
+      $("calendarView").classList.remove("hidden");
+    }
+
+    render();
+
+    /* ログイン後の画像判定は、衣装などの補助処理より先に実行する。
+       強制リロードは行わず、画像は読み込み成功時にそのまま表示する。 */
+    const loginUid = currentUser?.uid || null;
+    const shouldProcessLoginRun = !!loginUid && loginImageProcessingUid !== loginUid;
+    if(shouldProcessLoginRun){
+      loginImageProcessingUid = loginUid;
+      try{
+        showWelcomeAfterLogin = false;
+        const imageInfo = await decideLoginImage();
+        if(imageInfo && thisAuthRunToken === authStateRunToken && currentUser?.uid === loginUid){
+          showWelcomeOverlay(imageInfo);
+        }
+      }catch(e){
+        console.error("ログイン後の画像表示判定に失敗しました",e);
+      }
+    }
+
+    /* 画像表示と独立した、保存済み衣装・キャラクターの読み込み */
     await loadEquippedCostume();
     await loadEventCostumeOverride();
     sendCharacterToBell();
@@ -3539,16 +3573,11 @@ onAuthStateChanged(
     /* 今日のプレゼント（1日1着・コレクションとは別管理） */
     await acquireDailyCostume();
 
-    /* =========================
-       イベント衣装のコレクション取得
-       design.html は変更せず、実際に表示される今日の衣装だけを
-       同じ日付・キャラクター条件で確認して記録する。
-    ========================= */
+    /* 実際に表示される今日の衣装だけをコレクションに記録 */
     acquireTodayCharacterCostume();
 
-    /* テスト設定が1のときだけ、ページを開くたび未取得衣装を1着獲得する。
-       0にすると、このページオープン獲得だけを停止する。 */
-    if (COSTUME_PAGE_OPEN_TEST_MODE === 1) {
+    /* テスト設定が1のときだけ、ページを開くたび未取得衣装を1着獲得する。 */
+    if(COSTUME_PAGE_OPEN_TEST_MODE === 1){
       await awardRandomCostumeOnPageOpen({
         db,
         ref,
@@ -3566,80 +3595,16 @@ onAuthStateChanged(
       });
     }
 
-
-    $("loggedOutLeft")
-      .classList
-      .add("hidden");
-
-
-    $("loggedOutRight")
-      .classList
-      .add("hidden");
-
-
-    $("loggedInLeft")
-      .classList
-      .remove("hidden");
-
-
-    $("loggedInRight")
-      .classList
-      .remove("hidden");
-
-
-    $("loginMsg")
-      .innerHTML =
-        "";
-
-
-    if(
-      authProcessing
-    ){
-
-      authProcessing =
-        false;
-
-
-      hide();
-
-
-      $("calendarView")
-        .classList
-        .remove("hidden");
-
-    }
-
-
     render();
 
-    /* =========================
-       ログイン後／ページを開いたときの画像表示
-       認証が確認できた時点で必ず判定する
-    ========================= */
-    const loginUid = currentUser?.uid || null;
-    if(loginUid && loginImageProcessingUid !== loginUid){
-      loginImageProcessingUid = loginUid;
-      try{
-        showWelcomeAfterLogin = false;
-        const imageInfo = await decideLoginImage();
-        /* 判定中に別アカウントへ切り替わっていたら古い結果を表示しない */
-        if(imageInfo && currentUser?.uid === loginUid){
-          showWelcomeOverlay(imageInfo);
-        }
-      }catch(e){
-        console.error("ログイン後の画像表示判定に失敗しました",e);
-      }finally{
-        if(loginImageProcessingUid === loginUid) loginImageProcessingUid = null;
-      }
-
-      /* =========================
-         シークレット衣装は画像表示とは別抽選
-         当選時は右上キャラクターだけ即時変更
-      ========================= */
+    /* シークレット衣装の判定は従来どおり、衣装データ読み込み後に独立して実行 */
+    if(shouldProcessLoginRun && loginUid && loginImageProcessingUid === loginUid){
       try{
         if(currentUser?.uid === loginUid) await trySecretCostumeDraw();
       }catch(e){
         console.error("シークレット衣装の判定に失敗しました",e);
+      }finally{
+        if(loginImageProcessingUid === loginUid) loginImageProcessingUid = null;
       }
     }
 
@@ -7786,11 +7751,11 @@ async function decideLoginImage(){
   const snap = await get(memberRef);
   const data = snap.exists() ? (snap.val() || {}) : {};
 
-  /* ① WELCOME：初回だけ表示する。
-     強制リロードは行わず、初ログインの判定時点でそのまま表示する。
-     画像の読み込みに成功したあとで welcomeShown を保存するため、
-     読み込みに失敗した場合は次回ログイン時に再試行できる。 */
-  if(!data.welcomeShown){
+  /* ① WELCOME：画像の実表示を新しい専用フラグで判定する。
+     旧版は画像読み込み前に welcomeShown=true を保存していたため、
+     表示失敗でも「表示済み」になった可能性がある。
+     welcomeImageDisplayed は画像の読み込み・表示成功後にだけ保存する。 */
+  if(data.welcomeImageDisplayed !== true){
     return {
       kind: "welcome",
       src: "images/welcome/welcome.jpg",
@@ -7915,7 +7880,10 @@ function showWelcomeOverlay(imageInfo){
     if(imageInfo.markWelcomeShownAfterLoad && expectedUid && !welcomeShownUpdateInProgress){
       welcomeShownUpdateInProgress = true;
       try{
-        await update(ref(db,`members/${expectedUid}`),{welcomeShown:true});
+        await update(ref(db,`members/${expectedUid}`),{
+          welcomeShown:true,
+          welcomeImageDisplayed:true
+        });
       }catch(error){
         console.error("WELCOME表示済み状態の保存に失敗しました",error);
       }finally{
