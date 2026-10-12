@@ -7786,10 +7786,23 @@ async function decideLoginImage(){
   const snap = await get(memberRef);
   const data = snap.exists() ? (snap.val() || {}) : {};
 
-  /* ① WELCOME：初回だけ表示する。表示済みならイベント画像などへ進む。 */
+  /* ① WELCOME：初回だけ表示する。
+     初回ログイン直後は認証・会員データ・画面初期化のタイミングが競合することがあるため、
+     このタブで1回だけリロードして初期化を揃えてからWELCOME表示へ進む。 */
   if(!data.welcomeShown){
-    /* WELCOME画像を実際に表示できる前に表示済み扱いにしない。
-       画像の読み込みに失敗した場合も、次回ログイン時に再表示できる。 */
+    const reloadKey = `welcomeFirstLoginReload:${currentUser.uid}`;
+    let alreadyReloaded = false;
+    try{
+      alreadyReloaded = sessionStorage.getItem(reloadKey) === "1";
+      if(!alreadyReloaded){
+        sessionStorage.setItem(reloadKey,"1");
+        window.location.reload();
+        return null;
+      }
+    }catch(storageError){
+      console.warn("初回WELCOMEリロードの状態を保存できませんでした",storageError);
+    }
+    /* リロード後は同じタブで再リロードを繰り返さず、WELCOMEを表示する。 */
     return {
       kind: "welcome",
       src: "images/welcome/welcome.jpg",
@@ -7913,6 +7926,7 @@ function showWelcomeOverlay(imageInfo){
       welcomeShownUpdateInProgress = true;
       try{
         await update(ref(db,`members/${expectedUid}`),{welcomeShown:true});
+        try{ sessionStorage.removeItem(`welcomeFirstLoginReload:${expectedUid}`); }catch(_e){}
       }catch(error){
         console.error("WELCOME表示済み状態の保存に失敗しました",error);
       }finally{
