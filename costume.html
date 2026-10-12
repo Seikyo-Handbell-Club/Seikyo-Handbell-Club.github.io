@@ -35,6 +35,14 @@ body{
 .top-back-row{display:flex;justify-content:flex-start;margin:0 0 12px;}
 .top-back-row button{border:1px solid #d5e0e7;border-radius:12px;background:#fff;color:#26343d;padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer;}
 
+/* お気に入りハート */
+.costume-card{width:100%;}
+.favorite-button{position:absolute;top:7px;right:7px;z-index:3;width:38px;height:38px;padding:0;border:1px solid #e5e7eb;border-radius:50%;background:rgba(255,255,255,.96);color:#a0a8af;font-size:23px;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 7px rgba(0,0,0,.08);}
+.favorite-button.is-favorite{color:#e84b75;background:#fff0f4;border-color:#ffc4d3;}
+.favorite-button:focus-visible,#backToTopButton:focus-visible{outline:3px solid #5b9bd5;outline-offset:2px;}
+#backToTopButton{position:fixed;right:16px;bottom:18px;z-index:1000;width:auto;min-width:0;padding:11px 15px;border:1px solid #d5e0e7;border-radius:999px;background:rgba(255,255,255,.96);color:#26343d;font-size:14px;box-shadow:0 4px 16px rgba(30,55,70,.18);display:none;}
+#backToTopButton.show{display:block;}
+
 .card{
   background:#fff;
   border:1px solid #e1e8ed;
@@ -245,6 +253,7 @@ button:disabled{
 
 <body>
 <div id="imageLightbox" class="image-lightbox" aria-hidden="true" role="dialog" aria-label="画像を拡大"><button type="button" class="image-lightbox-close" aria-label="閉じる">×</button><img id="imageLightboxImg" alt="拡大画像"></div>
+<button id="backToTopButton" type="button" aria-label="ページの上に戻る">↑ 上に戻る</button>
 
 <div class="page">
 
@@ -481,6 +490,7 @@ const costumeDefinitions = {
 let currentUser = null;
 
 let acquiredCollection = {};
+let favoriteCostumes = {bell:{},chime:{}};
 
 let equippedCostume = {
   bell:null,
@@ -566,6 +576,12 @@ async function loadMemberData(){
 
     acquiredCollection =
       data.collection || {};
+
+    const savedFavorites = data.favoriteCostumes || {};
+    favoriteCostumes = {
+      bell: savedFavorites.bell && typeof savedFavorites.bell === "object" ? savedFavorites.bell : {},
+      chime: savedFavorites.chime && typeof savedFavorites.chime === "object" ? savedFavorites.chime : {}
+    };
 
     const daily =
       data.dailyCostumes || {};
@@ -667,27 +683,72 @@ function renderCostumes(){
   costumeList.innerHTML="";
   (costumeDefinitions[character]||[]).forEach(costume=>{
     if(!isAcquired(character,costume)) return;
-    const card=document.createElement("button");
-    card.type="button"; card.className="costume-card";
+    const card=document.createElement("div");
+    card.className="costume-card";
+    card.setAttribute("role","button");
+    card.setAttribute("tabindex","0");
+    card.setAttribute("aria-label",`${costume.name}を選択`);
     if(selectedCostume[character]===costume.id) card.classList.add("selected");
-    {
-      const image=document.createElement("img");
-      image.src=costume.src;
-      image.alt=costume.name;
-      image.loading="lazy";
-      card.appendChild(image);
-    }
-    const name=document.createElement("div"); name.className="costume-name"; name.textContent=costume.name;
+
+    const image=document.createElement("img");
+    image.src=costume.src;
+    image.alt=costume.name;
+    image.loading="lazy";
+    card.appendChild(image);
+
+    const name=document.createElement("div");
+    name.className="costume-name";
+    name.textContent=costume.name;
     card.appendChild(name);
-    const badge=document.createElement("span"); badge.className="costume-type-badge"+(costume.kind==="daily"?" daily":""); badge.textContent=costume.kind==="daily"?"毎日":costume.kind==="normal"?"ノーマル":costume.kind==="secret"?"シークレット":"イベント"; card.appendChild(badge);
-    if(equippedCostume[character]===costume.id){const b=document.createElement("span");b.className="selected-badge worn-badge";b.textContent="着用中";card.appendChild(b);}
-    if(selectedCostume[character]===costume.id){const b=document.createElement("span");b.className="selected-badge choosing-badge";b.textContent="選択中";card.appendChild(b);}
-    card.addEventListener("click",()=>{selectedCostume[character]=costume.id;renderAll();});
+
+    const badge=document.createElement("span");
+    badge.className="costume-type-badge"+(costume.kind==="daily"?" daily":"");
+    badge.textContent=costume.kind==="daily"?"毎日":costume.kind==="normal"?"ノーマル":costume.kind==="secret"?"シークレット":"イベント";
+    card.appendChild(badge);
+
+    if(equippedCostume[character]===costume.id){
+      const b=document.createElement("span");b.className="selected-badge worn-badge";b.textContent="着用中";b.style.right="8px";card.appendChild(b);
+    }
+    if(selectedCostume[character]===costume.id){
+      const b=document.createElement("span");b.className="selected-badge choosing-badge";b.textContent="選択中";b.style.right="8px";b.style.top=equippedCostume[character]===costume.id?"38px":"8px";card.appendChild(b);
+    }
+
+    const favoriteButton=document.createElement("button");
+    favoriteButton.type="button";
+    favoriteButton.className="favorite-button"+(favoriteCostumes[character]?.[costume.id]?" is-favorite":"");
+    favoriteButton.textContent=favoriteCostumes[character]?.[costume.id]?"♥":"♡";
+    favoriteButton.setAttribute("aria-label",favoriteCostumes[character]?.[costume.id]?"お気に入りを解除":"お気に入りに登録");
+    favoriteButton.setAttribute("aria-pressed",favoriteCostumes[character]?.[costume.id]?"true":"false");
+    favoriteButton.addEventListener("click",async event=>{
+      event.stopPropagation();
+      if(!currentUser){showMessage("ログインが必要です。",true);return;}
+      const wasFavorite=!!favoriteCostumes[character]?.[costume.id];
+      favoriteButton.disabled=true;
+      try{
+        const favoriteRef=ref(db,`members/${currentUser.uid}/favoriteCostumes/${character}/${costume.id}`);
+        if(wasFavorite){
+          await update(ref(db),{[`members/${currentUser.uid}/favoriteCostumes/${character}/${costume.id}`]:null});
+          delete favoriteCostumes[character][costume.id];
+        }else{
+          await update(ref(db),{[`members/${currentUser.uid}/favoriteCostumes/${character}/${costume.id}`]:true});
+          favoriteCostumes[character][costume.id]=true;
+        }
+        renderCostumes();
+      }catch(error){
+        console.error("お気に入り保存エラー:",error);
+        showMessage("お気に入りを保存できませんでした。通信状態を確認してな。",true);
+        favoriteButton.disabled=false;
+      }
+    });
+    card.appendChild(favoriteButton);
+
+    const chooseCostume=()=>{selectedCostume[character]=costume.id;renderAll();};
+    card.addEventListener("click",event=>{if(!event.target.closest(".favorite-button"))chooseCostume();});
+    card.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();chooseCostume();}});
     costumeList.appendChild(card);
   });
   if(!costumeList.children.length){const empty=document.createElement("div");empty.className="locked-message";empty.textContent="まだ取得済みの衣装がありません。";costumeList.appendChild(empty);}
 }
-
 function renderAll(){
   selectedCharacterTitle.textContent=selectedCharacter==="chime"?"🎵 チャイムくんの衣装":"🔔 ベルちゃんの衣装";
   selectBell.classList.toggle("selected",selectedCharacter==="bell");
@@ -787,6 +848,17 @@ saveButton.addEventListener(
   saveCostume
 );
 
+
+/* =========================
+   上に戻るボタン
+========================= */
+const backToTopButton=document.getElementById("backToTopButton");
+function updateBackToTopButton(){
+  backToTopButton.classList.toggle("show",window.scrollY>250);
+}
+window.addEventListener("scroll",updateBackToTopButton,{passive:true});
+backToTopButton.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
+updateBackToTopButton();
 
 /* =========================
    認証状態
