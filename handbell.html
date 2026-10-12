@@ -7957,12 +7957,16 @@ function closeWelcomeOverlay(){
   const overlay = $("welcomeOverlay");
   if(!overlay) return;
 
+  /* インライン指定がCSSのclosing状態を上書きしてクリックを奪わないよう、
+     タップ直後に操作を透過させ、フェード後に完全に非表示にする */
   overlay.classList.remove("show");
   overlay.classList.add("closing");
   overlay.setAttribute("aria-hidden","true");
+  overlay.style.pointerEvents = "none";
 
   setTimeout(() => {
     overlay.classList.remove("closing");
+    overlay.style.visibility = "hidden";
   }, 850);
 }
 
