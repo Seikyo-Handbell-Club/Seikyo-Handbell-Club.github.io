@@ -427,6 +427,18 @@ main{
   }
 }
 
+.collection-overall-progress{
+  margin:10px 0 16px;
+  padding:12px 14px;
+  border:1px solid var(--border-color, #ddd);
+  border-radius:12px;
+  text-align:center;
+  font-weight:700;
+}
+.collection-overall-progress.complete{
+  border-color:#e0b84d;
+  background:rgba(255,215,0,.12);
+}
 .collection-grid{
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
@@ -1838,6 +1850,7 @@ textarea{
   </button>
 
   <h2>📚 コレクション</h2>
+  <div id="collectionOverallProgress" class="collection-overall-progress" role="status" aria-live="polite">コレクションを読み込み中…</div>
 
   <div id="collectionContent"></div>
   <button
@@ -7031,7 +7044,7 @@ function getTodayString(date = new Date()){
 
 /* =========================
    コレクション
-   134枠：
+   160枠：
    月別画像12 + イベント画像12 +
    ベルちゃん衣装54 + チャイムくん衣装54 +
    シークレット画像2
@@ -7498,6 +7511,15 @@ function renderCollectionItems(acquiredData){
 
   const mini=$("collectionCountMini");
   if(mini) mini.textContent=`${acquiredCount}/${collectionItems.length}`;
+
+  const overallProgress=$("collectionOverallProgress");
+  if(overallProgress){
+    const isComplete=collectionItems.length > 0 && acquiredCount === collectionItems.length;
+    overallProgress.classList.toggle("complete",isComplete);
+    overallProgress.textContent=isComplete
+      ? `🎉 コレクションコンプリート！ ${acquiredCount}/${collectionItems.length} 🎉`
+      : `コレクション収集状況：${acquiredCount}/${collectionItems.length}`;
+  }
 }
 
 async function renderCollection(){
