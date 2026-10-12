@@ -3438,6 +3438,18 @@ let authProcessing =
 let setupInProgress =
   false;
 
+/* 初回アカウント設定中に届いた認証通知を捨てず、設定完了後に再開する */
+let setupCompletionWaiters = [];
+function waitForSetupCompletion(){
+  if(!setupInProgress) return Promise.resolve(true);
+  return new Promise(resolve => setupCompletionWaiters.push(resolve));
+}
+function resolveSetupCompletionWaiters(success){
+  const waiters = setupCompletionWaiters;
+  setupCompletionWaiters = [];
+  waiters.forEach(resolve => resolve(success));
+}
+
 /* 認証状態の初期通知が重複しても、ログイン後画像の判定・表示を二重実行しない */
 let loginImageProcessingUid = null;
 /* 認証コールバックが重なったとき、古い処理が新しいログイン画面を上書きしないための世代番号 */
@@ -3485,9 +3497,12 @@ onAuthStateChanged(
 
 
     if(setupInProgress){
-
-      return;
-
+      /* 初回設定中にFirebaseから届いたログイン通知を破棄すると、
+         設定完了までWELCOME判定が実行されず、再読み込みが必要になる。 */
+      const setupSucceeded = await waitForSetupCompletion();
+      if(!setupSucceeded || thisAuthRunToken !== authStateRunToken || currentUser?.uid !== u.uid){
+        return;
+      }
     }
 
 
@@ -3910,6 +3925,7 @@ async function setupPassword(){
 
     setupInProgress =
       false;
+    resolveSetupCompletionWaiters(true);
 
     authProcessing =
       false;
@@ -3929,6 +3945,8 @@ async function setupPassword(){
         console.error(signOutError);
       }
     }
+    /* 設定失敗時は待機中の認証処理を再開させず終了させる */
+    resolveSetupCompletionWaiters(false);
 
     console.error(
       "初回設定エラー:",
