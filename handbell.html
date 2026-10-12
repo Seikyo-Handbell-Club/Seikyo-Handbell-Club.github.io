@@ -559,6 +559,68 @@ main{
   object-fit:contain;
 }
 
+/* シークレット衣装の説明パネル（拡大画像の下） */
+.secret-costume-description{
+  display:none;
+  position:absolute;
+  left:50%;
+  bottom:max(16px, env(safe-area-inset-bottom));
+  transform:translateX(-50%);
+  width:min(680px, calc(100% - 32px));
+  box-sizing:border-box;
+  padding:14px 18px 15px;
+  color:#fff8dc;
+  text-align:center;
+  border:1px solid rgba(244,211,117,.9);
+  border-radius:16px;
+  background:linear-gradient(135deg,rgba(15,22,48,.96),rgba(48,28,66,.96));
+  box-shadow:0 0 0 2px rgba(244,211,117,.12),0 0 24px rgba(244,211,117,.2);
+  z-index:3;
+  pointer-events:none;
+}
+.secret-costume-description::before{
+  content:"✦  ✧  ✦";
+  display:block;
+  margin-bottom:4px;
+  color:#f5d779;
+  letter-spacing:.35em;
+  font-size:13px;
+}
+.secret-costume-description .secret-description-title{
+  margin-bottom:7px;
+  color:#ffe7a0;
+  font-size:clamp(16px,2.8vw,21px);
+  font-weight:800;
+  letter-spacing:.08em;
+  text-shadow:0 0 10px rgba(255,220,120,.28);
+}
+.secret-costume-description .secret-description-text{
+  font-size:clamp(12px,2.2vw,15px);
+  line-height:1.75;
+  overflow-wrap:anywhere;
+}
+.secret-costume-description .secret-description-flourish{
+  margin-top:7px;
+  color:#f3c7df;
+  font-size:13px;
+  letter-spacing:.3em;
+}
+#collectionImageOverlay.secret-costume-active img,
+#costumeOverlay.secret-costume-active img{
+  max-height:calc(100vh - 230px);
+}
+#costumeOverlay.secret-costume-active img{height:calc(100vh - 230px);width:100%;}
+#collectionImageOverlay.secret-costume-active{align-items:center;padding-bottom:190px;}
+#collectionImageOverlay.secret-costume-active .secret-costume-description,
+#costumeOverlay.secret-costume-active .secret-costume-description{display:block;}
+@media(max-width:520px){
+  .secret-costume-description{bottom:max(12px,env(safe-area-inset-bottom));padding:11px 12px 12px;width:calc(100% - 24px);}
+  #collectionImageOverlay.secret-costume-active{padding-bottom:205px;padding-top:52px;}
+  #collectionImageOverlay.secret-costume-active img,
+  #costumeOverlay.secret-costume-active img{max-height:calc(100vh - 260px);}
+  #costumeOverlay.secret-costume-active img{height:calc(100vh - 260px);}
+}
+
 .collection-overlay-close{
   position:fixed;
   top:max(12px,calc(env(safe-area-inset-top) + 8px));
@@ -2199,6 +2261,7 @@ textarea{
   <button id="collectionImageClose" class="collection-overlay-close" type="button">閉じる</button>
   <button class="collection-view-arrow left" type="button" aria-label="前の入手済みアイテム" data-collection-step="-1">‹</button>
   <img id="collectionImageOverlayImg" src="" alt="">
+  <div class="secret-costume-description" aria-live="polite"><div class="secret-description-title"></div><div class="secret-description-text"></div><div class="secret-description-flourish">✧ 🌸 ✧</div></div>
   <button class="collection-view-arrow right" type="button" aria-label="次の入手済みアイテム" data-collection-step="1">›</button>
 </div>
 
@@ -2207,6 +2270,7 @@ textarea{
   <button id="costumeClose" class="collection-overlay-close" type="button">閉じる</button>
   <button class="collection-view-arrow left" type="button" aria-label="前の入手済みアイテム" data-collection-step="-1">‹</button>
   <img id="costumeOverlayImg" src="" alt="">
+  <div class="secret-costume-description" aria-live="polite"><div class="secret-description-title"></div><div class="secret-description-text"></div><div class="secret-description-flourish">✧ 🌸 ✧</div></div>
   <button class="collection-view-arrow right" type="button" aria-label="次の入手済みアイテム" data-collection-step="1">›</button>
 </div>
 
@@ -7835,7 +7899,15 @@ function refreshCollectionViewerItems(){
   return [...box.querySelectorAll("[data-collection-src]")].filter(el=>{
     const wrap=el.closest(".collection-image-wrap");
     return !!(wrap && wrap.classList.contains("collection-image-clickable") && el.dataset.collectionSrc);
-  }).map(el=>({src:el.dataset.collectionSrc,type:el.dataset.collectionType||"normal",alt:el.getAttribute("alt")||""}));
+  }).map(el=>{
+    const src=el.dataset.collectionSrc;
+    const secret=src.includes("bell-secret-complete.jpg")
+      ? {title:"星月夜の夢",description:"三日月と星々がきらめく、幻想的な夜空の衣装。深い藍色と金色の輝きが、ベルちゃんを夢の世界へと誘うよ……！"}
+      : src.includes("chime-secret-complete.jpg")
+        ? {title:"暁桜のシンフォニー",description:"夜明けの空と、咲き誇る桜をイメージした特別な衣装。黄金色の朝日が、新しい一日の始まりを優しく祝福してくれるよ！"}
+        : null;
+    return {src,type:el.dataset.collectionType||"normal",alt:el.getAttribute("alt")||"",secret};
+  });
 }
 function setCollectionViewerArrowsVisible(visible){
   ["collectionImageOverlay","costumeOverlay"].forEach(id=>{
@@ -7854,6 +7926,26 @@ function showCollectionViewerItem(index){
   other.classList.remove("show"); other.setAttribute("aria-hidden","true");
   overlay.classList.add("show"); overlay.setAttribute("aria-hidden","false");
   image.src=item.src; image.alt=item.alt;
+  [overlay,other].forEach(node=>{
+    node.classList.remove("secret-costume-active");
+    const panel=node.querySelector(".secret-costume-description");
+    if(panel){
+      const title=panel.querySelector(".secret-description-title");
+      const description=panel.querySelector(".secret-description-text");
+      if(title) title.textContent="";
+      if(description) description.textContent="";
+    }
+  });
+  if(item.secret){
+    overlay.classList.add("secret-costume-active");
+    const panel=overlay.querySelector(".secret-costume-description");
+    if(panel){
+      panel.querySelector(".secret-description-title").textContent=item.secret.title;
+      panel.querySelector(".secret-description-text").textContent=item.secret.description;
+      const flourish=panel.querySelector(".secret-description-flourish");
+      if(flourish) flourish.textContent=item.secret.title==="暁桜のシンフォニー"?"✧ 🌸 ✧ 🌅 ✧":"✧ 🌙 ✧ ⭐ ✧";
+    }
+  }
   setCollectionViewerArrowsVisible(true);
 }
 function openCollectionImage(src){
@@ -7866,8 +7958,10 @@ function openCollectionImage(src){
 function closeCollectionImage(){
   ["collectionImageOverlay","costumeOverlay"].forEach(id=>{
     const overlay=$(id); if(!overlay) return;
-    overlay.classList.remove("show"); overlay.setAttribute("aria-hidden","true");
+    overlay.classList.remove("show","secret-costume-active"); overlay.setAttribute("aria-hidden","true");
     const image=overlay.querySelector("img"); if(image) image.src="";
+    const panel=overlay.querySelector(".secret-costume-description");
+    if(panel){panel.querySelector(".secret-description-title").textContent="";panel.querySelector(".secret-description-text").textContent="";}
   });
   collectionViewerItems=[]; collectionViewerIndex=-1;
   document.body.style.overflow="";
