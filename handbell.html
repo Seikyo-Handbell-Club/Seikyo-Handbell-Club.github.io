@@ -4551,7 +4551,20 @@ function renderDayDetail(date,schedules,all){
         n =>
           n &&
           n.date === date
-      );
+      )
+      .sort((a, b) => {
+        const gradeOrder = value => {
+          const m = String(value?.grade || "").match(/\d+/);
+          return m ? Number(m[0]) : 99;
+        };
+        const classOrder = value => {
+          const m = String(value?.className || "").match(/\d+/);
+          return m ? Number(m[0]) : 99;
+        };
+        return gradeOrder(a) - gradeOrder(b)
+          || classOrder(a) - classOrder(b)
+          || String(a.name || "").localeCompare(String(b.name || ""), "ja");
+      });
 
   let h =
     `<h2>${jp(date)}</h2>`;
@@ -4692,12 +4705,7 @@ function renderDayDetail(date,schedules,all){
         h += `
           <div class="item">
             <strong>
-              ${esc(n.name || "名前未設定")}
-              ${
-                (n.grade || n.className)
-                  ? `<span class="profile-class">　${esc(n.grade || "")}${n.className ? `${esc(String(n.className).replace(/組$/,""))}組` : ""}</span>`
-                  : ""
-              }
+              ${esc(n.grade ? `${n.grade}年` : "学年未登録")} ${esc(n.className ? `${n.className}組` : "クラス未登録")} ${esc(n.name || "名前未設定")}
             </strong>
             <span class="badge">
               ${esc(n.type || "欠席")}
@@ -5676,15 +5684,6 @@ async function saveNoticeCore(){
         type:
           type,
 
-        name:
-          profile.name,
-
-        grade:
-          getProfileGrade(),
-
-        className:
-          getProfileClass(),
-
         startTime:
           times.startTime,
 
@@ -5696,6 +5695,12 @@ async function saveNoticeCore(){
 
         date:
           d,
+
+        grade:
+          profile.grade || "",
+
+        className:
+          profile.className || "",
 
         updatedAt:
           Date.now()
@@ -5739,10 +5744,10 @@ async function saveNoticeCore(){
         profile.name,
 
       grade:
-        getProfileGrade(),
+        profile.grade || "",
 
       className:
-        getProfileClass(),
+        profile.className || "",
 
       type:
         type,
@@ -6703,6 +6708,10 @@ window.checkDate =
 
 window.saveNotice =
   saveNotice;
+
+
+window.cancelNoticeEdit =
+  cancelNoticeEdit;
 
 
 window.editNotice =
