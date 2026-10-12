@@ -3440,10 +3440,13 @@ let setupInProgress =
 
 /* 認証状態の初期通知が重複しても、ログイン後画像の判定・表示を二重実行しない */
 let loginImageProcessingUid = null;
+/* 認証コールバックが重なったとき、古い処理が新しいログイン画面を上書きしないための世代番号 */
+let authStateRunToken = 0;
 
 onAuthStateChanged(
   auth,
   async u => {
+    const thisAuthRunToken = ++authStateRunToken;
 
     currentUser =
       u;
@@ -3490,6 +3493,10 @@ onAuthStateChanged(
     const loaded =
       await loadProfile();
 
+    /* プロフィール取得中に認証状態が変わったら、古い処理を続けない */
+    if(thisAuthRunToken !== authStateRunToken || currentUser?.uid !== u.uid){
+      return;
+    }
 
     if(!loaded){
 
@@ -7891,23 +7898,21 @@ function showWelcomeOverlay(imageInfo){
   const overlay = $("welcomeOverlay");
   const image = $("welcomeImage");
   if(!overlay || !image || !imageInfo) return;
-  const token = ++welcomeImageHandlingToken;
-  /* 同時に衣装プレゼント演出が出ても、WELCOME画面が背後に隠れないよう最前面にする。 */
-  overlay.style.zIndex = "100020";
-  overlay.style.visibility = "visible";
-  overlay.style.pointerEvents = "auto";
 
+  const token = ++welcomeImageHandlingToken;
+  const expectedUid = currentUser?.uid || null;
   let handled = false;
-  const handleLoadedImage = async () => {
+
+  const finishLoadedImage = async () => {
     if(handled || token !== welcomeImageHandlingToken || !image.complete || image.naturalWidth <= 0) return;
+    if(expectedUid && currentUser?.uid !== expectedUid) return;
     handled = true;
     acquireCollectionForDisplayedImage(imageInfo);
-    /* 初回WELCOMEは画像が実際に読み込まれて表示できた後で初めて表示済みにする。
-       これにより読み込み失敗時に月別画像へ進んでしまう問題を防ぐ。 */
-    if(imageInfo.markWelcomeShownAfterLoad && currentUser && !welcomeShownUpdateInProgress){
+
+    if(imageInfo.markWelcomeShownAfterLoad && expectedUid && !welcomeShownUpdateInProgress){
       welcomeShownUpdateInProgress = true;
       try{
-        await update(ref(db,`members/${currentUser.uid}`),{welcomeShown:true});
+        await update(ref(db,`members/${expectedUid}`),{welcomeShown:true});
       }catch(error){
         console.error("WELCOME表示済み状態の保存に失敗しました",error);
       }finally{
@@ -7916,24 +7921,33 @@ function showWelcomeOverlay(imageInfo){
     }
   };
 
-  image.onload = () => { void handleLoadedImage(); };
+  image.onload = () => { void finishLoadedImage(); };
   image.onerror = () => {
-    /* 読み込み失敗時は初回WELCOMEを表示済みにせず、月別画像にも進めない。 */
-    console.error("WELCOME画像を読み込めませんでした:",imageInfo.src);
+    console.error("ログイン画像を読み込めませんでした:",imageInfo.src);
+    /* 初回WELCOMEが読み込めなかった場合は表示済みにせず、次回ログインで再試行する */
   };
 
   overlay.classList.remove("closing");
   overlay.setAttribute("aria-hidden","false");
-  overlay.classList.add("show");
+  overlay.style.zIndex = "100020";
+  overlay.style.visibility = "visible";
+  overlay.style.pointerEvents = "auto";
   image.alt = imageInfo.name || "Welcome";
-  if(image.src !== new URL(imageInfo.src,window.location.href).href){
-    image.src = imageInfo.src;
-  }else if(image.complete && image.naturalWidth > 0){
-    void handleLoadedImage();
-  }
-  /* キャッシュ済み画像でもonloadが発火しない場合に備える */
-  if(image.complete && image.naturalWidth > 0){
-    void handleLoadedImage();
+
+  const targetSrc = new URL(imageInfo.src,window.location.href).href;
+  if(image.src !== targetSrc) image.src = targetSrc;
+
+  /* 初回ロード直後のonload競合に備え、画像のロード完了を確認してから表示する */
+  const revealWhenReady = () => {
+    if(token !== welcomeImageHandlingToken) return;
+    if(image.complete && image.naturalWidth > 0){
+      overlay.classList.add("show");
+      void finishLoadedImage();
+    }
+  };
+  revealWhenReady();
+  if(!image.complete){
+    image.addEventListener("load", revealWhenReady, {once:true});
   }
 }
 
