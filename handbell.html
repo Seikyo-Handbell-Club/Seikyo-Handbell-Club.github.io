@@ -3438,6 +3438,8 @@ let authProcessing =
 let setupInProgress =
   false;
 
+/* 認証状態の初期通知が重複しても、ログイン後画像の判定・表示を二重実行しない */
+let loginImageProcessingUid = null;
 
 onAuthStateChanged(
   auth,
@@ -3607,24 +3609,31 @@ onAuthStateChanged(
        ログイン後／ページを開いたときの画像表示
        認証が確認できた時点で必ず判定する
     ========================= */
-    try{
-      showWelcomeAfterLogin = false;
-      const imageInfo = await decideLoginImage();
-      if(imageInfo){
-        showWelcomeOverlay(imageInfo);
+    const loginUid = currentUser?.uid || null;
+    if(loginUid && loginImageProcessingUid !== loginUid){
+      loginImageProcessingUid = loginUid;
+      try{
+        showWelcomeAfterLogin = false;
+        const imageInfo = await decideLoginImage();
+        /* 判定中に別アカウントへ切り替わっていたら古い結果を表示しない */
+        if(imageInfo && currentUser?.uid === loginUid){
+          showWelcomeOverlay(imageInfo);
+        }
+      }catch(e){
+        console.error("ログイン後の画像表示判定に失敗しました",e);
+      }finally{
+        if(loginImageProcessingUid === loginUid) loginImageProcessingUid = null;
       }
-    }catch(e){
-      console.error("ログイン後の画像表示判定に失敗しました",e);
-    }
 
-    /* =========================
-       シークレット衣装は画像表示とは別抽選
-       当選時は右上キャラクターだけ即時変更
-    ========================= */
-    try{
-      await trySecretCostumeDraw();
-    }catch(e){
-      console.error("シークレット衣装の判定に失敗しました",e);
+      /* =========================
+         シークレット衣装は画像表示とは別抽選
+         当選時は右上キャラクターだけ即時変更
+      ========================= */
+      try{
+        if(currentUser?.uid === loginUid) await trySecretCostumeDraw();
+      }catch(e){
+        console.error("シークレット衣装の判定に失敗しました",e);
+      }
     }
 
   }
@@ -7692,12 +7701,13 @@ function showSecretCostumeGift(character){
       <div class="daily-gift-name">${name}</div>
       <div style="font-size:13px;line-height:1.7;margin-top:8px;color:#596773;">${description}</div>
       <div class="daily-gift-note">コレクションにも追加されたよ！</div>
-      <button id="secretCostumeGiftClose" type="button">確認する</button>
+      <button id="secretCostumeGiftClose" type="button" style="position:relative;z-index:2;pointer-events:auto;cursor:pointer;touch-action:manipulation;min-height:48px;padding:12px 24px;margin-top:14px;border:0;border-radius:14px;background:#e8edf3;color:#087cf0;font-size:16px;font-weight:700;">確認する</button>
     </div>`;
   overlay.style.position = "fixed";
   overlay.style.inset = "0";
-  overlay.style.zIndex = "100010";
+  overlay.style.zIndex = "100030";
   overlay.style.display = "flex";
+  overlay.style.pointerEvents = "auto";
   overlay.style.alignItems = "center";
   overlay.style.justifyContent = "center";
   overlay.style.padding = "20px";
@@ -7705,8 +7715,22 @@ function showSecretCostumeGift(character){
   overlay.style.backdropFilter = "blur(5px)";
   overlay.style.overflowY = "auto";
   document.body.appendChild(overlay);
-  const close = () => overlay.remove();
-  $("secretCostumeGiftClose")?.addEventListener("click",close);
+  const close = () => {
+    if(!overlay.isConnected) return;
+    overlay.remove();
+  };
+  const closeButton = overlay.querySelector("#secretCostumeGiftClose");
+  if(closeButton){
+    closeButton.addEventListener("click",event=>{
+      event.preventDefault();
+      event.stopPropagation();
+      close();
+    },{capture:true});
+    closeButton.addEventListener("pointerup",event=>{
+      /* iPad/Safariでclickが取りこぼされる場合のフォールバック */
+      if(event.pointerType === "touch") close();
+    },{passive:true});
+  }
   overlay.addEventListener("click",e=>{ if(e.target === overlay) close(); });
 }
 
