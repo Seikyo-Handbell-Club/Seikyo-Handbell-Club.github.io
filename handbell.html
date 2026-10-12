@@ -4693,6 +4693,11 @@ function renderDayDetail(date,schedules,all){
           <div class="item">
             <strong>
               ${esc(n.name || "名前未設定")}
+              ${
+                (n.grade || n.className)
+                  ? `<span class="profile-class">　${esc(n.grade || "")}${n.className ? `${esc(String(n.className).replace(/組$/,""))}組` : ""}</span>`
+                  : ""
+              }
             </strong>
             <span class="badge">
               ${esc(n.type || "欠席")}
@@ -5671,6 +5676,15 @@ async function saveNoticeCore(){
         type:
           type,
 
+        name:
+          profile.name,
+
+        grade:
+          getProfileGrade(),
+
+        className:
+          getProfileClass(),
+
         startTime:
           times.startTime,
 
@@ -5723,6 +5737,12 @@ async function saveNoticeCore(){
 
       name:
         profile.name,
+
+      grade:
+        getProfileGrade(),
+
+      className:
+        getProfileClass(),
 
       type:
         type,
