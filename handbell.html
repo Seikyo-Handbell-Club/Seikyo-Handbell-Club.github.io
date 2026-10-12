@@ -312,6 +312,11 @@ main{
   font-size:12px;
   font-weight:800;
 }
+.collection-count.complete{
+  background:#fff0b8;
+  color:#8a4b08;
+  border:1px solid #f2c45d;
+}
 
 .collection-section{
   margin-top:20px;
@@ -1811,7 +1816,7 @@ textarea{
       onclick="showCollection()"
     >
       <span>📚 コレクション</span>
-      <span id="collectionCountMini" class="collection-count">0/134</span>
+      <span id="collectionCountMini" class="collection-count">0/160</span>
     </button>
   </div>
 
@@ -7510,7 +7515,12 @@ function renderCollectionItems(acquiredData){
   });
 
   const mini=$("collectionCountMini");
-  if(mini) mini.textContent=`${acquiredCount}/${collectionItems.length}`;
+  if(mini){
+    const isComplete=collectionItems.length > 0 && acquiredCount >= collectionItems.length;
+    mini.textContent=isComplete ? "🎉 COMPLETE!" : `${acquiredCount}/${collectionItems.length}`;
+    mini.classList.toggle("complete",isComplete);
+    mini.setAttribute("aria-label",isComplete ? `コレクションコンプリート ${acquiredCount}/${collectionItems.length}` : `コレクション ${acquiredCount}/${collectionItems.length}`);
+  }
 
   const overallProgress=$("collectionOverallProgress");
   if(overallProgress){
@@ -7545,7 +7555,10 @@ async function updateCollectionMiniCount(){
   if(!mini) return;
   const data=await loadCollectionData(false);
   const count=collectionItems.filter(item=>!!data[item.id]).length;
-  mini.textContent=`${count}/${collectionItems.length}`;
+  const isComplete=collectionItems.length > 0 && count >= collectionItems.length;
+  mini.textContent=isComplete ? "🎉 COMPLETE!" : `${count}/${collectionItems.length}`;
+  mini.classList.toggle("complete",isComplete);
+  mini.setAttribute("aria-label",isComplete ? `コレクションコンプリート ${count}/${collectionItems.length}` : `コレクション ${count}/${collectionItems.length}`);
 }
 
 function openCostumeOverlay(){
