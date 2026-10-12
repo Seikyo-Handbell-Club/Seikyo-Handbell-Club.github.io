@@ -7581,7 +7581,7 @@ async function showCollection(){
    - イベント衣装の日は抽選しない
    - ?testDate=YYYY-MM-DD の日付を抽選日として使う
 ===================================================== */
-const SECRET_COSTUME_PROBABILITY = 0.001;
+const SECRET_COSTUME_PROBABILITY = 1.0;
 
 const SECRET_COSTUME_IDS = {
   bell:"secret_bell_rare_costume",
@@ -7614,7 +7614,7 @@ async function getOrCreateDailySecretLottery(){
       if(current && current.date === today) return current;
 
       const random = Math.random();
-      if(random < 0.90){
+      if(random < 0.0005){
         return {date:today,type:"ultraRareImage"};
       }
       if(random < 0.002){
@@ -7781,19 +7781,39 @@ async function decideLoginImage(){
      月別画像の設定に従って表示する。 */
 
   /* ② シークレット4種類共通の抽選結果。
-     同じ日にリロードしても再抽選せず、イベント衣装の日は抽選しない。 */
+     抽選結果は1日1回だけ保存し、レア画像の表示権も同日に1回だけ取得する。 */
   const secretLottery = await getOrCreateDailySecretLottery();
 
-  if(secretLottery?.type === "ultraRareImage"){
-    return {
-      kind: "lucky",
-      rarity: "ultraRare",
-      src: `images/lucky/${luckyImageFiles.ultraRare}`,
-      name: "超レア"
-    };
-  }
+  if(secretLottery?.type === "ultraRareImage" || secretLottery?.type === "rareImage"){
+    /* 表示権をFirebase transactionで先着1回だけ取得する。
+       再読み込みや同時に複数処理が走っても、同じ日の画像を繰り返し表示しない。 */
+    const displayClaimToken = `${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const lotteryStateRef = ref(db,`members/${currentUser.uid}/secretLotteryState`);
+    try{
+      const claimResult = await runTransaction(lotteryStateRef,current=>{
+        if(!current || current.date !== todayString) return current;
+        if(current.type !== secretLottery.type || current.imageShown === true) return current;
+        return {...current,imageShown:true,imageShownToken:displayClaimToken};
+      });
+      const claimedState = claimResult?.snapshot?.val?.() || null;
+      if(!claimResult?.committed || claimedState?.imageShownToken !== displayClaimToken){
+        return null;
+      }
+    }catch(error){
+      console.error("シークレット画像の表示済み記録に失敗しました",error);
+      /* 記録できない場合は重複表示を避け、シークレット画像を表示しない。 */
+      return null;
+    }
 
-  if(secretLottery?.type === "rareImage"){
+    if(secretLottery.type === "ultraRareImage"){
+      return {
+        kind: "lucky",
+        rarity: "ultraRare",
+        src: `images/lucky/${luckyImageFiles.ultraRare}`,
+        name: "超レア"
+      };
+    }
+
     return {
       kind: "lucky",
       rarity: "rare",
