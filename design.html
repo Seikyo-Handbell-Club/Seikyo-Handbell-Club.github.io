@@ -1316,8 +1316,10 @@ function renderSecretCostume(
       ? CHIME_SECRET_GLOBAL
       : SECRET_COSTUME_GLOBAL;
 
+  /* イベント日はシークレットを表示せず、イベント衣装を優先する */
   if(
-    !isSecretEquipped(character)
+    !isSecretEquipped(character) ||
+    !!getCostumeKey(getCurrentDate())
   ){
 
     bellImage.style.visibility = "visible";
@@ -2175,9 +2177,8 @@ function getCharacterImage(
   --------------------------------------------- */
 
   if(
-    isSecretEquipped(
-      selected
-    )
+    isSecretEquipped(selected) &&
+    !getCostumeKey(date)
   ){
 
     return characterImages[
@@ -2189,85 +2190,52 @@ function getCharacterImage(
   /*
    * 衣装の優先順位
    *
-   * 1. ユーザーが「着替える」で選んだ衣装
-   * 2. イベント日の衣装
-   * 3. 通常のベルちゃん
+   * 1. シークレット衣装（上で判定済み）
+   * 2. イベント日の衣装（イベント日は自動で優先）
+   * 3. ユーザーが「着替える」で選んだ普段の衣装
+   * 4. 通常のベルちゃん／チャイムくん
    *
-   * イベント日は強制衣装ではありません。
+   * イベント終了後は、保存されている普段の衣装に自動で戻ります。
    */
 
   /* ---------------------------------------------
-     ② ユーザーが選択した衣装
+     ② イベント日の衣装
   --------------------------------------------- */
 
-  const equipped =
-    equippedCostumes?.[selected] ||
-    null;
-
-  /* 「ノーマルに戻す」を明示選択した場合は、イベント日でも通常画像を優先する */
-  if(equipped === "normal"){
-    return characterImages[selected].src;
-  }
-
-  const equippedImage =
-    getCostumeImageFromId(
-      equipped,
-      selected
-    );
-
-  if(equippedImage){
-
-    return equippedImage;
-
-  }
-
-  /* ---------------------------------------------
-     ③ イベント衣装
-  --------------------------------------------- */
-
-  const costumeKey =
-    getCostumeKey(date);
+  const costumeKey = getCostumeKey(date);
 
   if(costumeKey){
-
-    const override =
-      eventCostumeOverrides?.[
-        costumeKey
-      ]?.[selected] ||
-      null;
+    const override = eventCostumeOverrides?.[costumeKey]?.[selected] || null;
 
     if(override){
-
       if(override === "normal"){
         return characterImages[selected].src;
       }
 
-      const overrideImage =
-        getCostumeImageFromId(
-          override,
-          selected
-        );
-
+      const overrideImage = getCostumeImageFromId(override, selected);
       if(overrideImage){
-
         return overrideImage;
-
       }
-
     }
 
-    if(
-      costumeImages[
-        selected
-      ]?.[costumeKey]
-    ){
-
-      return costumeImages[
-        selected
-      ][costumeKey];
-
+    if(costumeImages[selected]?.[costumeKey]){
+      return costumeImages[selected][costumeKey];
     }
+  }
 
+  /* ---------------------------------------------
+     ③ ユーザーが選択した普段の衣装
+  --------------------------------------------- */
+
+  const equipped = equippedCostumes?.[selected] || null;
+
+  if(equipped === "normal"){
+    return characterImages[selected].src;
+  }
+
+  const equippedImage = getCostumeImageFromId(equipped, selected);
+  if(equippedImage){
+    return equippedImage;
   }
 
   /* ---------------------------------------------
@@ -2566,9 +2534,8 @@ function updateCostume(){
    */
 
   if(
-    isSecretEquipped(
-      characterAtStart
-    )
+    isSecretEquipped(characterAtStart) &&
+    !getCostumeKey(getCurrentDate())
   ){
 
     renderSecretCostume(
