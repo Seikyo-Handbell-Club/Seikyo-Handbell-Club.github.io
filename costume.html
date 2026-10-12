@@ -397,14 +397,28 @@ const eventCostumeDefinitions = [
   ["newyearseve","大晦日","bell-winter.png","chime-winter.png"]
 ];
 
-const dailyCostumeDefinitions = Array.from({length:54},(_,index)=>{
-  const number = String(index+1).padStart(2,"0");
-  return {
-    id:`daily-costume-${number}`,
-    name:`ベルちゃん・衣装コレクション ${number}`,
-    src:`costumes/daily-costume-${number}.webp`
-  };
-});
+/*
+ * 通常衣装54種類は、コレクション側と同じIDで管理する。
+ * ベルちゃん：bell_costume_slot_01 ～ bell_costume_slot_54
+ * チャイムくん：chime_costume_slot_01 ～ chime_costume_slot_54
+ * 取得データは members/{uid}/collection/{衣装ID} に保存されている。
+ */
+function dailyCostumeDefinitions(character){
+  return Array.from({length:54},(_,index)=>{
+    const number = String(index+1).padStart(2,"0");
+    const isChime = character === "chime";
+    return {
+      id:`${character}_costume_slot_${number}`,
+      name:isChime
+        ? `チャイムくん衣装${number}`
+        : `ベルちゃん衣装${number}`,
+      src:isChime
+        ? `costumes/chime-costume-${number}.png`
+        : `costumes/daily-costume-${number}.webp`,
+      kind:"daily"
+    };
+  });
+}
 
 const secretCostumeDefinitions = {
   bell:{
@@ -448,12 +462,13 @@ const costumeDefinitions = {
   bell:[
     {id:"normal",name:"ベルちゃん・ノーマル",src:"bell.png",kind:"normal"},
     ...eventCostumeDefinitions.map(([key,name,bellFile])=>({id:`event_${key}_bell`,name:`ベルちゃん・${name}`,src:`costumes/${bellFile}`,kind:"event"})),
-    ...dailyCostumeDefinitions.map(costume=>({...costume,kind:"daily"})),
+    ...dailyCostumeDefinitions("bell"),
     secretCostumeDefinitions.bell
   ],
   chime:[
     {id:"normal",name:"チャイムくん・ノーマル",src:"chime.png",kind:"normal"},
     ...eventCostumeDefinitions.map(([key,name,bellFile,chimeFile])=>({id:`event_${key}_chime`,name:`チャイムくん・${name}`,src:`costumes/${chimeFile}`,kind:"event"})),
+    ...dailyCostumeDefinitions("chime"),
     secretCostumeDefinitions.chime
   ]
 };
@@ -624,7 +639,9 @@ function isAcquired(
     return true;
 
   if(costume.kind === "daily"){
+    /* 通常衣装の取得情報はコレクションIDで判定する */
     return !!(
+      acquiredCollection?.[costume.id] ||
       dailyCostumes?.[character]?.[costume.id]
     );
   }
