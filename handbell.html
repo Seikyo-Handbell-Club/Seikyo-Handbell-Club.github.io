@@ -7337,23 +7337,29 @@ async function loadCollectionData(forceRefresh=false){
 async function awardAttendanceCostumes(){
   if(!currentUser || !profile) return;
   const uid=currentUser.uid;
-  const createdAt=Number(profile.accountCreatedAt)||Date.now();
-  const createdDate=getTodayString(new Date(createdAt));
   const today=getTodayString(getAppDate());
   try{
-    const [scheduleSnap,noticeSnap,awardSnap,collectionSnap]=await Promise.all([
-      get(ref(db,"schedules")),get(ref(db,"notices")),
+    const memberRef=ref(db,`members/${uid}`);
+    const [memberSnap,scheduleSnap,noticeSnap,awardSnap,collectionSnap]=await Promise.all([
+      get(memberRef),get(ref(db,"schedules")),get(ref(db,"notices")),
       get(ref(db,`members/${uid}/attendanceCostumeAwards`)),
       get(ref(db,`members/${uid}/collection`))
     ]);
     if(!currentUser || currentUser.uid!==uid) return;
+    const memberData=memberSnap.exists()?(memberSnap.val()||{}):{};
+    // 初回ログインでは付与しない。初回実行日より前の部活日も遡って付与しない。
+    if(!memberData.attendanceCostumeStartDate){
+      await update(memberRef,{attendanceCostumeStartDate:today});
+      return;
+    }
+    const startDate=String(memberData.attendanceCostumeStartDate);
     const schedules=scheduleSnap.exists()?(scheduleSnap.val()||{}):{};
     const notices=noticeSnap.exists()?(noticeSnap.val()||{}):{};
     const awards=awardSnap.exists()?(awardSnap.val()||{}):{};
     const owned=collectionSnap.exists()?(collectionSnap.val()||{}):{};
     const candidates=collectionItems.filter(item=>/^((bell|chime)_costume_slot_(0[1-9]|[1-4][0-9]|5[0-4]))$/.test(item.id));
     const eligible=[];
-    const start=new Date(createdDate+"T00:00:00");
+    const start=new Date(startDate+"T00:00:00");
     const end=new Date(today+"T00:00:00");
     for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
       const date=getTodayString(d);
