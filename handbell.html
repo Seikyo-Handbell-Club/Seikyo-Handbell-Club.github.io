@@ -3571,7 +3571,7 @@ onAuthStateChanged(
     sendEventCostumeOverrideToBell();
 
     /* 今日のプレゼント（1日1着・コレクションとは別管理） */
-    await acquireDailyCostume();
+    /* ログインしただけでは衣装を付与しない。取得判定は部活日・欠席連絡などを確認する処理に限定する。 */
     /* 欠席連絡のない部活日分の未取得衣装をまとめて付与 */
     await awardAttendanceCostumes();
 
