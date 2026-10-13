@@ -40,7 +40,7 @@ export async function awardRandomCostumeOnPageOpen({
     const bellComplete = bellAvailable.length >= 54 && bellUnowned.length === 0;
     const chimeComplete = chimeAvailable.length >= 54 && chimeUnowned.length === 0;
 
-    // 片方の通常衣装54種類をコンプリートしたら、もう片方の未取得衣装を優先して抽選。
+    // 片方のアレンジ衣装54種類をコンプリートしたら、もう片方の未取得衣装を優先して抽選。
     // 相手側をコンプリートするまで、ページを開くたびに相手側から1着獲得する。
     let targetCharacter = character;
     if (chimeComplete && bellUnowned.length > 0) targetCharacter = "bell";

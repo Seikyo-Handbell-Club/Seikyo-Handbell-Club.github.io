@@ -288,7 +288,7 @@ button:disabled{
     <div id="costumeFilterBar" class="costume-filter-bar" aria-label="衣装の種類で絞り込む">
       <button type="button" class="costume-filter-button active" data-filter="all">全部</button>
       <button type="button" class="costume-filter-button" data-filter="event">イベント衣装</button>
-      <button type="button" class="costume-filter-button" data-filter="daily">通常衣装</button>
+      <button type="button" class="costume-filter-button" data-filter="daily">アレンジ衣装</button>
       <button type="button" class="costume-filter-button" data-filter="secret">シークレット衣装</button>
       <button type="button" class="costume-filter-button" data-filter="favorites">お気に入り</button>
     </div>
@@ -420,7 +420,7 @@ const eventCostumeDefinitions = [
 ];
 
 /*
- * 通常衣装54種類は、コレクション側と同じIDで管理する。
+ * アレンジ衣装54種類は、コレクション側と同じIDで管理する。
  * ベルちゃん：bell_costume_slot_01 ～ bell_costume_slot_54
  * チャイムくん：chime_costume_slot_01 ～ chime_costume_slot_54
  * 取得データは members/{uid}/collection/{衣装ID} に保存されている。
@@ -482,13 +482,13 @@ function secretCostumePreviewHtml(character){
 
 const costumeDefinitions = {
   bell:[
-    {id:"normal",name:"ベルちゃん・ノーマル",src:"bell.png",kind:"normal"},
+    {id:"normal",name:"ベルちゃん・ノーマル",src:"bell.webp",kind:"normal"},
     ...eventCostumeDefinitions.map(([key,name,bellFile])=>({id:`event_${key}_bell`,name:`ベルちゃん・${name}`,src:`costumes/${bellFile}`,kind:"event"})),
     ...dailyCostumeDefinitions("bell"),
     secretCostumeDefinitions.bell
   ],
   chime:[
-    {id:"normal",name:"チャイムくん・ノーマル",src:"chime.png",kind:"normal"},
+    {id:"normal",name:"チャイムくん・ノーマル",src:"chime.webp",kind:"normal"},
     ...eventCostumeDefinitions.map(([key,name,bellFile,chimeFile])=>({id:`event_${key}_chime`,name:`チャイムくん・${name}`,src:`costumes/${chimeFile}`,kind:"event"})),
     ...dailyCostumeDefinitions("chime"),
     secretCostumeDefinitions.chime
@@ -669,7 +669,7 @@ function isAcquired(
     return true;
 
   if(costume.kind === "daily"){
-    /* 通常衣装の取得情報はコレクションIDで判定する */
+    /* アレンジ衣装の取得情報はコレクションIDで判定する */
     return !!(
       acquiredCollection?.[costume.id] ||
       dailyCostumes?.[character]?.[costume.id]
@@ -724,7 +724,7 @@ function renderCostumes(){
 
     const badge=document.createElement("span");
     badge.className="costume-type-badge"+(costume.kind==="daily"?" daily":"");
-    badge.textContent=costume.kind==="daily"?"毎日":costume.kind==="normal"?"ノーマル":costume.kind==="secret"?"シークレット":"イベント";
+    badge.textContent=costume.kind==="daily"?"アレンジ":costume.kind==="normal"?"ノーマル":costume.kind==="secret"?"シークレット":"イベント";
     card.appendChild(badge);
 
     if(equippedCostume[character]===costume.id){
@@ -810,7 +810,7 @@ async function saveCostume(){
   const character=selectedCharacter;
   const selectedId=selectedCostume[character];
   if(!selectedId)return;
-  /* normal を明示保存し、イベント日でも通常衣装に戻せるようにする */
+  /* normal を明示保存し、イベント日でもアレンジ衣装に戻せるようにする */
   const costumeId = selectedId;
 
   saveButton.disabled=true;

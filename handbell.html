@@ -2464,12 +2464,12 @@ let equippedCostume = {
 const dailyCostumeDefinitions = [
   {
     id:"daily-costume-01",
-    name:"毎日衣装 01",
+    name:"アレンジ衣装 01",
     src:"costumes/daily-costume-01.webp"
   },
   {
     id:"daily-costume-02",
-    name:"毎日衣装 02",
+    name:"アレンジ衣装 02",
     src:"costumes/daily-costume-02.webp"
   }
 ];
@@ -2574,7 +2574,7 @@ async function loadDailyCostumes(){
       chime: data.chime && typeof data.chime === "object" ? data.chime : {}
     };
   }catch(e){
-    console.error("毎日衣装の読み込みエラー:",e);
+    console.error("アレンジ衣装の読み込みエラー:",e);
     dailyCostumes = {bell:{},chime:{}};
   }
 }
@@ -2658,7 +2658,7 @@ async function acquireDailyCostume(){
       showDailyCostumeGift(gift.character,costume);
     }
   }catch(e){
-    console.error("毎日衣装の取得エラー:",e);
+    console.error("アレンジ衣装の取得エラー:",e);
   }
 }
 

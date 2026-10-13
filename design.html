@@ -714,7 +714,7 @@ body.logged-in .secret-costume{
 
   <img
     class="bell"
-    src="bell.png"
+    src="bell.webp"
     alt="ベルちゃん"
     id="bellImage"
   >
@@ -1705,12 +1705,12 @@ let eventCostumeOverrides={};
 const characterImages = {
 
   bell:{
-    src:"bell.png",
+    src:"bell.webp",
     name:"ベルちゃん"
   },
 
   chime:{
-    src:"chime.png",
+    src:"chime.webp",
     name:"チャイムくん"
   }
 
@@ -1998,7 +1998,7 @@ function getCostumeKey(
 
   /*
    * 1月6日〜1月31日は
-   * 通常衣装のまま
+   * アレンジ衣装のまま
    */
 
   /* ---------------------------------------------
@@ -4421,7 +4421,7 @@ function celebrate(){
 
   }
 
-  /* ===== 通常衣装は今まで通り ===== */
+  /* ===== アレンジ衣装は今まで通り ===== */
 
   isAnimating=true;
 
@@ -4521,7 +4521,7 @@ bellImage.addEventListener(
       characterImages[
         currentCharacter
       ]?.src ||
-      "bell.png";
+      "bell.webp";
 
     if(
       !bellImage.src.endsWith(

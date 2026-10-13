@@ -470,13 +470,13 @@ button:disabled{
       </div>
 
       <!-- =========================
-           毎日衣装
+           アレンジ衣装
       ========================== -->
 
       <div class="costume-category">
 
         <h2 class="costume-category-title">
-          🎁 毎日衣装
+          🎀 アレンジ衣装
         </h2>
 
         <div
@@ -696,7 +696,7 @@ const eventCostumeDefinitions = [
 
 
 /* =====================================================
-   毎日衣装
+   アレンジ衣装
 ===================================================== */
 
 const dailyCostumeDefinitions = Array.from({length:54},(_,index)=>{
@@ -964,7 +964,7 @@ function isEventCostumeAcquired(
 
 
 /* =====================================================
-   取得済み毎日衣装
+   取得済みアレンジ衣装
 ===================================================== */
 
 function isDailyCostumeAcquired(
@@ -1061,7 +1061,7 @@ function createCostumeCard(
 
   typeBadge.textContent =
     type === "daily"
-      ? "毎日"
+      ? "アレンジ"
       : type === "normal"
         ? "ノーマル"
         : "イベント";
@@ -1166,7 +1166,7 @@ function renderWardrobe(){
   const normalCostume = {
     id: "normal",
     name: character === "bell" ? "ベルちゃん・ノーマル" : "チャイムくん・ノーマル",
-    src: character === "bell" ? "bell.png" : "chime.png"
+    src: character === "bell" ? "bell.webp" : "chime.webp"
   };
   normalCostumesContainer.appendChild(
     createCostumeCard(character, normalCostume, "normal")
@@ -1239,7 +1239,7 @@ function renderWardrobe(){
   }
 
   /* ===================================================
-     毎日衣装
+     アレンジ衣装
   =================================================== */
 
   const dailyList = character === "bell"
@@ -1253,7 +1253,7 @@ function renderWardrobe(){
 
     dailyCostumesContainer.appendChild(
       createEmptyMessage(
-        "まだ取得済みの毎日衣装がありません。"
+        "まだ取得済みのアレンジ衣装がありません。"
       )
     );
 
@@ -1337,7 +1337,7 @@ async function loadMemberData(){
 
 
     /* ================================================
-       毎日衣装
+       アレンジ衣装
        イベント衣装とは完全に別管理
     ================================================= */
 
@@ -1439,7 +1439,7 @@ async function saveCostume(){
       selectedCharacter
     ];
 
-  /* normal を明示保存し、イベント日でも通常衣装に戻せるようにする */
+  /* normal を明示保存し、イベント日でもアレンジ衣装に戻せるようにする */
   const costumeId = selectedId;
 
 

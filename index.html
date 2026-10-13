@@ -284,7 +284,7 @@ button:disabled{
     <div class="costume-tabs" role="tablist" aria-label="衣装の種類">
       <button type="button" class="costume-tab active" data-costume-filter="all">全部</button>
       <button type="button" class="costume-tab" data-costume-filter="event">イベント</button>
-      <button type="button" class="costume-tab" data-costume-filter="normal">通常衣装</button>
+      <button type="button" class="costume-tab" data-costume-filter="normal">アレンジ衣装</button>
       <button type="button" class="costume-tab" data-costume-filter="secret">シークレット</button>
       <button type="button" class="costume-tab" data-costume-filter="favorites">♥ お気に入り</button>
     </div>
@@ -746,7 +746,7 @@ function renderCostumes(){
 
     const badge=document.createElement("span");
     badge.className="costume-type-badge"+(costume.kind==="daily"?" daily":"");
-    badge.textContent=costume.kind==="daily"?"毎日":costume.kind==="normal"?"ノーマル":costume.kind==="secret"?"シークレット":"イベント";
+    badge.textContent=costume.kind==="daily"?"アレンジ":costume.kind==="normal"?"ノーマル":costume.kind==="secret"?"シークレット":"イベント";
     card.appendChild(badge);
 
     if(equippedCostume[character]===costume.id){const b=document.createElement("span");b.className="selected-badge worn-badge";b.textContent="着用中";card.appendChild(b);}
@@ -793,7 +793,7 @@ async function saveCostume(){
   const character=selectedCharacter;
   const selectedId=selectedCostume[character];
   if(!selectedId)return;
-  /* normal を明示保存し、イベント日でも通常衣装に戻せるようにする */
+  /* normal を明示保存し、イベント日でもアレンジ衣装に戻せるようにする */
   const costumeId = selectedId;
 
   saveButton.disabled=true;
