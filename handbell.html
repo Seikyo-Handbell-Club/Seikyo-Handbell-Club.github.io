@@ -2313,15 +2313,6 @@ textarea{
 
 <script type="module">
 
-import { awardRandomCostumeOnPageOpen } from "./costume-system.js";
-
-/* 衣装獲得テスト設定
-   1 = テスト：ページを開くたびに未取得衣装を1着獲得
-   0 = テスト停止：ページを開くたびの獲得を行わない
-   ※ 0にしても「部活に3回参加で獲得」の本番処理が自動で追加されるわけではありません。
-*/
-const COSTUME_PAGE_OPEN_TEST_MODE = 1;
-
 import{
   initializeApp
 }
@@ -2491,42 +2482,6 @@ function getDailyCostumeCharacter(){
 function getDailyCostumeAvailable(character){
   const owned = dailyCostumes?.[character] || {};
   return dailyCostumeDefinitions.filter(item => !owned[item.id]);
-}
-
-function showCostumePageOpenTestGift(character,costume){
-  const old = $("costumePageOpenTestGiftOverlay");
-  if(old) old.remove();
-
-  const overlay = document.createElement("div");
-  overlay.id = "costumePageOpenTestGiftOverlay";
-  overlay.innerHTML = `
-    <div class="daily-gift-card" role="dialog" aria-modal="true">
-      <div class="daily-gift-title">🎉 ${character === "chime" ? "チャイムくん" : "ベルちゃん"}からプレゼントが届いたよ！</div>
-      <div class="daily-gift-character">${character === "chime" ? "チャイムくん" : "ベルちゃん"}の衣装をゲットしたよ！</div>
-      <img class="daily-gift-image" src="${esc(costume.src)}" alt="${esc(costume.name || costume.id)}">
-      <div class="daily-gift-name">${esc(costume.name || costume.id)}</div>
-      <div class="daily-gift-note">コレクションに追加されたよ！</div>
-      <button id="costumePageOpenTestGiftClose" type="button">受け取る</button>
-    </div>
-  `;
-  overlay.style.position = "fixed";
-  overlay.style.inset = "0";
-  overlay.style.zIndex = "100020";
-  overlay.style.display = "flex";
-  overlay.style.alignItems = "center";
-  overlay.style.justifyContent = "center";
-  overlay.style.padding = "20px";
-  overlay.style.background = "rgba(20,30,40,.58)";
-  overlay.style.backdropFilter = "blur(5px)";
-  overlay.style.webkitBackdropFilter = "blur(5px)";
-  overlay.style.overflowY = "auto";
-  document.body.appendChild(overlay);
-
-  const close = () => overlay.remove();
-  $("costumePageOpenTestGiftClose")?.addEventListener("click", close);
-  overlay.addEventListener("click", e => {
-    if(e.target === overlay) close();
-  });
 }
 
 function showDailyCostumeGift(character,costume){
@@ -3272,6 +3227,11 @@ async function loadProfile(){
       if(s.exists()){
 
         profile = s.val();
+        if(!Number(profile.accountCreatedAt)){
+          profile.accountCreatedAt = Date.now();
+          try{ await update(memberRef,{accountCreatedAt:profile.accountCreatedAt}); }
+          catch(migrationError){ console.error("参加衣装用の登録日時保存に失敗しました",migrationError); }
+        }
 
         /*
           復旧用メール変更の確認が完了した後、
@@ -3605,28 +3565,11 @@ onAuthStateChanged(
 
     /* 今日のプレゼント（1日1着・コレクションとは別管理） */
     await acquireDailyCostume();
+    /* 欠席連絡のない部活日分の未取得衣装をまとめて付与 */
+    await awardAttendanceCostumes();
 
     /* 実際に表示される今日の衣装だけをコレクションに記録 */
     acquireTodayCharacterCostume();
-
-    /* テスト設定が1のときだけ、ページを開くたび未取得衣装を1着獲得する。 */
-    if(COSTUME_PAGE_OPEN_TEST_MODE === 1){
-      await awardRandomCostumeOnPageOpen({
-        db,
-        ref,
-        get,
-        set,
-        currentUser,
-        profile,
-        collectionItems,
-        getCachedCollectionData,
-        saveCollectionDataCache,
-        renderCollection,
-        updateCollectionMiniCount,
-        collectionView: $("collectionView"),
-        showCostumeGift: showCostumePageOpenTestGift
-      });
-    }
 
     render();
 
@@ -3915,7 +3858,8 @@ async function setupPassword(){
       schoolId:id,
       name:data.name || "",
       grade:data.grade || "",
-      className:data.className || ""
+      className:data.className || "",
+      accountCreatedAt:Date.now()
     };
 
     try{
@@ -3928,6 +3872,7 @@ async function setupPassword(){
         ref(db,"memberIds/" + id),
         {
           accountCreated:true,
+          accountCreatedAt:newProfile.accountCreatedAt,
           uid:cred.user.uid,
           authEmail:recoveryEmail,
           recoveryEmail:recoveryEmail,
@@ -7386,6 +7331,67 @@ async function loadCollectionData(forceRefresh=false){
     console.error("コレクション取得エラー:",e);
     return cached || {};
   }
+}
+
+/* 部活日に欠席等の連絡がない日を参加扱いにし、未取得衣装をまとめて付与 */
+async function awardAttendanceCostumes(){
+  if(!currentUser || !profile) return;
+  const uid=currentUser.uid;
+  const createdAt=Number(profile.accountCreatedAt)||Date.now();
+  const createdDate=getTodayString(new Date(createdAt));
+  const today=getTodayString(getAppDate());
+  try{
+    const [scheduleSnap,noticeSnap,awardSnap,collectionSnap]=await Promise.all([
+      get(ref(db,"schedules")),get(ref(db,"notices")),
+      get(ref(db,`members/${uid}/attendanceCostumeAwards`)),
+      get(ref(db,`members/${uid}/collection`))
+    ]);
+    if(!currentUser || currentUser.uid!==uid) return;
+    const schedules=scheduleSnap.exists()?(scheduleSnap.val()||{}):{};
+    const notices=noticeSnap.exists()?(noticeSnap.val()||{}):{};
+    const awards=awardSnap.exists()?(awardSnap.val()||{}):{};
+    const owned=collectionSnap.exists()?(collectionSnap.val()||{}):{};
+    const candidates=collectionItems.filter(item=>/^((bell|chime)_costume_slot_(0[1-9]|[1-4][0-9]|5[0-4]))$/.test(item.id));
+    const eligible=[];
+    const start=new Date(createdDate+"T00:00:00");
+    const end=new Date(today+"T00:00:00");
+    for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
+      const date=getTodayString(d);
+      if(awards[date]) continue;
+      if(!hasClubSchedule(getSchedulesForDate(schedules,date))) continue;
+      const hasNotice=Object.values(notices).some(n=>n && n.uid===uid && n.date===date);
+      if(!hasNotice) eligible.push(date);
+    }
+    let pool=candidates.filter(item=>!owned[item.id]);
+    const preferred=profile.characterType==="chime"?"chime":"bell";
+    pool.sort((a,b)=>{
+      const ap=a.id.startsWith(preferred+"_")?0:1, bp=b.id.startsWith(preferred+"_")?0:1;
+      return ap-bp || a.id.localeCompare(b.id);
+    });
+    let awarded=0;
+    for(const date of eligible){
+      if(!pool.length) break;
+      const item=pool.shift();
+      const markerRef=ref(db,`members/${uid}/attendanceCostumeAwards/${date}`);
+      const markerNow=await get(markerRef);
+      if(markerNow.exists()) continue;
+      const itemRef=ref(db,`members/${uid}/collection/${item.id}`);
+      const itemNow=await get(itemRef);
+      if(!itemNow.exists()){
+        await set(itemRef,{acquiredAt:Date.now(),source:"attendance",activityDate:date});
+        owned[item.id]={acquiredAt:Date.now(),source:"attendance",activityDate:date};
+        awarded++;
+      } else {
+        pool=pool.filter(x=>x.id!==item.id);
+      }
+      await set(markerRef,{costumeId:item.id,awardedAt:Date.now()});
+    }
+    if(awarded){
+      saveCollectionDataCache(uid,{...owned});
+      updateCollectionMiniCount();
+      if($("collectionView") && !$("collectionView").classList.contains("hidden")) await renderCollection();
+    }
+  }catch(e){ console.error("参加衣装の付与に失敗しました",e); }
 }
 
 const SECRET_PREVIEW_LAYOUT = {
