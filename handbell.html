@@ -312,11 +312,6 @@ main{
   font-size:12px;
   font-weight:800;
 }
-.collection-count.complete{
-  background:#fff0b8;
-  color:#8a4b08;
-  border:1px solid #f2c45d;
-}
 
 .collection-section{
   margin-top:20px;
@@ -432,18 +427,6 @@ main{
   }
 }
 
-.collection-overall-progress{
-  margin:10px 0 16px;
-  padding:12px 14px;
-  border:1px solid var(--border-color, #ddd);
-  border-radius:12px;
-  text-align:center;
-  font-weight:700;
-}
-.collection-overall-progress.complete{
-  border-color:#e0b84d;
-  background:rgba(255,215,0,.12);
-}
 .collection-grid{
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
@@ -1816,7 +1799,7 @@ textarea{
       onclick="showCollection()"
     >
       <span>📚 コレクション</span>
-      <span id="collectionCountMini" class="collection-count">0/160</span>
+      <span id="collectionCountMini" class="collection-count">0/134</span>
     </button>
   </div>
 
@@ -1855,7 +1838,6 @@ textarea{
   </button>
 
   <h2>📚 コレクション</h2>
-  <div id="collectionOverallProgress" class="collection-overall-progress" role="status" aria-live="polite">コレクションを読み込み中…</div>
 
   <div id="collectionContent"></div>
   <button
@@ -2298,7 +2280,7 @@ textarea{
     <img
       id="welcomeImage"
       class="welcome-image"
-      src="images/welcome/welcome.webp"
+      src="images/welcome/welcome.jpg"
       alt="Welcome to Handbell Club"
     >
     <button
@@ -2312,6 +2294,15 @@ textarea{
 </div>
 
 <script type="module">
+
+import { awardRandomCostumeOnPageOpen } from "./costume-system.js";
+
+/* 衣装獲得テスト設定
+   1 = テスト：ページを開くたびに未取得衣装を1着獲得
+   0 = テスト停止：ページを開くたびの獲得を行わない
+   ※ 0にしても「部活に3回参加で獲得」の本番処理が自動で追加されるわけではありません。
+*/
+const COSTUME_PAGE_OPEN_TEST_MODE = 1;
 
 import{
   initializeApp
@@ -2455,12 +2446,12 @@ let equippedCostume = {
 const dailyCostumeDefinitions = [
   {
     id:"daily-costume-01",
-    name:"アレンジ衣装 01",
+    name:"毎日衣装 01",
     src:"costumes/daily-costume-01.webp"
   },
   {
     id:"daily-costume-02",
-    name:"アレンジ衣装 02",
+    name:"毎日衣装 02",
     src:"costumes/daily-costume-02.webp"
   }
 ];
@@ -2482,6 +2473,42 @@ function getDailyCostumeCharacter(){
 function getDailyCostumeAvailable(character){
   const owned = dailyCostumes?.[character] || {};
   return dailyCostumeDefinitions.filter(item => !owned[item.id]);
+}
+
+function showCostumePageOpenTestGift(character,costume){
+  const old = $("costumePageOpenTestGiftOverlay");
+  if(old) old.remove();
+
+  const overlay = document.createElement("div");
+  overlay.id = "costumePageOpenTestGiftOverlay";
+  overlay.innerHTML = `
+    <div class="daily-gift-card" role="dialog" aria-modal="true">
+      <div class="daily-gift-title">🎉 ${character === "chime" ? "チャイムくん" : "ベルちゃん"}からプレゼントが届いたよ！</div>
+      <div class="daily-gift-character">${character === "chime" ? "チャイムくん" : "ベルちゃん"}の衣装をゲットしたよ！</div>
+      <img class="daily-gift-image" src="${esc(costume.src)}" alt="${esc(costume.name || costume.id)}">
+      <div class="daily-gift-name">${esc(costume.name || costume.id)}</div>
+      <div class="daily-gift-note">コレクションに追加されたよ！</div>
+      <button id="costumePageOpenTestGiftClose" type="button">受け取る</button>
+    </div>
+  `;
+  overlay.style.position = "fixed";
+  overlay.style.inset = "0";
+  overlay.style.zIndex = "100020";
+  overlay.style.display = "flex";
+  overlay.style.alignItems = "center";
+  overlay.style.justifyContent = "center";
+  overlay.style.padding = "20px";
+  overlay.style.background = "rgba(20,30,40,.58)";
+  overlay.style.backdropFilter = "blur(5px)";
+  overlay.style.webkitBackdropFilter = "blur(5px)";
+  overlay.style.overflowY = "auto";
+  document.body.appendChild(overlay);
+
+  const close = () => overlay.remove();
+  $("costumePageOpenTestGiftClose")?.addEventListener("click", close);
+  overlay.addEventListener("click", e => {
+    if(e.target === overlay) close();
+  });
 }
 
 function showDailyCostumeGift(character,costume){
@@ -2529,7 +2556,7 @@ async function loadDailyCostumes(){
       chime: data.chime && typeof data.chime === "object" ? data.chime : {}
     };
   }catch(e){
-    console.error("アレンジ衣装の読み込みエラー:",e);
+    console.error("毎日衣装の読み込みエラー:",e);
     dailyCostumes = {bell:{},chime:{}};
   }
 }
@@ -2602,13 +2629,6 @@ async function acquireDailyCostume(){
       }
     );
 
-    /* 毎日プレゼント衣装も対応するコレクション枠に登録する */
-    const costumeNumber = costume.id.match(/daily-costume-(\d+)/)?.[1];
-    if(costumeNumber){
-      const collectionItemId = `${gift.character}_costume_slot_${costumeNumber.padStart(2,"0")}`;
-      await acquireCollectionItem(collectionItemId);
-    }
-
     dailyCostumes = {
       bell:{...(dailyCostumes.bell || {})},
       chime:{...(dailyCostumes.chime || {})}
@@ -2620,7 +2640,7 @@ async function acquireDailyCostume(){
       showDailyCostumeGift(gift.character,costume);
     }
   }catch(e){
-    console.error("アレンジ衣装の取得エラー:",e);
+    console.error("毎日衣装の取得エラー:",e);
   }
 }
 
@@ -3234,11 +3254,6 @@ async function loadProfile(){
       if(s.exists()){
 
         profile = s.val();
-        if(!Number(profile.accountCreatedAt)){
-          profile.accountCreatedAt = Date.now();
-          try{ await update(memberRef,{accountCreatedAt:profile.accountCreatedAt}); }
-          catch(migrationError){ console.error("参加衣装用の登録日時保存に失敗しました",migrationError); }
-        }
 
         /*
           復旧用メール変更の確認が完了した後、
@@ -3571,12 +3586,29 @@ onAuthStateChanged(
     sendEventCostumeOverrideToBell();
 
     /* 今日のプレゼント（1日1着・コレクションとは別管理） */
-    /* ログインしただけでは衣装を付与しない。取得判定は部活日・欠席連絡などを確認する処理に限定する。 */
-    /* 欠席連絡のない部活日分の未取得衣装をまとめて付与 */
-    await awardAttendanceCostumes();
+    await acquireDailyCostume();
 
     /* 実際に表示される今日の衣装だけをコレクションに記録 */
     acquireTodayCharacterCostume();
+
+    /* テスト設定が1のときだけ、ページを開くたび未取得衣装を1着獲得する。 */
+    if(COSTUME_PAGE_OPEN_TEST_MODE === 1){
+      await awardRandomCostumeOnPageOpen({
+        db,
+        ref,
+        get,
+        set,
+        currentUser,
+        profile,
+        collectionItems,
+        getCachedCollectionData,
+        saveCollectionDataCache,
+        renderCollection,
+        updateCollectionMiniCount,
+        collectionView: $("collectionView"),
+        showCostumeGift: showCostumePageOpenTestGift
+      });
+    }
 
     render();
 
@@ -3658,51 +3690,21 @@ async function login(){
     const memberIdData =
       memberIdSnap.val() || {};
 
-    // メールアドレス訂正後に、DB側の authEmail と Firebase Authentication 側の
-    // 登録メールが一時的にずれている可能性があるため、保存済み候補を順番に照合する。
-    // パスワードは変更せず、候補メールだけを切り替えて試す。
-    const loginEmailCandidates = [
-      memberIdData.pendingRecoveryEmail,
-      memberIdData.authEmail,
-      memberIdData.recoveryEmail,
-      email(id)
-    ]
-      .map(value => String(value || "").trim())
-      .filter((value, index, values) =>
-        value && values.findIndex(item => item.toLowerCase() === value.toLowerCase()) === index
-      );
-
-    if(!loginEmailCandidates.length){
-      throw Error("no-login-email");
-    }
+    // Firebase Authentication に登録済みのメールアドレスを優先する。
+    // 古いデータで authEmail が未登録の場合は recoveryEmail を使い、
+    // それもない場合だけ従来の学校ID由来メールアドレスへフォールバックする。
+    const loginEmail =
+      memberIdData.authEmail ||
+      memberIdData.recoveryEmail ||
+      email(id);
 
     showWelcomeAfterLogin = true;
 
-    let loginSucceeded = false;
-    let lastLoginError = null;
-
-    for(const loginEmail of loginEmailCandidates){
-      try{
-        await signInWithEmailAndPassword(auth, loginEmail, pw);
-        loginSucceeded = true;
-        break;
-      }catch(loginError){
-        lastLoginError = loginError;
-        // 認証情報不一致なら、保存されている別のメール候補も確認する。
-        // 通信障害などはメール候補の問題ではないため、その場で終了する。
-        if(![
-          "auth/invalid-credential",
-          "auth/user-not-found",
-          "auth/wrong-password"
-        ].includes(loginError.code)){
-          throw loginError;
-        }
-      }
-    }
-
-    if(!loginSucceeded){
-      throw lastLoginError || Error("auth/invalid-credential");
-    }
+    await signInWithEmailAndPassword(
+      auth,
+      loginEmail,
+      pw
+    );
 
 
   }catch(e){
@@ -3733,11 +3735,9 @@ async function login(){
 
 
     const loginErrorHelp =
-      e.message === "no-login-email"
-        ? "この学校IDにはログイン用メールアドレスが登録されていません。管理者に登録情報を確認してもらってください。"
-        : e.code === "auth/invalid-credential"
-          ? "保存されているメールアドレス候補を確認しましたが認証できませんでした。パスワードが正しくても、Firebase側の登録メールアドレスと学校IDの紐付けが異なる可能性があります。管理者に学校IDの authEmail・recoveryEmail とFirebase Authenticationの登録メールアドレスを照合してもらってください。"
-          : "";
+      e.code === "auth/invalid-credential"
+        ? "学校IDに対応する登録メールアドレス、またはパスワードが一致していない可能性があります。入力内容を確認してください。解決しない場合は「パスワード再設定」から再設定してください。"
+        : "";
 
     $("loginMsg")
       .innerHTML =
@@ -3865,8 +3865,7 @@ async function setupPassword(){
       schoolId:id,
       name:data.name || "",
       grade:data.grade || "",
-      className:data.className || "",
-      accountCreatedAt:Date.now()
+      className:data.className || ""
     };
 
     try{
@@ -3879,7 +3878,6 @@ async function setupPassword(){
         ref(db,"memberIds/" + id),
         {
           accountCreated:true,
-          accountCreatedAt:newProfile.accountCreatedAt,
           uid:cred.user.uid,
           authEmail:recoveryEmail,
           recoveryEmail:recoveryEmail,
@@ -4802,7 +4800,7 @@ function renderDayDetail(date,schedules,all){
               ${
                 /顧問|先生|職員/.test(`${n.grade || ""}${n.className || ""}`)
                   ? `${esc(n.grade || "")}${esc(n.className || "")}`
-                  : `${esc(n.grade ? `${n.grade}年` : "学年未登録")} ${esc(n.className ? `${String(n.className).replace(/組$/, "")}組` : "クラス未登録")}`
+                  : `${esc(n.grade ? String(n.grade).replace(/年$/, "") + "年" : "学年未登録")} ${esc(n.className ? `${String(n.className).replace(/組$/, "")}組` : "クラス未登録")}`
               } ${esc(n.name || "名前未設定")}
             </strong>
             <span class="badge">
@@ -6890,23 +6888,23 @@ render();
 ========================= */
 
 const monthlyImageFiles = {
-  1: "january.jpg.webp",
-  2: "february.jpg.webp",
-  3: "march.jpg.webp",
-  4: "april.jpg.webp",
-  5: "may.jpg.webp",
-  6: "june.jpg.webp",
-  7: "july.jpg.webp",
-  8: "august.jpg.webp",
-  9: "september.jpg.webp",
-  10: "october.jpg.webp",
-  11: "november.jpg.webp",
-  12: "december.jpg.webp"
+  1: "january.jpg.PNG",
+  2: "february.jpg.PNG",
+  3: "march.jpg.PNG",
+  4: "april.jpg.PNG",
+  5: "may.jpg.PNG",
+  6: "june.jpg.PNG",
+  7: "july.jpg.PNG",
+  8: "august.jpg.PNG",
+  9: "september.jpg.PNG",
+  10: "october.jpg.PNG",
+  11: "november.jpg.PNG",
+  12: "december.jpg.PNG"
 };
 
 const luckyImageFiles = {
-  rare: "rare.PNG.webp",
-  ultraRare: "ultra_rare.PNG.webp"
+  rare: "rare.PNG.PNG",
+  ultraRare: "ultra_rare.PNG.PNG"
 };
 
 /* レア衣装：ページを開いたときに低確率で表示 */
@@ -6916,18 +6914,18 @@ const rareCostumeFiles = {
 };
 
 const eventImageFiles = {
-  "01-01": "newyear.jpg.webp",
-  "02-03": "setsubun.jpg.webp",
-  "02-14": "valentine.jpg.webp",
-  "03-03": "hinamatsuri.jpg.webp",
-  "03-14": "whiteday.jpg.webp",
-  "05-05": "childrensday.jpg.webp",
-  "07-07": "tanabata.jpg.webp",
-  "09-25": "jugoya.jpg.webp",
-  "10-31": "halloween.jpg.webp",
-  "12-24": "christmas_eve.jpg.webp",
-  "12-25": "christmas.jpg.webp",
-  "12-31": "newyears_eve.jpg.webp"
+  "01-01": "newyear.jpg.PNG",
+  "02-03": "setsubun.jpg.PNG",
+  "02-14": "valentine.jpg.PNG",
+  "03-03": "hinamatsuri.jpg.PNG",
+  "03-14": "whiteday.jpg.PNG",
+  "05-05": "childrensday.jpg.PNG",
+  "07-07": "tanabata.jpg.PNG",
+  "09-25": "jugoya.jpg.PNG",
+  "10-31": "halloween.jpg.PNG",
+  "12-24": "christmas_eve.jpg.PNG",
+  "12-25": "christmas.jpg.PNG",
+  "12-31": "newyears_eve.jpg.PNG"
 };
 
 const jugoyaDates = {
@@ -6951,7 +6949,7 @@ function getEventImageInfo(date){
   if(m === 1 && d >= 1 && d <= 5){
     return {
       key: `${y}-newyear-${m}-${d}`,
-      file: "newyear.jpg.webp",
+      file: "newyear.jpg.PNG",
       name: "お正月",
       everyOpen: true
     };
@@ -6961,7 +6959,7 @@ function getEventImageInfo(date){
   if(m === 1 && d >= 6 && d <= 31){
     return {
       key: `${y}-newyear-late`,
-      file: "newyear.jpg.webp",
+      file: "newyear.jpg.PNG",
       name: "お正月",
       everyOpen: true
     };
@@ -6972,7 +6970,7 @@ function getEventImageInfo(date){
 
   if(m === 9 || m === 10){
     const jugoya = jugoyaDates[y];
-    if(jugoya === md) file = "jugoya.jpg.webp";
+    if(jugoya === md) file = "jugoya.jpg.PNG";
   }
 
   if(!file) return null;
@@ -6986,7 +6984,7 @@ function getEventImageInfo(date){
           md === "03-14" ? "ホワイトデー" :
           md === "05-05" ? "こどもの日" :
           md === "07-07" ? "七夕" :
-          file === "jugoya.jpg.webp" ? "十五夜" :
+          file === "jugoya.jpg.PNG" ? "十五夜" :
           md === "10-31" ? "ハロウィン" :
           md === "12-24" ? "クリスマスイブ" :
           md === "12-25" ? "クリスマス" :
@@ -7001,7 +6999,7 @@ function getTodayString(date = new Date()){
 
 /* =========================
    コレクション
-   160枠：
+   134枠：
    月別画像12 + イベント画像12 +
    ベルちゃん衣装54 + チャイムくん衣装54 +
    シークレット画像2
@@ -7017,31 +7015,31 @@ const collectionItems = [
     src:`images/monthly/${file}`
   })),
 
-  {id:"event_newyear_image",group:"eventImage",name:"お正月",src:"images/events/newyear.jpg.webp"},
-  {id:"event_setsubun_image",group:"eventImage",name:"節分",src:"images/events/setsubun.jpg.webp"},
-  {id:"event_valentine_image",group:"eventImage",name:"バレンタイン",src:"images/events/valentine.jpg.webp"},
-  {id:"event_hinamatsuri_image",group:"eventImage",name:"ひな祭り",src:"images/events/hinamatsuri.jpg.webp"},
-  {id:"event_whiteday_image",group:"eventImage",name:"ホワイトデー",src:"images/events/whiteday.jpg.webp"},
-  {id:"event_kodomonohi_image",group:"eventImage",name:"こどもの日",src:"images/events/childrensday.jpg.webp"},
-  {id:"event_tanabata_image",group:"eventImage",name:"七夕",src:"images/events/tanabata.jpg.webp"},
-  {id:"event_tsukimi_image",group:"eventImage",name:"十五夜",src:"images/events/jugoya.jpg.webp"},
-  {id:"event_halloween_image",group:"eventImage",name:"ハロウィン",src:"images/events/halloween.jpg.webp"},
-  {id:"event_christmaseve_image",group:"eventImage",name:"クリスマスイブ",src:"images/events/christmas_eve.jpg.webp"},
-  {id:"event_christmas_image",group:"eventImage",name:"クリスマス",src:"images/events/christmas.jpg.webp"},
-  {id:"event_newyearseve_image",group:"eventImage",name:"大晦日",src:"images/events/newyears_eve.jpg.webp"},
+  {id:"event_newyear_image",group:"eventImage",name:"お正月",src:"images/events/newyear.jpg.PNG"},
+  {id:"event_setsubun_image",group:"eventImage",name:"節分",src:"images/events/setsubun.jpg.PNG"},
+  {id:"event_valentine_image",group:"eventImage",name:"バレンタイン",src:"images/events/valentine.jpg.PNG"},
+  {id:"event_hinamatsuri_image",group:"eventImage",name:"ひな祭り",src:"images/events/hinamatsuri.jpg.PNG"},
+  {id:"event_whiteday_image",group:"eventImage",name:"ホワイトデー",src:"images/events/whiteday.jpg.PNG"},
+  {id:"event_kodomonohi_image",group:"eventImage",name:"こどもの日",src:"images/events/childrensday.jpg.PNG"},
+  {id:"event_tanabata_image",group:"eventImage",name:"七夕",src:"images/events/tanabata.jpg.PNG"},
+  {id:"event_tsukimi_image",group:"eventImage",name:"十五夜",src:"images/events/jugoya.jpg.PNG"},
+  {id:"event_halloween_image",group:"eventImage",name:"ハロウィン",src:"images/events/halloween.jpg.PNG"},
+  {id:"event_christmaseve_image",group:"eventImage",name:"クリスマスイブ",src:"images/events/christmas_eve.jpg.PNG"},
+  {id:"event_christmas_image",group:"eventImage",name:"クリスマス",src:"images/events/christmas.jpg.PNG"},
+  {id:"event_newyearseve_image",group:"eventImage",name:"大晦日",src:"images/events/newyears_eve.jpg.PNG"},
 
-  {id:"event_newyear_bell",group:"bell",name:"ベルちゃん・お正月",src:"costumes/bell-newyear.webp"},
-  {id:"event_setsubun_bell",group:"bell",name:"ベルちゃん・節分",src:"costumes/bell-setsubun.webp"},
-  {id:"event_valentine_bell",group:"bell",name:"ベルちゃん・バレンタイン",src:"costumes/bell-valentine.webp"},
-  {id:"event_hinamatsuri_bell",group:"bell",name:"ベルちゃん・ひな祭り",src:"costumes/bell-hinamatsuri.webp"},
-  {id:"event_whiteday_bell",group:"bell",name:"ベルちゃん・ホワイトデー",src:"costumes/bell-whiteday.webp"},
-  {id:"event_kodomonohi_bell",group:"bell",name:"ベルちゃん・こどもの日",src:"costumes/bell-kodomonohi.webp"},
-  {id:"event_tanabata_bell",group:"bell",name:"ベルちゃん・七夕",src:"costumes/bell-tanabata.webp"},
-  {id:"event_tsukimi_bell",group:"bell",name:"ベルちゃん・十五夜",src:"costumes/bell-tsukimi.webp"},
-  {id:"event_halloween_bell",group:"bell",name:"ベルちゃん・ハロウィン",src:"costumes/bell-halloween.webp"},
-  {id:"event_christmaseve_bell",group:"bell",name:"ベルちゃん・クリスマスイブ",src:"costumes/bell-christmaseve.webp"},
-  {id:"event_christmas_bell",group:"bell",name:"ベルちゃん・クリスマス",src:"costumes/bell-christmas.webp"},
-  {id:"event_newyearseve_bell",group:"bell",name:"ベルちゃん・大晦日",src:"costumes/bell-winter.webp"},
+  {id:"event_newyear_bell",group:"bell",name:"ベルちゃん・お正月",src:"costumes/bell-newyear.png"},
+  {id:"event_setsubun_bell",group:"bell",name:"ベルちゃん・節分",src:"costumes/bell-setsubun.png"},
+  {id:"event_valentine_bell",group:"bell",name:"ベルちゃん・バレンタイン",src:"costumes/bell-valentine.png"},
+  {id:"event_hinamatsuri_bell",group:"bell",name:"ベルちゃん・ひな祭り",src:"costumes/bell-hinamatsuri.png"},
+  {id:"event_whiteday_bell",group:"bell",name:"ベルちゃん・ホワイトデー",src:"costumes/bell-whiteday.png"},
+  {id:"event_kodomonohi_bell",group:"bell",name:"ベルちゃん・こどもの日",src:"costumes/bell-kodomonohi.png"},
+  {id:"event_tanabata_bell",group:"bell",name:"ベルちゃん・七夕",src:"costumes/bell-tanabata.png"},
+  {id:"event_tsukimi_bell",group:"bell",name:"ベルちゃん・十五夜",src:"costumes/bell-tsukimi.png"},
+  {id:"event_halloween_bell",group:"bell",name:"ベルちゃん・ハロウィン",src:"costumes/bell-halloween.png"},
+  {id:"event_christmaseve_bell",group:"bell",name:"ベルちゃん・クリスマスイブ",src:"costumes/bell-christmaseve.png"},
+  {id:"event_christmas_bell",group:"bell",name:"ベルちゃん・クリスマス",src:"costumes/bell-christmas.png"},
+  {id:"event_newyearseve_bell",group:"bell",name:"ベルちゃん・大晦日",src:"costumes/bell-winter.png"},
 
   {id:"bell_costume_slot_01",group:"bell",name:"ベルちゃん衣装01",src:"costumes/daily-costume-01.webp"},
   {id:"bell_costume_slot_02",group:"bell",name:"ベルちゃん衣装02",src:"costumes/daily-costume-02.webp"},
@@ -7098,78 +7096,78 @@ const collectionItems = [
   {id:"bell_costume_slot_53",group:"bell",name:"ベルちゃん衣装53",src:"costumes/daily-costume-53.webp"},
   {id:"bell_costume_slot_54",group:"bell",name:"ベルちゃん衣装54",src:"costumes/daily-costume-54.webp"},
 
-  {id:"event_newyear_chime",group:"chime",name:"チャイムくん・お正月",src:"costumes/chime-newyear.webp"},
-  {id:"event_setsubun_chime",group:"chime",name:"チャイムくん・節分",src:"costumes/chime-setsubun.webp"},
-  {id:"event_valentine_chime",group:"chime",name:"チャイムくん・バレンタイン",src:"costumes/chime-valentine.webp"},
-  {id:"event_hinamatsuri_chime",group:"chime",name:"チャイムくん・ひな祭り",src:"costumes/chime-hinamatsuri.webp"},
-  {id:"event_whiteday_chime",group:"chime",name:"チャイムくん・ホワイトデー",src:"costumes/chime-whiteday.webp"},
-  {id:"event_kodomonohi_chime",group:"chime",name:"チャイムくん・こどもの日",src:"costumes/chime-kodomonohi.webp"},
-  {id:"event_tanabata_chime",group:"chime",name:"チャイムくん・七夕",src:"costumes/chime-tanabata.webp"},
-  {id:"event_tsukimi_chime",group:"chime",name:"チャイムくん・十五夜",src:"costumes/chime-tsukimi.webp"},
-  {id:"event_halloween_chime",group:"chime",name:"チャイムくん・ハロウィン",src:"costumes/chime-halloween.webp"},
-  {id:"event_christmaseve_chime",group:"chime",name:"チャイムくん・クリスマスイブ",src:"costumes/chime-christmaseve.webp"},
-  {id:"event_christmas_chime",group:"chime",name:"チャイムくん・クリスマス",src:"costumes/chime-christmas.webp"},
-  {id:"event_newyearseve_chime",group:"chime",name:"チャイムくん・大晦日",src:"costumes/chime-winter.webp"},
+  {id:"event_newyear_chime",group:"chime",name:"チャイムくん・お正月",src:"costumes/chime-newyear.png"},
+  {id:"event_setsubun_chime",group:"chime",name:"チャイムくん・節分",src:"costumes/chime-setsubun.png"},
+  {id:"event_valentine_chime",group:"chime",name:"チャイムくん・バレンタイン",src:"costumes/chime-valentine.png"},
+  {id:"event_hinamatsuri_chime",group:"chime",name:"チャイムくん・ひな祭り",src:"costumes/chime-hinamatsuri.png"},
+  {id:"event_whiteday_chime",group:"chime",name:"チャイムくん・ホワイトデー",src:"costumes/chime-whiteday.png"},
+  {id:"event_kodomonohi_chime",group:"chime",name:"チャイムくん・こどもの日",src:"costumes/chime-kodomonohi.png"},
+  {id:"event_tanabata_chime",group:"chime",name:"チャイムくん・七夕",src:"costumes/chime-tanabata.png"},
+  {id:"event_tsukimi_chime",group:"chime",name:"チャイムくん・十五夜",src:"costumes/chime-tsukimi.png"},
+  {id:"event_halloween_chime",group:"chime",name:"チャイムくん・ハロウィン",src:"costumes/chime-halloween.png"},
+  {id:"event_christmaseve_chime",group:"chime",name:"チャイムくん・クリスマスイブ",src:"costumes/chime-christmaseve.png"},
+  {id:"event_christmas_chime",group:"chime",name:"チャイムくん・クリスマス",src:"costumes/chime-christmas.png"},
+  {id:"event_newyearseve_chime",group:"chime",name:"チャイムくん・大晦日",src:"costumes/chime-winter.png"},
 
-  {id:"chime_costume_slot_01",group:"chime",name:"チャイムくん衣装01",hiddenName:"？？？",src:"costumes/chime-costume-01.webp"},
-  {id:"chime_costume_slot_02",group:"chime",name:"チャイムくん衣装02",hiddenName:"？？？",src:"costumes/chime-costume-02.webp"},
-  {id:"chime_costume_slot_03",group:"chime",name:"チャイムくん衣装03",hiddenName:"？？？",src:"costumes/chime-costume-03.webp"},
-  {id:"chime_costume_slot_04",group:"chime",name:"チャイムくん衣装04",hiddenName:"？？？",src:"costumes/chime-costume-04.webp"},
-  {id:"chime_costume_slot_05",group:"chime",name:"チャイムくん衣装05",hiddenName:"？？？",src:"costumes/chime-costume-05.webp"},
-  {id:"chime_costume_slot_06",group:"chime",name:"チャイムくん衣装06",hiddenName:"？？？",src:"costumes/chime-costume-06.webp"},
-  {id:"chime_costume_slot_07",group:"chime",name:"チャイムくん衣装07",hiddenName:"？？？",src:"costumes/chime-costume-07.webp"},
-  {id:"chime_costume_slot_08",group:"chime",name:"チャイムくん衣装08",hiddenName:"？？？",src:"costumes/chime-costume-08.webp"},
-  {id:"chime_costume_slot_09",group:"chime",name:"チャイムくん衣装09",hiddenName:"？？？",src:"costumes/chime-costume-09.webp"},
-  {id:"chime_costume_slot_10",group:"chime",name:"チャイムくん衣装10",hiddenName:"？？？",src:"costumes/chime-costume-10.webp"},
-  {id:"chime_costume_slot_11",group:"chime",name:"チャイムくん衣装11",hiddenName:"？？？",src:"costumes/chime-costume-11.webp"},
-  {id:"chime_costume_slot_12",group:"chime",name:"チャイムくん衣装12",hiddenName:"？？？",src:"costumes/chime-costume-12.webp"},
-  {id:"chime_costume_slot_13",group:"chime",name:"チャイムくん衣装13",hiddenName:"？？？",src:"costumes/chime-costume-13.webp"},
-  {id:"chime_costume_slot_14",group:"chime",name:"チャイムくん衣装14",hiddenName:"？？？",src:"costumes/chime-costume-14.webp"},
-  {id:"chime_costume_slot_15",group:"chime",name:"チャイムくん衣装15",hiddenName:"？？？",src:"costumes/chime-costume-15.webp"},
-  {id:"chime_costume_slot_16",group:"chime",name:"チャイムくん衣装16",hiddenName:"？？？",src:"costumes/chime-costume-16.webp"},
-  {id:"chime_costume_slot_17",group:"chime",name:"チャイムくん衣装17",hiddenName:"？？？",src:"costumes/chime-costume-17.webp"},
-  {id:"chime_costume_slot_18",group:"chime",name:"チャイムくん衣装18",hiddenName:"？？？",src:"costumes/chime-costume-18.webp"},
-  {id:"chime_costume_slot_19",group:"chime",name:"チャイムくん衣装19",hiddenName:"？？？",src:"costumes/chime-costume-19.webp"},
-  {id:"chime_costume_slot_20",group:"chime",name:"チャイムくん衣装20",hiddenName:"？？？",src:"costumes/chime-costume-20.webp"},
-  {id:"chime_costume_slot_21",group:"chime",name:"チャイムくん衣装21",hiddenName:"？？？",src:"costumes/chime-costume-21.webp"},
-  {id:"chime_costume_slot_22",group:"chime",name:"チャイムくん衣装22",hiddenName:"？？？",src:"costumes/chime-costume-22.webp"},
-  {id:"chime_costume_slot_23",group:"chime",name:"チャイムくん衣装23",hiddenName:"？？？",src:"costumes/chime-costume-23.webp"},
-  {id:"chime_costume_slot_24",group:"chime",name:"チャイムくん衣装24",hiddenName:"？？？",src:"costumes/chime-costume-24.webp"},
-  {id:"chime_costume_slot_25",group:"chime",name:"チャイムくん衣装25",hiddenName:"？？？",src:"costumes/chime-costume-25.webp"},
-  {id:"chime_costume_slot_26",group:"chime",name:"チャイムくん衣装26",hiddenName:"？？？",src:"costumes/chime-costume-26.webp"},
-  {id:"chime_costume_slot_27",group:"chime",name:"チャイムくん衣装27",hiddenName:"？？？",src:"costumes/chime-costume-27.webp"},
-  {id:"chime_costume_slot_28",group:"chime",name:"チャイムくん衣装28",hiddenName:"？？？",src:"costumes/chime-costume-28.webp"},
-  {id:"chime_costume_slot_29",group:"chime",name:"チャイムくん衣装29",hiddenName:"？？？",src:"costumes/chime-costume-29.webp"},
-  {id:"chime_costume_slot_30",group:"chime",name:"チャイムくん衣装30",hiddenName:"？？？",src:"costumes/chime-costume-30.webp"},
-  {id:"chime_costume_slot_31",group:"chime",name:"チャイムくん衣装31",hiddenName:"？？？",src:"costumes/chime-costume-31.webp"},
-  {id:"chime_costume_slot_32",group:"chime",name:"チャイムくん衣装32",hiddenName:"？？？",src:"costumes/chime-costume-32.webp"},
-  {id:"chime_costume_slot_33",group:"chime",name:"チャイムくん衣装33",hiddenName:"？？？",src:"costumes/chime-costume-33.webp"},
-  {id:"chime_costume_slot_34",group:"chime",name:"チャイムくん衣装34",hiddenName:"？？？",src:"costumes/chime-costume-34.webp"},
-  {id:"chime_costume_slot_35",group:"chime",name:"チャイムくん衣装35",hiddenName:"？？？",src:"costumes/chime-costume-35.webp"},
-  {id:"chime_costume_slot_36",group:"chime",name:"チャイムくん衣装36",hiddenName:"？？？",src:"costumes/chime-costume-36.webp"},
-  {id:"chime_costume_slot_37",group:"chime",name:"チャイムくん衣装37",hiddenName:"？？？",src:"costumes/chime-costume-37.webp"},
-  {id:"chime_costume_slot_38",group:"chime",name:"チャイムくん衣装38",hiddenName:"？？？",src:"costumes/chime-costume-38.webp"},
-  {id:"chime_costume_slot_39",group:"chime",name:"チャイムくん衣装39",hiddenName:"？？？",src:"costumes/chime-costume-39.webp"},
-  {id:"chime_costume_slot_40",group:"chime",name:"チャイムくん衣装40",hiddenName:"？？？",src:"costumes/chime-costume-40.webp"},
-  {id:"chime_costume_slot_41",group:"chime",name:"チャイムくん衣装41",hiddenName:"？？？",src:"costumes/chime-costume-41.webp"},
-  {id:"chime_costume_slot_42",group:"chime",name:"チャイムくん衣装42",hiddenName:"？？？",src:"costumes/chime-costume-42.webp"},
-  {id:"chime_costume_slot_43",group:"chime",name:"チャイムくん衣装43",hiddenName:"？？？",src:"costumes/chime-costume-43.webp"},
-  {id:"chime_costume_slot_44",group:"chime",name:"チャイムくん衣装44",hiddenName:"？？？",src:"costumes/chime-costume-44.webp"},
-  {id:"chime_costume_slot_45",group:"chime",name:"チャイムくん衣装45",hiddenName:"？？？",src:"costumes/chime-costume-45.webp"},
-  {id:"chime_costume_slot_46",group:"chime",name:"チャイムくん衣装46",hiddenName:"？？？",src:"costumes/chime-costume-46.webp"},
-  {id:"chime_costume_slot_47",group:"chime",name:"チャイムくん衣装47",hiddenName:"？？？",src:"costumes/chime-costume-47.webp"},
-  {id:"chime_costume_slot_48",group:"chime",name:"チャイムくん衣装48",hiddenName:"？？？",src:"costumes/chime-costume-48.webp"},
-  {id:"chime_costume_slot_49",group:"chime",name:"チャイムくん衣装49",hiddenName:"？？？",src:"costumes/chime-costume-49.webp"},
-  {id:"chime_costume_slot_50",group:"chime",name:"チャイムくん衣装50",hiddenName:"？？？",src:"costumes/chime-costume-50.webp"},
-  {id:"chime_costume_slot_51",group:"chime",name:"チャイムくん衣装51",hiddenName:"？？？",src:"costumes/chime-costume-51.webp"},
-  {id:"chime_costume_slot_52",group:"chime",name:"チャイムくん衣装52",hiddenName:"？？？",src:"costumes/chime-costume-52.webp"},
-  {id:"chime_costume_slot_53",group:"chime",name:"チャイムくん衣装53",hiddenName:"？？？",src:"costumes/chime-costume-53.webp"},
-  {id:"chime_costume_slot_54",group:"chime",name:"チャイムくん衣装54",hiddenName:"？？？",src:"costumes/chime-costume-54.webp"},
+  {id:"chime_costume_slot_01",group:"chime",name:"チャイムくん衣装01",hiddenName:"？？？",src:"costumes/chime-costume-01.png"},
+  {id:"chime_costume_slot_02",group:"chime",name:"チャイムくん衣装02",hiddenName:"？？？",src:"costumes/chime-costume-02.png"},
+  {id:"chime_costume_slot_03",group:"chime",name:"チャイムくん衣装03",hiddenName:"？？？",src:"costumes/chime-costume-03.png"},
+  {id:"chime_costume_slot_04",group:"chime",name:"チャイムくん衣装04",hiddenName:"？？？",src:"costumes/chime-costume-04.png"},
+  {id:"chime_costume_slot_05",group:"chime",name:"チャイムくん衣装05",hiddenName:"？？？",src:"costumes/chime-costume-05.png"},
+  {id:"chime_costume_slot_06",group:"chime",name:"チャイムくん衣装06",hiddenName:"？？？",src:"costumes/chime-costume-06.png"},
+  {id:"chime_costume_slot_07",group:"chime",name:"チャイムくん衣装07",hiddenName:"？？？",src:"costumes/chime-costume-07.png"},
+  {id:"chime_costume_slot_08",group:"chime",name:"チャイムくん衣装08",hiddenName:"？？？",src:"costumes/chime-costume-08.png"},
+  {id:"chime_costume_slot_09",group:"chime",name:"チャイムくん衣装09",hiddenName:"？？？",src:"costumes/chime-costume-09.png"},
+  {id:"chime_costume_slot_10",group:"chime",name:"チャイムくん衣装10",hiddenName:"？？？",src:"costumes/chime-costume-10.png"},
+  {id:"chime_costume_slot_11",group:"chime",name:"チャイムくん衣装11",hiddenName:"？？？",src:"costumes/chime-costume-11.png"},
+  {id:"chime_costume_slot_12",group:"chime",name:"チャイムくん衣装12",hiddenName:"？？？",src:"costumes/chime-costume-12.png"},
+  {id:"chime_costume_slot_13",group:"chime",name:"チャイムくん衣装13",hiddenName:"？？？",src:"costumes/chime-costume-13.png"},
+  {id:"chime_costume_slot_14",group:"chime",name:"チャイムくん衣装14",hiddenName:"？？？",src:"costumes/chime-costume-14.png"},
+  {id:"chime_costume_slot_15",group:"chime",name:"チャイムくん衣装15",hiddenName:"？？？",src:"costumes/chime-costume-15.png"},
+  {id:"chime_costume_slot_16",group:"chime",name:"チャイムくん衣装16",hiddenName:"？？？",src:"costumes/chime-costume-16.png"},
+  {id:"chime_costume_slot_17",group:"chime",name:"チャイムくん衣装17",hiddenName:"？？？",src:"costumes/chime-costume-17.png"},
+  {id:"chime_costume_slot_18",group:"chime",name:"チャイムくん衣装18",hiddenName:"？？？",src:"costumes/chime-costume-18.png"},
+  {id:"chime_costume_slot_19",group:"chime",name:"チャイムくん衣装19",hiddenName:"？？？",src:"costumes/chime-costume-19.png"},
+  {id:"chime_costume_slot_20",group:"chime",name:"チャイムくん衣装20",hiddenName:"？？？",src:"costumes/chime-costume-20.png"},
+  {id:"chime_costume_slot_21",group:"chime",name:"チャイムくん衣装21",hiddenName:"？？？",src:"costumes/chime-costume-21.png"},
+  {id:"chime_costume_slot_22",group:"chime",name:"チャイムくん衣装22",hiddenName:"？？？",src:"costumes/chime-costume-22.png"},
+  {id:"chime_costume_slot_23",group:"chime",name:"チャイムくん衣装23",hiddenName:"？？？",src:"costumes/chime-costume-23.png"},
+  {id:"chime_costume_slot_24",group:"chime",name:"チャイムくん衣装24",hiddenName:"？？？",src:"costumes/chime-costume-24.png"},
+  {id:"chime_costume_slot_25",group:"chime",name:"チャイムくん衣装25",hiddenName:"？？？",src:"costumes/chime-costume-25.png"},
+  {id:"chime_costume_slot_26",group:"chime",name:"チャイムくん衣装26",hiddenName:"？？？",src:"costumes/chime-costume-26.png"},
+  {id:"chime_costume_slot_27",group:"chime",name:"チャイムくん衣装27",hiddenName:"？？？",src:"costumes/chime-costume-27.png"},
+  {id:"chime_costume_slot_28",group:"chime",name:"チャイムくん衣装28",hiddenName:"？？？",src:"costumes/chime-costume-28.png"},
+  {id:"chime_costume_slot_29",group:"chime",name:"チャイムくん衣装29",hiddenName:"？？？",src:"costumes/chime-costume-29.png"},
+  {id:"chime_costume_slot_30",group:"chime",name:"チャイムくん衣装30",hiddenName:"？？？",src:"costumes/chime-costume-30.png"},
+  {id:"chime_costume_slot_31",group:"chime",name:"チャイムくん衣装31",hiddenName:"？？？",src:"costumes/chime-costume-31.png"},
+  {id:"chime_costume_slot_32",group:"chime",name:"チャイムくん衣装32",hiddenName:"？？？",src:"costumes/chime-costume-32.png"},
+  {id:"chime_costume_slot_33",group:"chime",name:"チャイムくん衣装33",hiddenName:"？？？",src:"costumes/chime-costume-33.png"},
+  {id:"chime_costume_slot_34",group:"chime",name:"チャイムくん衣装34",hiddenName:"？？？",src:"costumes/chime-costume-34.png"},
+  {id:"chime_costume_slot_35",group:"chime",name:"チャイムくん衣装35",hiddenName:"？？？",src:"costumes/chime-costume-35.png"},
+  {id:"chime_costume_slot_36",group:"chime",name:"チャイムくん衣装36",hiddenName:"？？？",src:"costumes/chime-costume-36.png"},
+  {id:"chime_costume_slot_37",group:"chime",name:"チャイムくん衣装37",hiddenName:"？？？",src:"costumes/chime-costume-37.png"},
+  {id:"chime_costume_slot_38",group:"chime",name:"チャイムくん衣装38",hiddenName:"？？？",src:"costumes/chime-costume-38.png"},
+  {id:"chime_costume_slot_39",group:"chime",name:"チャイムくん衣装39",hiddenName:"？？？",src:"costumes/chime-costume-39.png"},
+  {id:"chime_costume_slot_40",group:"chime",name:"チャイムくん衣装40",hiddenName:"？？？",src:"costumes/chime-costume-40.png"},
+  {id:"chime_costume_slot_41",group:"chime",name:"チャイムくん衣装41",hiddenName:"？？？",src:"costumes/chime-costume-41.png"},
+  {id:"chime_costume_slot_42",group:"chime",name:"チャイムくん衣装42",hiddenName:"？？？",src:"costumes/chime-costume-42.png"},
+  {id:"chime_costume_slot_43",group:"chime",name:"チャイムくん衣装43",hiddenName:"？？？",src:"costumes/chime-costume-43.png"},
+  {id:"chime_costume_slot_44",group:"chime",name:"チャイムくん衣装44",hiddenName:"？？？",src:"costumes/chime-costume-44.png"},
+  {id:"chime_costume_slot_45",group:"chime",name:"チャイムくん衣装45",hiddenName:"？？？",src:"costumes/chime-costume-45.png"},
+  {id:"chime_costume_slot_46",group:"chime",name:"チャイムくん衣装46",hiddenName:"？？？",src:"costumes/chime-costume-46.png"},
+  {id:"chime_costume_slot_47",group:"chime",name:"チャイムくん衣装47",hiddenName:"？？？",src:"costumes/chime-costume-47.png"},
+  {id:"chime_costume_slot_48",group:"chime",name:"チャイムくん衣装48",hiddenName:"？？？",src:"costumes/chime-costume-48.png"},
+  {id:"chime_costume_slot_49",group:"chime",name:"チャイムくん衣装49",hiddenName:"？？？",src:"costumes/chime-costume-49.png"},
+  {id:"chime_costume_slot_50",group:"chime",name:"チャイムくん衣装50",hiddenName:"？？？",src:"costumes/chime-costume-50.png"},
+  {id:"chime_costume_slot_51",group:"chime",name:"チャイムくん衣装51",hiddenName:"？？？",src:"costumes/chime-costume-51.png"},
+  {id:"chime_costume_slot_52",group:"chime",name:"チャイムくん衣装52",hiddenName:"？？？",src:"costumes/chime-costume-52.png"},
+  {id:"chime_costume_slot_53",group:"chime",name:"チャイムくん衣装53",hiddenName:"？？？",src:"costumes/chime-costume-53.png"},
+  {id:"chime_costume_slot_54",group:"chime",name:"チャイムくん衣装54",hiddenName:"？？？",src:"costumes/chime-costume-54.png"},
 
   {id:"secret_rare_image",group:"secret",name:"レア画像",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.rare}`},
   {id:"secret_ultra_rare_image",group:"secret",name:"超レア画像",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.ultraRare}`},
-  {id:"secret_bell_rare_costume",group:"secret",name:"星月夜の夢",hiddenName:"シークレット衣装",src:"costumes/bell-secret-collection.webp"},
-  {id:"secret_chime_rare_costume",group:"secret",name:"暁桜のシンフォニー",hiddenName:"シークレット衣装",src:"costumes/chime-secret-complete.webp"}
+  {id:"secret_bell_rare_costume",group:"secret",name:"星月夜の夢",hiddenName:"シークレット衣装",src:"costumes/bell-secret-collection.jpg"},
+  {id:"secret_chime_rare_costume",group:"secret",name:"暁桜のシンフォニー",hiddenName:"シークレット衣装",src:"costumes/chime-secret-complete.jpg"}
 ];
 
 function getCollectionItem(itemId){
@@ -7340,82 +7338,15 @@ async function loadCollectionData(forceRefresh=false){
   }
 }
 
-/* 部活日に欠席等の連絡がない日を参加扱いにし、未取得衣装をまとめて付与 */
-async function awardAttendanceCostumes(){
-  if(!currentUser || !profile) return;
-  const uid=currentUser.uid;
-  const today=getTodayString(getAppDate());
-  try{
-    const memberRef=ref(db,`members/${uid}`);
-    const [memberSnap,scheduleSnap,noticeSnap,awardSnap,collectionSnap]=await Promise.all([
-      get(memberRef),get(ref(db,"schedules")),get(ref(db,"notices")),
-      get(ref(db,`members/${uid}/attendanceCostumeAwards`)),
-      get(ref(db,`members/${uid}/collection`))
-    ]);
-    if(!currentUser || currentUser.uid!==uid) return;
-    const memberData=memberSnap.exists()?(memberSnap.val()||{}):{};
-    // 初回ログインでは付与しない。初回実行日より前の部活日も遡って付与しない。
-    if(!memberData.attendanceCostumeStartDate){
-      await update(memberRef,{attendanceCostumeStartDate:today});
-      return;
-    }
-    const startDate=String(memberData.attendanceCostumeStartDate);
-    const schedules=scheduleSnap.exists()?(scheduleSnap.val()||{}):{};
-    const notices=noticeSnap.exists()?(noticeSnap.val()||{}):{};
-    const awards=awardSnap.exists()?(awardSnap.val()||{}):{};
-    const owned=collectionSnap.exists()?(collectionSnap.val()||{}):{};
-    const candidates=collectionItems.filter(item=>/^((bell|chime)_costume_slot_(0[1-9]|[1-4][0-9]|5[0-4]))$/.test(item.id));
-    const eligible=[];
-    const start=new Date(startDate+"T00:00:00");
-    const end=new Date(today+"T00:00:00");
-    for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
-      const date=getTodayString(d);
-      if(awards[date]) continue;
-      if(!hasClubSchedule(getSchedulesForDate(schedules,date))) continue;
-      const hasNotice=Object.values(notices).some(n=>n && n.uid===uid && n.date===date);
-      if(!hasNotice) eligible.push(date);
-    }
-    let pool=candidates.filter(item=>!owned[item.id]);
-    const preferred=profile.characterType==="chime"?"chime":"bell";
-    pool.sort((a,b)=>{
-      const ap=a.id.startsWith(preferred+"_")?0:1, bp=b.id.startsWith(preferred+"_")?0:1;
-      return ap-bp || a.id.localeCompare(b.id);
-    });
-    let awarded=0;
-    for(const date of eligible){
-      if(!pool.length) break;
-      const item=pool.shift();
-      const markerRef=ref(db,`members/${uid}/attendanceCostumeAwards/${date}`);
-      const markerNow=await get(markerRef);
-      if(markerNow.exists()) continue;
-      const itemRef=ref(db,`members/${uid}/collection/${item.id}`);
-      const itemNow=await get(itemRef);
-      if(!itemNow.exists()){
-        await set(itemRef,{acquiredAt:Date.now(),source:"attendance",activityDate:date});
-        owned[item.id]={acquiredAt:Date.now(),source:"attendance",activityDate:date};
-        awarded++;
-      } else {
-        pool=pool.filter(x=>x.id!==item.id);
-      }
-      await set(markerRef,{costumeId:item.id,awardedAt:Date.now()});
-    }
-    if(awarded){
-      saveCollectionDataCache(uid,{...owned});
-      updateCollectionMiniCount();
-      if($("collectionView") && !$("collectionView").classList.contains("hidden")) await renderCollection();
-    }
-  }catch(e){ console.error("参加衣装の付与に失敗しました",e); }
-}
-
 const SECRET_PREVIEW_LAYOUT = {
   bell: {
-    layers:["costumes/bell-secret-base.webp","costumes/bell-secret-main.webp","costumes/bell-secret-layer-01.webp","costumes/bell-secret-layer-02.webp","costumes/bell-secret-layer-03.webp","costumes/bell-secret-layer-04.webp","costumes/bell-secret-layer-05.webp"],
+    layers:["costumes/bell-secret-base.png","costumes/bell-secret-main.png","costumes/bell-secret-layer-01.png","costumes/bell-secret-layer-02.png","costumes/bell-secret-layer-03.png","costumes/bell-secret-layer-04.png","costumes/bell-secret-layer-05.png"],
     positions:[{x:-5.1,y:-9.9},{x:-4,y:30},{x:0,y:0},{x:25,y:35},{x:-62,y:35},{x:0,y:0},{x:32.5,y:4.9}],
     sizes:[{width:100,height:100,scale:1.1,angle:-3.9},{width:100,height:100,scale:1.45,angle:0},{width:100,height:100,scale:1,angle:0},{width:100,height:100,scale:1,angle:0},{width:100,height:100,scale:1,angle:0},{width:100,height:100,scale:1,angle:0},{width:100,height:100,scale:.96,angle:10.3}],
     enabled:[true,true,false,true,true,false,true], global:{x:0,y:50,scale:.9,angle:0}
   },
   chime: {
-    layers:["costumes/chime-secret-layer-03.webp","costumes/chime-secret-layer-02.webp","costumes/chime-secret-base-max.png","costumes/chime-secret-layer-05.webp","costumes/chime-secret-layer-01.webp","costumes/chime-secret-layer-04.webp"],
+    layers:["costumes/chime-secret-layer-03.png","costumes/chime-secret-layer-02.png","costumes/chime-secret-base-max.png","costumes/chime-secret-layer-05.png","costumes/chime-secret-layer-01.png","costumes/chime-secret-layer-04.png"],
     positions:[{x:-64,y:44.9},{x:-65.6,y:108},{x:-60.7,y:60.6},{x:-25.1,y:29.4},{x:-65.3,y:84.4},{x:-121.7,y:44.4}],
     sizes:[{width:100,height:100,scale:1.99,angle:0},{width:100,height:100,scale:1.75,angle:0},{width:100,height:100,scale:2.25,angle:0},{width:100,height:100,scale:1.09,angle:0},{width:100,height:100,scale:.9,angle:0},{width:100,height:100,scale:1,angle:0}],
     enabled:[false,true,true,true,true,false], global:{x:20,y:20,scale:.65,angle:0}
@@ -7423,7 +7354,7 @@ const SECRET_PREVIEW_LAYOUT = {
 };
 function secretCostumePreviewHtml(character){
   const isChime = character === "chime";
-  const src = isChime ? "costumes/chime-secret-complete.webp" : "costumes/bell-secret-complete.webp";
+  const src = isChime ? "costumes/chime-secret-complete.jpg" : "costumes/bell-secret-complete.jpg";
   const alt = isChime ? "チャイムくん・暁桜のシンフォニー" : "ベルちゃん・星月夜の夢";
   return `<div class="secret-costume-preview"><img class="secret-costume-complete-image" src="${src}" alt="${alt}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:contain;"></div>`;
 }
@@ -7440,9 +7371,7 @@ function collectionCardHtml(item,acquired){
   const visual=acquired
     ? (secretCharacter
         ? secretCostumePreviewHtml(secretCharacter).replace('<div class="secret-costume-preview">', `<div class="secret-costume-preview" data-collection-src="${esc(item.src)}" data-collection-type="costume">`)
-        : (item.group === "monthly"
-          ? `<img class="collection-image monthly-queued-image${isChimeRegularCostume ? " chime-costume-image" : ""}" data-collection-src="${esc(item.src)}" data-monthly-queue="true" data-collection-type="normal" alt="${esc(item.name)}" loading="lazy" decoding="async">`
-          : `<img class="collection-image${isChimeRegularCostume ? " chime-costume-image" : ""}" data-collection-src="${esc(item.src)}" data-collection-type="${isCostume ? "costume" : "normal"}" src="${esc(item.src)}" alt="${esc(item.name)}" loading="lazy" decoding="async">`))
+        : `<img class="collection-image${isChimeRegularCostume ? " chime-costume-image" : ""}" data-collection-src="${esc(item.src)}" data-collection-type="${isCostume ? "costume" : "normal"}" src="${esc(item.src)}" alt="${esc(item.name)}">`)
     : `<div class="collection-secret">？？？</div>`;
   return `<div class="collection-card">
     <div class="collection-image-wrap${acquired ? " collection-image-clickable" : ""}">${visual}</div>
@@ -7526,55 +7455,17 @@ function renderCollectionItems(acquiredData){
       const src=img.getAttribute("src") || "";
       if(src.includes("chime-secret-base-max.png") && img.dataset.fallbackUsed !== "true"){
         img.dataset.fallbackUsed="true";
-        img.src=src.replace("chime-secret-base-max.png","chime-secret-base.webp");
+        img.src=src.replace("chime-secret-base-max.png","chime-secret-base.png");
       }
     });
   });
   box.querySelectorAll("img.collection-image").forEach(img=>{
-    // Set lazy loading in the HTML itself as well, so the browser doesn't start
-    // fetching every full-size collection image before this pass runs.
     img.loading="lazy";
     img.decoding="async";
   });
-  // Load monthly images one by one in their displayed order, rather than
-  // making all twelve large files compete for bandwidth at once.
-  const monthlyQueue = [...box.querySelectorAll("#collection-section-monthly img[data-monthly-queue='true']")];
-  let monthlyQueueIndex = 0;
-  let monthlyQueueStarted = false;
-  const loadNextMonthlyImage = () => {
-    if(monthlyQueueIndex >= monthlyQueue.length) return;
-    const img = monthlyQueue[monthlyQueueIndex++];
-    const src = img.dataset.collectionSrc;
-    if(!src){ loadNextMonthlyImage(); return; }
-    img.loading = "eager";
-    img.fetchPriority = monthlyQueueIndex === 1 ? "high" : "auto";
-    const advance = () => loadNextMonthlyImage();
-    img.addEventListener("load", advance, {once:true});
-    img.addEventListener("error", advance, {once:true});
-    img.src = src;
-  };
-  if(monthlyQueue.length){
-    // Start with the first image; continue after each image succeeds or fails.
-    monthlyQueueStarted = true;
-    loadNextMonthlyImage();
-  }
 
   const mini=$("collectionCountMini");
-  if(mini){
-    const isComplete=collectionItems.length > 0 && acquiredCount >= collectionItems.length;
-    mini.textContent=isComplete ? "🎉 COMPLETE!" : `${acquiredCount}/${collectionItems.length}`;
-    mini.classList.toggle("complete",isComplete);
-    mini.setAttribute("aria-label",isComplete ? `コレクションコンプリート ${acquiredCount}/${collectionItems.length}` : `コレクション ${acquiredCount}/${collectionItems.length}`);
-  }
-
-  const overallProgress=$("collectionOverallProgress");
-  if(overallProgress){
-    const isComplete=collectionItems.length > 0 && acquiredCount === collectionItems.length;
-    overallProgress.classList.toggle("complete",isComplete);
-    overallProgress.textContent=isComplete
-      ? `🎉 コレクションコンプリート！ ${acquiredCount}/${collectionItems.length} 🎉`
-      : `コレクション収集状況：${acquiredCount}/${collectionItems.length}`;
-  }
+  if(mini) mini.textContent=`${acquiredCount}/${collectionItems.length}`;
 }
 
 async function renderCollection(){
@@ -7600,10 +7491,7 @@ async function updateCollectionMiniCount(){
   if(!mini) return;
   const data=await loadCollectionData(false);
   const count=collectionItems.filter(item=>!!data[item.id]).length;
-  const isComplete=collectionItems.length > 0 && count >= collectionItems.length;
-  mini.textContent=isComplete ? "🎉 COMPLETE!" : `${count}/${collectionItems.length}`;
-  mini.classList.toggle("complete",isComplete);
-  mini.setAttribute("aria-label",isComplete ? `コレクションコンプリート ${count}/${collectionItems.length}` : `コレクション ${count}/${collectionItems.length}`);
+  mini.textContent=`${count}/${collectionItems.length}`;
 }
 
 function openCostumeOverlay(){
@@ -7708,7 +7596,7 @@ async function showCollection(){
    - イベント衣装の日は抽選しない
    - ?testDate=YYYY-MM-DD の日付を抽選日として使う
 ===================================================== */
-const SECRET_COSTUME_PROBABILITY = 0.001;
+const SECRET_COSTUME_PROBABILITY = 1.0;
 
 const SECRET_COSTUME_IDS = {
   bell:"secret_bell_rare_costume",
@@ -7808,7 +7696,7 @@ function showSecretCostumeGift(character){
   const description = isChime
     ? "夜明けの空と、咲き誇る桜をイメージした特別な衣装。黄金色の朝日が、新しい一日の始まりを優しく祝福してくれるよ！"
     : "三日月と星々がきらめく、幻想的な夜空の衣装。深い藍色と金色の輝きが、ベルちゃんを夢の世界へと誘うよ……！";
-  const src = isChime ? "costumes/chime-secret-complete.webp" : "costumes/bell-secret-collection.webp";
+  const src = isChime ? "costumes/chime-secret-complete.jpg" : "costumes/bell-secret-collection.jpg";
   const overlay = document.createElement("div");
   overlay.id = "secretCostumeGiftOverlay";
   overlay.innerHTML = `
@@ -7904,7 +7792,7 @@ async function decideLoginImage(){
   if(data.welcomeImageDisplayed !== true){
     return {
       kind: "welcome",
-      src: "images/welcome/welcome.webp",
+      src: "images/welcome/welcome.jpg",
       name: "WELCOME",
       markWelcomeShownAfterLoad: true
     };
@@ -7927,24 +7815,13 @@ async function decideLoginImage(){
 
   /* ② シークレット4種類共通の抽選結果。
      抽選結果は1日1回だけ保存し、レア画像の表示権も同日に1回だけ取得する。 */
-  /* 抽選データの取得が遅い／応答しない場合でも、月別画像を長時間待たせない。
-     700ms以内に抽選結果が得られた場合だけ、従来どおりレア画像の判定を行う。
-     タイムアウトした抽選処理自体は継続するが、このログイン画像判定は月別画像へ進む。 */
-  const secretLottery = await Promise.race([
-    getOrCreateDailySecretLottery().catch(error => {
-      console.error("シークレット画像の抽選取得に失敗しました。月別画像へ進みます。", error);
-      return null;
-    }),
-    new Promise(resolve => setTimeout(() => resolve(null), 700))
-  ]);
+  const secretLottery = await getOrCreateDailySecretLottery();
 
   if(secretLottery?.type === "ultraRareImage" || secretLottery?.type === "rareImage"){
-    /* シークレット画像は当日1回だけ表示する。
-       すでに表示済み、または表示権の記録に失敗した場合は、
-       ページ全体を無画像にせず、下の月別画像判定へ進む。 */
+    /* 表示権をFirebase transactionで先着1回だけ取得する。
+       再読み込みや同時に複数処理が走っても、同じ日の画像を繰り返し表示しない。 */
     const displayClaimToken = `${Date.now()}_${Math.random().toString(36).slice(2)}`;
     const lotteryStateRef = ref(db,`members/${currentUser.uid}/secretLotteryState`);
-    let mayShowSecretImage = false;
     try{
       const claimResult = await runTransaction(lotteryStateRef,current=>{
         if(!current || current.date !== todayString) return current;
@@ -7952,28 +7829,30 @@ async function decideLoginImage(){
         return {...current,imageShown:true,imageShownToken:displayClaimToken};
       });
       const claimedState = claimResult?.snapshot?.val?.() || null;
-      mayShowSecretImage = !!claimResult?.committed && claimedState?.imageShownToken === displayClaimToken;
+      if(!claimResult?.committed || claimedState?.imageShownToken !== displayClaimToken){
+        return null;
+      }
     }catch(error){
-      console.error("シークレット画像の表示済み記録に失敗しました。月別画像へ進みます。",error);
+      console.error("シークレット画像の表示済み記録に失敗しました",error);
+      /* 記録できない場合は重複表示を避け、シークレット画像を表示しない。 */
+      return null;
     }
 
-    if(mayShowSecretImage){
-      if(secretLottery.type === "ultraRareImage"){
-        return {
-          kind: "lucky",
-          rarity: "ultraRare",
-          src: `images/lucky/${luckyImageFiles.ultraRare}`,
-          name: "超レア"
-        };
-      }
+    if(secretLottery.type === "ultraRareImage"){
       return {
         kind: "lucky",
-        rarity: "rare",
-        src: `images/lucky/${luckyImageFiles.rare}`,
-        name: "レア"
+        rarity: "ultraRare",
+        src: `images/lucky/${luckyImageFiles.ultraRare}`,
+        name: "超レア"
       };
     }
-    /* ここで return null せず、通常の月別画像判定へフォールバックする */
+
+    return {
+      kind: "lucky",
+      rarity: "rare",
+      src: `images/lucky/${luckyImageFiles.rare}`,
+      name: "レア"
+    };
   }
 
   /* ④ 月別：ONのときだけページを開くたびに表示する */
@@ -8124,9 +8003,9 @@ function refreshCollectionViewerItems(){
     return !!(wrap && wrap.classList.contains("collection-image-clickable") && el.dataset.collectionSrc);
   }).map(el=>{
     const src=el.dataset.collectionSrc;
-    const secret=(src.includes("bell-secret-complete.webp") || src.includes("bell-secret-collection.webp"))
+    const secret=(src.includes("bell-secret-complete.jpg") || src.includes("bell-secret-collection.jpg"))
       ? {title:"星月夜の夢",description:"三日月と星々がきらめく、幻想的な夜空の衣装。深い藍色と金色の輝きが、ベルちゃんを夢の世界へと誘うよ……！"}
-      : src.includes("chime-secret-complete.webp")
+      : src.includes("chime-secret-complete.jpg")
         ? {title:"暁桜のシンフォニー",description:"夜明けの空と、咲き誇る桜をイメージした特別な衣装。黄金色の朝日が、新しい一日の始まりを優しく祝福してくれるよ！"}
         : null;
     return {src,type:el.dataset.collectionType||"normal",alt:el.getAttribute("alt")||"",secret};
