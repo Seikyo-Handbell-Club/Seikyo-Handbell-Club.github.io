@@ -2602,6 +2602,13 @@ async function acquireDailyCostume(){
       }
     );
 
+    /* 毎日プレゼント衣装も対応するコレクション枠に登録する */
+    const costumeNumber = costume.id.match(/daily-costume-(\d+)/)?.[1];
+    if(costumeNumber){
+      const collectionItemId = `${gift.character}_costume_slot_${costumeNumber.padStart(2,"0")}`;
+      await acquireCollectionItem(collectionItemId);
+    }
+
     dailyCostumes = {
       bell:{...(dailyCostumes.bell || {})},
       chime:{...(dailyCostumes.chime || {})}
@@ -7333,7 +7340,7 @@ async function loadCollectionData(forceRefresh=false){
   }
 }
 
-/* アカウント作成後の部活参加3回ごとに衣装を1着付与 */
+/* 部活日に欠席等の連絡がない日を参加扱いにし、未取得衣装をまとめて付与 */
 async function awardAttendanceCostumes(){
   if(!currentUser || !profile) return;
   const uid=currentUser.uid;
@@ -7347,15 +7354,12 @@ async function awardAttendanceCostumes(){
     ]);
     if(!currentUser || currentUser.uid!==uid) return;
     const memberData=memberSnap.exists()?(memberSnap.val()||{}):{};
-    // Firebase Auth のアカウント作成日時を基準にし、初回ログイン以前の日付は数えない。
-    const creationTime=currentUser.metadata?.creationTime;
-    if(!creationTime) return;
-    const created=new Date(creationTime);
-    const accountDate=`${created.getFullYear()}-${String(created.getMonth()+1).padStart(2,"0")}-${String(created.getDate()).padStart(2,"0")}`;
-    const startDate=accountDate>String(memberData.attendanceCostumeStartDate||accountDate)?accountDate:String(memberData.attendanceCostumeStartDate||accountDate);
-    if(memberData.attendanceCostumeStartDate!==startDate){
-      await update(memberRef,{attendanceCostumeStartDate:startDate});
+    // 初回ログインでは付与しない。初回実行日より前の部活日も遡って付与しない。
+    if(!memberData.attendanceCostumeStartDate){
+      await update(memberRef,{attendanceCostumeStartDate:today});
+      return;
     }
+    const startDate=String(memberData.attendanceCostumeStartDate);
     const schedules=scheduleSnap.exists()?(scheduleSnap.val()||{}):{};
     const notices=noticeSnap.exists()?(noticeSnap.val()||{}):{};
     const awards=awardSnap.exists()?(awardSnap.val()||{}):{};
@@ -7366,15 +7370,11 @@ async function awardAttendanceCostumes(){
     const end=new Date(today+"T00:00:00");
     for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
       const date=getTodayString(d);
+      if(awards[date]) continue;
       if(!hasClubSchedule(getSchedulesForDate(schedules,date))) continue;
       const hasNotice=Object.values(notices).some(n=>n && n.uid===uid && n.date===date);
       if(!hasNotice) eligible.push(date);
     }
-    // 3回の参加条件を満たすごとに1着。付与済み日数は記録して重複付与を防ぐ。
-    const earnedCount=Math.floor(eligible.length/3);
-    const alreadyAwarded=Object.keys(awards).filter(date=>awards[date] && awards[date].costumeId).length;
-    let toAward=Math.max(0,earnedCount-alreadyAwarded);
-    if(!toAward) return;
     let pool=candidates.filter(item=>!owned[item.id]);
     const preferred=profile.characterType==="chime"?"chime":"bell";
     pool.sort((a,b)=>{
@@ -7382,17 +7382,22 @@ async function awardAttendanceCostumes(){
       return ap-bp || a.id.localeCompare(b.id);
     });
     let awarded=0;
-    while(toAward>0 && pool.length){
+    for(const date of eligible){
+      if(!pool.length) break;
       const item=pool.shift();
-      if(owned[item.id]) continue;
+      const markerRef=ref(db,`members/${uid}/attendanceCostumeAwards/${date}`);
+      const markerNow=await get(markerRef);
+      if(markerNow.exists()) continue;
       const itemRef=ref(db,`members/${uid}/collection/${item.id}`);
       const itemNow=await get(itemRef);
-      if(itemNow.exists()){owned[item.id]=itemNow.val();continue;}
-      const earnedOn=eligible[Math.min(eligible.length-1,(alreadyAwarded+awarded+1)*3-1)];
-      await set(itemRef,{acquiredAt:Date.now(),source:"attendance",activityDate:earnedOn});
-      owned[item.id]={acquiredAt:Date.now(),source:"attendance",activityDate:earnedOn};
-      await set(ref(db,`members/${uid}/attendanceCostumeAwards/${earnedOn}`),{costumeId:item.id,awardedAt:Date.now(),attendanceCount:(alreadyAwarded+awarded+1)*3});
-      awarded++;toAward--;
+      if(!itemNow.exists()){
+        await set(itemRef,{acquiredAt:Date.now(),source:"attendance",activityDate:date});
+        owned[item.id]={acquiredAt:Date.now(),source:"attendance",activityDate:date};
+        awarded++;
+      } else {
+        pool=pool.filter(x=>x.id!==item.id);
+      }
+      await set(markerRef,{costumeId:item.id,awardedAt:Date.now()});
     }
     if(awarded){
       saveCollectionDataCache(uid,{...owned});
