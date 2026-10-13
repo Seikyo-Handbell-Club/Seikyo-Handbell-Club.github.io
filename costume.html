@@ -482,13 +482,13 @@ function secretCostumePreviewHtml(character){
 
 const costumeDefinitions = {
   bell:[
-    {id:"normal",name:"ベルちゃん・ノーマル",src:"bell.webp",kind:"normal"},
+    {id:"normal",name:"ベルちゃん・ノーマル",src:"bell.png",kind:"normal"},
     ...eventCostumeDefinitions.map(([key,name,bellFile])=>({id:`event_${key}_bell`,name:`ベルちゃん・${name}`,src:`costumes/${bellFile}`,kind:"event"})),
     ...dailyCostumeDefinitions("bell"),
     secretCostumeDefinitions.bell
   ],
   chime:[
-    {id:"normal",name:"チャイムくん・ノーマル",src:"chime.webp",kind:"normal"},
+    {id:"normal",name:"チャイムくん・ノーマル",src:"chime.png",kind:"normal"},
     ...eventCostumeDefinitions.map(([key,name,bellFile,chimeFile])=>({id:`event_${key}_chime`,name:`チャイムくん・${name}`,src:`costumes/${chimeFile}`,kind:"event"})),
     ...dailyCostumeDefinitions("chime"),
     secretCostumeDefinitions.chime
