@@ -1156,7 +1156,11 @@ PDFを読み込む
 
 <input
   id="mid"
+  type="text"
+  inputmode="numeric"
+  pattern="[0-9]*"
   autocomplete="off"
+  oninput="this.value=this.value.replace(/[^0-9]/g,'')"
 >
 
 <label for="mname">
@@ -1637,6 +1641,12 @@ async function addMember(){
 
   const id=$("mid").value.trim();
   const name=$("mname").value.trim();
+
+  if(!/^[0-9]+$/.test(id)){
+    message("memberMsg","学校IDは数字のみで入力してください。","error");
+    $("mid").focus();
+    return;
+  }
   const grade=$("mgrade").value;
   const className=grade==="顧問など" ? "" : $("mclass").value;
 
