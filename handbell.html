@@ -7450,7 +7450,7 @@ function renderCollectionItems(acquiredData){
   });
 
   const mini=$("collectionCountMini");
-  if(mini) mini.textContent=`${acquiredCount}/${collectionItems.length}`;
+  if(mini) mini.textContent=collectionItems.length > 0 && acquiredCount >= collectionItems.length ? "🎉 COMPLETE!" : `${acquiredCount}/${collectionItems.length}`;
 }
 
 async function renderCollection(){
@@ -7476,7 +7476,7 @@ async function updateCollectionMiniCount(){
   if(!mini) return;
   const data=await loadCollectionData(false);
   const count=collectionItems.filter(item=>!!data[item.id]).length;
-  mini.textContent=`${count}/${collectionItems.length}`;
+  mini.textContent=collectionItems.length > 0 && count >= collectionItems.length ? "🎉 COMPLETE!" : `${count}/${collectionItems.length}`;
 }
 
 function openCostumeOverlay(){
