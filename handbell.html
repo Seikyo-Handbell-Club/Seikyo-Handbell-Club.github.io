@@ -7539,7 +7539,7 @@ const SECRET_PREVIEW_LAYOUT = {
 };
 function secretCostumePreviewHtml(character){
   const isChime = character === "chime";
-  const src = isChime ? "costumes/chime-secret-complete.webp" : "costumes/bell-secret-complete.webp";
+  const src = isChime ? "costumes/chime-secret-complete.webp" : "costumes/bell-secret-collection.webp";
   const alt = isChime ? "チャイムくん・暁桜のシンフォニー" : "ベルちゃん・星月夜の夢";
   return `<div class="secret-costume-preview"><img class="secret-costume-complete-image" src="${src}" alt="${alt}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:contain;"></div>`;
 }
