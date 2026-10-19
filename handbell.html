@@ -3537,8 +3537,9 @@ onAuthStateChanged(
     sendEquippedCostumeToBell();
     sendEventCostumeOverrideToBell();
 
-    /* 今日のプレゼント（1日1着・コレクションとは別管理） */
-    await acquireDailyCostume();
+    /* ログインしただけでは衣装を付与しない。
+       衣装は「部活参加3回ごと」の条件を満たした場合だけ付与する。
+       旧「今日のプレゼント」はコレクションと別管理で誤解を招くため、自動実行しない。 */
     /* 欠席連絡のない部活日分の未取得衣装をまとめて付与 */
     await awardAttendanceCostumes();
 
@@ -7135,7 +7136,7 @@ const collectionItems = [
 
   {id:"secret_rare_image",group:"secret",name:"レア画像",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.rare}`},
   {id:"secret_ultra_rare_image",group:"secret",name:"超レア画像",hiddenName:"シークレット画像",src:`images/lucky/${luckyImageFiles.ultraRare}`},
-  {id:"secret_bell_rare_costume",group:"secret",name:"星月夜の夢",hiddenName:"シークレット衣装",src:"costumes/bell-secret-complete.webp"},
+  {id:"secret_bell_rare_costume",group:"secret",name:"星月夜の夢",hiddenName:"シークレット衣装",src:"costumes/bell-secret-complete.jpg"},
   {id:"secret_chime_rare_costume",group:"secret",name:"暁桜のシンフォニー",hiddenName:"シークレット衣装",src:"costumes/chime-secret-complete.webp"}
 ];
 
@@ -7362,14 +7363,9 @@ async function awardAttendanceCostumes(){
 
     const memberData = memberSnap.exists() ? (memberSnap.val() || {}) : {};
     if(!memberData.attendanceCostumeStartDate){
-      // アカウント作成日以降だけを対象にする。登録日時がない旧アカウントは初回確認日を基準にする。
-      const createdAt = Number(memberData.accountCreatedAt || profile.accountCreatedAt || 0);
-      const createdDate = createdAt > 0 && Number.isFinite(createdAt)
-        ? getTodayString(new Date(createdAt))
-        : today;
-      const initialStartDate = createdDate > today ? today : createdDate;
+      // 初回実行日より前の部活日は遡って数えない。
       await update(memberRef,{
-        attendanceCostumeStartDate:initialStartDate,
+        attendanceCostumeStartDate:today,
         attendanceCostumeAttendanceInitialized:true
       });
       return;
@@ -7536,7 +7532,7 @@ const SECRET_PREVIEW_LAYOUT = {
     enabled:[true,true,false,true,true,false,true], global:{x:0,y:50,scale:.9,angle:0}
   },
   chime: {
-    layers:["costumes/chime-secret-layer-03.webp","costumes/chime-secret-layer-02.webp","costumes/chime-secret-base.webp","costumes/chime-secret-layer-05.webp","costumes/chime-secret-layer-01.webp","costumes/chime-secret-layer-04.webp"],
+    layers:["costumes/chime-secret-layer-03.webp","costumes/chime-secret-layer-02.webp","costumes/chime-secret-base-max.png","costumes/chime-secret-layer-05.webp","costumes/chime-secret-layer-01.webp","costumes/chime-secret-layer-04.webp"],
     positions:[{x:-64,y:44.9},{x:-65.6,y:108},{x:-60.7,y:60.6},{x:-25.1,y:29.4},{x:-65.3,y:84.4},{x:-121.7,y:44.4}],
     sizes:[{width:100,height:100,scale:1.99,angle:0},{width:100,height:100,scale:1.75,angle:0},{width:100,height:100,scale:2.25,angle:0},{width:100,height:100,scale:1.09,angle:0},{width:100,height:100,scale:.9,angle:0},{width:100,height:100,scale:1,angle:0}],
     enabled:[false,true,true,true,true,false], global:{x:20,y:20,scale:.65,angle:0}
@@ -7544,7 +7540,7 @@ const SECRET_PREVIEW_LAYOUT = {
 };
 function secretCostumePreviewHtml(character){
   const isChime = character === "chime";
-  const src = isChime ? "costumes/chime-secret-complete.webp" : "costumes/bell-secret-complete.webp";
+  const src = isChime ? "costumes/chime-secret-complete.webp" : "costumes/bell-secret-complete.jpg";
   const alt = isChime ? "チャイムくん・暁桜のシンフォニー" : "ベルちゃん・星月夜の夢";
   return `<div class="secret-costume-preview"><img class="secret-costume-complete-image" src="${src}" alt="${alt}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:contain;"></div>`;
 }
@@ -7623,7 +7619,7 @@ function renderCollectionItems(acquiredData){
       <div class="collection-toc-grid">
         ${groups.map(([id,title,items])=>{
           const count=items.filter(item=>isAcquired(item.id)).length;
-          return `<button type="button" class="collection-toc-button" onclick="scrollToCollectionSection('${id}')"><span>${title}</span><span class="collection-progress">${count === items.length ? "🎉 コンプリート！" : `${count}/${items.length}`}</span></button>`;
+          return `<button type="button" class="collection-toc-button" onclick="scrollToCollectionSection('${id}')"><span>${title}</span><span class="collection-progress">${count === items.length ? "COMPLETE!" : `${count}/${items.length}`}</span></button>`;
         }).join("")}
       </div>
     </nav>
@@ -7633,7 +7629,7 @@ function renderCollectionItems(acquiredData){
     <div class="collection-section" id="collection-section-${id}">
       <div class="collection-section-title-row">
         <h3>${title}</h3>
-        <span class="collection-section-progress">${items.filter(item=>isAcquired(item.id)).length === items.length ? "🎉 コンプリート！" : `${items.filter(item=>isAcquired(item.id)).length}/${items.length}`}</span>
+        <span class="collection-section-progress">${items.filter(item=>isAcquired(item.id)).length === items.length ? "COMPLETE!" : `${items.filter(item=>isAcquired(item.id)).length}/${items.length}`}</span>
       </div>
       <div class="collection-grid">
         ${items.map(item=>collectionCardHtml(item,isAcquired(item.id))).join("")}
@@ -7683,7 +7679,7 @@ function renderCollectionItems(acquiredData){
   const mini=$("collectionCountMini");
   if(mini){
     const isComplete=collectionItems.length > 0 && acquiredCount >= collectionItems.length;
-    mini.textContent=isComplete ? "🎉 コンプリート！" : `${acquiredCount}/${collectionItems.length}`;
+    mini.textContent=isComplete ? "🎉 COMPLETE!" : `${acquiredCount}/${collectionItems.length}`;
     mini.classList.toggle("complete",isComplete);
     mini.setAttribute("aria-label",isComplete ? `コレクションコンプリート ${acquiredCount}/${collectionItems.length}` : `コレクション ${acquiredCount}/${collectionItems.length}`);
   }
@@ -7722,7 +7718,7 @@ async function updateCollectionMiniCount(){
   const data=await loadCollectionData(false);
   const count=collectionItems.filter(item=>!!data[item.id]).length;
   const isComplete=collectionItems.length > 0 && count >= collectionItems.length;
-  mini.textContent=isComplete ? "🎉 コンプリート！" : `${count}/${collectionItems.length}`;
+  mini.textContent=isComplete ? "🎉 COMPLETE!" : `${count}/${collectionItems.length}`;
   mini.classList.toggle("complete",isComplete);
   mini.setAttribute("aria-label",isComplete ? `コレクションコンプリート ${count}/${collectionItems.length}` : `コレクション ${count}/${collectionItems.length}`);
 }
@@ -7928,7 +7924,7 @@ function showSecretCostumeGift(character){
   const description = isChime
     ? "夜明けの空と、咲き誇る桜をイメージした特別な衣装。黄金色の朝日が、新しい一日の始まりを優しく祝福してくれるよ！"
     : "三日月と星々がきらめく、幻想的な夜空の衣装。深い藍色と金色の輝きが、ベルちゃんを夢の世界へと誘うよ……！";
-  const src = isChime ? "costumes/chime-secret-complete.webp" : "costumes/bell-secret-complete.webp";
+  const src = isChime ? "costumes/chime-secret-complete.webp" : "costumes/bell-secret-complete.jpg";
   const overlay = document.createElement("div");
   overlay.id = "secretCostumeGiftOverlay";
   overlay.innerHTML = `
@@ -8244,7 +8240,7 @@ function refreshCollectionViewerItems(){
     return !!(wrap && wrap.classList.contains("collection-image-clickable") && el.dataset.collectionSrc);
   }).map(el=>{
     const src=el.dataset.collectionSrc;
-    const secret=(src.includes("bell-secret-complete.webp") || src.includes("bell-secret-collection.webp"))
+    const secret=(src.includes("bell-secret-complete.jpg") || src.includes("bell-secret-collection.jpg") || src.includes("bell-secret-complete.webp") || src.includes("bell-secret-collection.webp"))
       ? {title:"星月夜の夢",description:"三日月と星々がきらめく、幻想的な夜空の衣装。深い藍色と金色の輝きが、ベルちゃんを夢の世界へと誘うよ……！"}
       : src.includes("chime-secret-complete.webp")
         ? {title:"暁桜のシンフォニー",description:"夜明けの空と、咲き誇る桜をイメージした特別な衣装。黄金色の朝日が、新しい一日の始まりを優しく祝福してくれるよ！"}
