@@ -4770,7 +4770,7 @@ function renderDayDetail(date,schedules,all){
               ${
                 /顧問|先生|職員/.test(`${n.grade || ""}${n.className || ""}`)
                   ? `${esc(n.grade || "")}${esc(n.className || "")}`
-                  : `${esc(n.grade ? `${n.grade}年` : "学年未登録")} ${esc(n.className ? `${String(n.className).replace(/組$/, "")}組` : "クラス未登録")}`
+                  : `${esc(n.grade ? (/年$/.test(String(n.grade)) ? String(n.grade) : `${n.grade}年`) : "学年未登録")} ${esc(n.className ? `${String(n.className).replace(/組$/, "")}組` : "クラス未登録")}`
               } ${esc(n.name || "名前未設定")}
             </strong>
             <span class="badge">
