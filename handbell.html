@@ -7362,9 +7362,14 @@ async function awardAttendanceCostumes(){
 
     const memberData = memberSnap.exists() ? (memberSnap.val() || {}) : {};
     if(!memberData.attendanceCostumeStartDate){
-      // 初回実行日より前の部活日は遡って数えない。
+      // アカウント作成日以降だけを対象にする。登録日時がない旧アカウントは初回確認日を基準にする。
+      const createdAt = Number(memberData.accountCreatedAt || profile.accountCreatedAt || 0);
+      const createdDate = createdAt > 0 && Number.isFinite(createdAt)
+        ? getTodayString(new Date(createdAt))
+        : today;
+      const initialStartDate = createdDate > today ? today : createdDate;
       await update(memberRef,{
-        attendanceCostumeStartDate:today,
+        attendanceCostumeStartDate:initialStartDate,
         attendanceCostumeAttendanceInitialized:true
       });
       return;
@@ -7531,7 +7536,7 @@ const SECRET_PREVIEW_LAYOUT = {
     enabled:[true,true,false,true,true,false,true], global:{x:0,y:50,scale:.9,angle:0}
   },
   chime: {
-    layers:["costumes/chime-secret-layer-03.webp","costumes/chime-secret-layer-02.webp","costumes/chime-secret-base-max.png","costumes/chime-secret-layer-05.webp","costumes/chime-secret-layer-01.webp","costumes/chime-secret-layer-04.webp"],
+    layers:["costumes/chime-secret-layer-03.webp","costumes/chime-secret-layer-02.webp","costumes/chime-secret-base.webp","costumes/chime-secret-layer-05.webp","costumes/chime-secret-layer-01.webp","costumes/chime-secret-layer-04.webp"],
     positions:[{x:-64,y:44.9},{x:-65.6,y:108},{x:-60.7,y:60.6},{x:-25.1,y:29.4},{x:-65.3,y:84.4},{x:-121.7,y:44.4}],
     sizes:[{width:100,height:100,scale:1.99,angle:0},{width:100,height:100,scale:1.75,angle:0},{width:100,height:100,scale:2.25,angle:0},{width:100,height:100,scale:1.09,angle:0},{width:100,height:100,scale:.9,angle:0},{width:100,height:100,scale:1,angle:0}],
     enabled:[false,true,true,true,true,false], global:{x:20,y:20,scale:.65,angle:0}
@@ -7618,7 +7623,7 @@ function renderCollectionItems(acquiredData){
       <div class="collection-toc-grid">
         ${groups.map(([id,title,items])=>{
           const count=items.filter(item=>isAcquired(item.id)).length;
-          return `<button type="button" class="collection-toc-button" onclick="scrollToCollectionSection('${id}')"><span>${title}</span><span class="collection-progress">${count === items.length ? "COMPLETE!" : `${count}/${items.length}`}</span></button>`;
+          return `<button type="button" class="collection-toc-button" onclick="scrollToCollectionSection('${id}')"><span>${title}</span><span class="collection-progress">${count === items.length ? "🎉 コンプリート！" : `${count}/${items.length}`}</span></button>`;
         }).join("")}
       </div>
     </nav>
@@ -7628,7 +7633,7 @@ function renderCollectionItems(acquiredData){
     <div class="collection-section" id="collection-section-${id}">
       <div class="collection-section-title-row">
         <h3>${title}</h3>
-        <span class="collection-section-progress">${items.filter(item=>isAcquired(item.id)).length === items.length ? "COMPLETE!" : `${items.filter(item=>isAcquired(item.id)).length}/${items.length}`}</span>
+        <span class="collection-section-progress">${items.filter(item=>isAcquired(item.id)).length === items.length ? "🎉 コンプリート！" : `${items.filter(item=>isAcquired(item.id)).length}/${items.length}`}</span>
       </div>
       <div class="collection-grid">
         ${items.map(item=>collectionCardHtml(item,isAcquired(item.id))).join("")}
@@ -7678,7 +7683,7 @@ function renderCollectionItems(acquiredData){
   const mini=$("collectionCountMini");
   if(mini){
     const isComplete=collectionItems.length > 0 && acquiredCount >= collectionItems.length;
-    mini.textContent=isComplete ? "🎉 COMPLETE!" : `${acquiredCount}/${collectionItems.length}`;
+    mini.textContent=isComplete ? "🎉 コンプリート！" : `${acquiredCount}/${collectionItems.length}`;
     mini.classList.toggle("complete",isComplete);
     mini.setAttribute("aria-label",isComplete ? `コレクションコンプリート ${acquiredCount}/${collectionItems.length}` : `コレクション ${acquiredCount}/${collectionItems.length}`);
   }
@@ -7717,7 +7722,7 @@ async function updateCollectionMiniCount(){
   const data=await loadCollectionData(false);
   const count=collectionItems.filter(item=>!!data[item.id]).length;
   const isComplete=collectionItems.length > 0 && count >= collectionItems.length;
-  mini.textContent=isComplete ? "🎉 COMPLETE!" : `${count}/${collectionItems.length}`;
+  mini.textContent=isComplete ? "🎉 コンプリート！" : `${count}/${collectionItems.length}`;
   mini.classList.toggle("complete",isComplete);
   mini.setAttribute("aria-label",isComplete ? `コレクションコンプリート ${count}/${collectionItems.length}` : `コレクション ${count}/${collectionItems.length}`);
 }
