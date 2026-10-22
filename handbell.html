@@ -7313,7 +7313,13 @@ function getAttendanceCostumeUnlockTimestamp(date, scheduleOrSchedules){
     : getSchedulesForDate(scheduleOrSchedules, date);
   const times = list
     .filter(s => s && (s.type === "normal" || s.type === "concert" || s.type === "event" || !s.type))
-    .map(s => splitTimeRange(s.time).end)
+    // 予定入力で使われる各種ダッシュ（-, －, 〜, ～, –, —）を許容する。
+    // splitTimeRange() は一部のダッシュしか扱わないため、衣装判定内で直接解析する。
+    .map(s => {
+      const value = String(s.time || "").trim();
+      const match = value.match(/^\s*\d{1,2}:\d{2}\s*[-－〜～–—−~]\s*(\d{1,2}:\d{2})\s*$/);
+      return match ? match[1] : "";
+    })
     .filter(t => /^\d{1,2}:\d{2}$/.test(String(t || "")))
     .map(t => { const [h,m] = t.split(":").map(Number); return h * 60 + m; })
     .filter(n => Number.isFinite(n) && n >= 0 && n < 24 * 60);
