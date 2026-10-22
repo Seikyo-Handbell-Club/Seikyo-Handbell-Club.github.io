@@ -1288,7 +1288,7 @@ PDFを読み込む
 
 <div class="card">
   <h2 class="section-title">欠席理由の管理</h2>
-  <p class="sub-title">部員サイトの「欠席理由」に表示する項目を追加・修正・削除でき、上下ボタンで順番も変更できます。「その他」は固定項目で、常に最後に表示されます。</p>
+  <p class="sub-title">部員サイトの「欠席理由」に表示する項目を追加・修正・削除できます。左側の⠿を押したままドラッグすると順番を変更できます。「その他」は固定項目で、常に最後に表示されます。</p>
   <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end">
     <div style="flex:1;min-width:200px">
       <label for="newAbsenceReason">追加する理由</label>
@@ -4618,18 +4618,82 @@ function renderAbsenceReasonsAdmin(){
     const fixed=reason==="その他";
     const encoded=encodeURIComponent(reason);
     const controls=fixed
-      ? '<span class="small">（固定）</span>'
-      : `<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
-          <button type="button" class="secondary" data-move-reason="${index}" data-direction="up" ${index===0?'disabled':''} aria-label="${safe}を上へ">↑</button>
-          <button type="button" class="secondary" data-move-reason="${index}" data-direction="down" ${index===adminAbsenceReasons.length-2?'disabled':''} aria-label="${safe}を下へ">↓</button>
+      ? '<span class="small">（固定・移動不可）</span>'
+      : `<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center">
           <button type="button" class="secondary" data-edit-reason="${encoded}">修正</button>
           <button type="button" class="secondary" data-delete-reason="${encoded}">削除</button>
         </div>`;
-    return `<div style="display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e5e8ed"><span style="min-width:0;overflow-wrap:anywhere">${index+1}. ${safe}</span>${controls}</div>`;
+    const dragHandle=fixed ? '<span aria-hidden="true" style="width:38px;flex:0 0 38px"></span>'
+      : `<button type="button" class="secondary" data-drag-handle="${index}" aria-label="${safe}をドラッグして並び替え" title="押したままドラッグして並び替え" style="width:38px;min-width:38px;padding:10px 0;font-size:22px;line-height:1;touch-action:none;cursor:grab;user-select:none">⠿</button>`;
+    return `<div data-reason-row="${index}" style="display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e5e8ed;min-height:56px;box-sizing:border-box">
+      <div style="display:flex;gap:10px;align-items:center;min-width:0;flex:1">${dragHandle}<span style="min-width:0;overflow-wrap:anywhere">${index+1}. ${safe}</span></div>${controls}
+    </div>`;
   }).join("");
   host.querySelectorAll("[data-delete-reason]").forEach(button=>button.addEventListener("click",()=>deleteAbsenceReason(decodeURIComponent(button.dataset.deleteReason))));
   host.querySelectorAll("[data-edit-reason]").forEach(button=>button.addEventListener("click",()=>editAbsenceReason(decodeURIComponent(button.dataset.editReason))));
-  host.querySelectorAll("[data-move-reason]").forEach(button=>button.addEventListener("click",()=>moveAbsenceReason(Number(button.dataset.moveReason),button.dataset.direction)));
+  setupAbsenceReasonDrag(host);
+}
+
+function setupAbsenceReasonDrag(host){
+  let drag=null;
+  const clearDropMarks=()=>host.querySelectorAll("[data-reason-row]").forEach(row=>{
+    row.style.background="";
+    row.style.outline="";
+  });
+  host.querySelectorAll("[data-drag-handle]").forEach(handle=>{
+    handle.addEventListener("pointerdown",event=>{
+      if(event.pointerType==="mouse" && event.button!==0)return;
+      const index=Number(handle.dataset.dragHandle);
+      if(!Number.isInteger(index)||index<0||index>=adminAbsenceReasons.length-1)return;
+      event.preventDefault();
+      drag={from:index,pointerId:event.pointerId,x:event.clientX,y:event.clientY};
+      handle.style.cursor="grabbing";
+      try{handle.setPointerCapture(event.pointerId);}catch(e){}
+    });
+    handle.addEventListener("pointermove",event=>{
+      if(!drag||drag.pointerId!==event.pointerId)return;
+      event.preventDefault();
+      drag.x=event.clientX;drag.y=event.clientY;
+      clearDropMarks();
+      const target=document.elementFromPoint(event.clientX,event.clientY)?.closest("[data-reason-row]");
+      if(target && host.contains(target) && Number(target.dataset.reasonRow)<adminAbsenceReasons.length-1){
+        target.style.background="#eaf2ff";
+        target.style.outline="2px dashed #2563eb";
+      }
+    });
+    const finish=async event=>{
+      if(!drag||drag.pointerId!==event.pointerId)return;
+      const current=drag;
+      drag=null;
+      handle.style.cursor="grab";
+      clearDropMarks();
+      const targetRow=document.elementFromPoint(event.clientX,event.clientY)?.closest("[data-reason-row]");
+      if(!targetRow||!host.contains(targetRow))return;
+      const to=Number(targetRow.dataset.reasonRow);
+      if(!Number.isInteger(to)||to<0||to>=adminAbsenceReasons.length-1||to===current.from)return;
+      if(!(await isAdmin()))return;
+      const previous=[...adminAbsenceReasons];
+      try{
+        const [moved]=adminAbsenceReasons.splice(current.from,1);
+        const targetRect=targetRow.getBoundingClientRect();
+        const insertAfter=event.clientY>targetRect.top+targetRect.height/2;
+        let insertAt=to+(insertAfter?1:0);
+        if(current.from<insertAt)insertAt--;
+        insertAt=Math.max(0,Math.min(insertAt,adminAbsenceReasons.length-1));
+        adminAbsenceReasons.splice(insertAt,0,moved);
+        await saveAbsenceReasonsAdmin();
+        message("absenceReasonMsg","欠席理由の順番を変更しました。","success");
+      }catch(e){
+        adminAbsenceReasons=previous;
+        renderAbsenceReasonsAdmin();
+        message("absenceReasonMsg","順番の保存に失敗しました。\n"+(e.message||"不明"),"error");
+      }
+    };
+    handle.addEventListener("pointerup",finish);
+    handle.addEventListener("pointercancel",event=>{
+      if(drag&&drag.pointerId===event.pointerId){drag=null;handle.style.cursor="grab";clearDropMarks();}
+    });
+  });
 }
 
 async function saveAbsenceReasonsAdmin(){
