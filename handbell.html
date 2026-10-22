@@ -7301,37 +7301,35 @@ async function loadCollectionData(forceRefresh=false){
 }
 
 /*
-  部活参加衣装：参加3回ごとに1着。
-  ・欠席／遅刻／早退／途中抜けの連絡がある日は参加回数に含めない。
-  ・その日の部活終了30分前から自動でコレクションへ付与する。
-  ・日付ごとの参加記録と報酬記録を別々に保存して二重付与を防ぐ。
-  ・旧バージョンで既に処理済みの履歴は参加数の初期値として引き継ぎ、過去分の追加報酬は発生させない。
+  部活参加衣装：予定1件を参加1回として数え、3回ごとに1着付与する。
+  既存の参加日・報酬データは保持し、過去に処理済みの参加日を再付与しない。
 */
 let attendanceCostumeProcessing = false;
 let attendanceCostumeTimer = null;
 
-function getAttendanceCostumeUnlockTimestamp(date, schedules){
-  const clubSchedules = getSchedulesForDate(schedules, date).filter(s =>
-    s && (s.type === "normal" || s.type === "concert" || s.type === "event" || !s.type)
-  );
-  const endMinutes = clubSchedules
+function getAttendanceCostumeUnlockTimestamp(date, scheduleOrSchedules){
+  const list = Array.isArray(scheduleOrSchedules)
+    ? scheduleOrSchedules
+    : getSchedulesForDate(scheduleOrSchedules, date);
+  const times = list
+    .filter(s => s && (s.type === "normal" || s.type === "concert" || s.type === "event" || !s.type))
     .map(s => splitTimeRange(s.time).end)
     .filter(t => /^\d{1,2}:\d{2}$/.test(String(t || "")))
-    .map(t => {
-      const [h,m] = t.split(":").map(Number);
-      return h * 60 + m;
-    })
+    .map(t => { const [h,m] = t.split(":").map(Number); return h * 60 + m; })
     .filter(n => Number.isFinite(n) && n >= 0 && n < 24 * 60);
-  if(!endMinutes.length) return null;
-  // 同日に複数の部活予定がある場合は、一番遅い終了時刻を使う。
-  const latestEnd = Math.max(...endMinutes);
-  const endAt = new Date(`${date}T${String(Math.floor(latestEnd / 60)).padStart(2,"0")}:${String(latestEnd % 60).padStart(2,"0")}:00`);
-  if(!Number.isFinite(endAt.getTime())) return null;
-  return endAt.getTime() - 30 * 60 * 1000;
+  if(!times.length) return null;
+  const endMinutes = Math.max(...times);
+  const endAt = new Date(`${date}T${String(Math.floor(endMinutes / 60)).padStart(2,"0")}:${String(endMinutes % 60).padStart(2,"0")}:00`);
+  return Number.isFinite(endAt.getTime()) ? endAt.getTime() - 30 * 60 * 1000 : null;
+}
+
+function attendanceCostumeScheduleKey(date, schedule, index){
+  const identity = [schedule.type || "normal", schedule.time || "", schedule.title || schedule.name || "", schedule.place || ""]
+    .join("_").toLowerCase().replace(/[^a-z0-9_-]/g, "-").replace(/-+/g,"-").slice(0,90);
+  return `${date}__${identity || "schedule"}__${index}`;
 }
 
 async function awardAttendanceCostumes(){
-  // ページを開いたままでも、終了30分前になったら自動で判定する。
   if(attendanceCostumeTimer === null){
     attendanceCostumeTimer = setInterval(() => {
       if(currentUser && profile) awardAttendanceCostumes();
@@ -7344,98 +7342,95 @@ async function awardAttendanceCostumes(){
     const now = Date.now();
     const today = getTodayString(getAppDate());
     const memberRef = ref(db,`members/${uid}`);
-    const [memberSnap,scheduleSnap,noticeSnap,countedSnap,collectionSnap] = await Promise.all([
-      get(memberRef),
-      get(ref(db,"schedules")),
-      get(ref(db,"notices")),
+    const [memberSnap,scheduleSnap,noticeSnap,countedSnap,sessionSnap] = await Promise.all([
+      get(memberRef), get(ref(db,"schedules")), get(ref(db,"notices")),
       get(ref(db,`members/${uid}/attendanceCostumeAttendanceDates`)),
-      get(ref(db,`members/${uid}/collection`))
+      get(ref(db,`members/${uid}/attendanceCostumeAttendanceSessions`))
     ]);
     if(!currentUser || currentUser.uid !== uid) return;
-
     const memberData = memberSnap.exists() ? (memberSnap.val() || {}) : {};
     if(!memberData.attendanceCostumeStartDate){
-      // 初回実行日より前の部活日は遡って数えない。
-      await update(memberRef,{
-        attendanceCostumeStartDate:today,
-        attendanceCostumeAttendanceInitialized:true
-      });
+      await update(memberRef,{attendanceCostumeStartDate:today,attendanceCostumeAttendanceInitialized:true});
       return;
     }
-
     const startDate = String(memberData.attendanceCostumeStartDate);
     const schedules = scheduleSnap.exists() ? (scheduleSnap.val() || {}) : {};
     const notices = noticeSnap.exists() ? (noticeSnap.val() || {}) : {};
     const counted = countedSnap.exists() ? (countedSnap.val() || {}) : {};
-
-    const hasNoticeForDate = date => Object.values(notices).some(n =>
-      n && n.uid === uid && n.date === date
-    );
-    const hasClubOnDate = date => hasClubSchedule(getSchedulesForDate(schedules,date));
-    const addCountedDate = async (date, legacy) => {
-      const markerRef = ref(db,`members/${uid}/attendanceCostumeAttendanceDates/${date}`);
+    const sessions = sessionSnap.exists() ? (sessionSnap.val() || {}) : {};
+    const hasNoticeForDate = date => Object.values(notices).some(n => n && n.uid === uid && n.date === date);
+    const clubSchedule = s => s && (s.type === "normal" || s.type === "concert" || s.type === "event" || !s.type);
+    const getClubSchedules = date => getSchedulesForDate(schedules,date).filter(clubSchedule);
+    const addSession = async (date, schedule, index, legacy=false) => {
+      const key = attendanceCostumeScheduleKey(date,schedule,index);
+      const markerRef = ref(db,`members/${uid}/attendanceCostumeAttendanceSessions/${key}`);
       const result = await runTransaction(markerRef, current => current || {
-        countedAt:Date.now(),
-        legacy:!!legacy
+        activityDate:date, scheduleTime:String(schedule.time || ""), scheduleType:String(schedule.type || "normal"),
+        countedAt:Date.now(), legacy:!!legacy
       });
-      if(result.committed && result.snapshot.exists()) counted[date] = result.snapshot.val();
-      else if(result.snapshot && result.snapshot.exists()) counted[date] = result.snapshot.val();
+      if(result.snapshot && result.snapshot.exists()) sessions[key] = result.snapshot.val();
+      return key;
     };
 
-    // 旧版からの移行：今日より前の対象部活日を、過去の参加回数として引き継ぐ。
-    // これらの日付に対して新しい衣装を遡って追加することはない。
+    // 旧データの移行は従来どおり日単位で保持し、過去の参加を二重計上しない。
     if(!memberData.attendanceCostumeAttendanceInitialized){
-      const start = new Date(`${startDate}T00:00:00`);
-      const end = new Date(`${today}T00:00:00`);
+      const start = new Date(`${startDate}T00:00:00`), end = new Date(`${today}T00:00:00`);
       for(let d=new Date(start); d<end; d.setDate(d.getDate()+1)){
         if(!currentUser || currentUser.uid !== uid) return;
         const date = getTodayString(d);
-        if(counted[date] || !hasClubOnDate(date) || hasNoticeForDate(date)) continue;
-        await addCountedDate(date,true);
+        if(counted[date] || !getClubSchedules(date).length || hasNoticeForDate(date)) continue;
+        const markerRef = ref(db,`members/${uid}/attendanceCostumeAttendanceDates/${date}`);
+        const result = await runTransaction(markerRef,current => current || {countedAt:Date.now(),legacy:true});
+        if(result.snapshot && result.snapshot.exists()) counted[date] = result.snapshot.val();
       }
       await update(memberRef,{attendanceCostumeAttendanceInitialized:true});
     }
 
-    // 移行後の参加日をカウント。今日については、終了30分前になってから確定する。
-    const start = new Date(`${startDate}T00:00:00`);
-    const end = new Date(`${today}T00:00:00`);
+    // 各予定を個別に記録。予定ごとに終了30分前から参加回数へ反映する。
+    const start = new Date(`${startDate}T00:00:00`), end = new Date(`${today}T00:00:00`);
     for(let d=new Date(start); d<=end; d.setDate(d.getDate()+1)){
       if(!currentUser || currentUser.uid !== uid) return;
       const date = getTodayString(d);
-      if(counted[date] || !hasClubOnDate(date) || hasNoticeForDate(date)) continue;
-      if(date === today){
-        const unlockAt = getAttendanceCostumeUnlockTimestamp(date,schedules);
+      if(hasNoticeForDate(date)) continue;
+      const list = getClubSchedules(date);
+      for(let i=0;i<list.length;i++){
+        const schedule = list[i];
+        const unlockAt = getAttendanceCostumeUnlockTimestamp(date,[schedule]);
         if(unlockAt === null || now < unlockAt) continue;
+        await addSession(date,schedule,i,false);
       }
-      // 過去日にサイトを開いていなかった場合は、次回起動時にまとめて記録する。
-      await addCountedDate(date,false);
     }
 
-    // 日付順の累計参加回数から、3回目・6回目・9回目…の参加日を報酬日にする。
-    const attendanceDates = Object.keys(counted).filter(date =>
-      counted[date] && typeof counted[date] === "object"
-    ).sort();
+    // 日付単位の旧履歴は、同日に予定単位の記録がない場合のみ1回分として扱う。
+    const sessionsByDate = {};
+    for(const [key,value] of Object.entries(sessions)){
+      if(!value || typeof value !== "object") continue;
+      const date = value.activityDate || key.slice(0,10);
+      (sessionsByDate[date] ||= []).push({key,value});
+    }
+    const participation = [];
+    for(const [date,value] of Object.entries(counted)){
+      if(!sessionsByDate[date] && value && typeof value === "object") participation.push({key:date,date,legacy:value.legacy===true,availableAt:0,oldDate:true});
+    }
+    for(const [date,entries] of Object.entries(sessionsByDate)){
+      for(const entry of entries){
+        const availableAt = getAttendanceCostumeUnlockTimestamp(date,getClubSchedules(date).filter(s => String(s.time||"") === String(entry.value.scheduleTime||"")).slice(0,1));
+        participation.push({key:entry.key,date,legacy:entry.value.legacy===true,availableAt:availableAt || 0,oldDate:false});
+      }
+    }
+    participation.sort((a,b)=>a.date.localeCompare(b.date) || a.availableAt-b.availableAt || a.key.localeCompare(b.key));
+
     const rewardsRef = ref(db,`members/${uid}/attendanceCostumeRewards`);
-    for(let i=0; i<attendanceDates.length; i++){
-      const date = attendanceDates[i];
-      if((i+1) % 3 !== 0 || counted[date].legacy === true) continue;
-      const availableAt = getAttendanceCostumeUnlockTimestamp(date,schedules);
-      if(availableAt === null) continue;
-      const rewardRef = ref(db,`members/${uid}/attendanceCostumeRewards/${date}`);
+    for(let i=0;i<participation.length;i++){
+      const item = participation[i];
+      if((i+1)%3 !== 0 || item.legacy || item.oldDate || !item.availableAt) continue;
+      const rewardRef = ref(db,`members/${uid}/attendanceCostumeRewards/${item.key}`);
       const existingReward = await get(rewardRef);
       if(!existingReward.exists()){
-        await runTransaction(rewardRef,current => current || {
-          activityDate:date,
-          attendanceCount:i+1,
-          availableAt,
-          status:"pending",
-          createdAt:Date.now()
-        });
+        await runTransaction(rewardRef,current => current || {activityDate:item.date,attendanceCount:i+1,availableAt:item.availableAt,status:"pending",createdAt:Date.now()});
       }else{
         const existing = existingReward.val() || {};
-        if(existing.status !== "awarded" && existing.status !== "processing" && Number(existing.availableAt) !== availableAt){
-          await update(rewardRef,{availableAt});
-        }
+        if(existing.status !== "awarded" && existing.status !== "processing" && Number(existing.availableAt) !== item.availableAt) await update(rewardRef,{availableAt:item.availableAt});
       }
     }
 
@@ -7446,16 +7441,12 @@ async function awardAttendanceCostumes(){
     const candidates = collectionItems.filter(item => /^((bell|chime)_costume_slot_(0[1-9]|[1-4][0-9]|5[0-4]))$/.test(item.id));
     const preferred = profile.characterType === "chime" ? "chime" : "bell";
     const pool = candidates.filter(item => !owned[item.id]).sort((a,b) => {
-      const ap = a.id.startsWith(preferred+"_") ? 0 : 1;
-      const bp = b.id.startsWith(preferred+"_") ? 0 : 1;
+      const ap = a.id.startsWith(preferred+"_") ? 0 : 1, bp = b.id.startsWith(preferred+"_") ? 0 : 1;
       return ap-bp || a.id.localeCompare(b.id);
     });
     let awarded = 0;
-    const dueRewards = Object.entries(rewards).sort((a,b) =>
-      Number((a[1] || {}).availableAt || 0) - Number((b[1] || {}).availableAt || 0) || a[0].localeCompare(b[0])
-    );
-
-    for(const [date, rewardValue] of dueRewards){
+    const dueRewards = Object.entries(rewards).sort((a,b)=>Number((a[1]||{}).availableAt||0)-Number((b[1]||{}).availableAt||0)||a[0].localeCompare(b[0]));
+    for(const [rewardKey,rewardValue] of dueRewards){
       if(!currentUser || currentUser.uid !== uid) return;
       const reward = rewardValue || {};
       if(reward.status === "awarded" || Number(reward.availableAt || 0) > Date.now()) continue;
@@ -7463,9 +7454,9 @@ async function awardAttendanceCostumes(){
       if(!itemId){
         const candidate = pool.find(item => !owned[item.id]);
         if(!candidate) break;
-        const claimRef = ref(db,`members/${uid}/attendanceCostumeRewards/${date}`);
-        const claim = await runTransaction(claimRef,current => {
-          if(!current || current.status === "awarded" || Number(current.availableAt || 0) > Date.now()) return;
+        const claimRef = ref(db,`members/${uid}/attendanceCostumeRewards/${rewardKey}`);
+        const claim = await runTransaction(claimRef,current=>{
+          if(!current || current.status === "awarded" || Number(current.availableAt||0)>Date.now()) return;
           if(current.status === "processing" && current.costumeId) return current;
           return {...current,status:"processing",costumeId:candidate.id,claimedAt:Date.now()};
         });
@@ -7475,35 +7466,25 @@ async function awardAttendanceCostumes(){
         itemId = claimed.costumeId;
         if(!itemId) continue;
       }
-
       const itemRef = ref(db,`members/${uid}/collection/${itemId}`);
       const itemNow = await get(itemRef);
       if(itemNow.exists()){
         const existing = itemNow.val() || {};
-        // 前回処理が衣装保存後に中断していた場合は、付与済みに整える。
-        if(existing.source === "attendance" && existing.activityDate === date){
-          await update(ref(db,`members/${uid}/attendanceCostumeRewards/${date}`),{status:"awarded",awardedAt:Date.now()});
-          owned[itemId] = existing;
-          awarded++;
-          continue;
+        if(existing.source === "attendance" && (existing.activityDate === reward.activityDate || existing.activityDate === rewardKey)){
+          await update(ref(db,`members/${uid}/attendanceCostumeRewards/${rewardKey}`),{status:"awarded",awardedAt:Date.now()});
+          owned[itemId] = existing; awarded++; continue;
         }
-        // 予約中の衣装が別処理で取得済みになっていた場合は、次の候補を選び直す。
-        await update(ref(db,`members/${uid}/attendanceCostumeRewards/${date}`),{status:"pending",costumeId:null});
-        pool.splice(0,pool.length,...pool.filter(item => item.id !== itemId));
+        await update(ref(db,`members/${uid}/attendanceCostumeRewards/${rewardKey}`),{status:"pending",costumeId:null});
+        for(let i=pool.length-1;i>=0;i--) if(pool[i].id === itemId) pool.splice(i,1);
         continue;
       }
-
       const acquiredAt = Date.now();
-      const record = {acquiredAt,source:"attendance",activityDate:date,attendanceCount:reward.attendanceCount || null};
-      await set(itemRef,record);
-      owned[itemId] = record;
-      await update(ref(db,`members/${uid}/attendanceCostumeRewards/${date}`),{
-        status:"awarded",costumeId:itemId,awardedAt:Date.now()
-      });
-      for(let i=pool.length-1;i>=0;i--){ if(pool[i].id === itemId) pool.splice(i,1); }
+      const record = {acquiredAt,source:"attendance",activityDate:reward.activityDate || rewardKey,attendanceCount:reward.attendanceCount || null};
+      await set(itemRef,record); owned[itemId] = record;
+      await update(ref(db,`members/${uid}/attendanceCostumeRewards/${rewardKey}`),{status:"awarded",costumeId:itemId,awardedAt:Date.now()});
+      for(let i=pool.length-1;i>=0;i--) if(pool[i].id === itemId) pool.splice(i,1);
       awarded++;
     }
-
     if(awarded){
       saveCollectionDataCache(uid,{...owned});
       updateCollectionMiniCount();
