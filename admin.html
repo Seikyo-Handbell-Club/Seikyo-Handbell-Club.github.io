@@ -2958,8 +2958,10 @@ async function registerCandidates(){
       const x of pdfCandidatesData
     ){
 
+      const storageKey=await getScheduleStorageKey(x.date);
+
       await set(
-        ref(db,"schedules/"+x.date),
+        ref(db,"schedules/"+storageKey),
         {
           type:"normal",
           date:x.date,
@@ -3939,6 +3941,26 @@ function validateDateInputsBeforeSave(){
   }
 }
 
+async function getScheduleStorageKey(date, excludeKey=null){
+  // 既存データとの互換性を保ち、日付キーが空いていれば従来どおり使う。
+  if(date===excludeKey) return date;
+
+  const dateSnapshot=await get(ref(db,"schedules/"+date));
+  if(!dateSnapshot.exists()) return date;
+
+  // 同じ日付に予定が既にある場合は、別のキーで追加する。
+  let key="";
+  do{
+    key="normal_"+date+"_"+Date.now()+"_"+
+      Math.random().toString(36).slice(2,8);
+    const snapshot=await get(ref(db,"schedules/"+key));
+    if(!snapshot.exists()) break;
+  }while(true);
+
+  return key;
+}
+
+
 async function saveSchedule(){
 
   if(saveScheduleInProgress)return;
@@ -4012,17 +4034,13 @@ async function saveSchedule(){
       };
 
       if(oldKey!==newKey){
-        const existing=await get(ref(db,"schedules/"+newKey));
-        if(existing.exists()){
-          message("scheduleMsg","その日にはすでに通常部活の予定があります。別の日を選んでください。","error");
-          return;
-        }
+        const storageKey=await getScheduleStorageKey(newKey,oldKey);
         const updates={};
         updates["schedules/"+oldKey]=null;
-        updates["schedules/"+newKey]=normalData;
+        updates["schedules/"+storageKey]=normalData;
         await update(ref(db),updates);
       }else{
-        await set(ref(db,"schedules/"+newKey),normalData);
+        await set(ref(db,"schedules/"+oldKey),normalData);
       }
 
 
@@ -4044,8 +4062,10 @@ async function saveSchedule(){
     }
 
 
+    const storageKey=await getScheduleStorageKey(date);
+
     await set(
-      ref(db,"schedules/"+date),
+      ref(db,"schedules/"+storageKey),
       {
         type:"normal",
         date,
