@@ -7483,41 +7483,55 @@ async function awardAttendanceCostumes(){
     debug["参加履歴の合計候補"] = participation.length;
     debug["新しい参加回数（今回の判定対象）"] = participation.filter(item => !item.legacy && !item.oldDate && item.availableAt).length;
     const rewardsRef = ref(db,`members/${uid}/attendanceCostumeRewards`);
-    // 旧バージョンの参加日（legacy）は過去分の報酬を発生させないが、
-    // 新しい予定単位の参加回数の「3回ごと」という判定をずらしてはいけない。
-    // そのため、新しい参加セッションだけを1から数え、3・6・9回目に報酬を作る。
+    // 報酬は「新しい参加予定3件ごとに1着」。同じ日の複数予定も各1件として数える。
+    // 3・6・9件目に対応する予定キーだけを、今回の有効な報酬キーとして扱う。
     let newParticipationCount = 0;
+    const validRewardItems = [];
     for(const item of participation){
       if(item.legacy || item.oldDate || !item.availableAt) continue;
       newParticipationCount++;
-      if(newParticipationCount % 3 !== 0) continue;
-      const rewardRef = ref(db,`members/${uid}/attendanceCostumeRewards/${item.key}`);
-      const existingReward = await get(rewardRef);
-      if(!existingReward.exists()){
-        await runTransaction(rewardRef,current => current || {activityDate:item.date,attendanceCount:newParticipationCount,availableAt:item.availableAt,status:"pending",createdAt:Date.now()});
-      }else{
-        const existing = existingReward.val() || {};
-        if(existing.status !== "awarded" && existing.status !== "processing" && Number(existing.availableAt) !== item.availableAt) await update(rewardRef,{availableAt:item.availableAt});
+      if(newParticipationCount % 3 === 0){
+        validRewardItems.push({...item, attendanceCount:newParticipationCount});
+        const rewardRef = ref(db,`members/${uid}/attendanceCostumeRewards/${item.key}`);
+        const existingReward = await get(rewardRef);
+        if(!existingReward.exists()){
+          await runTransaction(rewardRef,current => current || {activityDate:item.date,attendanceCount:newParticipationCount,availableAt:item.availableAt,status:"pending",createdAt:Date.now()});
+        }else{
+          const existing = existingReward.val() || {};
+          if(existing.status !== "awarded" && existing.status !== "processing" && Number(existing.availableAt) !== item.availableAt) await update(rewardRef,{availableAt:item.availableAt,attendanceCount:newParticipationCount});
+        }
       }
     }
+    const validRewardKeys = new Set(validRewardItems.map(item => item.key));
 
     const rewardsSnap = await get(rewardsRef);
     const rewards = rewardsSnap.exists() ? (rewardsSnap.val() || {}) : {};
+    // 以前の不具合で3回未満の予定にも作られた未処理報酬は、再付与しないよう無効化する。
+    // 既に awarded の履歴・コレクションは自動削除せず、ユーザーのデータを壊さない。
+    for(const [key,value] of Object.entries(rewards)){
+      const reward = value || {};
+      if(!validRewardKeys.has(key) && reward.status !== "awarded" && reward.status !== "superseded"){
+        await update(ref(db,`members/${uid}/attendanceCostumeRewards/${key}`),{status:"superseded",supersededAt:Date.now()});
+        reward.status = "superseded";
+      }
+    }
     debug["報酬レコード総数"] = Object.keys(rewards).length;
+    debug["今回有効な報酬キー数（3回ごと）"] = validRewardKeys.size;
     debug["報酬ステータス"] = Object.entries(rewards).map(([k,v]) => `${k}: ${(v||{}).status || "statusなし"}`).join(" / ") || "なし";
     debug["処理段階"] = "衣装候補とコレクションを確認中";
     const collectionSnapNow = await get(ref(db,`members/${uid}/collection`));
     const owned = collectionSnapNow.exists() ? (collectionSnapNow.val() || {}) : {};
     const candidates = collectionItems.filter(item => /^((bell|chime)_costume_slot_(0[1-9]|[1-4][0-9]|5[0-4]))$/.test(item.id));
-    const preferred = profile.characterType === "chime" ? "chime" : "bell";
-    const pool = candidates.filter(item => !owned[item.id]).sort((a,b) => {
-      const ap = a.id.startsWith(preferred+"_") ? 0 : 1, bp = b.id.startsWith(preferred+"_") ? 0 : 1;
-      return ap-bp || a.id.localeCompare(b.id);
-    });
+    const availableForCharacter = character => candidates.filter(item => item.id.startsWith(character+"_") && !owned[item.id]);
+    const initialCharacter = profile.characterType === "chime" ? "chime" : "bell";
+    const totalUnowned = candidates.filter(item => !owned[item.id]).length;
     debug["通常衣装候補数"] = candidates.length;
-    debug["未所持の衣装候補数"] = pool.length;
+    debug["未所持の衣装候補数"] = totalUnowned;
+    debug["最初に選択しているキャラクター"] = initialCharacter === "chime" ? "チャイムくん" : "ベルちゃん";
     let awarded = 0;
-    const dueRewards = Object.entries(rewards).sort((a,b)=>Number((a[1]||{}).availableAt||0)-Number((b[1]||{}).availableAt||0)||a[0].localeCompare(b[0]));
+    const dueRewards = Object.entries(rewards)
+      .filter(([key]) => validRewardKeys.has(key))
+      .sort((a,b)=>Number((a[1]||{}).availableAt||0)-Number((b[1]||{}).availableAt||0)||a[0].localeCompare(b[0]));
     const rewardDiagnostics = [];
     debug["現在時刻ミリ秒"] = Date.now();
     debug["報酬詳細（解放時刻・判定）"] = dueRewards.map(([k,v]) => {
@@ -7532,7 +7546,25 @@ async function awardAttendanceCostumes(){
       if(Number(reward.availableAt || 0) > Date.now()) { rewardDiagnostics.push(`${rewardKey}: 解放時刻前のためスキップ`); continue; }
       let itemId = reward.status === "processing" ? reward.costumeId : null;
       if(!itemId){
-        const candidate = pool.find(item => !owned[item.id]);
+        let character = profile.characterType === "chime" ? "chime" : "bell";
+        let characterPool = availableForCharacter(character);
+        if(!characterPool.length){
+          const otherCharacter = character === "bell" ? "chime" : "bell";
+          const otherPool = availableForCharacter(otherCharacter);
+          if(!otherPool.length){
+            rewardDiagnostics.push(`${rewardKey}: ベルちゃん・チャイムくん両方の衣装をコンプリート済みのため付与停止`);
+            break;
+          }
+          // 選択中キャラをコンプリートしていたら、もう一方へ自動切り替え。
+          await update(ref(db,`members/${uid}`),{characterType:otherCharacter});
+          profile = {...profile,characterType:otherCharacter};
+          character = otherCharacter;
+          characterPool = otherPool;
+          sendCharacterToBell();
+          rewardDiagnostics.push(`${rewardKey}: ${character === "chime" ? "ベルちゃん" : "チャイムくん"}をコンプリート済みのため、${character === "chime" ? "チャイムくん" : "ベルちゃん"}へ自動切り替え`);
+        }
+        // 選択中キャラの未所持衣装だけからランダムに1着選ぶ。
+        const candidate = characterPool[Math.floor(Math.random() * characterPool.length)];
         if(!candidate) { rewardDiagnostics.push(`${rewardKey}: 未所持候補がないため停止`); break; }
         const claimRef = ref(db,`members/${uid}/attendanceCostumeRewards/${rewardKey}`);
         const claim = await runTransaction(claimRef,current=>{
@@ -7563,14 +7595,12 @@ async function awardAttendanceCostumes(){
         }
         await update(ref(db,`members/${uid}/attendanceCostumeRewards/${rewardKey}`),{status:"pending",costumeId:null});
         rewardDiagnostics.push(`${rewardKey}: 候補衣装${itemId}が既に所持済み（参加報酬由来ではない）ため保留に戻した`);
-        for(let i=pool.length-1;i>=0;i--) if(pool[i].id === itemId) pool.splice(i,1);
         continue;
       }
       const acquiredAt = Date.now();
       const record = {acquiredAt,source:"attendance",activityDate:reward.activityDate || rewardKey,attendanceCount:reward.attendanceCount || null};
       await set(itemRef,record); owned[itemId] = record;
       await update(ref(db,`members/${uid}/attendanceCostumeRewards/${rewardKey}`),{status:"awarded",costumeId:itemId,awardedAt:Date.now()});
-      for(let i=pool.length-1;i>=0;i--) if(pool[i].id === itemId) pool.splice(i,1);
       awarded++;
       rewardDiagnostics.push(`${rewardKey}: ${itemId}をコレクションに保存し付与成功`);
     }
