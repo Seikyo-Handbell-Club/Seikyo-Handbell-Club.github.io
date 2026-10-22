@@ -7307,6 +7307,31 @@ async function loadCollectionData(forceRefresh=false){
 let attendanceCostumeProcessing = false;
 let attendanceCostumeTimer = null;
 
+// 一時診断表示：参加衣装が付与されない原因を画面上で確認するためのもの。
+function showAttendanceCostumeDiagnostic(info){
+  try{
+    let panel = document.getElementById("attendanceCostumeDiagnosticPanel");
+    if(!panel){
+      panel = document.createElement("div");
+      panel.id = "attendanceCostumeDiagnosticPanel";
+      panel.style.cssText = "position:fixed;z-index:2147483647;left:8px;right:8px;bottom:8px;max-height:42vh;overflow:auto;background:#fff;border:2px solid #b45309;border-radius:12px;padding:12px;color:#111827;font:13px/1.5 -apple-system,BlinkMacSystemFont,sans-serif;box-shadow:0 4px 18px #0003;white-space:pre-wrap;word-break:break-word;";
+      const close = document.createElement("button");
+      close.type = "button"; close.textContent = "閉じる";
+      close.style.cssText = "float:right;margin:0 0 8px 8px;padding:5px 10px;border:1px solid #999;border-radius:7px;background:#f3f4f6;color:#111;";
+      close.onclick = () => panel.remove();
+      panel.appendChild(close);
+      const heading = document.createElement("strong"); heading.textContent = "参加衣装 診断結果（確認後は閉じてOK）";
+      heading.style.display = "block"; heading.style.marginBottom = "6px";
+      panel.appendChild(heading);
+      const body = document.createElement("div"); body.id = "attendanceCostumeDiagnosticBody";
+      panel.appendChild(body);
+      document.body.appendChild(panel);
+    }
+    const body = document.getElementById("attendanceCostumeDiagnosticBody");
+    if(body) body.textContent = Object.entries(info).map(([k,v]) => `${k}: ${v}`).join("\n");
+  }catch(displayError){ console.error("参加衣装診断表示エラー",displayError); }
+}
+
 function getAttendanceCostumeUnlockTimestamp(date, scheduleOrSchedules){
   const list = Array.isArray(scheduleOrSchedules)
     ? scheduleOrSchedules
@@ -7344,7 +7369,9 @@ async function awardAttendanceCostumes(){
   if(attendanceCostumeProcessing || !currentUser || !profile) return;
   attendanceCostumeProcessing = true;
   const uid = currentUser.uid;
+  const debug = {"処理段階":"開始", "ログインUID":uid, "実行時刻":new Date().toLocaleString("ja-JP")};
   try{
+    debug["処理段階"] = "Firebaseから会員・予定・連絡・参加記録を取得中";
     const now = Date.now();
     const today = getTodayString(getAppDate());
     const memberRef = ref(db,`members/${uid}`);
@@ -7353,8 +7380,14 @@ async function awardAttendanceCostumes(){
       get(ref(db,`members/${uid}/attendanceCostumeAttendanceDates`))
     ]);
     if(!currentUser || currentUser.uid !== uid) return;
+    debug["会員データ取得"] = memberSnap.exists() ? "あり" : "なし";
+    debug["予定データ取得"] = scheduleSnap.exists() ? "あり" : "なし";
+    debug["欠席等の連絡データ"] = noticeSnap.exists() ? "あり" : "なし";
+    debug["参加記録データ"] = countedSnap.exists() ? "あり" : "なし";
     const memberData = memberSnap.exists() ? (memberSnap.val() || {}) : {};
     if(!memberData.attendanceCostumeStartDate){
+      debug["処理段階"] = "初回開始日を初期化（今回は報酬判定なし）";
+      showAttendanceCostumeDiagnostic(debug);
       await update(memberRef,{attendanceCostumeStartDate:today,attendanceCostumeAttendanceInitialized:true});
       return;
     }
@@ -7362,6 +7395,13 @@ async function awardAttendanceCostumes(){
     const schedules = scheduleSnap.exists() ? (scheduleSnap.val() || {}) : {};
     const notices = noticeSnap.exists() ? (noticeSnap.val() || {}) : {};
     const counted = countedSnap.exists() ? (countedSnap.val() || {}) : {};
+    debug["参加開始日"] = startDate;
+    debug["既存参加記録数"] = Object.keys(counted).length;
+    debug["処理段階"] = "予定ごとの参加条件を確認中";
+    let debugEligibleSchedules = 0;
+    let debugBlockedByNotice = 0;
+    let debugNotYetUnlocked = 0;
+    let debugBadTime = 0;
     // 予定単位の記録も、既存の参加記録パスに保存してFirebase Rulesとの互換性を保つ。
     const sessions = Object.fromEntries(Object.entries(counted).filter(([key,value]) =>
       value && typeof value === "object" && value.activityDate && key !== value.activityDate
@@ -7402,16 +7442,24 @@ async function awardAttendanceCostumes(){
     for(let d=new Date(start); d<=end; d.setDate(d.getDate()+1)){
       if(!currentUser || currentUser.uid !== uid) return;
       const date = getTodayString(d);
-      if(hasNoticeForDate(date)) continue;
+      if(hasNoticeForDate(date)){ debugBlockedByNotice++; continue; }
       const list = getClubSchedules(date);
       for(let i=0;i<list.length;i++){
         const schedule = list[i];
         const unlockAt = getAttendanceCostumeUnlockTimestamp(date,[schedule]);
-        if(unlockAt === null || now < unlockAt) continue;
+        if(unlockAt === null){ debugBadTime++; continue; }
+        if(now < unlockAt){ debugNotYetUnlocked++; continue; }
+        debugEligibleSchedules++;
         await addSession(date,schedule,i,false);
       }
     }
 
+    debug["対象となった予定数"] = debugEligibleSchedules;
+    debug["連絡があって除外した日数"] = debugBlockedByNotice;
+    debug["まだ解放時刻前の予定数"] = debugNotYetUnlocked;
+    debug["時刻を解析できなかった予定数"] = debugBadTime;
+    debug["予定単位の参加記録数"] = Object.keys(sessions).length;
+    debug["処理段階"] = "3回ごとの報酬判定中";
     // 日付単位の旧履歴は、同日に予定単位の記録がない場合のみ1回分として扱う。
     const sessionsByDate = {};
     for(const [key,value] of Object.entries(sessions)){
@@ -7432,6 +7480,8 @@ async function awardAttendanceCostumes(){
     }
     participation.sort((a,b)=>a.date.localeCompare(b.date) || a.availableAt-b.availableAt || a.key.localeCompare(b.key));
 
+    debug["参加履歴の合計候補"] = participation.length;
+    debug["新しい参加回数（今回の判定対象）"] = participation.filter(item => !item.legacy && !item.oldDate && item.availableAt).length;
     const rewardsRef = ref(db,`members/${uid}/attendanceCostumeRewards`);
     // 旧バージョンの参加日（legacy）は過去分の報酬を発生させないが、
     // 新しい予定単位の参加回数の「3回ごと」という判定をずらしてはいけない。
@@ -7453,6 +7503,9 @@ async function awardAttendanceCostumes(){
 
     const rewardsSnap = await get(rewardsRef);
     const rewards = rewardsSnap.exists() ? (rewardsSnap.val() || {}) : {};
+    debug["報酬レコード総数"] = Object.keys(rewards).length;
+    debug["報酬ステータス"] = Object.entries(rewards).map(([k,v]) => `${k}: ${(v||{}).status || "statusなし"}`).join(" / ") || "なし";
+    debug["処理段階"] = "衣装候補とコレクションを確認中";
     const collectionSnapNow = await get(ref(db,`members/${uid}/collection`));
     const owned = collectionSnapNow.exists() ? (collectionSnapNow.val() || {}) : {};
     const candidates = collectionItems.filter(item => /^((bell|chime)_costume_slot_(0[1-9]|[1-4][0-9]|5[0-4]))$/.test(item.id));
@@ -7461,6 +7514,8 @@ async function awardAttendanceCostumes(){
       const ap = a.id.startsWith(preferred+"_") ? 0 : 1, bp = b.id.startsWith(preferred+"_") ? 0 : 1;
       return ap-bp || a.id.localeCompare(b.id);
     });
+    debug["通常衣装候補数"] = candidates.length;
+    debug["未所持の衣装候補数"] = pool.length;
     let awarded = 0;
     const dueRewards = Object.entries(rewards).sort((a,b)=>Number((a[1]||{}).availableAt||0)-Number((b[1]||{}).availableAt||0)||a[0].localeCompare(b[0]));
     for(const [rewardKey,rewardValue] of dueRewards){
@@ -7502,12 +7557,20 @@ async function awardAttendanceCostumes(){
       for(let i=pool.length-1;i>=0;i--) if(pool[i].id === itemId) pool.splice(i,1);
       awarded++;
     }
+    debug["今回付与した衣装数"] = awarded;
+    debug["処理段階"] = awarded ? "衣装付与成功" : "エラーなしで終了したが衣装付与なし（上の数値で原因を確認）";
+    showAttendanceCostumeDiagnostic(debug);
     if(awarded){
       saveCollectionDataCache(uid,{...owned});
       updateCollectionMiniCount();
       if($("collectionView") && !$("collectionView").classList.contains("hidden")) await renderCollection();
     }
   }catch(e){
+    debug["処理段階"] = "エラーで停止";
+    debug["エラー名"] = e && e.name ? e.name : "不明";
+    debug["エラーメッセージ"] = e && e.message ? e.message : String(e);
+    debug["エラー詳細"] = e && e.stack ? e.stack : "stackなし";
+    showAttendanceCostumeDiagnostic(debug);
     console.error("参加衣装の付与に失敗しました",e);
   }finally{
     attendanceCostumeProcessing = false;
