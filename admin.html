@@ -1156,6 +1156,8 @@ PDFを読み込む
 
 <input
   id="mid"
+  inputmode="numeric"
+  pattern="[0-9]*"
   autocomplete="off"
 >
 
@@ -1659,12 +1661,22 @@ function toggleMemberClassField(){
 $("mgrade").addEventListener("change", toggleMemberClassField);
 toggleMemberClassField();
 
+const schoolIdInput = $("mid");
+if(schoolIdInput){
+  schoolIdInput.addEventListener("input", () => {
+    const normalized = schoolIdInput.value.replace(/\D/g, "");
+    if(schoolIdInput.value !== normalized){
+      schoolIdInput.value = normalized;
+    }
+  });
+}
+
 
 async function addMember(){
 
   if(!(await isAdmin()))return;
 
-  const id=$("mid").value.trim();
+  const id=$("mid").value.replace(/\D/g, "").trim();
   const name=$("mname").value.trim();
   const grade=$("mgrade").value;
   const className=grade==="顧問など" ? "" : $("mclass").value;
