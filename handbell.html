@@ -7360,6 +7360,34 @@ function attendanceCostumeScheduleKey(date, schedule, index){
   return `${date}__${identity || "schedule"}__${index}`;
 }
 
+function showAttendanceCostumeGift(itemId){
+  const item = getCollectionItem(itemId);
+  if(!item) return;
+  const old = $("attendanceCostumeGiftOverlay");
+  if(old) old.remove();
+
+  const characterName = item.group === "chime" || item.id.startsWith("chime_")
+    ? "チャイムくん"
+    : "ベルちゃん";
+  const overlay = document.createElement("div");
+  overlay.id = "attendanceCostumeGiftOverlay";
+  overlay.style.cssText = "position:fixed;inset:0;z-index:2147483646;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(20,30,40,.58);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);";
+  overlay.innerHTML = `
+    <div class="daily-gift-card" role="dialog" aria-modal="true">
+      <div class="daily-gift-title">🎉 参加衣装を入手！</div>
+      <div class="daily-gift-character">${characterName}の新しい衣装をゲットしたよ！</div>
+      <img class="daily-gift-image" src="${esc(item.src)}" alt="${esc(item.name)}">
+      <div class="daily-gift-name">${esc(item.name)}</div>
+      <div class="daily-gift-note">コレクションに追加されたよ！「着替える」から着用できるよ。</div>
+      <button id="attendanceCostumeGiftClose" type="button">確認する</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  const close = () => overlay.remove();
+  $("attendanceCostumeGiftClose")?.addEventListener("click",close);
+  overlay.addEventListener("click",e=>{ if(e.target === overlay) close(); });
+}
+
 async function awardAttendanceCostumes(){
   if(attendanceCostumeTimer === null){
     attendanceCostumeTimer = setInterval(() => {
@@ -7529,6 +7557,7 @@ async function awardAttendanceCostumes(){
     debug["未所持の衣装候補数"] = totalUnowned;
     debug["最初に選択しているキャラクター"] = initialCharacter === "chime" ? "チャイムくん" : "ベルちゃん";
     let awarded = 0;
+    const newlyAwardedItemIds = [];
     const dueRewards = Object.entries(rewards)
       .filter(([key]) => validRewardKeys.has(key))
       .sort((a,b)=>Number((a[1]||{}).availableAt||0)-Number((b[1]||{}).availableAt||0)||a[0].localeCompare(b[0]));
@@ -7601,6 +7630,7 @@ async function awardAttendanceCostumes(){
       const record = {acquiredAt,source:"attendance",activityDate:reward.activityDate || rewardKey,attendanceCount:reward.attendanceCount || null};
       await set(itemRef,record); owned[itemId] = record;
       await update(ref(db,`members/${uid}/attendanceCostumeRewards/${rewardKey}`),{status:"awarded",costumeId:itemId,awardedAt:Date.now()});
+      newlyAwardedItemIds.push(itemId);
       awarded++;
       rewardDiagnostics.push(`${rewardKey}: ${itemId}をコレクションに保存し付与成功`);
     }
@@ -7611,6 +7641,7 @@ async function awardAttendanceCostumes(){
     if(awarded){
       saveCollectionDataCache(uid,{...owned});
       updateCollectionMiniCount();
+      if(newlyAwardedItemIds.length) showAttendanceCostumeGift(newlyAwardedItemIds[0]);
       if($("collectionView") && !$("collectionView").classList.contains("hidden")) await renderCollection();
     }
   }catch(e){
