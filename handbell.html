@@ -7536,11 +7536,18 @@ async function awardAttendanceCostumes(){
         if(!candidate) { rewardDiagnostics.push(`${rewardKey}: 未所持候補がないため停止`); break; }
         const claimRef = ref(db,`members/${uid}/attendanceCostumeRewards/${rewardKey}`);
         const claim = await runTransaction(claimRef,current=>{
-          if(!current || current.status === "awarded" || Number(current.availableAt||0)>Date.now()) return;
-          if(current.status === "processing" && current.costumeId) return current;
-          return {...current,status:"processing",costumeId:candidate.id,claimedAt:Date.now()};
+          // RTDB transaction may initially call the updater with null before the
+          // server value is available. Use the already-read reward as a fallback
+          // instead of aborting immediately and leaving every reward pending.
+          const base = current || reward;
+          if(!base || base.status === "awarded" || Number(base.availableAt||0)>Date.now()) return;
+          if(base.status === "processing" && base.costumeId) return base;
+          return {...base,status:"processing",costumeId:candidate.id,claimedAt:Date.now()};
         });
-        if(!claim.snapshot.exists()) { rewardDiagnostics.push(`${rewardKey}: claim transactionのsnapshotが存在せずスキップ`); continue; }
+        if(!claim.committed || !claim.snapshot.exists()) {
+          rewardDiagnostics.push(`${rewardKey}: claim transaction未確定（committed=${claim.committed}, snapshotExists=${claim.snapshot.exists()}）`);
+          continue;
+        }
         const claimed = claim.snapshot.val() || {};
         if(claimed.status === "awarded") { rewardDiagnostics.push(`${rewardKey}: claim後にawardedになったためスキップ`); continue; }
         itemId = claimed.costumeId;
