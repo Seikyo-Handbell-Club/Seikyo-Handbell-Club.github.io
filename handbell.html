@@ -7342,10 +7342,9 @@ async function awardAttendanceCostumes(){
     const now = Date.now();
     const today = getTodayString(getAppDate());
     const memberRef = ref(db,`members/${uid}`);
-    const [memberSnap,scheduleSnap,noticeSnap,countedSnap,sessionSnap] = await Promise.all([
+    const [memberSnap,scheduleSnap,noticeSnap,countedSnap] = await Promise.all([
       get(memberRef), get(ref(db,"schedules")), get(ref(db,"notices")),
-      get(ref(db,`members/${uid}/attendanceCostumeAttendanceDates`)),
-      get(ref(db,`members/${uid}/attendanceCostumeAttendanceSessions`))
+      get(ref(db,`members/${uid}/attendanceCostumeAttendanceDates`))
     ]);
     if(!currentUser || currentUser.uid !== uid) return;
     const memberData = memberSnap.exists() ? (memberSnap.val() || {}) : {};
@@ -7357,18 +7356,24 @@ async function awardAttendanceCostumes(){
     const schedules = scheduleSnap.exists() ? (scheduleSnap.val() || {}) : {};
     const notices = noticeSnap.exists() ? (noticeSnap.val() || {}) : {};
     const counted = countedSnap.exists() ? (countedSnap.val() || {}) : {};
-    const sessions = sessionSnap.exists() ? (sessionSnap.val() || {}) : {};
+    // 予定単位の記録も、既存の参加記録パスに保存してFirebase Rulesとの互換性を保つ。
+    const sessions = Object.fromEntries(Object.entries(counted).filter(([key,value]) =>
+      value && typeof value === "object" && value.activityDate && key !== value.activityDate
+    ));
     const hasNoticeForDate = date => Object.values(notices).some(n => n && n.uid === uid && n.date === date);
     const clubSchedule = s => s && (s.type === "normal" || s.type === "concert" || s.type === "event" || !s.type);
     const getClubSchedules = date => getSchedulesForDate(schedules,date).filter(clubSchedule);
     const addSession = async (date, schedule, index, legacy=false) => {
       const key = attendanceCostumeScheduleKey(date,schedule,index);
-      const markerRef = ref(db,`members/${uid}/attendanceCostumeAttendanceSessions/${key}`);
+      const markerRef = ref(db,`members/${uid}/attendanceCostumeAttendanceDates/${key}`);
       const result = await runTransaction(markerRef, current => current || {
         activityDate:date, scheduleTime:String(schedule.time || ""), scheduleType:String(schedule.type || "normal"),
         countedAt:Date.now(), legacy:!!legacy
       });
-      if(result.snapshot && result.snapshot.exists()) sessions[key] = result.snapshot.val();
+      if(result.snapshot && result.snapshot.exists()){
+        sessions[key] = result.snapshot.val();
+        counted[key] = result.snapshot.val();
+      }
       return key;
     };
 
@@ -7410,6 +7415,7 @@ async function awardAttendanceCostumes(){
     }
     const participation = [];
     for(const [date,value] of Object.entries(counted)){
+      if(value && typeof value === "object" && value.activityDate && date !== value.activityDate) continue;
       if(!sessionsByDate[date] && value && typeof value === "object") participation.push({key:date,date,legacy:value.legacy===true,availableAt:0,oldDate:true});
     }
     for(const [date,entries] of Object.entries(sessionsByDate)){
