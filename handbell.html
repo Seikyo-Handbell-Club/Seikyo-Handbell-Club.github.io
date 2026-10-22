@@ -7518,25 +7518,33 @@ async function awardAttendanceCostumes(){
     debug["未所持の衣装候補数"] = pool.length;
     let awarded = 0;
     const dueRewards = Object.entries(rewards).sort((a,b)=>Number((a[1]||{}).availableAt||0)-Number((b[1]||{}).availableAt||0)||a[0].localeCompare(b[0]));
+    const rewardDiagnostics = [];
+    debug["現在時刻ミリ秒"] = Date.now();
+    debug["報酬詳細（解放時刻・判定）"] = dueRewards.map(([k,v]) => {
+      const r = v || {};
+      const at = Number(r.availableAt || 0);
+      return `${k}: status=${r.status || "なし"}, availableAt=${r.availableAt ?? "未設定"}, 解放日時=${at ? new Date(at).toLocaleString("ja-JP") : "なし"}, 今より未来=${at > Date.now()}`;
+    }).join(" / ") || "報酬なし";
     for(const [rewardKey,rewardValue] of dueRewards){
       if(!currentUser || currentUser.uid !== uid) return;
       const reward = rewardValue || {};
-      if(reward.status === "awarded" || Number(reward.availableAt || 0) > Date.now()) continue;
+      if(reward.status === "awarded") { rewardDiagnostics.push(`${rewardKey}: awardedのためスキップ`); continue; }
+      if(Number(reward.availableAt || 0) > Date.now()) { rewardDiagnostics.push(`${rewardKey}: 解放時刻前のためスキップ`); continue; }
       let itemId = reward.status === "processing" ? reward.costumeId : null;
       if(!itemId){
         const candidate = pool.find(item => !owned[item.id]);
-        if(!candidate) break;
+        if(!candidate) { rewardDiagnostics.push(`${rewardKey}: 未所持候補がないため停止`); break; }
         const claimRef = ref(db,`members/${uid}/attendanceCostumeRewards/${rewardKey}`);
         const claim = await runTransaction(claimRef,current=>{
           if(!current || current.status === "awarded" || Number(current.availableAt||0)>Date.now()) return;
           if(current.status === "processing" && current.costumeId) return current;
           return {...current,status:"processing",costumeId:candidate.id,claimedAt:Date.now()};
         });
-        if(!claim.snapshot.exists()) continue;
+        if(!claim.snapshot.exists()) { rewardDiagnostics.push(`${rewardKey}: claim transactionのsnapshotが存在せずスキップ`); continue; }
         const claimed = claim.snapshot.val() || {};
-        if(claimed.status === "awarded") continue;
+        if(claimed.status === "awarded") { rewardDiagnostics.push(`${rewardKey}: claim後にawardedになったためスキップ`); continue; }
         itemId = claimed.costumeId;
-        if(!itemId) continue;
+        if(!itemId) { rewardDiagnostics.push(`${rewardKey}: costumeIdが空のためスキップ`); continue; }
       }
       const itemRef = ref(db,`members/${uid}/collection/${itemId}`);
       const itemNow = await get(itemRef);
@@ -7547,6 +7555,7 @@ async function awardAttendanceCostumes(){
           owned[itemId] = existing; awarded++; continue;
         }
         await update(ref(db,`members/${uid}/attendanceCostumeRewards/${rewardKey}`),{status:"pending",costumeId:null});
+        rewardDiagnostics.push(`${rewardKey}: 候補衣装${itemId}が既に所持済み（参加報酬由来ではない）ため保留に戻した`);
         for(let i=pool.length-1;i>=0;i--) if(pool[i].id === itemId) pool.splice(i,1);
         continue;
       }
@@ -7556,7 +7565,9 @@ async function awardAttendanceCostumes(){
       await update(ref(db,`members/${uid}/attendanceCostumeRewards/${rewardKey}`),{status:"awarded",costumeId:itemId,awardedAt:Date.now()});
       for(let i=pool.length-1;i>=0;i--) if(pool[i].id === itemId) pool.splice(i,1);
       awarded++;
+      rewardDiagnostics.push(`${rewardKey}: ${itemId}をコレクションに保存し付与成功`);
     }
+    debug["報酬ごとの処理結果"] = rewardDiagnostics.join(" / ") || "報酬ループで処理された報酬なし";
     debug["今回付与した衣装数"] = awarded;
     debug["処理段階"] = awarded ? "衣装付与成功" : "エラーなしで終了したが衣装付与なし（上の数値で原因を確認）";
     showAttendanceCostumeDiagnostic(debug);
