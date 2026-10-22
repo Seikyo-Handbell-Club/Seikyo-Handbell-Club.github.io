@@ -1288,7 +1288,7 @@ PDFを読み込む
 
 <div class="card">
   <h2 class="section-title">欠席理由の管理</h2>
-  <p class="sub-title">部員サイトの「欠席理由」に表示する項目を追加・削除できます。「その他」は固定項目です。</p>
+  <p class="sub-title">部員サイトの「欠席理由」に表示する項目を追加・修正・削除でき、上下ボタンで順番も変更できます。「その他」は固定項目で、常に最後に表示されます。</p>
   <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end">
     <div style="flex:1;min-width:200px">
       <label for="newAbsenceReason">追加する理由</label>
@@ -4616,9 +4616,20 @@ function renderAbsenceReasonsAdmin(){
   host.innerHTML=adminAbsenceReasons.map((reason,index)=>{
     const safe=esc(reason);
     const fixed=reason==="その他";
-    return `<div style="display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e5e8ed"><span>${index+1}. ${safe}${fixed?' <span class="small">（固定）</span>':''}</span>${fixed?'':'<button type="button" class="secondary" data-delete-reason="'+encodeURIComponent(reason)+'">削除</button>'}</div>`;
+    const encoded=encodeURIComponent(reason);
+    const controls=fixed
+      ? '<span class="small">（固定）</span>'
+      : `<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
+          <button type="button" class="secondary" data-move-reason="${index}" data-direction="up" ${index===0?'disabled':''} aria-label="${safe}を上へ">↑</button>
+          <button type="button" class="secondary" data-move-reason="${index}" data-direction="down" ${index===adminAbsenceReasons.length-2?'disabled':''} aria-label="${safe}を下へ">↓</button>
+          <button type="button" class="secondary" data-edit-reason="${encoded}">修正</button>
+          <button type="button" class="secondary" data-delete-reason="${encoded}">削除</button>
+        </div>`;
+    return `<div style="display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e5e8ed"><span style="min-width:0;overflow-wrap:anywhere">${index+1}. ${safe}</span>${controls}</div>`;
   }).join("");
   host.querySelectorAll("[data-delete-reason]").forEach(button=>button.addEventListener("click",()=>deleteAbsenceReason(decodeURIComponent(button.dataset.deleteReason))));
+  host.querySelectorAll("[data-edit-reason]").forEach(button=>button.addEventListener("click",()=>editAbsenceReason(decodeURIComponent(button.dataset.editReason))));
+  host.querySelectorAll("[data-move-reason]").forEach(button=>button.addEventListener("click",()=>moveAbsenceReason(Number(button.dataset.moveReason),button.dataset.direction)));
 }
 
 async function saveAbsenceReasonsAdmin(){
@@ -4642,16 +4653,49 @@ async function addAbsenceReason(){
   }catch(e){message("absenceReasonMsg","保存に失敗しました。\n"+(e.message||"不明"),"error");}
 }
 
+async function editAbsenceReason(reason){
+  if(!(await isAdmin()))return;
+  if(reason==="その他")return;
+  const currentIndex=adminAbsenceReasons.indexOf(reason);
+  if(currentIndex<0)return;
+  const value=prompt("欠席理由を修正してください。",reason);
+  if(value===null)return;
+  const updated=value.trim();
+  if(!updated){message("absenceReasonMsg","欠席理由を入力してください。","error");return;}
+  if(updated==="その他"){message("absenceReasonMsg","「その他」は固定項目です。","error");return;}
+  if(adminAbsenceReasons.some((x,i)=>i!==currentIndex&&x.toLowerCase()===updated.toLowerCase())){message("absenceReasonMsg","同じ理由がすでにあります。","error");return;}
+  if(updated===reason)return;
+  const previous=[...adminAbsenceReasons];
+  try{
+    adminAbsenceReasons[currentIndex]=updated;
+    await saveAbsenceReasonsAdmin();
+    message("absenceReasonMsg","欠席理由を修正しました。","success");
+  }catch(e){adminAbsenceReasons=previous;renderAbsenceReasonsAdmin();message("absenceReasonMsg","修正の保存に失敗しました。\n"+(e.message||"不明"),"error");}
+}
+
+async function moveAbsenceReason(index,direction){
+  if(!(await isAdmin()))return;
+  const target=index+(direction==="up"?-1:1);
+  if(index<0||index>=adminAbsenceReasons.length-1||target<0||target>=adminAbsenceReasons.length-1)return;
+  const previous=[...adminAbsenceReasons];
+  try{
+    [adminAbsenceReasons[index],adminAbsenceReasons[target]]=[adminAbsenceReasons[target],adminAbsenceReasons[index]];
+    await saveAbsenceReasonsAdmin();
+    message("absenceReasonMsg","欠席理由の順番を変更しました。","success");
+  }catch(e){adminAbsenceReasons=previous;renderAbsenceReasonsAdmin();message("absenceReasonMsg","順番の保存に失敗しました。\n"+(e.message||"不明"),"error");}
+}
+
 async function deleteAbsenceReason(reason){
   if(!(await isAdmin()))return;
   if(reason==="その他")return;
   if(!confirm(`「${reason}」を削除しますか？\n過去の連絡記録は変更されません。`))return;
+  const previous=[...adminAbsenceReasons];
   try{
     adminAbsenceReasons=adminAbsenceReasons.filter(x=>x!==reason);
     if(!adminAbsenceReasons.includes("その他"))adminAbsenceReasons.push("その他");
     await saveAbsenceReasonsAdmin();
     message("absenceReasonMsg","欠席理由を削除しました。","success");
-  }catch(e){message("absenceReasonMsg","削除に失敗しました。\n"+(e.message||"不明"),"error");}
+  }catch(e){adminAbsenceReasons=previous;renderAbsenceReasonsAdmin();message("absenceReasonMsg","削除に失敗しました。\n"+(e.message||"不明"),"error");}
 }
 
 
