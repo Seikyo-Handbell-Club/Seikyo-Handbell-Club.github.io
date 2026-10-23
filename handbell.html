@@ -7970,7 +7970,7 @@ async function showCollection(){
    - Firebase transaction で抽選日と結果を確定し、複数回のリロードにも対応
    - イベント衣装の日は抽選しない
 ===================================================== */
-const SECRET_COSTUME_PROBABILITY = 1.0;
+const SECRET_COSTUME_PROBABILITY = 0.001;
 
 const SECRET_COSTUME_IDS = {
   bell:"secret_bell_rare_costume",
@@ -8076,12 +8076,12 @@ function showSecretCostumeGift(character){
   overlay.innerHTML = `
     <div class="daily-gift-card" role="dialog" aria-modal="true">
       <div class="daily-gift-title">✨ シークレット衣装を入手！</div>
-      <div class="daily-gift-character">${isChime ? "チャイムくん" : "ベルちゃん"}の特別な衣装を見つけたよ！</div>
+      <div class="daily-gift-character">${isChime ? "チャイムくん" : "ベルちゃん"}から特別な衣装が届いたよ！</div>
       <img class="daily-gift-image" src="${src}" alt="${name}" style="width:100%;height:190px;object-fit:contain;">
       <div class="daily-gift-name">${name}</div>
       <div style="font-size:13px;line-height:1.7;margin-top:8px;color:#596773;">${description}</div>
-      <div class="daily-gift-note">コレクションにも追加されたよ！</div>
-      <button id="secretCostumeGiftClose" type="button" style="position:relative;z-index:2;pointer-events:auto;cursor:pointer;touch-action:manipulation;min-height:48px;padding:12px 24px;margin-top:14px;border:0;border-radius:14px;background:#e8edf3;color:#087cf0;font-size:16px;font-weight:700;">確認する</button>
+      <div class="daily-gift-note">コレクションに追加されたよ！</div>
+      <button id="secretCostumeGiftClose" type="button" style="position:relative;z-index:2;pointer-events:auto;cursor:pointer;touch-action:manipulation;min-height:48px;padding:12px 24px;margin-top:14px;border:0;border-radius:14px;background:#e8edf3;color:#087cf0;font-size:16px;font-weight:700;">閉じる</button>
     </div>`;
   overlay.style.position = "fixed";
   overlay.style.inset = "0";
