@@ -7970,7 +7970,7 @@ async function showCollection(){
    - Firebase transaction で抽選日と結果を確定し、複数回のリロードにも対応
    - イベント衣装の日は抽選しない
 ===================================================== */
-const SECRET_COSTUME_PROBABILITY = 0.001;
+const SECRET_COSTUME_PROBABILITY = 1.0;
 
 const SECRET_COSTUME_IDS = {
   bell:"secret_bell_rare_costume",
@@ -8006,7 +8006,7 @@ async function getOrCreateDailySecretLottery(){
       if(random < 0.0005){
         return {date:today,type:"ultraRareImage"};
       }
-      if(random < 1.0){
+      if(random < 0.002){
         return {date:today,type:"rareImage"};
       }
 
