@@ -7374,11 +7374,11 @@ function showAttendanceCostumeGift(itemId){
   overlay.style.cssText = "position:fixed;inset:0;z-index:2147483646;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(20,30,40,.58);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);";
   overlay.innerHTML = `
     <div class="daily-gift-card" role="dialog" aria-modal="true">
-      <div class="daily-gift-title">🎉 参加衣装を入手！</div>
-      <div class="daily-gift-character">${characterName}の新しい衣装をゲットしたよ！</div>
+      <div class="daily-gift-title">🎁 新しい衣装をゲット！</div>
+      <div class="daily-gift-character">ベルちゃんからプレゼントが届いたよ！</div>
       <img class="daily-gift-image" src="${esc(item.src)}" alt="${esc(item.name)}">
       <div class="daily-gift-name">${esc(item.name)}</div>
-      <div class="daily-gift-note">コレクションに追加されたよ！「着替える」から着用できるよ。</div>
+      <div class="daily-gift-note">コレクションに追加されたよ！</div>
       <button id="attendanceCostumeGiftClose" type="button">確認する</button>
     </div>
   `;
