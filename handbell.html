@@ -7307,31 +7307,6 @@ async function loadCollectionData(forceRefresh=false){
 let attendanceCostumeProcessing = false;
 let attendanceCostumeTimer = null;
 
-// 一時診断表示：参加衣装が付与されない原因を画面上で確認するためのもの。
-function showAttendanceCostumeDiagnostic(info){
-  try{
-    let panel = document.getElementById("attendanceCostumeDiagnosticPanel");
-    if(!panel){
-      panel = document.createElement("div");
-      panel.id = "attendanceCostumeDiagnosticPanel";
-      panel.style.cssText = "position:fixed;z-index:2147483647;left:8px;right:8px;bottom:8px;max-height:42vh;overflow:auto;background:#fff;border:2px solid #b45309;border-radius:12px;padding:12px;color:#111827;font:13px/1.5 -apple-system,BlinkMacSystemFont,sans-serif;box-shadow:0 4px 18px #0003;white-space:pre-wrap;word-break:break-word;";
-      const close = document.createElement("button");
-      close.type = "button"; close.textContent = "閉じる";
-      close.style.cssText = "float:right;margin:0 0 8px 8px;padding:5px 10px;border:1px solid #999;border-radius:7px;background:#f3f4f6;color:#111;";
-      close.onclick = () => panel.remove();
-      panel.appendChild(close);
-      const heading = document.createElement("strong"); heading.textContent = "参加衣装 診断結果（確認後は閉じてOK）";
-      heading.style.display = "block"; heading.style.marginBottom = "6px";
-      panel.appendChild(heading);
-      const body = document.createElement("div"); body.id = "attendanceCostumeDiagnosticBody";
-      panel.appendChild(body);
-      document.body.appendChild(panel);
-    }
-    const body = document.getElementById("attendanceCostumeDiagnosticBody");
-    if(body) body.textContent = Object.entries(info).map(([k,v]) => `${k}: ${v}`).join("\n");
-  }catch(displayError){ console.error("参加衣装診断表示エラー",displayError); }
-}
-
 function getAttendanceCostumeUnlockTimestamp(date, scheduleOrSchedules){
   const list = Array.isArray(scheduleOrSchedules)
     ? scheduleOrSchedules
@@ -7429,7 +7404,6 @@ async function awardAttendanceCostumes(){
     const memberData = memberSnap.exists() ? (memberSnap.val() || {}) : {};
     if(!memberData.attendanceCostumeStartDate){
       debug["処理段階"] = "初回開始日を初期化（今回は報酬判定なし）";
-      showAttendanceCostumeDiagnostic(debug);
       await update(memberRef,{attendanceCostumeStartDate:today,attendanceCostumeAttendanceInitialized:true});
       return;
     }
@@ -7651,7 +7625,6 @@ async function awardAttendanceCostumes(){
     debug["報酬ごとの処理結果"] = rewardDiagnostics.join(" / ") || "報酬ループで処理された報酬なし";
     debug["今回付与した衣装数"] = awarded;
     debug["処理段階"] = awarded ? "衣装付与成功" : "エラーなしで終了したが衣装付与なし（上の数値で原因を確認）";
-    showAttendanceCostumeDiagnostic(debug);
     if(awarded){
       saveCollectionDataCache(uid,{...owned});
       updateCollectionMiniCount();
@@ -7663,7 +7636,6 @@ async function awardAttendanceCostumes(){
     debug["エラー名"] = e && e.name ? e.name : "不明";
     debug["エラーメッセージ"] = e && e.message ? e.message : String(e);
     debug["エラー詳細"] = e && e.stack ? e.stack : "stackなし";
-    showAttendanceCostumeDiagnostic(debug);
     console.error("参加衣装の付与に失敗しました",e);
   }finally{
     attendanceCostumeProcessing = false;
