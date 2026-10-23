@@ -7375,7 +7375,7 @@ function showAttendanceCostumeGift(itemId){
   overlay.innerHTML = `
     <div class="daily-gift-card" role="dialog" aria-modal="true">
       <div class="daily-gift-title">🎁 新しい衣装をゲット！</div>
-      <div class="daily-gift-character">ベルちゃんからプレゼントが届いたよ！</div>
+      <div class="daily-gift-character">${characterName}からプレゼントが届いたよ！</div>
       <img class="daily-gift-image" src="${esc(item.src)}" alt="${esc(item.name)}">
       <div class="daily-gift-name">${esc(item.name)}</div>
       <div class="daily-gift-note">コレクションに追加されたよ！</div>
@@ -7970,7 +7970,7 @@ async function showCollection(){
    - Firebase transaction で抽選日と結果を確定し、複数回のリロードにも対応
    - イベント衣装の日は抽選しない
 ===================================================== */
-const SECRET_COSTUME_PROBABILITY = 1.0;
+const SECRET_COSTUME_PROBABILITY = 0.001;
 
 const SECRET_COSTUME_IDS = {
   bell:"secret_bell_rare_costume",
@@ -8095,9 +8095,20 @@ function showSecretCostumeGift(character){
   overlay.style.backdropFilter = "blur(5px)";
   overlay.style.overflowY = "auto";
   document.body.appendChild(overlay);
+  let closing = false;
   const close = () => {
-    if(!overlay.isConnected) return;
-    overlay.remove();
+    if(closing || !overlay.isConnected) return;
+    closing = true;
+    const card = overlay.querySelector(".daily-gift-card");
+    overlay.style.pointerEvents = "none";
+    overlay.style.transition = "opacity 650ms ease";
+    overlay.style.opacity = "0";
+    if(card){
+      card.style.transition = "opacity 650ms ease, transform 650ms ease";
+      card.style.opacity = "0";
+      card.style.transform = "scale(.94) translateY(10px)";
+    }
+    window.setTimeout(() => overlay.remove(), 680);
   };
   const closeButton = overlay.querySelector("#secretCostumeGiftClose");
   if(closeButton){
@@ -8105,11 +8116,7 @@ function showSecretCostumeGift(character){
       event.preventDefault();
       event.stopPropagation();
       close();
-    },{capture:true});
-    closeButton.addEventListener("pointerup",event=>{
-      /* iPad/Safariでclickが取りこぼされる場合のフォールバック */
-      if(event.pointerType === "touch") close();
-    },{passive:true});
+    });
   }
   overlay.addEventListener("click",e=>{ if(e.target === overlay) close(); });
 }
