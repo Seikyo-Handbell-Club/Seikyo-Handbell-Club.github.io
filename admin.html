@@ -4639,66 +4639,105 @@ function renderAbsenceReasonsAdmin(){
 
 function setupAbsenceReasonDrag(host){
   let drag=null;
-  const clearDropMarks=()=>host.querySelectorAll("[data-reason-row]").forEach(row=>{
-    row.style.background="";
-    row.style.outline="";
+  const rows=()=>Array.from(host.querySelectorAll('[data-reason-row]'));
+  const clearDragStyles=()=>rows().forEach(row=>{
+    row.style.background='';
+    row.style.outline='';
+    row.style.transform='';
   });
-  host.querySelectorAll("[data-drag-handle]").forEach(handle=>{
-    handle.addEventListener("pointerdown",event=>{
-      if(event.pointerType==="mouse" && event.button!==0)return;
-      const index=Number(handle.dataset.dragHandle);
-      if(!Number.isInteger(index)||index<0||index>=adminAbsenceReasons.length-1)return;
+
+  host.querySelectorAll('[data-drag-handle]').forEach(handle=>{
+    handle.addEventListener('pointerdown',event=>{
+      if(event.pointerType==='mouse'&&event.button!==0)return;
+      const row=handle.closest('[data-reason-row]');
+      const from=Number(row?.dataset.reasonRow);
+      if(!row||!Number.isInteger(from)||from<0||from>=adminAbsenceReasons.length-1)return;
       event.preventDefault();
-      drag={from:index,pointerId:event.pointerId,x:event.clientX,y:event.clientY};
-      handle.style.cursor="grabbing";
+      const rect=row.getBoundingClientRect();
+      const ghost=row.cloneNode(true);
+      ghost.removeAttribute('data-reason-row');
+      Object.assign(ghost.style,{
+        position:'fixed',left:`${rect.left}px`,top:`${rect.top}px`,width:`${rect.width}px`,
+        height:`${rect.height}px`,boxSizing:'border-box',margin:'0',zIndex:'99999',
+        pointerEvents:'none',opacity:'0.96',background:'#fff',border:'1px solid #93b4f5',
+        borderRadius:'10px',boxShadow:'0 12px 28px rgba(15,23,42,.2)',
+        transform:'scale(1.015)',transition:'box-shadow .12s ease'
+      });
+      const placeholder=document.createElement('div');
+      placeholder.setAttribute('data-reason-placeholder','');
+      Object.assign(placeholder.style,{
+        height:`${rect.height}px`,boxSizing:'border-box',margin:'4px 0',
+        border:'2px dashed #2563eb',borderRadius:'8px',background:'#eff6ff'
+      });
+      row.parentNode.insertBefore(placeholder,row);
+      row.style.display='none';
+      document.body.appendChild(ghost);
+      drag={from,pointerId:event.pointerId,row,placeholder,ghost,handle,
+        offsetX:event.clientX-rect.left,offsetY:event.clientY-rect.top,
+        startX:event.clientX,startY:event.clientY,moved:false};
+      handle.style.cursor='grabbing';
       try{handle.setPointerCapture(event.pointerId);}catch(e){}
     });
-    handle.addEventListener("pointermove",event=>{
+
+    handle.addEventListener('pointermove',event=>{
       if(!drag||drag.pointerId!==event.pointerId)return;
       event.preventDefault();
-      drag.x=event.clientX;drag.y=event.clientY;
-      clearDropMarks();
-      const target=document.elementFromPoint(event.clientX,event.clientY)?.closest("[data-reason-row]");
-      if(target && host.contains(target) && Number(target.dataset.reasonRow)<adminAbsenceReasons.length-1){
-        target.style.background="#eaf2ff";
-        target.style.outline="2px dashed #2563eb";
+      const d=drag;
+      const dx=event.clientX-d.startX,dy=event.clientY-d.startY;
+      if(Math.abs(dx)+Math.abs(dy)>4)d.moved=true;
+      d.ghost.style.left=`${event.clientX-d.offsetX}px`;
+      d.ghost.style.top=`${event.clientY-d.offsetY}px`;
+      const target=document.elementFromPoint(event.clientX,event.clientY)?.closest('[data-reason-row]');
+      if(!target||!host.contains(target)||target===d.row||Number(target.dataset.reasonRow)>=adminAbsenceReasons.length-1)return;
+      const targetRect=target.getBoundingClientRect();
+      const insertAfter=event.clientY>targetRect.top+targetRect.height/2;
+      const anchor=insertAfter?target.nextSibling:target;
+      if(anchor!==d.placeholder&&anchor!==d.row){
+        host.insertBefore(d.placeholder,anchor);
+      }else if(anchor===d.row&&d.placeholder.nextSibling!==d.row){
+        host.insertBefore(d.placeholder,d.row);
       }
     });
+
     const finish=async event=>{
       if(!drag||drag.pointerId!==event.pointerId)return;
-      const current=drag;
-      drag=null;
-      handle.style.cursor="grab";
-      clearDropMarks();
-      const targetRow=document.elementFromPoint(event.clientX,event.clientY)?.closest("[data-reason-row]");
-      if(!targetRow||!host.contains(targetRow))return;
-      const to=Number(targetRow.dataset.reasonRow);
-      if(!Number.isInteger(to)||to<0||to>=adminAbsenceReasons.length-1||to===current.from)return;
-      if(!(await isAdmin()))return;
+      event.preventDefault();
+      const d=drag;drag=null;
+      d.handle.style.cursor='grab';
+      d.ghost.remove();
+      d.row.style.display='';
+      if(!d.moved||!host.contains(d.placeholder)){
+        d.placeholder.remove();clearDragStyles();return;
+      }
+      host.insertBefore(d.row,d.placeholder);
+      d.placeholder.remove();
+      const orderedRows=rows().filter(row=>row!==d.row||row.isConnected);
+      const newOrder=orderedRows.map(row=>adminAbsenceReasons[Number(row.dataset.reasonRow)]);
+      if(newOrder.length!==adminAbsenceReasons.length||newOrder[newOrder.length-1]!=='その他'){
+        renderAbsenceReasonsAdmin();return;
+      }
       const previous=[...adminAbsenceReasons];
+      if(newOrder.every((reason,index)=>reason===previous[index])){renderAbsenceReasonsAdmin();return;}
+      if(!(await isAdmin())){renderAbsenceReasonsAdmin();return;}
       try{
-        const [moved]=adminAbsenceReasons.splice(current.from,1);
-        const targetRect=targetRow.getBoundingClientRect();
-        const insertAfter=event.clientY>targetRect.top+targetRect.height/2;
-        let insertAt=to+(insertAfter?1:0);
-        if(current.from<insertAt)insertAt--;
-        insertAt=Math.max(0,Math.min(insertAt,adminAbsenceReasons.length-1));
-        adminAbsenceReasons.splice(insertAt,0,moved);
+        adminAbsenceReasons=newOrder;
         await saveAbsenceReasonsAdmin();
-        message("absenceReasonMsg","欠席理由の順番を変更しました。","success");
+        message('absenceReasonMsg','欠席理由の順番を変更しました。','success');
       }catch(e){
         adminAbsenceReasons=previous;
         renderAbsenceReasonsAdmin();
-        message("absenceReasonMsg","順番の保存に失敗しました。\n"+(e.message||"不明"),"error");
+        message('absenceReasonMsg','順番の保存に失敗しました。\n'+(e.message||'不明'),'error');
       }
     };
-    handle.addEventListener("pointerup",finish);
-    handle.addEventListener("pointercancel",event=>{
-      if(drag&&drag.pointerId===event.pointerId){drag=null;handle.style.cursor="grab";clearDropMarks();}
+    handle.addEventListener('pointerup',finish);
+    handle.addEventListener('pointercancel',event=>{
+      if(drag&&drag.pointerId===event.pointerId){
+        const d=drag;drag=null;d.ghost.remove();d.placeholder.remove();d.row.style.display='';
+        d.handle.style.cursor='grab';clearDragStyles();
+      }
     });
   });
 }
-
 async function saveAbsenceReasonsAdmin(){
   await set(ref(db,"settings/absenceReasons"),adminAbsenceReasons);
   renderAbsenceReasonsAdmin();
