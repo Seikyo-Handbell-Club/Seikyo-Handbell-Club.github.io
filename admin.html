@@ -1589,8 +1589,13 @@ function toggleUnknownTime(checkboxId,wrapId){
   const checkbox=$(checkboxId);
   const wrap=$(wrapId);
   if(!checkbox||!wrap)return;
-  wrap.classList.toggle("hidden",checkbox.checked);
-  if(checkbox.checked){
+
+  // CSSクラスだけに依存せず、チェック状態に合わせて入力欄を確実に表示・非表示にする
+  const hide=checkbox.checked;
+  wrap.classList.toggle("hidden",hide);
+  wrap.style.display=hide?"none":"";
+
+  if(hide){
     const input=wrap.querySelector("input");
     if(input)input.value="";
   }
