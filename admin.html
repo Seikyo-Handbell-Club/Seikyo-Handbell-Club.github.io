@@ -202,6 +202,27 @@ button{
   margin-top:0
 }
 
+.time-input-wrap{
+  width:100%;
+}
+.time-input-wrap input{
+  width:100%;
+  box-sizing:border-box;
+}
+.time-unknown-toggle{
+  display:flex;
+  align-items:flex-start;
+  gap:7px;
+  margin-top:9px;
+  font-size:14px;
+  line-height:1.45;
+  font-weight:400;
+  cursor:pointer;
+}
+.time-unknown-toggle input{
+  flex:0 0 auto;
+  margin:3px 0 0;
+}
 .time-note{
   margin-top:6px;
   font-size:12px;
@@ -813,10 +834,21 @@ PDFを読み込む
 開始
 </label>
 
-<input
-  id="stimeStart"
-  type="time"
->
+<div id="stimeStartInputWrap" class="time-input-wrap">
+  <input
+    id="stimeStart"
+    type="time"
+  >
+</div>
+
+<label class="time-unknown-toggle">
+  <input
+    id="stimeStartUnknown"
+    type="checkbox"
+    onchange="toggleUnknownTime('stimeStartUnknown','stimeStartInputWrap')"
+  >
+  開始時刻を？？？にする
+</label>
 
 </div>
 
@@ -826,10 +858,21 @@ PDFを読み込む
 終了
 </label>
 
-<input
-  id="stimeEnd"
-  type="time"
->
+<div id="stimeEndInputWrap" class="time-input-wrap">
+  <input
+    id="stimeEnd"
+    type="time"
+  >
+</div>
+
+<label class="time-unknown-toggle">
+  <input
+    id="stimeEndUnknown"
+    type="checkbox"
+    onchange="toggleUnknownTime('stimeEndUnknown','stimeEndInputWrap')"
+  >
+  終了時刻を？？？にする
+</label>
 
 </div>
 
@@ -942,10 +985,21 @@ PDFを読み込む
 開始
 </label>
 
-<input
-  id="concertTimeStart"
-  type="time"
->
+<div id="concertTimeStartInputWrap" class="time-input-wrap">
+  <input
+    id="concertTimeStart"
+    type="time"
+  >
+</div>
+
+<label class="time-unknown-toggle">
+  <input
+    id="concertTimeStartUnknown"
+    type="checkbox"
+    onchange="toggleUnknownTime('concertTimeStartUnknown','concertTimeStartInputWrap')"
+  >
+  開始時刻を？？？にする
+</label>
 
 </div>
 
@@ -955,10 +1009,21 @@ PDFを読み込む
 終了
 </label>
 
-<input
-  id="concertTimeEnd"
-  type="time"
->
+<div id="concertTimeEndInputWrap" class="time-input-wrap">
+  <input
+    id="concertTimeEnd"
+    type="time"
+  >
+</div>
+
+<label class="time-unknown-toggle">
+  <input
+    id="concertTimeEndUnknown"
+    type="checkbox"
+    onchange="toggleUnknownTime('concertTimeEndUnknown','concertTimeEndInputWrap')"
+  >
+  終了時刻を？？？にする
+</label>
 
 </div>
 
@@ -1060,10 +1125,21 @@ PDFを読み込む
 開始
 </label>
 
-<input
-  id="eventTimeStart"
-  type="time"
->
+<div id="eventTimeStartInputWrap" class="time-input-wrap">
+  <input
+    id="eventTimeStart"
+    type="time"
+  >
+</div>
+
+<label class="time-unknown-toggle">
+  <input
+    id="eventTimeStartUnknown"
+    type="checkbox"
+    onchange="toggleUnknownTime('eventTimeStartUnknown','eventTimeStartInputWrap')"
+  >
+  開始時刻を？？？にする
+</label>
 
 </div>
 
@@ -1073,10 +1149,21 @@ PDFを読み込む
 終了
 </label>
 
-<input
-  id="eventTimeEnd"
-  type="time"
->
+<div id="eventTimeEndInputWrap" class="time-input-wrap">
+  <input
+    id="eventTimeEnd"
+    type="time"
+  >
+</div>
+
+<label class="time-unknown-toggle">
+  <input
+    id="eventTimeEndUnknown"
+    type="checkbox"
+    onchange="toggleUnknownTime('eventTimeEndUnknown','eventTimeEndInputWrap')"
+  >
+  終了時刻を？？？にする
+</label>
 
 </div>
 
@@ -1436,16 +1523,21 @@ function message(id,text,type=""){
 }
 
 
-function makeTimeRange(start,end){
+function makeTimeRange(start,end,startUnknown=false,endUnknown=false){
 
-  start=String(start||"").trim();
-  end=String(end||"").trim();
+  start=startUnknown?"？？？":String(start||"").trim();
+  end=endUnknown?"？？？":String(end||"").trim();
 
   if(!start&&!end){
     return "終日";
   }
 
-  if(!start||!end||start>=end){
+  if(!start||!end){
+    return null;
+  }
+
+  // 両方が通常の時刻の場合だけ、開始・終了の前後関係を検証する。
+  if(start!=="？？？"&&end!=="？？？"&&start>=end){
     return null;
   }
 
@@ -1460,25 +1552,51 @@ function splitTimeRange(time){
   if(!v||v==="終日"){
     return{
       start:"",
-      end:""
+      end:"",
+      startUnknown:false,
+      endUnknown:false
     };
   }
 
   const m=v.match(
-    /^(\d{1,2}:\d{2})\s*[〜~\-－]\s*(\d{1,2}:\d{2})$/
+    /^(\d{1,2}:\d{2}|？？？)\s*[〜~\-－]\s*(\d{1,2}:\d{2}|？？？)$/
   );
 
   if(!m){
     return{
       start:"",
-      end:""
+      end:"",
+      startUnknown:false,
+      endUnknown:false
     };
   }
 
   return{
-    start:m[1],
-    end:m[2]
+    start:m[1]==="？？？"?"":m[1],
+    end:m[2]==="？？？"?"":m[2],
+    startUnknown:m[1]==="？？？",
+    endUnknown:m[2]==="？？？"
   };
+}
+
+
+function toggleUnknownTime(checkboxId,wrapId){
+  const checkbox=$(checkboxId);
+  const wrap=$(wrapId);
+  if(!checkbox||!wrap)return;
+  wrap.classList.toggle("hidden",checkbox.checked);
+  if(checkbox.checked){
+    const input=wrap.querySelector("input");
+    if(input)input.value="";
+  }
+}
+
+
+function setUnknownTime(inputId,isUnknown){
+  const checkbox=$(inputId+"Unknown");
+  if(!checkbox)return;
+  checkbox.checked=!!isUnknown;
+  toggleUnknownTime(inputId+"Unknown",inputId+"InputWrap");
 }
 
 
@@ -3993,7 +4111,9 @@ async function saveSchedule(){
     const time=
       makeTimeRange(
         $("stimeStart").value,
-        $("stimeEnd").value
+        $("stimeEnd").value,
+        $("stimeStartUnknown").checked,
+        $("stimeEndUnknown").checked
       );
 
     const place=
@@ -4183,7 +4303,9 @@ async function saveSchedule(){
     const time=
       makeTimeRange(
         $("concertTimeStart").value,
-        $("concertTimeEnd").value
+        $("concertTimeEnd").value,
+        $("concertTimeStartUnknown").checked,
+        $("concertTimeEndUnknown").checked
       );
 
     const title=
@@ -4320,7 +4442,9 @@ async function saveSchedule(){
     const time=
       makeTimeRange(
         $("eventTimeStart").value,
-        $("eventTimeEnd").value
+        $("eventTimeEnd").value,
+        $("eventTimeStartUnknown").checked,
+        $("eventTimeEndUnknown").checked
       );
 
     const title=
@@ -4401,6 +4525,8 @@ function clearScheduleForm(){
   $("sdate").value="";
   $("stimeStart").value="";
   $("stimeEnd").value="";
+  setUnknownTime("stimeStart",false);
+  setUnknownTime("stimeEnd",false);
   $("splace").value="";
   $("sTitle").value="";
   $("snote").value="";
@@ -4413,6 +4539,8 @@ function clearScheduleForm(){
   $("concertDate").value="";
   $("concertTimeStart").value="";
   $("concertTimeEnd").value="";
+  setUnknownTime("concertTimeStart",false);
+  setUnknownTime("concertTimeEnd",false);
   $("concertTitle").value="";
   $("concertPlace").value="";
   $("concertNote").value="";
@@ -4424,6 +4552,8 @@ function clearScheduleForm(){
   $("eventDate").value="";
   $("eventTimeStart").value="";
   $("eventTimeEnd").value="";
+  setUnknownTime("eventTimeStart",false);
+  setUnknownTime("eventTimeEnd",false);
   $("eventTitle").value="";
   $("eventPlace").value="";
   $("eventNote").value="";
@@ -4471,6 +4601,8 @@ async function editSchedule(key){
 
     $("stimeStart").value=z.start;
     $("stimeEnd").value=z.end;
+    setUnknownTime("stimeStart",z.startUnknown);
+    setUnknownTime("stimeEnd",z.endUnknown);
 
     $("splace").value=
       d.place||"";
@@ -4512,6 +4644,8 @@ async function editSchedule(key){
 
     $("concertTimeEnd").value=
       z.end;
+    setUnknownTime("concertTimeStart",z.startUnknown);
+    setUnknownTime("concertTimeEnd",z.endUnknown);
 
     $("concertTitle").value=
       d.title||"";
@@ -4550,6 +4684,8 @@ async function editSchedule(key){
 
     $("eventTimeEnd").value=
       z.end;
+    setUnknownTime("eventTimeStart",z.startUnknown);
+    setUnknownTime("eventTimeEnd",z.endUnknown);
 
     $("eventTitle").value=
       d.title||"";
