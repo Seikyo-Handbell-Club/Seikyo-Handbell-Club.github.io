@@ -1321,6 +1321,9 @@ PDFを読み込む
     </div>
     <button id="addAbsenceReasonButton" class="primary" type="button">理由を追加</button>
   </div>
+  <div style="margin-top:10px">
+    <button id="absenceReasonOrderButton" class="secondary" type="button">↕ 順番を変える</button>
+  </div>
   <div id="absenceReasonMsg" aria-live="polite"></div>
   <div id="absenceReasonsList"><p class="small">読み込み中...</p></div>
 </div>
@@ -4601,6 +4604,8 @@ const DEFAULT_ABSENCE_REASONS = [
   "オープンキャンパス", "その他"
 ];
 let adminAbsenceReasons = [...DEFAULT_ABSENCE_REASONS];
+let absenceReasonOrderMode = false;
+let absenceReasonOrderBeforeEdit = null;
 
 async function loadAbsenceReasonsAdmin(){
   const snap = await get(ref(db,"settings/absenceReasons"));
@@ -4616,18 +4621,28 @@ async function loadAbsenceReasonsAdmin(){
 function renderAbsenceReasonsAdmin(){
   const host=$("absenceReasonsList");
   if(!host)return;
+  const orderButton=$("absenceReasonOrderButton");
+  if(orderButton)orderButton.textContent=absenceReasonOrderMode?"✓ 保存":"↕ 順番を変える";
+  const addInput=$("newAbsenceReason");
+  const addButton=$("addAbsenceReasonButton");
+  if(addInput)addInput.disabled=absenceReasonOrderMode;
+  if(addButton)addButton.disabled=absenceReasonOrderMode;
   host.innerHTML=adminAbsenceReasons.map((reason,index)=>{
     const safe=esc(reason);
     const fixed=reason==="その他";
     const encoded=encodeURIComponent(reason);
-    const controls=fixed
-      ? '<span class="small">（固定・移動不可）</span>'
-      : `<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center">
-          <button type="button" class="secondary" data-edit-reason="${encoded}">修正</button>
-          <button type="button" class="secondary" data-delete-reason="${encoded}">削除</button>
-        </div>`;
-    const dragHandle=fixed ? '<span aria-hidden="true" style="width:38px;flex:0 0 38px"></span>'
-      : `<button type="button" class="secondary" data-drag-handle="${index}" aria-label="${safe}をドラッグして並び替え" title="押したままドラッグして並び替え" style="width:38px;min-width:38px;padding:10px 0;font-size:22px;line-height:1;touch-action:none;cursor:grab;user-select:none">⠿</button>`;
+    const controls=absenceReasonOrderMode
+      ? (fixed ? '<span class="small">（最後に固定）</span>' : '')
+      : (fixed
+        ? '<span class="small">（固定・移動不可）</span>'
+        : `<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center">
+            <button type="button" class="secondary" data-edit-reason="${encoded}">修正</button>
+            <button type="button" class="secondary" data-delete-reason="${encoded}">削除</button>
+          </div>`);
+    const dragHandle=absenceReasonOrderMode
+      ? (fixed ? '<span aria-hidden="true" style="width:38px;flex:0 0 38px"></span>'
+        : `<button type="button" class="secondary" data-drag-handle="${index}" aria-label="${safe}をドラッグして並び替え" title="押したままドラッグして並び替え" style="width:38px;min-width:38px;padding:10px 0;font-size:22px;line-height:1;touch-action:none;cursor:grab;user-select:none">⠿</button>`)
+      : '<span aria-hidden="true" style="width:0;flex:0 0 0"></span>';
     return `<div data-reason-row="${index}" style="display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e5e8ed;min-height:56px;box-sizing:border-box">
       <div style="display:flex;gap:10px;align-items:center;min-width:0;flex:1">${dragHandle}<span style="min-width:0;overflow-wrap:anywhere">${index+1}. ${safe}</span></div>${controls}
     </div>`;
@@ -4718,16 +4733,8 @@ function setupAbsenceReasonDrag(host){
       }
       const previous=[...adminAbsenceReasons];
       if(newOrder.every((reason,index)=>reason===previous[index])){renderAbsenceReasonsAdmin();return;}
-      if(!(await isAdmin())){renderAbsenceReasonsAdmin();return;}
-      try{
-        adminAbsenceReasons=newOrder;
-        await saveAbsenceReasonsAdmin();
-        message('absenceReasonMsg','欠席理由の順番を変更しました。','success');
-      }catch(e){
-        adminAbsenceReasons=previous;
-        renderAbsenceReasonsAdmin();
-        message('absenceReasonMsg','順番の保存に失敗しました。\n'+(e.message||'不明'),'error');
-      }
+      adminAbsenceReasons=newOrder;
+      renderAbsenceReasonsAdmin();
     };
     handle.addEventListener('pointerup',finish);
     handle.addEventListener('pointercancel',event=>{
@@ -4741,6 +4748,36 @@ function setupAbsenceReasonDrag(host){
 async function saveAbsenceReasonsAdmin(){
   await set(ref(db,"settings/absenceReasons"),adminAbsenceReasons);
   renderAbsenceReasonsAdmin();
+}
+
+async function toggleAbsenceReasonOrderMode(){
+  if(!absenceReasonOrderMode){
+    absenceReasonOrderBeforeEdit=[...adminAbsenceReasons];
+    absenceReasonOrderMode=true;
+    renderAbsenceReasonsAdmin();
+    message("absenceReasonMsg","理由をドラッグして並び替え、終わったら保存を押してください。","success");
+    return;
+  }
+  if(!(await isAdmin()))return;
+  const button=$("absenceReasonOrderButton");
+  if(button)button.disabled=true;
+  try{
+    if(!adminAbsenceReasons.includes("その他"))adminAbsenceReasons.push("その他");
+    adminAbsenceReasons=[...adminAbsenceReasons.filter(reason=>reason!=="その他"),"その他"];
+    await set(ref(db,"settings/absenceReasons"),adminAbsenceReasons);
+    absenceReasonOrderMode=false;
+    absenceReasonOrderBeforeEdit=null;
+    renderAbsenceReasonsAdmin();
+    message("absenceReasonMsg","欠席理由の順番を保存しました。","success");
+  }catch(e){
+    adminAbsenceReasons=absenceReasonOrderBeforeEdit?[...absenceReasonOrderBeforeEdit]:[...DEFAULT_ABSENCE_REASONS];
+    absenceReasonOrderMode=false;
+    absenceReasonOrderBeforeEdit=null;
+    renderAbsenceReasonsAdmin();
+    message("absenceReasonMsg","順番の保存に失敗しました。\n"+(e.message||"不明"),"error");
+  }finally{
+    if(button)button.disabled=false;
+  }
 }
 
 async function addAbsenceReason(){
@@ -4857,6 +4894,9 @@ $("logoutButton")
 
 $("addAbsenceReasonButton")
   .addEventListener("click",addAbsenceReason);
+
+$("absenceReasonOrderButton")
+  .addEventListener("click",toggleAbsenceReasonOrderMode);
 
 $("newAbsenceReason").addEventListener("keydown",e=>{
   if(e.key==="Enter")addAbsenceReason();
