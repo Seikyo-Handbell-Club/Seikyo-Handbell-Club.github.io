@@ -2130,51 +2130,81 @@ textarea{
 
     <div id="lateTimeBox" class="hidden">
 
-      <label>
-        到着予定時刻
-      </label>
+      <div id="lateTimeInputBox">
+        <label>
+          到着予定時刻
+        </label>
 
-      <input
-        id="startTime"
-        type="time"
-      >
+        <input
+          id="startTime"
+          type="time"
+        >
+      </div>
+      <label class="small" style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+        <input id="lateTimeUnknown" type="checkbox" onchange="toggleTimeUnknown('遅刻')" style="width:auto;">
+        時間不明
+      </label>
+      <label class="small" style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+        <input id="lateAbsencePossible" type="checkbox" style="width:auto;">
+        欠席の可能性あり
+      </label>
 
     </div>
 
 
     <div id="earlyTimeBox" class="hidden">
 
-      <label>
-        退出予定時刻
-      </label>
+      <div id="earlyTimeInputBox">
+        <label>
+          退出予定時刻
+        </label>
 
-      <input
-        id="earlyLeaveTime"
-        type="time"
-      >
+        <input
+          id="earlyLeaveTime"
+          type="time"
+        >
+      </div>
+      <label class="small" style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+        <input id="earlyTimeUnknown" type="checkbox" onchange="toggleTimeUnknown('早退')" style="width:auto;">
+        時間不明
+      </label>
+      <label class="small" style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+        <input id="earlyAbsencePossible" type="checkbox" style="width:auto;">
+        欠席の可能性あり
+      </label>
 
     </div>
 
 
     <div id="breakTimeBox" class="hidden">
 
-      <label>
-        退出時刻
+      <div id="breakTimeInputBox">
+        <label>
+          退出時刻
+        </label>
+
+        <input
+          id="breakOutTime"
+          type="time"
+        >
+
+        <label>
+          戻る予定時刻
+        </label>
+
+        <input
+          id="breakReturnTime"
+          type="time"
+        >
+      </div>
+      <label class="small" style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+        <input id="breakTimeUnknown" type="checkbox" onchange="toggleTimeUnknown('途中抜け')" style="width:auto;">
+        時間不明（退出・戻る時刻）
       </label>
-
-      <input
-        id="breakOutTime"
-        type="time"
-      >
-
-      <label>
-        戻る予定時刻
+      <label class="small" style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+        <input id="breakAbsencePossible" type="checkbox" style="width:auto;">
+        欠席の可能性あり
       </label>
-
-      <input
-        id="breakReturnTime"
-        type="time"
-      >
 
     </div>
 
@@ -4489,27 +4519,21 @@ function getNoticeTimeText(n){
 
   if(type === "遅刻"){
 
-    return n.startTime
-      ?
-      `到着予定 ${esc(n.startTime)}`
-      :
-      "";
+    return n.timeUnknown ? "到着予定時刻：不明" : (n.startTime ? `到着予定 ${esc(n.startTime)}` : "");
 
   }
 
 
   if(type === "早退"){
 
-    return n.startTime
-      ?
-      `退出予定 ${esc(n.startTime)}`
-      :
-      "";
+    return n.timeUnknown ? "退出予定時刻：不明" : (n.startTime ? `退出予定 ${esc(n.startTime)}` : "");
 
   }
 
 
   if(type === "途中抜け"){
+
+    if(n.timeUnknown) return "退出・戻る時刻：不明";
 
     if(
       n.startTime &&
@@ -4777,6 +4801,11 @@ function renderDayDetail(date,schedules,all){
                 :
                 ""
             }
+            ${
+              n.absencePossible && ["遅刻", "早退", "途中抜け"].includes(n.type)
+                ? `<div class="meta">欠席の可能性あり</div>`
+                : ""
+            }
             <div class="meta">
               理由：${esc(n.reason || "")}
             </div>
@@ -4895,7 +4924,12 @@ async function showForm(id=null){
     $("breakReturnTime")
       .value =
         "";
-
+    $("lateTimeUnknown").checked = false;
+    $("earlyTimeUnknown").checked = false;
+    $("breakTimeUnknown").checked = false;
+    $("lateAbsencePossible").checked = false;
+    $("earlyAbsencePossible").checked = false;
+    $("breakAbsencePossible").checked = false;
 
     updateTimeFields();
 
@@ -5024,19 +5058,43 @@ async function setDefaultTimesForNoticeType(){
   const times =
     await getDefaultClubTimes();
 
-  if(type === "遅刻" && !$(`startTime`).value){
+  if(type === "遅刻" && !$(`lateTimeUnknown`).checked && !$(`startTime`).value){
     $(`startTime`).value = times.start;
   }
 
-  if(type === "早退" && !$(`earlyLeaveTime`).value){
+  if(type === "早退" && !$(`earlyTimeUnknown`).checked && !$(`earlyLeaveTime`).value){
     $(`earlyLeaveTime`).value = times.end;
   }
 
-  if(type === "途中抜け"){
+  if(type === "途中抜け" && !$(`breakTimeUnknown`).checked){
     if(!$(`breakOutTime`).value) $(`breakOutTime`).value = times.start;
     if(!$(`breakReturnTime`).value) $(`breakReturnTime`).value = times.end;
   }
 
+}
+
+
+function toggleTimeUnknown(type){
+  if(type === "遅刻"){
+    const unknown = $("lateTimeUnknown").checked;
+    $("startTime").disabled = unknown;
+    $("lateTimeInputBox").classList.toggle("hidden", unknown);
+    if(unknown) $("startTime").value = "";
+  }else if(type === "早退"){
+    const unknown = $("earlyTimeUnknown").checked;
+    $("earlyLeaveTime").disabled = unknown;
+    $("earlyTimeInputBox").classList.toggle("hidden", unknown);
+    if(unknown) $("earlyLeaveTime").value = "";
+  }else if(type === "途中抜け"){
+    const unknown = $("breakTimeUnknown").checked;
+    $("breakOutTime").disabled = unknown;
+    $("breakReturnTime").disabled = unknown;
+    $("breakTimeInputBox").classList.toggle("hidden", unknown);
+    if(unknown){
+      $("breakOutTime").value = "";
+      $("breakReturnTime").value = "";
+    }
+  }
 }
 
 
@@ -5452,8 +5510,7 @@ function getFormTimes(){
 
     return {
       startTime:
-        $("startTime")
-          .value,
+        $("lateTimeUnknown").checked ? "" : $("startTime").value,
 
       endTime:""
     };
@@ -5465,8 +5522,7 @@ function getFormTimes(){
 
     return {
       startTime:
-        $("earlyLeaveTime")
-          .value,
+        $("earlyTimeUnknown").checked ? "" : $("earlyLeaveTime").value,
 
       endTime:""
     };
@@ -5478,12 +5534,10 @@ function getFormTimes(){
 
     return {
       startTime:
-        $("breakOutTime")
-          .value,
+        $("breakTimeUnknown").checked ? "" : $("breakOutTime").value,
 
       endTime:
-        $("breakReturnTime")
-          .value
+        $("breakTimeUnknown").checked ? "" : $("breakReturnTime").value
     };
 
   }
@@ -5515,8 +5569,7 @@ function validateFormTimes(){
   if(type === "遅刻"){
 
     if(
-      !$("startTime")
-        .value
+      !$('lateTimeUnknown').checked && !$("startTime").value
     ){
 
       alert(
@@ -5534,8 +5587,7 @@ function validateFormTimes(){
   if(type === "早退"){
 
     if(
-      !$("earlyLeaveTime")
-        .value
+      !$('earlyTimeUnknown').checked && !$("earlyLeaveTime").value
     ){
 
       alert(
@@ -5551,6 +5603,8 @@ function validateFormTimes(){
 
 
   if(type === "途中抜け"){
+
+    if($('breakTimeUnknown').checked) return true;
 
     const out =
       $("breakOutTime")
@@ -5748,6 +5802,10 @@ async function saveNoticeCore(){
         endTime:
           times.endTime,
 
+        timeUnknown: (type === "遅刻" && $("lateTimeUnknown").checked) || (type === "早退" && $("earlyTimeUnknown").checked) || (type === "途中抜け" && $("breakTimeUnknown").checked),
+
+        absencePossible: (type === "遅刻" && $("lateAbsencePossible").checked) || (type === "早退" && $("earlyAbsencePossible").checked) || (type === "途中抜け" && $("breakAbsencePossible").checked),
+
         reason:
           r,
 
@@ -5815,6 +5873,10 @@ async function saveNoticeCore(){
 
       endTime:
         times.endTime,
+
+      timeUnknown: (type === "遅刻" && $("lateTimeUnknown").checked) || (type === "早退" && $("earlyTimeUnknown").checked) || (type === "途中抜け" && $("breakTimeUnknown").checked),
+
+      absencePossible: (type === "遅刻" && $("lateAbsencePossible").checked) || (type === "早退" && $("earlyAbsencePossible").checked) || (type === "途中抜け" && $("breakAbsencePossible").checked),
 
       reason:
         r,
@@ -6197,6 +6259,13 @@ async function editNotice(id){
         :
         "";
 
+  $("lateTimeUnknown").checked = n.type === "遅刻" && !!n.timeUnknown;
+  $("earlyTimeUnknown").checked = n.type === "早退" && !!n.timeUnknown;
+  $("breakTimeUnknown").checked = n.type === "途中抜け" && !!n.timeUnknown;
+  $("lateAbsencePossible").checked = n.type === "遅刻" && !!n.absencePossible;
+  $("earlyAbsencePossible").checked = n.type === "早退" && !!n.absencePossible;
+  $("breakAbsencePossible").checked = n.type === "途中抜け" && !!n.absencePossible;
+  toggleTimeUnknown(n.type);
 
   updateTimeFields();
 
